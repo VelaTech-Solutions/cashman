@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cash Flow Manager - Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+  <link rel="stylesheet" href="./style.css">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="app-header-logo">
+        <div class="logo">
+          <span class="logo-icon">
+            <img src="https://assets.codepen.io/285131/almeria-logo.svg" alt="Logo" />
+          </span>
+          <h1 class="logo-title">
+            <span>Cash Flow</span>
+            <span>Manager</span>
+          </h1>
+        </div>
+      </div>
+      <div class="app-header-navigation">
+        <div class="tabs">
+          <a href="#">Overview</a>
+        </div>
+      </div>
+      <div class="app-header-actions">
+        <button class="user-profile">
+          <span id="user-email">Not logged in</span>
+          <span>
+            <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" alt="User Avatar" />
+          </span>
+        </button>
+      </div>
+      <div class="app-header-mobile">
+        <button class="icon-button large">
+          <i class="ph-list"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <div class="app-body-navigation">
+        <nav class="navigation">
+          <a href="#"><i class="ph-sign-out"></i><span>Logout</span></a>
+          <a href="#"><i class="ph-check-square"></i><span>Add Client</span></a>
+          <a href="#"><i class="ph-swap"></i><span>Edit Client</span></a>
+          <a href="#"><i class="ph-file-text"></i><span>View Client</span></a>
+          <a href="src/settings.html"><i class="ph-globe"></i><span>Settings</span></a>
+          <a href="#"><i class="ph-gear"></i><span>Developer Notes</span></a>
+        </nav>
+        <footer class="footer">
+          <div>Integra Wealth ©<br />All Rights Reserved 2025</div>
+        </footer>
+      </div>
+
+      <div class="app-body-main-content">
+        <section class="service-section">
+          <h2>Clients</h2>
+          <div class="service-section-header">
+            <div class="search-field">
+              <i class="ph-magnifying-glass"></i>
+              <input type="text" placeholder="Id Number">
+            </div>
+            <button class="flat-button">Search</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Firebase Initialization
+    firebase.initializeApp(firebaseConfig);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const auth = firebase.auth();
+
+      firebase.auth().onAuthStateChanged(user => {
+        const userEmailElement = document.getElementById("user-email");
+        if (user) {
+          userEmailElement.innerText = user.email;
+        } else {
+          userEmailElement.innerText = "Not logged in";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

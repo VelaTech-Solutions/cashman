@@ -1,54 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Authentication</title>
+    <title>Welcome to Cash Flow Manager</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDK -->
-    <script defer src="/__/firebase/11.1.0/firebase-app-compat.js"></script>
-    <script defer src="/__/firebase/11.1.0/firebase-auth-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-auth-compat.js"></script>    
+    <script defer src="/__/firebase/11.0.2/firebase-firestore-compat.js"></script>
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
-    <!-- FirebaseUI CSS -->
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-    <!-- FirebaseUI JS -->
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-
     <style>
-      /* Your styles for the authentication page */
-      #firebaseui-auth-container {
-        max-width: 400px;
-        margin: 100px auto;
-        padding: 20px;
-        background: white;
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #080710;
+        font-family: 'Poppins', sans-serif;
+      }
+
+      .background {
+        width: 430px;
+        height: 520px;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+      }
+
+      .background .shape {
+        height: 200px;
+        width: 200px;
+        position: absolute;
+        border-radius: 50%;
+      }
+
+      .shape:first-child {
+        background: linear-gradient(#1845ad, #23a2f6);
+        left: -80px;
+        top: -80px;
+      }
+
+      .shape:last-child {
+        background: linear-gradient(to right, #ff512f, #f09819);
+        right: -30px;
+        bottom: -80px;
+      }
+
+      form {
+        height: 520px;
+        width: 400px;
+        background-color: rgba(255, 255, 255, 0.13);
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+        padding: 50px 35px;
+      }
+
+      form * {
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        outline: none;
+        border: none;
+      }
+
+      form h3 {
+        font-size: 32px;
+        font-weight: 500;
+        text-align: center;
+      }
+
+      label {
+        display: block;
+        margin-top: 30px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      input {
+        display: block;
+        height: 50px;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.07);
         border-radius: 3px;
+        padding: 0 10px;
+        margin-top: 8px;
+        font-size: 14px;
+      }
+
+      ::placeholder {
+        color: #e5e5e5;
+      }
+
+      button {
+        margin-top: 50px;
+        width: 100%;
+        background-color: #ffffff;
+        color: #080710;
+        padding: 15px 0;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #auth-status {
+        margin-top: 20px;
+        text-align: center;
+        color: #ff4d4d;
+        font-size: 14px;
+      }
+
+      #app-name {
+        font-size: 40px;
+        font-weight: 700;
+        color: #eaf0fb;
+        text-align: center;
+        margin-bottom: 20px;
       }
     </style>
   </head>
   <body>
-    <div id="firebaseui-auth-container"></div>
+    <!-- App name header -->
+    <div id="message">
+      <h2>Welcome</h2>
+      <h1 id="app-name">Cash Flow Manager</h1>
+    </div>
+
+
+    <form id="auth-form">
+      <h3>Login Here</h3>
+
+      <label for="email">Email</label>
+      <input type="email" placeholder="Email" id="email" autocomplete="email" required>
+
+      <label for="password">Password</label>
+      <input type="password" placeholder="Password" id="password" autocomplete="current-password" required>
+
+      <button id="sign-in-button">Log In</button>
+      <div id="auth-status"></div>
+    </form>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize FirebaseUI
-        const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      document.addEventListener('DOMContentLoaded', function () {
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const signInButton = document.getElementById('sign-in-button');
+        const authStatusEl = document.getElementById('auth-status');
 
-        // Define sign-in options
-        const uiConfig = {
-          signInOptions: [
-            firebase.auth.EmailAuthProvider.PROVIDER_ID, // Email/password sign-in
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID, // Google sign-in
-            firebase.auth.FacebookAuthProvider.PROVIDER_ID, // Facebook sign-in (optional)
-            firebase.auth.TwitterAuthProvider.PROVIDER_ID, // Twitter sign-in (optional)
-            firebase.auth.GithubAuthProvider.PROVIDER_ID // GitHub sign-in (optional)
-          ],
-          // Redirect user after sign-in (can also use `signInSuccessUrl`)
-          signInSuccessUrl: '/home', // Adjust the URL as per your app structure
-        };
+        // Initialize Firebase
+        const app = firebase.app();
+        const auth = firebase.auth();
 
-        // Start FirebaseUI
-        ui.start('#firebaseui-auth-container', uiConfig);
+        // Sign In Function
+        signInButton.addEventListener('click', (event) => {
+          event.preventDefault(); // Prevent default form submission
+
+          const email = emailInput.value.trim();
+          const password = passwordInput.value.trim();
+
+          if (!email || !password) {
+            authStatusEl.textContent = 'Please enter both email and password.';
+            return;
+          }
+
+          auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+              console.log('Signed in:', userCredential.user);
+              window.location.href = 'src/dashboard.html'; // Redirect after login
+              // send username to dashboard
+           // User is authenticated
+            const userEmailElement = document.getElementById('user-email');
+            userEmailElement.innerText = user.email;
+            })
+            .catch((error) => {
+              console.error('Error signing in:', error.message);
+              authStatusEl.textContent = error.message;
+            });
+        });
       });
     </script>
   </body>
