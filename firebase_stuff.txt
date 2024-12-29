@@ -209,3 +209,5 @@ ubuntu@Echo:~/cashman$
 one line deployment command:
 
 npm run build && git add . && git commit -m "Updated Firebase" && git push origin main && firebase deploy --only hosting
+
+rm -rf build && npm run build && git add . && git commit -m "Updated Firebase" && git push origin main && firebase deploy --only hosting
