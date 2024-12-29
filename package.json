@@ -29,6 +29,7 @@
     ]
   },
   "dependencies": {
-    "firebaseui": "^6.1.0"
+    "firebaseui": "^6.1.0",
+    "react-router-dom": "^7.1.1"
   }
 }

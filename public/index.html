@@ -177,7 +177,7 @@
           auth.signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
               console.log('Signed in:', userCredential.user);
-              window.location.href = 'dashboard.html'; // Redirect after login
+              window.location.href = '/dashboard.html'; // Redirect after login
               // send username to dashboard
            // User is authenticated
             const userEmailElement = document.getElementById('user-email');
