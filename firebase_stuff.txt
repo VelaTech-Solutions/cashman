@@ -203,3 +203,9 @@ i  Writing project information to .firebaserc...
 
 ✔  Firebase initialization complete!
 ubuntu@Echo:~/cashman$ 
+
+
+
+one line deployment command:
+
+npm run build && git add . && git commit -m "Updated Firebase" && git push origin main && firebase deploy --only hosting
