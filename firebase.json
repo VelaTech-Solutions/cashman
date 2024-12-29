@@ -16,7 +16,7 @@
     }
   ],
   "hosting": {
-    "public": "public",
+    "public": "build",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -29,7 +29,8 @@
   "emulators": {
     "apphosting": {
       "port": 5002,
-      "rootDirectory": "./"
+      "rootDirectory": "./",
+      "startCommand": "bash -c 'npm run start'"
     },
     "auth": {
       "port": 9099
@@ -48,10 +49,6 @@
     },
     "storage": {
       "port": 9199
-    },
-    "dataconnect": {
-      "port": 9399,
-      "dataDir": "dataconnect/.dataconnect/pgliteData"
     },
     "tasks": {
       "port": 9499
