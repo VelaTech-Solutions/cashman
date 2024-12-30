@@ -57,10 +57,6 @@
 ├── README.md
 ├── apphosting.yaml
 ├── database-debug.log
-├── firebase
-│   ├── auth.js
-│   ├── config.js
-│   └── database.js
 ├── firebase.json
 ├── firebase_stuff.txt
 ├── firestore-debug.log
@@ -82,11 +78,26 @@
 │   ├── App.css
 │   ├── App.js
 │   ├── App.test.js
+│   ├── assets
+│   ├── components
+│   │   ├── Button.js
+│   │   └── Input.js
+│   ├── firebase
+│   │   ├── auth.js
+│   │   ├── config.js
+│   │   └── database.js
 │   ├── index.css
 │   ├── index.js
 │   ├── logo.svg
+│   ├── pages
+│   │   ├── Dashboard.js
+│   │   └── Login.js
 │   ├── reportWebVitals.js
-│   └── setupTests.js
+│   ├── services
+│   │   └── apiService.js
+│   ├── setupTests.js
+│   └── styles
+│       └── global.css
 ├── storage.rules
 ├── trash
 │   ├── dashboard.html
@@ -94,4 +105,4 @@
 │   └── index3.html
 └── tree.txt
 
-23 directories, 71 files
+28 directories, 77 files
