@@ -48,7 +48,6 @@ firebase deploy
 
 
 
-
 ##########
 
 ubuntu@Echo:~/cashman$ firebase init

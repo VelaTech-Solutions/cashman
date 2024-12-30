@@ -1,0 +1,97 @@
+.
+├── .firebase
+│   ├── hosting.YnVpbGQ.cache
+│   ├── hosting.cHVibGlj.cache
+│   └── logs
+│       └── vsce-debug.log
+├── .firebaserc
+├── .git
+│   ├── COMMIT_EDITMSG
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── ORIG_HEAD
+│   ├── branches
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               ├── HEAD
+│   │               └── main
+│   ├── packed-refs
+│   └── refs
+│       ├── heads
+│       │   └── main
+│       ├── remotes
+│       │   └── origin
+│       │       ├── HEAD
+│       │       └── main
+│       └── tags
+├── .github
+│   └── workflows
+│       ├── firebase-hosting-merge.yml
+│       └── firebase-hosting-pull-request.yml
+├── .gitignore
+├── LICENSE
+├── README.md
+├── apphosting.yaml
+├── database-debug.log
+├── firebase
+│   ├── auth.js
+│   ├── config.js
+│   └── database.js
+├── firebase.json
+├── firebase_stuff.txt
+├── firestore-debug.log
+├── functions
+│   ├── .eslintrc.js
+│   ├── .gitignore
+│   ├── index.js
+│   └── package.json
+├── package-lock.json
+├── package.json
+├── public
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+├── src
+│   ├── App.css
+│   ├── App.js
+│   ├── App.test.js
+│   ├── index.css
+│   ├── index.js
+│   ├── logo.svg
+│   ├── reportWebVitals.js
+│   └── setupTests.js
+├── storage.rules
+├── trash
+│   ├── dashboard.html
+│   ├── index2.html
+│   └── index3.html
+└── tree.txt
+
+23 directories, 71 files

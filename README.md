@@ -73,3 +73,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 git config --global user.name "JodyWi"
 git config --global user.email "jody.kruger@gmail.com"
+
+
+tree -a -I 'node_modules|objects|build' > tree.txt
