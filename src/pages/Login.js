@@ -1,26 +1,22 @@
-// src/pages/Login.js - Login page where user can sign in
+// src/pages/Login.js
 
 import React, { useState } from 'react';
 import { signIn } from '../firebase/auth';  // Import the signIn function
-import { useHistory } from 'react-router-dom'; // To navigate after successful login
+import { useNavigate } from 'react-router-dom'; // For navigation after login
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const history = useHistory();  // Use for redirection
+  const navigate = useNavigate();  // For redirecting after successful login
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Call the signIn function with the email and password
-      await signIn(email, password);
-      // Redirect to the dashboard (or another page) after successful login
-      history.push('/dashboard');
+      await signIn(email, password);  // Sign in the user
+      navigate('/dashboard');  // Navigate to the dashboard page after login
     } catch (err) {
-      // Handle any errors (like wrong credentials)
       setError('Failed to log in. Please check your credentials.');
     }
   };

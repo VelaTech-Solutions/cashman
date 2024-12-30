@@ -1,23 +1,26 @@
 // src/firebase/auth.js - Handles Firebase authentication logic
 
-import { firebase } from './firebase';
+import { firebaseApp } from './config'; // Use config to initialize auth
+import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+
+const auth = getAuth(firebaseApp);  // Initialize auth with the Firebase app
 
 // Sign in function with error handling
-const signIn = (email, password) => {
-  return firebase.auth().signInWithEmailAndPassword(email, password)
-    .catch(error => {
-      console.error("Error signing in: ", error);
-      throw error; // You can also throw an error to be handled by the calling component
-    });
+export const signIn = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    throw new Error('Authentication failed');
+  }
 };
 
 // Sign out function
-const signOut = () => {
-  return firebase.auth().signOut()
-    .catch(error => {
-      console.error("Error signing out: ", error);
-      throw error; // Handle or display error
-    });
+export const signOutUser = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Error signing out: ", error);
+    throw error; // Handle or display error
+  }
 };
-
-export { signIn, signOut };
