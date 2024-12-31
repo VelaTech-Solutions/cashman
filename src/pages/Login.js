@@ -1,51 +1,60 @@
-// src/pages/Login.js
-
 import React, { useState } from 'react';
-import { signIn } from '../firebase/auth';  // Import the signIn function
-import { useNavigate } from 'react-router-dom'; // For navigation after login
+import { signIn } from '../firebase/auth';  // Make sure the signIn function is correctly imported
+import { useNavigate } from 'react-router-dom';
+import '../styles/tailwind.css';  // Ensure your CSS file is properly linked
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const navigate = useNavigate();  // For redirecting after successful login
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      await signIn(email, password);  // Sign in the user
-      navigate('/dashboard');  // Navigate to the dashboard page after login
+      await signIn(email, password);
+      navigate('/dashboard');
     } catch (err) {
       setError('Failed to log in. Please check your credentials.');
     }
   };
 
   return (
-    <div className="login-page">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p>{error}</p>}
-        <button type="submit">Login</button>
-      </form>
+    <div className="min-h-screen flex justify-center items-center bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">Login</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            />
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            className="w-full p-3 mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg font-semibold hover:scale-105 transition transform"
+          >
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

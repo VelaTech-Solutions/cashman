@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Link } from 'react-router-dom'; // Import Link from react-router-dom
-import '../styles/global.css';
+
 
 const Settings = () => {
   const [userEmail, setUserEmail] = useState('Not logged in');
