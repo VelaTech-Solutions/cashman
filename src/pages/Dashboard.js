@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-// import './Dashboard.css';
+import '../styles/global.css';
 
 const Dashboard = () => {
   const [userEmail, setUserEmail] = useState('Not logged in');
@@ -41,7 +41,7 @@ const Dashboard = () => {
             <span>{userEmail}</span>
             <span>
               <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" alt="User Avatar" />
-            </span>
+            </span> 
           </button>
         </div>
         <div className="app-header-mobile">
@@ -55,11 +55,12 @@ const Dashboard = () => {
         <div className="app-body-navigation">
           <nav className="navigation">
             <a href="#"><i className="ph-sign-out"></i><span>Logout</span></a>
-            <a href="#"><i className="ph-check-square"></i><span>Add Client</span></a>
-            <a href="#"><i className="ph-swap"></i><span>Edit Client</span></a>
-            <a href="#"><i className="ph-file-text"></i><span>View Client</span></a>
-            <a href="/settings"><i className="ph-globe"></i><span>Settings</span></a>
-            <a href="#"><i className="ph-gear"></i><span>Developer Notes</span></a>
+              
+            <a href="./Addclient"><i className="ph-check-square"></i><span>Add Client</span></a>
+            <a href="./Editclient"><i className="ph-swap"></i><span>Edit Client</span></a>
+            <a href="./Viewclient"><i className="ph-file-text"></i><span>View Client</span></a>
+            <a href="./Settings"><i className="ph-globe"></i><span>Settings</span></a>
+            <a href="./Developernotes"><i className="ph-gear"></i><span>Developer Notes</span></a>
           </nav>
           <footer className="footer">
             <div>Integra Wealth ©<br />All Rights Reserved 2025</div>
