@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { Link } from 'react-router-dom';
 import '../styles/global.css';
 
 const Dashboard = () => {
@@ -33,15 +34,15 @@ const Dashboard = () => {
         </div>
         <div className="app-header-navigation">
           <div className="tabs">
-            <a href="#">Overview</a>
+            <Link to="/dashboard">Overview</Link>
           </div>
         </div>
         <div className="app-header-actions">
           <button className="user-profile">
             <span>{userEmail}</span>
             <span>
-              <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" alt="User Avatar" />
-            </span> 
+              <img src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png" alt="User Avatar" />
+            </span>
           </button>
         </div>
         <div className="app-header-mobile">
@@ -54,13 +55,12 @@ const Dashboard = () => {
       <div className="app-body">
         <div className="app-body-navigation">
           <nav className="navigation">
-            <a href="#"><i className="ph-sign-out"></i><span>Logout</span></a>
-              
-            <a href="./Addclient"><i className="ph-check-square"></i><span>Add Client</span></a>
-            <a href="./Editclient"><i className="ph-swap"></i><span>Edit Client</span></a>
-            <a href="./Viewclient"><i className="ph-file-text"></i><span>View Client</span></a>
-            <a href="./Settings"><i className="ph-globe"></i><span>Settings</span></a>
-            <a href="./Developernotes"><i className="ph-gear"></i><span>Developer Notes</span></a>
+            <Link to="/logout"><i className="ph-sign-out"></i><span>Logout</span></Link>
+            <Link to="/addclient"><i className="ph-check-square"></i><span>Add Client</span></Link>
+            <Link to="/editclient"><i className="ph-swap"></i><span>Edit Client</span></Link>
+            <Link to="/viewclient"><i className="ph-file-text"></i><span>View Client</span></Link>
+            <Link to="/settings"><i className="ph-globe"></i><span>Settings</span></Link>
+            <Link to="/developernotes"><i className="ph-gear"></i><span>Developer Notes</span></Link>
           </nav>
           <footer className="footer">
             <div>Integra Wealth ©<br />All Rights Reserved 2025</div>

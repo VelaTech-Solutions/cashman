@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import '../styles/global.css';
-
 
 const Settings = () => {
   const [userEmail, setUserEmail] = useState('Not logged in');
@@ -31,6 +31,9 @@ const Settings = () => {
         <div className="app-header-actions">
           <button className="user-profile">
             <span>{userEmail}</span>
+            <span>
+              <img src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png" alt="User Avatar" />
+            </span>
           </button>
         </div>
         <div className="app-header-mobile">
@@ -43,9 +46,15 @@ const Settings = () => {
       <div className="app-body">
         <div className="app-body-navigation">
           <nav className="navigation">
-            <a href="/dashboard"><i className="ph-sign-out"></i><span>Back to Dashboard</span></a>
-            <a href="#"><i className="ph-check-square"></i><span>Categories Settings</span></a>
-            <a href="#"><i className="ph-swap"></i><span>Tools Settings</span></a>
+            <Link to="/dashboard">Back to Dashboard</Link>
+            <Link to="/categories-settings">
+              <i className="ph-check-square"></i>
+              <span>Categories Settings</span>
+            </Link>
+            <button>
+              <i className="ph-swap"></i>
+              <span>Tools Settings</span>
+            </button>
           </nav>
         </div>
       </div>

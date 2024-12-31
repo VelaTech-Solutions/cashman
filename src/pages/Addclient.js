@@ -33,7 +33,7 @@ const Addclient = () => {
           <button className="user-profile">
             <span>{userEmail}</span>
             <span>
-              <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" alt="User Avatar" />
+            <img src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png" alt="User Avatar" />
             </span> 
           </button>
         </div>
