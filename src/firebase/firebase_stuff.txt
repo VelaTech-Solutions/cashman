@@ -210,3 +210,58 @@ one line deployment command:
 npm run build && git add . && git commit -m "Updated Firebase" && git push origin main && firebase deploy --only hosting
 
 rm -rf build && npm run build && git add . && git commit -m "Updated Firebase" && git push origin main && firebase deploy --only hosting
+
+
+
+#############
+
+storage
+
+Set up default bucket
+1 
+Bucket options
+2 
+Security rules
+Bucket reference
+gs://
+cashman-790ad.firebasestorage.app
+Storage class
+Regional
+
+No cost location
+Location
+
+US-CENTRAL1
+Access frequency
+
+Standard
+
+All locations
+Location
+
+Access frequency
+
+Set up default bucket
+Bucket options
+2 
+Security rules
+After you define your data structure, you will need to write rules to secure your data.
+Learn more
+
+Start in production mode
+Your data is private by default. Client read/write access will only be granted as specified by your security rules.
+
+Start in test mode
+Your data is open by default to enable quick setup. However, you must update your security rules within 30 days to enable long-term client read/write access.
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if
+          request.time < timestamp.date(2025, 1, 30);
+    }
+  }
+}
+caution:
+The default security rules for test mode allow anyone with your storage bucket reference to view, edit and delete all data in your storage bucket for the next 30 days
