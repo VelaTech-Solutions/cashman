@@ -58,7 +58,6 @@
 ├── apphosting.yaml
 ├── database-debug.log
 ├── firebase.json
-├── firebase_stuff.txt
 ├── firestore-debug.log
 ├── functions
 │   ├── .eslintrc.js
@@ -79,30 +78,45 @@
 │   ├── App.js
 │   ├── App.test.js
 │   ├── assets
+│   │   └── avatar-100.png
 │   ├── components
 │   │   ├── Button.js
-│   │   └── Input.js
+│   │   ├── Input.js
+│   │   └── component.html
 │   ├── firebase
 │   │   ├── auth.js
 │   │   ├── config.js
-│   │   └── database.js
+│   │   ├── database.js
+│   │   ├── firebase.js
+│   │   ├── firebase_stuff.txt
+│   │   ├── firestore.js
+│   │   └── storage.js
 │   ├── index.css
 │   ├── index.js
 │   ├── logo.svg
 │   ├── pages
+│   │   ├── Addclient.js
 │   │   ├── Dashboard.js
-│   │   └── Login.js
+│   │   ├── Developernotes.js
+│   │   ├── Editclient.js
+│   │   ├── Login.js
+│   │   ├── Settings.js
+│   │   └── Viewclient.js
 │   ├── reportWebVitals.js
 │   ├── services
 │   │   └── apiService.js
 │   ├── setupTests.js
 │   └── styles
-│       └── global.css
+│       ├── Dashboard.css
+│       ├── Settings.css
+│       ├── global.css
+│       └── tailwind.css
 ├── storage.rules
+├── tailwind.config.js
 ├── trash
 │   ├── dashboard.html
 │   ├── index2.html
 │   └── index3.html
 └── tree.txt
 
-28 directories, 77 files
+28 directories, 91 files

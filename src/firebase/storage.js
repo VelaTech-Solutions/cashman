@@ -1,4 +1,3 @@
-
 // src/firebase/storage.js
 import { getStorage } from "firebase/storage";
 import { firebaseApp } from "./config";
