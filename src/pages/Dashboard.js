@@ -53,6 +53,10 @@ const Dashboard = () => {
             <i className="ph-gear text-xl"></i>
             <span>Developer Notes</span>
           </Link>
+          <Link to ="/testpage" className="flex items-center space-x-3 hover:text-white transition">
+            <i className="ph-gear text-xl"></i>
+            <span>Test Page</span>
+          </Link>
         </nav>
       </div>
 

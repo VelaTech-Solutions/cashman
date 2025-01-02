@@ -1,24 +1,19 @@
 import React, { useState } from "react";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db } from "../firebase/firestore"; // Firestore instance
-import { doc, setDoc, updateDoc } from "firebase/firestore"; // Firestore modular imports
+import { doc, setDoc } from "firebase/firestore"; // Firestore modular imports
 import { storage } from "../firebase/storage"; // Firebase Storage instance
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
-
 
 const Testpage = () => {
   const [clientDetails, setClientDetails] = useState({
     idNumber: "",
-    clientName: "",
-    clientSurname: "",
     bankName: "",
   });
   const [bankStatements, setBankStatements] = useState([]);
   const [uploadProgress, setUploadProgress] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadCompleted, setUploadCompleted] = useState(false);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -29,37 +24,44 @@ const Testpage = () => {
   // Handle file selection
   const handleFileChange = (e) => {
     setBankStatements(Array.from(e.target.files));
-    setUploadCompleted(false); // Reset upload completion status
   };
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    const { idNumber, clientName, clientSurname, bankName } = clientDetails;
+  // Submit ID number and bank name to Firestore
+  const handleSubmitID = async () => {
+    const { idNumber, bankName } = clientDetails;
 
-    if (!idNumber || !clientName || !clientSurname || !bankName || bankStatements.length === 0) {
-      alert("Please fill in all required fields and upload files.");
+    if (!idNumber || !bankName) {
+      alert("Please fill in the ID Number and select a Bank.");
+      return;
+    }
+
+    try {
+      const clientDocRef = doc(db, "clients", idNumber);
+      await setDoc(clientDocRef, {
+        idNumber,
+        bankName,
+        timestamp: new Date(),
+      });
+      alert("✅ ID Number and Bank Name submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting ID Number:", error);
+      alert("❌ Failed to submit ID Number.");
+    }
+  };
+
+  // Submit bank statements to Firebase Storage
+  const handleSubmitStatements = async () => {
+    const { idNumber } = clientDetails;
+
+    if (!idNumber || bankStatements.length === 0) {
+      alert("Please fill in the ID Number and upload bank statements.");
       return;
     }
 
     setIsUploading(true);
     setUploadProgress(new Array(bankStatements.length).fill(0));
-    const uploadedFiles = [];
 
     try {
-      // Save client details in Firestore
-      const clientDocRef = doc(db, "clients", idNumber); // Corrected Firestore syntax
-      await setDoc(
-        clientDocRef,
-        {
-          clientName,
-          clientSurname,
-          bankName,
-          timestamp: new Date(),
-        },
-        { merge: true } // Ensures no data overwriting
-      );
-
-      // Upload files to Firebase Storage
       for (const [index, file] of bankStatements.entries()) {
         const fileRef = ref(storage, `bank_statements/${idNumber}/${file.name}`);
         const uploadTask = uploadBytesResumable(fileRef, file);
@@ -74,55 +76,29 @@ const Testpage = () => {
               setUploadProgress(newProgress);
             },
             (error) => {
-              console.error("File upload error:", error);
+              console.error("Error uploading file:", error);
               reject(error);
             },
             async () => {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              uploadedFiles.push({
-                fileName: file.name,
-                downloadURL,
-              });
+              console.log(`File uploaded: ${file.name}, URL: ${downloadURL}`);
               resolve();
             }
           );
         });
       }
 
-      // Update Firestore document with file metadata
-      await updateDoc(clientDocRef, { bankStatements: uploadedFiles });
-
-      alert("All data and files successfully uploaded.");
-      setUploadCompleted(true);
+      alert("✅ All bank statements uploaded successfully!");
     } catch (error) {
-      console.error("Error during submission:", error);
-      alert("An error occurred while saving data.");
+      console.error("Error uploading bank statements:", error);
+      alert("❌ Failed to upload bank statements.");
     } finally {
       setIsUploading(false);
     }
   };
 
-
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
-      <motion.div
-        className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg transition-all duration-300`}
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-      >
-        <div className="flex items-center space-x-3 pb-4">
-          <h1 className="text-xl font-semibold text-white">Testing Page</h1>
-        </div>
-        <nav className="space-y-4">
-          <Link to="/dashboard" className="hover:text-white transition">
-            Back to Dashboard
-          </Link>
-        </nav>
-      </motion.div>
-
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <motion.div
           className="space-y-8"
@@ -132,85 +108,74 @@ const Testpage = () => {
         >
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
-              Capture Clients
+              Test Page
             </h2>
-            <motion.input
-              type="text"
-              name="idNumber"
-              placeholder="ID Number"
-              value={clientDetails.idNumber}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
-            <motion.input
-              type="text"
-              name="clientName"
-              placeholder="Client Name"
-              value={clientDetails.clientName}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
-            <motion.input
-              type="text"
-              name="clientSurname"
-              placeholder="Client Surname"
-              value={clientDetails.clientSurname}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
-            <select
-              name="bankName"
-              value={clientDetails.bankName}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            >
-              <option value="">Select Bank</option>
-              <option value="Absa Bank">Absa Bank</option>
-              <option value="Capitec Bank">Capitec Bank</option>
-              <option value="FNB Bank">FNB Bank</option>
-              <option value="Ned Bank">Ned Bank</option>
-              <option value="Standard Bank">Standard Bank</option>
-              <option value="Tyme Bank">Tyme Bank</option>
-            </select>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
-            <motion.button
-              onClick={handleSubmit}
-              className={`w-full p-2 rounded ${
-                isUploading ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-              }`}
-              disabled={isUploading}
-              whileHover={{ scale: isUploading ? 1 : 1.02 }}
-            >
-              {isUploading ? "Uploading..." : "Submit Bank Statements"}
-            </motion.button>
-            {uploadProgress.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {uploadProgress.map((progress, index) => (
-                  <motion.div
-                    key={index}
-                    className="bg-green-600 rounded h-2 w-full mb-2"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
-                  ></motion.div>
-                ))}
-              </div>
-            )}
-            {uploadCompleted && (
-              <motion.p
-                className="text-green-400 text-lg mt-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
+
+            {/* ID Number and Bank Name Submission */}
+            <div className="space-y-4">
+              <motion.input
+                type="text"
+                name="idNumber"
+                placeholder="ID Number"
+                value={clientDetails.idNumber}
+                onChange={handleInputChange}
+                className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+              />
+              <select
+                name="bankName"
+                value={clientDetails.bankName}
+                onChange={handleInputChange}
+                className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
               >
-                🎉 All files uploaded successfully!
-              </motion.p>
-            )}
+                <option value="">Select Bank</option>
+                <option value="Absa Bank">Absa Bank</option>
+                <option value="Capitec Bank">Capitec Bank</option>
+                <option value="FNB Bank">FNB Bank</option>
+                <option value="Ned Bank">Ned Bank</option>
+                <option value="Standard Bank">Standard Bank</option>
+                <option value="Tyme Bank">Tyme Bank</option>
+              </select>
+              <motion.button
+                onClick={handleSubmitID}
+                className="w-full p-2 rounded bg-blue-600 hover:bg-blue-700"
+              >
+                Submit ID Number
+              </motion.button>
+            </div>
+
+            {/* Bank Statements Submission */}
+            <div className="space-y-4">
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+              />
+              <motion.button
+                onClick={handleSubmitStatements}
+                className={`w-full p-2 rounded ${
+                  isUploading
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+                disabled={isUploading}
+              >
+                {isUploading ? "Uploading..." : "Submit Bank Statements"}
+              </motion.button>
+              {uploadProgress.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {uploadProgress.map((progress, index) => (
+                    <motion.div
+                      key={index}
+                      className="bg-green-600 rounded h-2 w-full mb-2"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.5 }}
+                    ></motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
         </motion.div>
       </div>
