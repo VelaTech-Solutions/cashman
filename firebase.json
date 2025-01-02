@@ -23,9 +23,6 @@
       "**/.*",
       "**/node_modules/**"
     ],
-
-    
-
     "rewrites": [
       {
         "source": "**",
@@ -67,5 +64,10 @@
       "enabled": true
     },
     "singleProjectMode": true
+  },
+  "firestore": {
+    "database": "cashflow-db",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

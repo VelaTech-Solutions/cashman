@@ -1,57 +1,68 @@
 import React, { useState } from "react";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firestore";
 
 const TestPage = () => {
-  const [idNumber, setIdNumber] = useState("");
-  const [response, setResponse] = useState("");
+  const [idNumber, setIdNumber] = useState(""); // State for ID input
+  const [statusMessage, setStatusMessage] = useState(""); // State for status messages
 
-  const handleSubmit = async () => {
+  const handleSubmitId = async () => {
     if (!idNumber.trim()) {
-      setResponse("Please enter a valid ID number.");
+      setStatusMessage("Please enter a valid ID number.");
       return;
     }
 
     try {
-      const docRef = doc(db, "testCollection", idNumber);
-      const data = { timestamp: new Date(), note: "Test entry" };
-
-      // Write the ID number to Firestore
-      await setDoc(docRef, data);
-      setResponse(`ID number ${idNumber} added successfully.`);
-
-      // Retrieve and display the document to confirm it exists
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
-      } else {
-        console.log("No such document!");
-      }
+      const idDocRef = doc(db, "clients", idNumber); // Reference to the Firestore document
+      await setDoc(idDocRef, {
+        idNumber,
+        timestamp: new Date().toISOString(),
+      });
+      setStatusMessage(`ID Number ${idNumber} successfully saved to Firestore!`);
+      setIdNumber(""); // Clear input field
     } catch (error) {
-      console.error("Error writing ID number:", error);
-      setResponse("Failed to add ID number. Check the console for details.");
+      console.error("Error writing to Firestore:", error);
+      setStatusMessage(`Failed to save ID number. Error: ${error.message}`);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-800 text-white">
-      <div className="p-8 rounded shadow-lg bg-gray-900 space-y-4">
-        <h2 className="text-2xl font-bold">Test Firestore Entry</h2>
+    <div style={{ padding: "20px" }}>
+      <h1>Test Firestore Integration</h1>
+      <div style={{ marginBottom: "20px" }}>
+        <label htmlFor="idNumber">Enter ID Number:</label>
         <input
           type="text"
-          placeholder="Enter ID Number"
+          id="idNumber"
           value={idNumber}
           onChange={(e) => setIdNumber(e.target.value)}
-          className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+          placeholder="ID Number"
+          style={{ marginLeft: "10px", padding: "5px" }}
         />
         <button
-          onClick={handleSubmit}
-          className="w-full p-2 bg-green-600 rounded hover:bg-green-700"
+          onClick={handleSubmitId}
+          style={{
+            marginLeft: "10px",
+            padding: "5px 10px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+          }}
         >
           Submit ID Number
         </button>
-        {response && <p className="mt-4 text-green-400">{response}</p>}
       </div>
+      {statusMessage && (
+        <div
+          style={{
+            marginTop: "20px",
+            color: statusMessage.includes("Failed") ? "red" : "green",
+          }}
+        >
+          {statusMessage}
+        </div>
+      )}
     </div>
   );
 };
