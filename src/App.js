@@ -9,6 +9,7 @@ import Editclient from './pages/Editclient';
 import Viewclient from './pages/Viewclient';
 import Settings from './pages/Settings';
 import Developernotes from './pages/Developernotes';
+import Testpage from './pages/Testpage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/viewclient" element={<Viewclient />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/developernotes" element={<Developernotes />} />
+        <Route path="/testpage" element={<Testpage />} />
       </Routes>
     </Router>
   );

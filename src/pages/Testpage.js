@@ -7,7 +7,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
-const Addclient = () => {
+
+const Testpage = () => {
   const [clientDetails, setClientDetails] = useState({
     idNumber: "",
     clientName: "",
@@ -101,6 +102,8 @@ const Addclient = () => {
     }
   };
 
+
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       {/* Sidebar */}
@@ -110,7 +113,7 @@ const Addclient = () => {
         animate={{ x: 0 }}
       >
         <div className="flex items-center space-x-3 pb-4">
-          <h1 className="text-xl font-semibold text-white">Add Client</h1>
+          <h1 className="text-xl font-semibold text-white">Testing Page</h1>
         </div>
         <nav className="space-y-4">
           <Link to="/dashboard" className="hover:text-white transition">
@@ -215,4 +218,4 @@ const Addclient = () => {
   );
 };
 
-export default Addclient;
+export default Testpage;
