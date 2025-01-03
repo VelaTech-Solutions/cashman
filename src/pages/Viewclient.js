@@ -1,45 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase/firestore'; // Adjust path if necessary
+import React, { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase/firestore";
 
 const Viewclient = () => {
-  const [userEmail, setUserEmail] = useState('Not logged in');
-  const [clientData, setClientData] = useState(null); // State for client data
-  const [loading, setLoading] = useState(true); // Loading state
+  const [userEmail, setUserEmail] = useState("Not logged in");
+  const [clientData, setClientData] = useState(null);
+  const [errorLog, setErrorLog] = useState([]);
   const auth = getAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserEmail(user.email);
+        fetchClientData(user.uid); // Assuming UID is used to fetch data
       } else {
-        setUserEmail('Not logged in');
+        setUserEmail("Not logged in");
       }
     });
     return () => unsubscribe();
   }, [auth]);
 
-  useEffect(() => {
-    const fetchClientData = async () => {
-      try {
-        const docRef = doc(db, 'clients', 'OnCsEboOl39VtcboLM8i'); // Adjust collection and document ID
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setClientData(docSnap.data());
-        } else {
-          console.error('No such document!');
-        }
-      } catch (error) {
-        console.error('Error fetching client data:', error);
-      } finally {
-        setLoading(false);
+  const fetchClientData = async (userId) => {
+    try {
+      setErrorLog((prev) => [...prev, "Starting to fetch client data..."]);
+      if (!userId) {
+        setErrorLog((prev) => [...prev, "User ID is not available."]);
+        throw new Error("User ID is required to fetch client data.");
       }
-    };
 
-    fetchClientData();
-  }, []);
+      const docRef = doc(db, "clients", userId);
+      setErrorLog((prev) => [...prev, `Fetching document for user ID: ${userId}`]);
+      
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setErrorLog((prev) => [...prev, "Document exists, setting client data."]);
+        setClientData(docSnap.data());
+      } else {
+        setErrorLog((prev) => [...prev, "No document found for this user."]);
+        throw new Error("No document found for the given user ID.");
+      }
+    } catch (error) {
+      console.error("Error fetching client data:", error);
+      setErrorLog((prev) => [...prev, `Error: ${error.message}`]);
+    }
+  };
 
   return (
     <div className="app">
@@ -79,17 +85,20 @@ const Viewclient = () => {
           </nav>
         </div>
         <div className="app-body-content">
-          {loading ? (
-            <p>Loading client data...</p>
-          ) : clientData ? (
-            <div>
-              <h2>Client Details</h2>
-              <p><strong>ID:</strong> {clientData.id}</p>
-              {/* Add other fields as needed */}
-            </div>
+          <h2>Client Data</h2>
+          {clientData ? (
+            <pre>{JSON.stringify(clientData, null, 2)}</pre>
           ) : (
             <p>No client data available.</p>
           )}
+        </div>
+        <div className="app-body-logs">
+          <h3>Error Log</h3>
+          <ul>
+            {errorLog.map((log, index) => (
+              <li key={index}>{log}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
