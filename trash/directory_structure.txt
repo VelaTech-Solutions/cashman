@@ -56,17 +56,19 @@
 ├── LICENSE
 ├── README.md
 ├── apphosting.yaml
+├── config
+│   ├── firestore.indexes.json
+│   └── tailwind.config.js
 ├── database-debug.log
 ├── deploy.sh
 ├── firebase.json
 ├── firestore-debug.log
-├── firestore.indexes.json
-├── firestore.rules
 ├── functions
 │   ├── .gitignore
 │   ├── index.js
 │   ├── package-lock.json
 │   └── package.json
+├── logs
 ├── package-lock.json
 ├── package.json
 ├── public
@@ -75,6 +77,9 @@
 │   ├── logo100.png
 │   ├── manifest.json
 │   └── robots.txt
+├── rules
+│   ├── firestore.rules
+│   └── storage.rules
 ├── src
 │   ├── App.css
 │   ├── App.js
@@ -83,8 +88,7 @@
 │   │   └── avatar-100.png
 │   ├── components
 │   │   ├── Button.js
-│   │   ├── Input.js
-│   │   └── component.html
+│   │   └── Input.js
 │   ├── firebase
 │   │   ├── auth.js
 │   │   ├── config.js
@@ -110,17 +114,15 @@
 │   │   └── apiService.js
 │   └── styles
 │       └── tailwind.css
-├── storage.rules
-├── tailwind.config.js
 └── trash
     ├── Dashboard.css
     ├── Settings.css
+    ├── component.html
     ├── dashboard.html
     ├── directory_structure.txt
     ├── global.css
     ├── index2.html
     ├── index3.html
-    ├── setupTests.js
-    └── tree.txt
+    └── setupTests.js
 
-28 directories, 95 files
+31 directories, 94 files

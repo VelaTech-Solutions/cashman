@@ -4,8 +4,8 @@
     "ignore": [
       "node_modules",
       ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log",
+      "logs/firebase-debug.log",
+      "logs/firebase-debug.*.log",
       "*.local"
     ],
     "predeploy": []
@@ -26,7 +26,7 @@
     ]
   },
   "storage": {
-    "rules": "storage.rules"
+    "rules": "rules/storage.rules"
   },
   "emulators": {
     "functions": {
@@ -38,7 +38,7 @@
   },
   "firestore": {
     "database": "cashflow-db",
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    "rules": "rules/firestore.rules",
+    "indexes": "config/firestore.indexes.json"
   }
 }
