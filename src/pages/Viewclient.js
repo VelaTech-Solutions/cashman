@@ -1,117 +1,65 @@
 // src/pages/Viewclient.js
 
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import "../styles/tailwind.css";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { db } from '../firebase/firebase'; // Assuming you've initialized Firebase in this file
+import { doc, getDoc } from 'firebase/firestore';
 
 const Viewclient = () => {
-  const [userEmail, setUserEmail] = useState("Not logged in");
-  const [clientData, setClientData] = useState(null);
-  const [errorLog, setErrorLog] = useState([]);
-  const auth = getAuth();
-  const db = getFirestore();
+  const { idNumber } = useParams(); // Fetch the idNumber from the URL
+  const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserEmail(user.email);
-        fetchClientData(user.uid);
-      } else {
-        setUserEmail("Not logged in");
+    const fetchClientData = async () => {
+      try {
+        const clientDocRef = doc(db, 'clients', idNumber); // Reference to the client document
+        const clientDocSnap = await getDoc(clientDocRef);
+
+        if (clientDocSnap.exists()) {
+          setClient(clientDocSnap.data()); // Set the client data to state
+        } else {
+          console.log('No such client!');
+        }
+      } catch (error) {
+        console.error('Error fetching client data:', error);
+      } finally {
+        setLoading(false); // Stop loading once the data is fetched
       }
-    });
-    return () => unsubscribe();
-  }, [auth]);
+    };
 
-  const fetchClientData = async (userId) => {
-    try {
-      setErrorLog((prev) => [...prev, "Starting to fetch client data..."]);
+    fetchClientData();
+  }, [idNumber]); // Re-run when idNumber changes
 
-      if (!userId) {
-        setErrorLog((prev) => [...prev, "User ID is not available."]);
-        throw new Error("User ID is required to fetch client data.");
-      }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-      const docRef = doc(db, "clients", userId);
-      setErrorLog((prev) => [...prev, `Fetching document for user ID: ${userId}`]);
-
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setErrorLog((prev) => [...prev, "Document exists, setting client data."]);
-        setClientData(docSnap.data());
-      } else {
-        setErrorLog((prev) => [...prev, "No document found for this user."]);
-        throw new Error("No document found for the given user ID.");
-      }
-    } catch (error) {
-      console.error("Error fetching client data:", error);
-      setErrorLog((prev) => [...prev, `Error: ${error.message}`]);
-    }
-  };
+  if (!client) {
+    return <div>No client data available</div>;
+  }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="app-header-logo">
-          <div className="logo">
-            <h1 className="logo-title">
-              <span>View Client</span>
-            </h1>
-          </div>
-        </div>
-        <div className="app-header-actions">
-          <button className="user-profile">
-            <span>{userEmail}</span>
-            <span>
-              <img
-                src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png"
-                alt="User Avatar"
-              />
-            </span>
-          </button>
-        </div>
-        <div className="app-header-mobile">
-          <button className="icon-button large">
-            <i className="ph-list"></i>
-          </button>
-        </div>
-      </header>
+    <div className="view-client-container">
+      <h2>View Client</h2>
+      <div className="client-details">
+        <p><strong>Name:</strong> {client.name}</p>
+        <p><strong>Surname:</strong> {client.surname}</p>
+        <p><strong>Bank Name:</strong> {client.bankName}</p>
+        <p><strong>ID Number:</strong> {client.idNumber}</p>
+        <p><strong>Timestamp:</strong> {new Date(client.timestamp?.seconds * 1000).toLocaleString()}</p>
+      </div>
 
-      <div className="app-body">
-        <div className="app-body-navigation">
-          <nav className="navigation">
-            <Link to="/dashboard">
-              <i className="ph-sign-out"></i>
-              <span>Back to Dashboard</span>
-            </Link>
-          </nav>
-        </div>
-        <div className="app-body-content">
-          <h2>Client Data</h2>
-          {clientData ? (
-            <div className="client-data">
-              <pre>{JSON.stringify(clientData, null, 2)}</pre>
-            </div>
-          ) : (
-            <p>No client data available.</p>
-          )}
-        </div>
-        <div className="app-body-logs">
-          <h3>Error Log</h3>
-          <ul>
-            {errorLog.map((log, index) => (
-              <li key={index}>{log}</li>
-            ))}
-          </ul>
-        </div>
+      <div className="client-bank-statement">
+        <h3>Bank Statement</h3>
+        {client.bankStatement && (
+          <a href={client.bankStatement} target="_blank" rel="noopener noreferrer">
+            View Bank Statement
+          </a>
+        )}
       </div>
     </div>
   );
 };
 
 export default Viewclient;
-
