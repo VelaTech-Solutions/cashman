@@ -1,46 +1,59 @@
+// src/pages/TestPage.js
 import React, { useState } from "react";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase/storage";
 
 const TestPage = () => {
-  const [idNumber, setIdNumber] = useState(""); // State for ID input
-  const [statusMessage, setStatusMessage] = useState(""); // State for status messages
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState("");
 
-  const handleSubmitId = async () => {
-    if (!idNumber.trim()) {
-      setStatusMessage("Please enter a valid ID number.");
+  // Handle file selection
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+    setUploadStatus(""); // Reset status
+  };
+
+  // Upload file to Firebase Storage
+  const handleUploadFile = () => {
+    if (!selectedFile) {
+      setUploadStatus("Please select a file to upload.");
       return;
     }
 
-    try {
-      const idDocRef = doc(db, "clients", idNumber); // Reference to the Firestore document
-      await setDoc(idDocRef, {
-        idNumber,
-        timestamp: new Date().toISOString(),
-      });
-      setStatusMessage(`ID Number ${idNumber} successfully saved to Firestore!`);
-      setIdNumber(""); // Clear input field
-    } catch (error) {
-      console.error("Error writing to Firestore:", error);
-      setStatusMessage(`Failed to save ID number. Error: ${error.message}`);
-    }
+    const storageRef = ref(storage, `bank_statements/${selectedFile.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadStatus(`Upload is ${progress.toFixed(2)}% done`);
+      },
+      (error) => {
+        console.error("Upload failed:", error);
+        setUploadStatus(`Upload failed: ${error.message}`);
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        setUploadStatus(`Upload complete! File URL: ${downloadURL}`);
+      }
+    );
   };
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Test Firestore Integration</h1>
+      <h1>Test Firebase Storage</h1>
       <div style={{ marginBottom: "20px" }}>
-        <label htmlFor="idNumber">Enter ID Number:</label>
+        <label htmlFor="fileUpload">Select Bank Statement:</label>
         <input
-          type="text"
-          id="idNumber"
-          value={idNumber}
-          onChange={(e) => setIdNumber(e.target.value)}
-          placeholder="ID Number"
+          type="file"
+          id="fileUpload"
+          onChange={handleFileChange}
           style={{ marginLeft: "10px", padding: "5px" }}
         />
         <button
-          onClick={handleSubmitId}
+          onClick={handleUploadFile}
           style={{
             marginLeft: "10px",
             padding: "5px 10px",
@@ -50,17 +63,17 @@ const TestPage = () => {
             cursor: "pointer",
           }}
         >
-          Submit ID Number
+          Upload File
         </button>
       </div>
-      {statusMessage && (
+      {uploadStatus && (
         <div
           style={{
             marginTop: "20px",
-            color: statusMessage.includes("Failed") ? "red" : "green",
+            color: uploadStatus.includes("failed") ? "red" : "green",
           }}
         >
-          {statusMessage}
+          {uploadStatus}
         </div>
       )}
     </div>
