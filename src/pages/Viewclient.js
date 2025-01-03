@@ -3,23 +3,22 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import "../styles/tailwind.css";
-
-// firebase imports
-
-
 
 const Viewclient = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const [clientData, setClientData] = useState(null);
   const [errorLog, setErrorLog] = useState([]);
   const auth = getAuth();
+  const db = getFirestore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserEmail(user.email);
-        fetchClientData(user.uid); // Assuming UID is used to fetch data
+        fetchClientData(user.uid);
       } else {
         setUserEmail("Not logged in");
       }
@@ -30,6 +29,7 @@ const Viewclient = () => {
   const fetchClientData = async (userId) => {
     try {
       setErrorLog((prev) => [...prev, "Starting to fetch client data..."]);
+
       if (!userId) {
         setErrorLog((prev) => [...prev, "User ID is not available."]);
         throw new Error("User ID is required to fetch client data.");
@@ -37,7 +37,7 @@ const Viewclient = () => {
 
       const docRef = doc(db, "clients", userId);
       setErrorLog((prev) => [...prev, `Fetching document for user ID: ${userId}`]);
-      
+
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -84,16 +84,18 @@ const Viewclient = () => {
       <div className="app-body">
         <div className="app-body-navigation">
           <nav className="navigation">
-            <a href="/dashboard">
+            <Link to="/dashboard">
               <i className="ph-sign-out"></i>
               <span>Back to Dashboard</span>
-            </a>
+            </Link>
           </nav>
         </div>
         <div className="app-body-content">
           <h2>Client Data</h2>
           {clientData ? (
-            <pre>{JSON.stringify(clientData, null, 2)}</pre>
+            <div className="client-data">
+              <pre>{JSON.stringify(clientData, null, 2)}</pre>
+            </div>
           ) : (
             <p>No client data available.</p>
           )}
@@ -112,3 +114,4 @@ const Viewclient = () => {
 };
 
 export default Viewclient;
+

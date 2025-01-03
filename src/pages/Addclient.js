@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
 // firebase imports
-import { storage } from "../firebase/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; 
+import { db } from "../firebase/firebase";  // Make sure db is imported
+import { doc, setDoc } from "firebase/firestore"; // Firestore functions
 
 const Addclient = () => {
   const [clientDetails, setClientDetails] = useState({
@@ -16,35 +16,30 @@ const Addclient = () => {
     clientSurname: "",
     bankName: "",
   });
-  const [bankStatements, setBankStatements] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadCompleted, setUploadCompleted] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setClientDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setBankStatements(Array.from(e.target.files));
-    setUploadCompleted(false);
-  };
-
   const handleSubmit = async () => {
     const { idNumber, clientName, clientSurname, bankName } = clientDetails;
 
-    if (!idNumber || !clientName || !clientSurname || !bankName || bankStatements.length === 0) {
-      alert("Please fill in all required fields and upload files.");
+    if (!idNumber || !clientName || !clientSurname || !bankName) {
+      alert("Please fill in all required fields.");
       return;
     }
 
-    setIsUploading(true);
-    setUploadProgress(new Array(bankStatements.length).fill(0));
-    const uploadedFiles = [];
+    setIsSubmitting(true);
 
     try {
+      // Create a reference to the document using the ID number as the document ID
       const clientDocRef = doc(db, "clients", idNumber);
+      
+      // Add the client data to Firestore
       await setDoc(
         clientDocRef,
         {
@@ -56,44 +51,13 @@ const Addclient = () => {
         { merge: true }
       );
 
-      for (const [index, file] of bankStatements.entries()) {
-        const fileRef = ref(storage, `bank_statements/${idNumber}/${file.name}`);
-        const uploadTask = uploadBytesResumable(fileRef, file);
-
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              const newProgress = [...uploadProgress];
-              newProgress[index] = Math.round(progress);
-              setUploadProgress(newProgress);
-            },
-            (error) => {
-              console.error("File upload error:", error);
-              reject(error);
-            },
-            async () => {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              uploadedFiles.push({
-                fileName: file.name,
-                downloadURL,
-              });
-              resolve();
-            }
-          );
-        });
-      }
-
-      await updateDoc(clientDocRef, { bankStatements: uploadedFiles });
-
-      alert("All data and files successfully uploaded.");
-      setUploadCompleted(true);
+      setSubmitSuccess(true);
+      alert("Client details successfully saved.");
     } catch (error) {
-      console.error("Error during submission:", error);
+      console.error("Error saving client data:", error);
       alert("An error occurred while saving data.");
     } finally {
-      setIsUploading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -163,43 +127,26 @@ const Addclient = () => {
               <option value="Standard Bank">Standard Bank</option>
               <option value="Tyme Bank">Tyme Bank</option>
             </select>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
+
             <motion.button
               onClick={handleSubmit}
               className={`w-full p-2 rounded ${
-                isUploading ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+                isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
               }`}
-              disabled={isUploading}
-              whileHover={{ scale: isUploading ? 1 : 1.02 }}
+              disabled={isSubmitting}
+              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
             >
-              {isUploading ? "Uploading..." : "Submit Bank Statements"}
+              {isSubmitting ? "Saving..." : "Save Client Details"}
             </motion.button>
-            {uploadProgress.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {uploadProgress.map((progress, index) => (
-                  <motion.div
-                    key={index}
-                    className="bg-green-600 rounded h-2 w-full mb-2"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
-                  ></motion.div>
-                ))}
-              </div>
-            )}
-            {uploadCompleted && (
+
+            {submitSuccess && (
               <motion.p
                 className="text-green-400 text-lg mt-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
               >
-                🎉 All files uploaded successfully!
+                🎉 Client details saved successfully!
               </motion.p>
             )}
           </section>
