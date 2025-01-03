@@ -57,20 +57,22 @@
 ├── README.md
 ├── apphosting.yaml
 ├── database-debug.log
+├── deploy.sh
 ├── firebase.json
 ├── firestore-debug.log
+├── firestore.indexes.json
+├── firestore.rules
 ├── functions
-│   ├── .eslintrc.js
 │   ├── .gitignore
 │   ├── index.js
+│   ├── package-lock.json
 │   └── package.json
 ├── package-lock.json
 ├── package.json
 ├── public
 │   ├── favicon.ico
 │   ├── index.html
-│   ├── logo192.png
-│   ├── logo512.png
+│   ├── logo100.png
 │   ├── manifest.json
 │   └── robots.txt
 ├── src
@@ -101,22 +103,24 @@
 │   │   ├── Editclient.js
 │   │   ├── Login.js
 │   │   ├── Settings.js
+│   │   ├── Testpage.js
 │   │   └── Viewclient.js
 │   ├── reportWebVitals.js
 │   ├── services
 │   │   └── apiService.js
-│   ├── setupTests.js
 │   └── styles
-│       ├── Dashboard.css
-│       ├── Settings.css
-│       ├── global.css
 │       └── tailwind.css
 ├── storage.rules
 ├── tailwind.config.js
-├── trash
-│   ├── dashboard.html
-│   ├── index2.html
-│   └── index3.html
-└── tree.txt
+└── trash
+    ├── Dashboard.css
+    ├── Settings.css
+    ├── dashboard.html
+    ├── directory_structure.txt
+    ├── global.css
+    ├── index2.html
+    ├── index3.html
+    ├── setupTests.js
+    └── tree.txt
 
-28 directories, 91 files
+28 directories, 95 files

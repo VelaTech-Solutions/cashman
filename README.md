@@ -75,4 +75,6 @@ git config --global user.name "JodyWi"
 git config --global user.email "jody.kruger@gmail.com"
 
 
-tree -a -I 'node_modules|objects|build' > tree.txt
+tree -a -I 'node_modules|objects|build' > trash/directory_structure.txt
+
+zip -r /home/ubuntu/cashman/cashman_v1.1_backup.zip /home/ubuntu/cashman

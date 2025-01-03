@@ -1,8 +1,12 @@
 #!/bin/bash
+
+# Maybe update git here too?
+
+
 # Delete the build folder
 rm -rf build
 
-# Recreate the build folder
+# Build the app
 npm run build
 
 # Deploy using Firebase
