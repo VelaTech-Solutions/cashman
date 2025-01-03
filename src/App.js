@@ -2,14 +2,18 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';  // Import the Login component
-import Dashboard from './pages/Dashboard';  // Import the Dashboard page (add this later)
+
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import Addclient from './pages/Addclient';
 import Editclient from './pages/Editclient'; 
 import Viewclient from './pages/Viewclient';
 import Settings from './pages/Settings';
 import Developernotes from './pages/Developernotes';
 import Testpage from './pages/Testpage';
+import Teststorage from './pages/Teststorage';
+import Testfirestore from './pages/Testfirestore';
+import Testfunctions from './pages/Testfunctions';
 
 function App() {
   return (
@@ -23,6 +27,10 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/developernotes" element={<Developernotes />} />
         <Route path="/testpage" element={<Testpage />} />
+        <Route path="/teststorage" element={<Teststorage />} />
+        <Route path="/testfirestore" element={<Testfirestore />} />
+        <Route path="/testfunctions" element={<Testfunctions />} />
+
       </Routes>
     </Router>
   );

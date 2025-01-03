@@ -1,7 +1,13 @@
+// src/pages/Viewclient.js
+
 import React, { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firestore";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import "../styles/tailwind.css";
+
+// firebase imports
+
+
 
 const Viewclient = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");

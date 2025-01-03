@@ -1,7 +1,13 @@
+// src/pages/Login.js
+
 import React, { useState } from 'react';
-import { signIn } from '../firebase/auth';  // Make sure the signIn function is correctly imported
 import { useNavigate } from 'react-router-dom';
-import '../styles/tailwind.css';  // Ensure your CSS file is properly linked
+import { motion } from "framer-motion";
+import '../styles/tailwind.css';
+
+// firebase imports
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/firebase'; // Ensure this is the correct path
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +18,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signIn(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       navigate('/dashboard');
     } catch (err) {
       setError('Failed to log in. Please check your credentials.');
@@ -25,7 +31,9 @@ const Login = () => {
         <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-600">
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -36,7 +44,9 @@ const Login = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600">
+              Password
+            </label>
             <input
               id="password"
               type="password"

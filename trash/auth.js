@@ -1,9 +1,6 @@
-// src/firebase/auth.js - Handles Firebase authentication logic
+// src/firebase/auth.js
 
-import { firebaseApp } from './config'; // Use config to initialize auth
-import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-
-const auth = getAuth(firebaseApp);  // Initialize auth with the Firebase app
+import { auth } from './firebase'; // Import the initialized auth instance
 
 // Sign in function with error handling
 export const signIn = async (email, password) => {

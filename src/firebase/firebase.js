@@ -15,17 +15,37 @@
  * limitations under the License.
  */
 
+// Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
+import { getAnalytics } from "firebase/analytics";
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Configure Firebase.
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  // Insert your Firebase project's configuration here
+  apiKey: "AIzaSyBFd6YsOf1BS21_rshs854lw6COwOcKn7w",
+  authDomain: "cashman-790ad.firebaseapp.com",
+  projectId: "cashman-790ad",
+  storageBucket: "cashman-790ad.firebasestorage.app",
+  messagingSenderId: "106033459495",
+  appId: "1:106033459495:web:084cd32213e7fd820ef902",
+  measurementId: "G-ZEZ8YPPMP3"
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app); 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Export Firebase services
+const auth = getAuth(app);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+
+export { auth, analytics, db, storage };
+

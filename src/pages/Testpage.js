@@ -1,7 +1,15 @@
 // src/pages/TestPage.js
+
 import React, { useState } from "react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase/storage";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import "../styles/tailwind.css";
+
+
+// firebase imports
+import { storage } from "../firebase/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; 
+
 
 const TestPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);

@@ -1,6 +1,13 @@
+// src/pages/Settings.js
+
 import React, { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { motion } from 'framer-motion';
+import '../styles/tailwind.css';
+
+// firebase imports
+
+
 
 
 const Settings = () => {

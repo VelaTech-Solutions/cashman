@@ -1,11 +1,13 @@
+// src/pages/Addclient.js
+
 import React, { useState } from "react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { db } from "../firebase/firestore"; // Firestore instance
-import { doc, setDoc, updateDoc } from "firebase/firestore"; // Firestore modular imports
-import { storage } from "../firebase/storage"; // Firebase Storage instance
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
+
+// firebase imports
+import { storage } from "../firebase/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; 
 
 const Addclient = () => {
   const [clientDetails, setClientDetails] = useState({
@@ -19,19 +21,16 @@ const Addclient = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadCompleted, setUploadCompleted] = useState(false);
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setClientDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
-  // Handle file selection
   const handleFileChange = (e) => {
     setBankStatements(Array.from(e.target.files));
-    setUploadCompleted(false); // Reset upload completion status
+    setUploadCompleted(false);
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     const { idNumber, clientName, clientSurname, bankName } = clientDetails;
 
@@ -45,8 +44,7 @@ const Addclient = () => {
     const uploadedFiles = [];
 
     try {
-      // Save client details in Firestore
-      const clientDocRef = doc(db, "clients", idNumber); // Corrected Firestore syntax
+      const clientDocRef = doc(db, "clients", idNumber);
       await setDoc(
         clientDocRef,
         {
@@ -55,10 +53,9 @@ const Addclient = () => {
           bankName,
           timestamp: new Date(),
         },
-        { merge: true } // Ensures no data overwriting
+        { merge: true }
       );
 
-      // Upload files to Firebase Storage
       for (const [index, file] of bankStatements.entries()) {
         const fileRef = ref(storage, `bank_statements/${idNumber}/${file.name}`);
         const uploadTask = uploadBytesResumable(fileRef, file);
@@ -88,7 +85,6 @@ const Addclient = () => {
         });
       }
 
-      // Update Firestore document with file metadata
       await updateDoc(clientDocRef, { bankStatements: uploadedFiles });
 
       alert("All data and files successfully uploaded.");
@@ -103,7 +99,6 @@ const Addclient = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
       <motion.div
         className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg transition-all duration-300`}
         initial={{ x: -100 }}
@@ -119,7 +114,6 @@ const Addclient = () => {
         </nav>
       </motion.div>
 
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <motion.div
           className="space-y-8"
