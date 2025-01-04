@@ -1,65 +1,72 @@
 // src/pages/Viewclient.js
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { db } from '../firebase/firebase'; // Assuming you've initialized Firebase in this file
-import { doc, getDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { db } from '../firebase/firebase'; // Assuming config is correctly set up
+import { collection, getDocs } from 'firebase/firestore';
 
-const Viewclient = () => {
-  const { idNumber } = useParams(); // Fetch the idNumber from the URL
-  const [client, setClient] = useState(null);
+function ViewClient() {
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchClientData = async () => {
+    const fetchClients = async () => {
       try {
-        const clientDocRef = doc(db, 'clients', idNumber); // Reference to the client document
-        const clientDocSnap = await getDoc(clientDocRef);
-
-        if (clientDocSnap.exists()) {
-          setClient(clientDocSnap.data()); // Set the client data to state
-        } else {
-          console.log('No such client!');
-        }
-      } catch (error) {
-        console.error('Error fetching client data:', error);
+        const clientsCollection = collection(db, 'clients');
+        const clientSnapshot = await getDocs(clientsCollection);
+        const clientsList = clientSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setClients(clientsList);
+      } catch (err) {
+        setError('Failed to fetch clients. Please try again.');
       } finally {
-        setLoading(false); // Stop loading once the data is fetched
+        setLoading(false);
       }
     };
 
-    fetchClientData();
-  }, [idNumber]); // Re-run when idNumber changes
+    fetchClients();
+  }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="text-center p-8">
+        <p className="text-lg text-gray-500">Loading clients...</p>
+      </div>
+    );
   }
 
-  if (!client) {
-    return <div>No client data available</div>;
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="view-client-container">
-      <h2>View Client</h2>
-      <div className="client-details">
-        <p><strong>Name:</strong> {client.name}</p>
-        <p><strong>Surname:</strong> {client.surname}</p>
-        <p><strong>Bank Name:</strong> {client.bankName}</p>
-        <p><strong>ID Number:</strong> {client.idNumber}</p>
-        <p><strong>Timestamp:</strong> {new Date(client.timestamp?.seconds * 1000).toLocaleString()}</p>
-      </div>
-
-      <div className="client-bank-statement">
-        <h3>Bank Statement</h3>
-        {client.bankStatement && (
-          <a href={client.bankStatement} target="_blank" rel="noopener noreferrer">
-            View Bank Statement
-          </a>
-        )}
-      </div>
+    <div className="p-8">
+      <h1 className="text-2xl font-semibold text-gray-900 mb-4">Client List</h1>
+      {clients.length === 0 ? (
+        <p className="text-center text-lg text-gray-500">No clients available</p>
+      ) : (
+        <div className="space-y-4">
+          {clients.map((client) => (
+            <div
+              key={client.id}
+              className="p-4 border rounded-lg shadow-md hover:bg-gray-100"
+            >
+              <h2 className="text-xl font-semibold text-gray-800">{client.name}</h2>
+              <p className="text-gray-600">ID: {client.id}</p>
+              <p className="text-gray-600">Bank: {client.bank}</p>
+              <p className="text-gray-600">Timestamp: {client.timestamp}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
-};
+}
 
-export default Viewclient;
+export default ViewClient;

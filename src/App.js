@@ -23,7 +23,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/addclient" element={<Addclient />} />
         <Route path="/editclient" element={<Editclient />} />
-        <Route path="/viewclient/:idNumber" element={<Viewclient />} />
+        <Route path="/viewclient" element={<Viewclient />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/developernotes" element={<Developernotes />} />
         <Route path="/testpage" element={<Testpage />} />
