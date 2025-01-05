@@ -100,12 +100,14 @@ const Addclient = () => {
       const clientDocRef = doc(db, "clients", idNumber);
       await setDoc(
         clientDocRef,
-        {
+        { 
+          idNumber,
           clientName,
           clientSurname,
           bankName,
           bankStatementURL: fileURL, // Save the file URL
           timestamp: new Date(),
+          transactions
         },
         { merge: true }
       );

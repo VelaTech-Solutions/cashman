@@ -19,22 +19,22 @@ const logger = require("firebase-functions/logger");
 // });
 
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-admin.initializeApp();
+// const functions = require('firebase-functions');
+// const admin = require('firebase-admin');
+// admin.initializeApp();
 
-exports.processBankStatement = functions.https.onCall(async (data, context) => {
-  const { clientId } = data;
+// exports.processBankStatement = functions.https.onCall(async (data, context) => {
+//   const { clientId } = data;
 
-  try {
-    console.log(`Processing data for client ID: ${clientId}`);
-    // Simulate processing logic
-    return { success: true, message: `Data processed for client ID: ${clientId}` };
-  } catch (error) {
-    console.error('Error processing data:', error);
-    throw new functions.https.HttpsError('internal', 'Failed to process data.');
-  }
-});
+//   try {
+//     console.log(`Processing data for client ID: ${clientId}`);
+//     // Simulate processing logic
+//     return { success: true, message: `Data processed for client ID: ${clientId}` };
+//   } catch (error) {
+//     console.error('Error processing data:', error);
+//     throw new functions.https.HttpsError('internal', 'Failed to process data.');
+//   }
+// });
 
 
 

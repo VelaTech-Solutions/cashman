@@ -158,7 +158,7 @@ tree -a -I 'node_modules|objects|build' > trash/directory_structure.txt
 
 ## Backup Project
 ```bash
-zip -r /home/ubuntu/cashman/cashman_v1.2_backup.zip /home/ubuntu/cashman
+zip -r /home/ubuntu/cashman/cashman_v1.3_backup.zip /home/ubuntu/cashman
 ```
 ---
 
