@@ -6,9 +6,11 @@ import '../styles/tailwind.css';
 
 // firebase imports
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/firebase'; // Ensure this is the correct path
+import { auth, db, storage } from '../firebase/firebase'; // Ensure this is the correct path
+import { collection, getDocs } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
-const Dashboard = () => {
+const Testdash = () => {
   const [userEmail, setUserEmail] = useState('Not logged in');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -23,6 +25,18 @@ const Dashboard = () => {
     return () => unsubscribe();
   }, []);
 
+
+  const [clientCount, setClientCount] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const clientsSnapshot = await getDocs(collection(db, "clients"));
+      setClientCount(clientsSnapshot.size);
+    };
+    fetchData();
+  }, []);
+  
+
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
       {/* Sidebar */}
@@ -31,7 +45,7 @@ const Dashboard = () => {
           <img src="https://assets.codepen.io/285131/almeria-logo.svg" alt="Logo" className="w-8 h-8" />
           <h1 className="text-xl font-semibold text-white">Cash Flow Manager</h1>
         </div>
-        <nav className="space-y-4">
+        <nav className="flex-grow space-y-4">
           <Link to="/" className="flex items-center space-x-3 hover:text-white transition">
             <i className="ph-sign-out text-xl"></i>
             <span>Logout</span>
@@ -56,36 +70,11 @@ const Dashboard = () => {
             <i className="ph-gear text-xl"></i>
             <span>Developer Notes</span>
           </Link>
-
-          {/* Make a line */}
-          <div className="border-t border-gray-700"></div>  
-
-          <Link to="/testpage" className="flex items-center space-x-3 hover:text-white transition">
-            <i className="ph-gear text-xl"></i>
-            <span>Test Page</span>
-          </Link>
-          <Link to="/testfirestore" className="flex items-center space-x-3 hover:text-white transition">
-            <i className="ph-gear text-xl"></i>
-            <span>Test Firestore</span>
-          </Link>
-          <Link to="/teststorage" className="flex items-center space-x-3 hover:text-white transition">
-            <i className="ph-gear text-xl"></i>
-            <span>Test Storage</span>
-          </Link>
-          <Link to="/testfunctions" className="flex items-center space-x-3 hover:text-white transition">
-            <i className="ph-gear text-xl"></i> 
-            <span>Test Functions</span>
-          </Link>
-          <Link to="/testdash" className="flex items-center space-x-3 hover:text-white transition">
-            <i className="ph-gear text-xl"></i>
-            <span>Test Dashboard</span>
-          </Link>
-          <Link to="/testviewclient" className="flex items-center space-x-3 hover:text-white transition">
-            <i className="ph-gear text-xl"></i>
-            <span>Test View Client</span>
-          </Link>
         </nav>
-        <div className="mt-auto text-left text-gray-500 text-sm">
+
+
+        {/* Can we move this to the foot of the siderbar */}
+        <div className="mt-auto text-center text-gray-500 text-sm">
             Integra Wealth ©<br />
             All Rights Reserved 2025
         </div>
@@ -100,7 +89,7 @@ const Dashboard = () => {
           </button>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span>{userEmail}</span>
+              <span>Welcome  {userEmail} </span>
               <img
                 src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png"
                 alt="User Avatar"
@@ -113,25 +102,37 @@ const Dashboard = () => {
         {/* Main Section */}
         <div className="space-y-8">
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold">Clients</h2>
+            <h2 className="text-2xl font-semibold">Dashboard</h2>
             <div className="flex items-center justify-between">
               <div className="relative flex-grow">
                 <i className="ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input
-                  type="text"
-                  placeholder="Id Number"
-                  className="w-full py-2 pl-8 pr-4 bg-transparent border-b border-gray-600 text-white focus:outline-none"
-                />
+
               </div>
-              <button className="bg-transparent border border-gray-600 text-gray-200 px-6 py-2 rounded-md hover:bg-gray-600 transition">
-                Search
-              </button>
+            </div>
+
+            {/* display Number of clients in db */}
+            <div className="mt-4">
+                <p className="text-gray-400">Number of clients: {clientCount}</p>
+            </div>
+
+
+            {/*  Reports Incomplete*/}
+            <div className="mt-4">
+              <p className="text-gray-400">Reports Incomplete: 0</p>
+            </div>
+            {/*  Reports Completed*/}
+            <div className="mt-4">
+              <p className="text-gray-400">Reports Completed: 0</p>
             </div>
           </section>
         </div>
+
+        <footer className="mt-auto text-center text-gray-500 text-sm">
+
+        </footer>
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Testdash;

@@ -35,37 +35,17 @@ const Addclient = () => {
       setUploadStatus("Please select a file to upload.");
       return null;
     }
-  
-    if (!clientDetails.idNumber) {
-      setUploadStatus("Please provide a valid client ID.");
-      return null;
-    }
-  
-    const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
-    const maxFileSize = 5 * 1024 * 1024; // 5MB
-  
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setUploadStatus("Invalid file type. Please upload a PDF, JPEG, or PNG file.");
-      return null;
-    }
-  
-    if (selectedFile.size > maxFileSize) {
-      setUploadStatus("File size exceeds the limit of 5MB.");
-      return null;
-    }
-  
+
     setUploadStatus("Uploading file...");
-    const storageRef = ref(
-      storage,
-      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`
-    );
+    const storageRef = ref(storage, `bank_statements/${selectedFile.name}`);
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-  
+
     return new Promise((resolve, reject) => {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setUploadStatus(`Upload is ${progress.toFixed(2)}% done`);
         },
         (error) => {
@@ -81,7 +61,6 @@ const Addclient = () => {
       );
     });
   };
-  
 
   const handleSubmit = async () => {
     const { idNumber, clientName, clientSurname, bankName } = clientDetails;
@@ -137,7 +116,6 @@ const Addclient = () => {
         </nav>
       </motion.div>
 
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <motion.div
           className="space-y-8"
@@ -194,11 +172,9 @@ const Addclient = () => {
             <motion.input
               type="file"
               name="bankStatement"
-              accept=".pdf, .jpg, .jpeg, .png"
               onChange={handleFileChange}
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
-
 
             <motion.button
               onClick={handleSubmit}
@@ -208,7 +184,7 @@ const Addclient = () => {
               disabled={isSubmitting}
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
             >
-              {isSubmitting ? "Saving..." : "Submit"}
+              {isSubmitting ? "Saving..." : "Save Client Details"}
             </motion.button>
 
             {submitSuccess && (

@@ -120,7 +120,7 @@ const Testviewclient = () => {
                   <p className="text-sm text-gray-400">ID: {client.id}</p>
                   <p className="text-sm text-gray-400">Bank: {client.bankName}</p>
                   <Link
-                    to={`/client/${client.id}`}
+                    to={`/testclientprofile/${client.id}`}
                     className="mt-2 inline-block text-blue-400 hover:underline"
                   >
                     View Details
