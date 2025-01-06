@@ -39,6 +39,8 @@ function App() {
         <Route path="/developernotes" element={<Developernotes />} />
         <Route path="/client/:id" element={<Clientprofile />} />
 
+
+        {/* TEST PAGES */}
         <Route path="/testpage" element={<Testpage />} />
         <Route path="/teststorage" element={<Teststorage />} />
         <Route path="/testfirestore" element={<Testfirestore />} />

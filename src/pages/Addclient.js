@@ -1,13 +1,14 @@
-// src/pages/Addclient.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Ensure `useEffect` is imported
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
-// firebase imports
+// Firebase imports
 import { db, storage } from "../firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/firebase"; // Ensure the path is correct
 
 const Addclient = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -20,6 +21,15 @@ const Addclient = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  // Fetch authenticated user
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserEmail(user?.email || "");
+    });
+    return unsubscribe;
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -35,32 +45,27 @@ const Addclient = () => {
       setUploadStatus("Please select a file to upload.");
       return null;
     }
-  
-    if (!clientDetails.idNumber) {
-      setUploadStatus("Please provide a valid client ID.");
-      return null;
-    }
-  
+
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     const maxFileSize = 5 * 1024 * 1024; // 5MB
-  
+
     if (!allowedTypes.includes(selectedFile.type)) {
       setUploadStatus("Invalid file type. Please upload a PDF, JPEG, or PNG file.");
       return null;
     }
-  
+
     if (selectedFile.size > maxFileSize) {
       setUploadStatus("File size exceeds the limit of 5MB.");
       return null;
     }
-  
+
     setUploadStatus("Uploading file...");
     const storageRef = ref(
       storage,
       `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`
     );
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-  
+
     return new Promise((resolve, reject) => {
       uploadTask.on(
         "state_changed",
@@ -81,7 +86,6 @@ const Addclient = () => {
       );
     });
   };
-  
 
   const handleSubmit = async () => {
     const { idNumber, clientName, clientSurname, bankName } = clientDetails;
@@ -96,18 +100,17 @@ const Addclient = () => {
       const fileURL = await handleUploadFile();
       if (!fileURL) return;
 
-      // Save client details along with the file URL in Firestore
       const clientDocRef = doc(db, "clients", idNumber);
       await setDoc(
         clientDocRef,
-        { 
+        {
           idNumber,
           clientName,
           clientSurname,
           bankName,
-          bankStatementURL: fileURL, // Save the file URL
+          bankStatementURL: fileURL,
           timestamp: new Date(),
-          transactions
+          userEmail,
         },
         { merge: true }
       );
@@ -139,7 +142,6 @@ const Addclient = () => {
         </nav>
       </motion.div>
 
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <motion.div
           className="space-y-8"
@@ -200,7 +202,6 @@ const Addclient = () => {
               onChange={handleFileChange}
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
-
 
             <motion.button
               onClick={handleSubmit}

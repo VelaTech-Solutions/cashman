@@ -16,6 +16,8 @@ const Testviewclient = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   // Track user authentication
   useEffect(() => {
@@ -78,10 +80,16 @@ const Testviewclient = () => {
         initial={{ x: -100 }}
         animate={{ x: 0 }}
       >
-        <div className="flex items-center space-x-3 pb-4">
-          <h1 className="text-xl font-semibold text-white">Cash Flow Manager</h1>
+        <div className="flex items-center space-x-3 pb-4 pt-4">
+          <h1 className="text-2xl font-bold text-blue-400">Cash Flow Manager</h1>
         </div>
-        <nav className="space-y-4">
+        {/* User Email */}
+        <div className="text-sm text-gray-300 border-t border-gray-700 pt-4">
+          <p>Logged in as:</p>
+          <p className="font-medium text-white">{userEmail || 'Guest'}</p>
+        </div>
+
+        <nav className="space-y-4 border-t border-gray-700 pt-4">
           <Link to="/dashboard" className="hover:text-white transition">
           Back to Dashboard
           </Link>
@@ -97,31 +105,70 @@ const Testviewclient = () => {
           >
             <i className="ph-list text-2xl"></i>
           </button>
-          <div className="flex items-center space-x-4">
-            <span>Welcome, {userEmail}</span>
-          </div>
         </header>
 
+        {/* Client Overview Section */}
         <section>
-          <h1 className="text-3xl font-semibold mb-4">Client List</h1>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-blue-400 mb-4">Client Overview</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+              {/* Total Clients */}
+              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
+                <p className="text-lg font-bold text-blue-400">Total Clients</p>
+                <p className="text-3xl font-bold text-white">{clients.length}</p>
+              </div>
+              {/* Reports Completed */}
+              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
+                <p className="text-lg font-bold text-blue-400">Reports Completed</p>
+                <p className="text-3xl font-bold text-white">
+                  {clients.filter((client) => client.status === 'Completed').length}
+                </p>
+              </div>
+              {/* Reports Pending */}
+              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
+                <p className="text-lg font-bold text-blue-400">Reports Pending</p>
+                <p className="text-3xl font-bold text-white">
+                  {clients.filter((client) => client.status === 'Pending').length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Search Bar */}
+        <section className="mt-8">
+          <input
+            type="text"
+            placeholder="Search clients by name, ID, or bank..."
+            onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+            className="w-full p-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </section>
+
+        {/* Clients Listing */}
+        <section className="mt-8">
           {clients.length === 0 ? (
             <p className="text-center text-lg text-gray-500">
               No clients available
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {clients.map((client) => (
                 <div
                   key={client.id}
-                  className="p-4 bg-gray-700 rounded-lg shadow-md"
+                  className="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-2xl transition-shadow"
                 >
-                  <h2 className="text-xl font-semibold">{client.id}</h2>
-                  <p className="text-sm font-semibold text-gray-400">Name: {client.clientName} {client.clientSurname}</p>
-                  <p className="text-sm text-gray-400">ID: {client.id}</p>
-                  <p className="text-sm text-gray-400">Bank: {client.bankName}</p>
+                  <h3 className="text-xl font-bold text-blue-400">{client.clientName} {client.clientSurname}</h3>
+                  <p className="text-sm text-gray-400 mt-2"><span className="font-bold">ID:</span> {client.id}</p>
+                  <p className="text-sm text-gray-400"><span className="font-bold">Bank:</span> {client.bankName}</p>
+                  <p className="text-sm text-gray-400"><span className="font-bold">Status:</span> {client.status}</p>
+                  <p className="text-sm text-gray-400"><span className="font-bold">Date Created:</span> {client.dateCreated}</p>
+                  <p className="text-sm text-gray-400"><span className="font-bold">Date Updated:</span> {client.dateUpdated}</p>
+                  <p className="text-sm text-gray-400"><span className="font-bold">Date Closed:</span> {client.dateClosed}</p>
+                  <p className="text-sm text-gray-400"><span className="font-bold">Captured By:</span> {client.userEmail}</p>
                   <Link
                     to={`/testclientprofile/${client.id}`}
-                    className="mt-2 inline-block text-blue-400 hover:underline"
+                    className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
                   >
                     View Details
                   </Link>
