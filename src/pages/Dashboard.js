@@ -6,12 +6,12 @@ import '../styles/tailwind.css';
 
 // firebase imports
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/firebase'; // Ensure this is the correct path
+import { auth } from '../firebase/firebase'; 
 
 const Dashboard = () => {
   const [userEmail, setUserEmail] = useState('Not logged in');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  // Check if user is logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -24,14 +24,18 @@ const Dashboard = () => {
   }, []);
 
   return (
+    
     <div className="min-h-screen flex bg-gray-900 text-white">
       {/* Sidebar */}
       <div className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 ${sidebarOpen ? 'block' : 'hidden lg:block'}`}>
-        <div className="flex items-center space-x-3 pb-4">
-          <img src="https://assets.codepen.io/285131/almeria-logo.svg" alt="Logo" className="w-8 h-8" />
-          <h1 className="text-xl font-semibold text-white">Cash Flow Manager</h1>
+      <div className="flex items-center space-x-3 pb-4 pt-4">
+          <h1 className="text-2xl font-bold text-blue-400">Cash Flow Manager</h1>
         </div>
-        <nav className="space-y-4">
+        {/* User Email */}
+        <div className="text-sm text-gray-300 border-t border-gray-700 pt-4">
+          <p className="font-medium text-white">{userEmail || 'Guest'}</p>
+        </div>
+        <nav className="space-y-4 border-t border-gray-700 pt-4">
           <Link to="/" className="flex items-center space-x-3 hover:text-white transition">
             <i className="ph-sign-out text-xl"></i>
             <span>Logout</span>
@@ -98,36 +102,6 @@ const Dashboard = () => {
           <button className="lg:hidden text-gray-400" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <i className="ph-list text-2xl"></i>
           </button>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <span>{userEmail}</span>
-              <img
-                src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png"
-                alt="User Avatar"
-                className="w-10 h-10 rounded-full ml-4"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Main Section */}
-        <div className="space-y-8">
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold">Clients</h2>
-            <div className="flex items-center justify-between">
-              <div className="relative flex-grow">
-                <i className="ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input
-                  type="text"
-                  placeholder="Id Number"
-                  className="w-full py-2 pl-8 pr-4 bg-transparent border-b border-gray-600 text-white focus:outline-none"
-                />
-              </div>
-              <button className="bg-transparent border border-gray-600 text-gray-200 px-6 py-2 rounded-md hover:bg-gray-600 transition">
-                Search
-              </button>
-            </div>
-          </section>
         </div>
       </div>
     </div>

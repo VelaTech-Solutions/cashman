@@ -1,4 +1,4 @@
-add to database
+add or tie to database
 <p className="text-sm text-gray-400"><span className="font-bold">Status:</span> {client.status}</p>
 <p className="text-sm text-gray-400"><span className="font-bold">Date Created:</span> {client.dateCreated}</p>
 <p className="text-sm text-gray-400"><span className="font-bold">Date Updated:</span> {client.dateUpdated}</p>

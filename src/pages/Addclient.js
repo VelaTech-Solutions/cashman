@@ -224,9 +224,18 @@ const Addclient = () => {
                 🎉 Client details saved successfully!
               </motion.p>
             )}
+                <p className="text-sm text-gray-400 italic mt-2">
+                  Note: This feature currently supports processing a single PDF file at a time.
+                </p>
           </section>
         </motion.div>
       </div>
+    {/*state a Message to User here | Handles a single pdf only at this time*/}
+    {/* Display a Message to User */}
+
+
+
+    
     </div>
   );
 };

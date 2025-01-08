@@ -1,64 +1,127 @@
-// src/pages/Editclient.js
+// src/pages/EditClient.js
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { db } from '../firebase/firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import '../styles/tailwind.css';
+const EditClient = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [formValues, setFormValues] = useState({
+    clientName: '',
+    clientSurname: '',
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-// firebase imports
-
-
-
-const Editclient = () => {
-  const [userEmail, setUserEmail] = useState('Not logged in');
-  const auth = getAuth();
-
+  // Fetch client data
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserEmail(user.email);
-      } else {
-        setUserEmail('Not logged in');
+    const fetchClient = async () => {
+      try {
+        const clientDoc = doc(db, 'clients', id);
+        const clientSnapshot = await getDoc(clientDoc);
+
+        if (clientSnapshot.exists()) {
+          const client = clientSnapshot.data();
+          setFormValues({
+            clientName: client.clientName || '',
+            clientSurname: client.clientSurname || '',
+          });
+        } else {
+          setError('Client not found.');
+        }
+      } catch (err) {
+        setError('Failed to fetch client data.');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    });
-    return () => unsubscribe();
-  }, [auth]);
+    };
+
+    fetchClient();
+  }, [id]);
+
+  // Handle form field changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submission
+  const handleUpdateClient = async () => {
+    if (!formValues.clientName || !formValues.clientSurname) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    try {
+      const clientDoc = doc(db, 'clients', id);
+      await updateDoc(clientDoc, {
+        clientName: formValues.clientName,
+        clientSurname: formValues.clientSurname,
+      });
+
+      alert('Client details updated successfully!');
+      navigate('/dashboard'); // Redirect to the dashboard or client view
+    } catch (err) {
+      console.error('Error updating client:', err);
+      setError('Failed to update client. Please try again.');
+    }
+  };
+
+  if (loading) {
+    return <p className="text-center text-gray-400">Loading client data...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
+  }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="app-header-logo">
-          <div className="logo">
-            <h1 className="logo-title">
-              <span>Edit Client</span>
-              
-            </h1>
+    <div className="min-h-screen bg-gray-900 text-white p-8">
+      {/* Navigation */}
+      <nav className="flex justify-between items-center mb-8">
+        <Link to="/dashboard" className="text-blue-400 hover:underline">
+          Back to Dashboard
+        </Link>
+      </nav>
+
+      {/* Edit Client Form */}
+      <div className="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-blue-400 mb-4">Edit Client</h1>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Client Name</label>
+            <input
+              type="text"
+              name="clientName"
+              value={formValues.clientName}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Client Surname</label>
+            <input
+              type="text"
+              name="clientSurname"
+              value={formValues.clientSurname}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+            />
           </div>
         </div>
-        <div className="app-header-actions">
-          <button className="user-profile">
-            <span>{userEmail}</span>
-            <span>
-            <img src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png" alt="User Avatar" />
-            </span> 
-          </button>
-        </div>
-        <div className="app-header-mobile">
-          <button className="icon-button large">
-            <i className="ph-list"></i>
-          </button>
-        </div>
-      </header>
 
-      <div className="app-body">
-        <div className="app-body-navigation">
-          <nav className="navigation">
-            <a href="/dashboard"><i className="ph-sign-out"></i><span>Back to Dashboard</span></a>
-          </nav>
-        </div>
+        <button
+          onClick={handleUpdateClient}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-4 w-full"
+        >
+          Save Changes
+        </button>
       </div>
     </div>
   );
 };
 
-export default Editclient;
+export default EditClient;

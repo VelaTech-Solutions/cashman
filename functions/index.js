@@ -59,6 +59,13 @@ exports.processBankStatement = functions.https.onCall(async (data, context) => {
     const pdfData = await pdfParse(pdfBuffer);
     const extractedText = pdfData.text;
 
+    // Step 3: Save the extracted text to Firestore as feild rawText
+    const db = admin.firestore();
+    const clientRef = db.collection('clients').doc(clientId);
+    await clientRef.update({ rawText: extractedText });
+    
+
+
     // Step 3: Log the extracted text and return it
     console.log(`Extracted text for client ${clientId}:`, extractedText);
     return { success: true, extractedText };
