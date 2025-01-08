@@ -4,3 +4,25 @@ add or tie to database
 <p className="text-sm text-gray-400"><span className="font-bold">Date Updated:</span> {client.dateUpdated}</p>
 <p className="text-sm text-gray-400"><span className="font-bold">Date Closed:</span> {client.dateClosed}</p>
 
+
+
+Fetch File from Storage:
+
+Retrieve the uploaded file from Firebase Storage.
+Ensure it’s the correct client’s file.
+Extract Raw Data:
+
+Process the file (PDF, image, etc.).
+Extract the raw text or OCR data.
+Save Raw Data to Firestore:
+
+Create a new field called rawData in the client’s document in Firestore.
+Save the extracted raw data into this field.
+Post-Processing Prep:
+
+Prepare the raw data for future processing (cleaning, categorization, etc.).
+Add error handling and logging for skipped or malformed lines.
+Testing:
+
+Test the entire flow (file -> storage -> database -> raw data saved).
+Debug any issues or edge cases.

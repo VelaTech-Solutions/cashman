@@ -43,7 +43,7 @@ function App() {
         {/* TEST PAGES */}
         <Route path="/testpage" element={<Testpage />} />
         <Route path="/teststorage" element={<Teststorage />} />
-        <Route path="/testfirestore" element={<Testfirestore />} />
+        {/* <Route path="/testfirestore" element={<Testfirestore />} /> */}
         <Route path="/testfunctions" element={<Testfunctions />} />
         <Route path="/testdash" element={<Testdash />} />
         <Route path="/testviewclient" element={<Testviewclient />} />
