@@ -13,6 +13,7 @@
 // https://firebase.google.com/docs/functions/get-started
 
 
+
 const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const functions = require('firebase-functions');
@@ -20,6 +21,8 @@ const admin = require('firebase-admin');
 const pdfParse = require('pdf-parse');
 const { Storage } = require('@google-cloud/storage');
 const cors = require("cors")({ origin: true });
+const os = require('os');
+const fs = require('fs');
 
 admin.initializeApp();
 const storage = new Storage();
@@ -120,3 +123,41 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
 //     res.status(500).send("Failed to process the file.");
 //   }
 // });
+
+
+// /functions/index.js
+// functions for extracting text from pdfs using pdf-parse
+
+
+
+// Function to handle PDF parsing
+exports.ExtractTextUsingParser = functions.https.onRequest(async (req, res) => {
+  try {
+    const { clientId, fileName } = req.body; // Expect clientId and fileName in the request
+
+    // Validate input
+    if (!clientId || !fileName) {
+      console.error("DEBUG: Missing required parameters");
+      return res.status(400).send({ error: "clientId and fileName are required." });
+    }
+
+    // Construct file path
+    const filePath = `bank_statements/${clientId}/${fileName}`;
+    const file = storage.file(filePath);
+
+    console.log("DEBUG: Checking file at path:", filePath);
+
+    // Check if the file exists
+    const [exists] = await file.exists();
+    if (exists) {
+      console.log("DEBUG: File exists at path:", filePath);
+      return res.status(200).send({ message: "File found", filePath });
+    } else {
+      console.error("DEBUG: File not found at path:", filePath);
+      return res.status(404).send({ error: "File not found", filePath });
+    }
+  } catch (error) {
+    console.error("DEBUG: Error in ExtractTextUsingParser:", error);
+    return res.status(500).send({ error: "Internal server error", details: error.message });
+  }
+});

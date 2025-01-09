@@ -24,7 +24,16 @@ const Testclientprofile = () => {
   const [notes, setNotes] = useState([]); // State for notes history
   const [userEmail, setUserEmail] = useState('Not logged in');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [processingMethod, setProcessingMethod] = useState('pdfparser'); // Default to PDF Parser
+  const PROCESS_METHODS = {
+    PDF_PARSER: 'pdfparser',
+    OCR: 'ocr',
+  };
 
+
+  
+  
+  // Fetch user email
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -135,8 +144,6 @@ const Testclientprofile = () => {
     }
   };
   
-  
-  
   // Function to handle deletion of client data
   const handleDeleteClient = async () => {
     try {
@@ -156,6 +163,8 @@ const Testclientprofile = () => {
       alert('Failed to delete client data. Please try again.');
     }
   };
+
+  // Fetch client data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -183,6 +192,7 @@ const Testclientprofile = () => {
     fetchData();
   }, [id]);
 
+  // Handle processing data
   const handleProcessData = async () => {
     setIsProcessing(true);
     try {
@@ -315,21 +325,60 @@ const Testclientprofile = () => {
             <select
               id="processing-method"
               className="bg-gray-800 text-white py-2 px-3 rounded text-sm w-full"
+              value={processingMethod}
+              onChange={(e) => setProcessingMethod(e.target.value)} // Update selected method
             >
-              <option value="ocr">Text-Based Extraction (for PDF Parser)</option>
-              <option value="pdfparser">Image-Based Extraction (for OCR)</option>
+              <option value={PROCESS_METHODS.PDF_PARSER}>PDF Parser</option>
+              <option value={PROCESS_METHODS.OCR}>OCR</option>
             </select>
+
           </div>
 
           {/* Extract Data button */}
-          <button 
+          <button
             className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-sm w-full"
-            onClick={() => {
-              // Add function here to handle extraction based on selected method
+            onClick={async () => {
+              try {
+                console.log("DEBUG: Starting extraction process...");
+                console.log("DEBUG: clientId:", id);
+                console.log("DEBUG: fileLinks:", fileLinks);
+                console.log("DEBUG: bankName:", clientData.bankName);
+                console.log("DEBUG: processingMethod:", processingMethod);
+
+                // Choose the correct backend function based on the selected method
+                let backendFunction;
+                if (processingMethod === "pdfparser") {
+                  backendFunction = httpsCallable(functions, "extractTextFromPDF");
+                  console.log("DEBUG: Using PDF Parser method");
+                } else if (processingMethod === "ocr") {
+                  backendFunction = httpsCallable(functions, "extractTextWithOCR");
+                  console.log("DEBUG: Using OCR method");
+                } else {
+                  throw new Error("Invalid processing method selected");
+                }
+
+                // Call the selected backend function
+                const result = await backendFunction({
+                  clientId: id, // Use the client ID from URL
+                  fileName: fileLinks[0], // Use the first file link (ensure it's correct)
+                  bankName: clientData.bankName, // Get bank name from client data
+                });
+
+                console.log("DEBUG: Backend response:", result.data);
+                alert(result.data.message);
+                console.log("DEBUG: Extracted Text Preview:", result.data.textPreview);
+              } catch (error) {
+                console.error("DEBUG: Error extracting data:", error);
+                alert("Failed to extract data. Please try again.");
+              }
             }}
           >
             Extract Data
           </button>
+
+
+
+
 
           {/* If data is extracted, show a view data button here */}
           

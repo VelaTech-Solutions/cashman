@@ -14,7 +14,7 @@ import Clientprofile from './pages/Clientprofile';
 
 import Testpage from './testpages/Testpage';
 import Teststorage from './testpages/Teststorage';
-import Testfirestore from './testpages/Testfirestore';
+// import Testfirestore from './testpages/Testfirestore';
 import Testfunctions from './testpages/Testfunctions';
 import Testdash from './testpages/Testdash';
 import Testviewclient from './testpages/Testviewclient';

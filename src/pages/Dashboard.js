@@ -64,6 +64,10 @@ const Dashboard = () => {
           {/* Make a line */}
           <div className="border-t border-gray-700"></div>  
 
+          {/* Dev Pages */}
+          <h1 className="text-2xl font-bold text-blue-400">Dev And Test Pages</h1>
+
+
           <Link to="/testpage" className="flex items-center space-x-3 hover:text-white transition">
             <i className="ph-gear text-xl"></i>
             <span>Test Page</span>
