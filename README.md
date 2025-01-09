@@ -178,7 +178,7 @@ I am using / changing to python for the functions at functions
 Removed the Java Functions
 
 ###
-cd functions
+cd functions-py
 sudo apt install python3-venv
 python3 -m venv venv
 source venv/bin/activate

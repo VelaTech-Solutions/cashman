@@ -40,3 +40,17 @@ Debug any issues or edge cases.
         "*.local"
       ]
     }
+
+        {
+      "source": "functions-py",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "runtime": "python310",
+      "predeploy": [],
+      "codebase": "default"
+    },

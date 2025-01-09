@@ -1,17 +1,29 @@
 {
   "functions": [
     {
-      "source": "functions",
+      "source": "functions-py",
+      "codebase": "default",
+      "runtime": "python310",
+      "predeploy": [],
       "ignore": [
         "venv",
         ".git",
         "firebase-debug.log",
         "firebase-debug.*.log",
         "*.local"
+      ]
+    },
+    {
+      "source": "functions-js",
+      "codebase": "functions-js",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
       ],
-      "runtime": "python310",
-      "predeploy": [],
-      "codebase": "default"
+      "predeploy": []
     }
   ],
   "hosting": {
