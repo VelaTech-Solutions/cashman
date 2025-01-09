@@ -12,6 +12,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 const Teststorage = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadStatus, setUploadStatus] = useState("");
+    const [idNumber, setIdNumber] = useState("");
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -23,7 +24,7 @@ const Teststorage = () => {
             return;
         }
 
-        const storageRef = ref(storage, `bank_statements/${selectedFile.name}`);
+        const storageRef = ref(storage, `bank_statements/${idNumber}/${selectedFile.name}`);
         const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
         uploadTask.on(
@@ -47,6 +48,15 @@ const Teststorage = () => {
     return (
         <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-3xl font-bold mb-4">Upload File to Firebase Storage</h1>
+
+            {/* input id number */}
+            <label className="font-bold mb-2">ID Number</label>
+            <input
+                type="text"
+                value={idNumber}
+                onChange={(e) => setIdNumber(e.target.value)}
+                className="mb-4"
+            />
             <input
                 type="file"
                 onChange={handleFileChange}
