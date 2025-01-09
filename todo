@@ -26,3 +26,17 @@ Testing:
 
 Test the entire flow (file -> storage -> database -> raw data saved).
 Debug any issues or edge cases.
+
+
+
+    {
+      "source": "python",
+      "codebase": "python",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }

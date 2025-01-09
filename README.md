@@ -158,7 +158,7 @@ tree -a -I 'node_modules|objects|build' > trash/directory_structure.txt
 
 ## Backup Project
 ```bash
-zip -r /home/ubuntu/cashman/cashman_v1.4_backup.zip /home/ubuntu/cashman
+zip -r /home/ubuntu/cashman/cashman_v1.5_javafunctions_backup.zip /home/ubuntu/cashman
 ```
 ---
 
@@ -171,3 +171,15 @@ Contributions are welcome! Please open an issue or submit a pull request with yo
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+
+Functions
+I am using / changing to python for the functions at functions
+Removed the Java Functions
+
+###
+cd functions
+sudo apt install python3-venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt

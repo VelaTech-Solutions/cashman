@@ -1,15 +1,19 @@
 {
-  "functions": {
-    "source": "functions",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "logs/firebase-debug.log",
-      "logs/firebase-debug.*.log",
-      "*.local"
-    ],
-    "predeploy": []
-  },
+  "functions": [
+    {
+      "source": "functions",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "runtime": "python310",
+      "predeploy": [],
+      "codebase": "default"
+    }
+  ],
   "hosting": {
     "site": "cashflowmanager",
     "public": "build",
