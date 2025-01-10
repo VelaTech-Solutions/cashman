@@ -186,7 +186,7 @@ const Addclient = () => {
               <option value="">Select Bank</option>
               <option value="Absa Bank">Absa Bank</option>
               <option value="Capitec Bank">Capitec Bank</option>
-              <option value="FNB Bank">FNB Bank</option>
+              <option value="FNB Bank">Fnb Bank</option>
               <option value="Ned Bank">Ned Bank</option>
               <option value="Standard Bank">Standard Bank</option>
               <option value="Tyme Bank">Tyme Bank</option>
