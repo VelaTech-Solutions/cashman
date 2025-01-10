@@ -23,7 +23,9 @@ const Testclientprofile = () => {
   const [note, setNote] = useState(''); // State for the new note
   const [notes, setNotes] = useState([]); // State for notes history
   const [userEmail, setUserEmail] = useState('Not logged in');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [processingMethod, setProcessingMethod] = useState('pdfparser'); // Default to PDF Parser
   const PROCESS_METHODS = {
     PDF_PARSER: 'pdfparser',
@@ -192,23 +194,49 @@ const Testclientprofile = () => {
     fetchData();
   }, [id]);
 
-  // Handle processing data
-  const handleProcessData = async () => {
-    setIsProcessing(true);
-    try {
-      const processBankStatement = httpsCallable(functions, 'processBankStatement');
-      const result = await processBankStatement({ clientId: id });
-      alert(result.data.message);
-    } catch (err) {
-      console.error('Error processing data:', err);
-      alert('Failed to process data.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   if (loading) return <p>Loading client data and files...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
+
+
+  // Logic for handling data extraction
+  const handleExtractData = async () => {
+    setProcessing(true); // Show loading state
+    setErrorMessage(""); // Clear any previous errors
+
+    try {
+      // Debugging logs for the frontend
+      console.log("DEBUG: Starting extraction process...");
+      console.log("DEBUG: Sending parameters to backend:", {
+        clientId: id,
+        fileName: fileLinks[0],
+        bankName: clientData.bankName,
+        method: processingMethod,
+      });
+
+      // Call the backend function
+      const extractData = httpsCallable(functions, "extractData");
+      const result = await extractData({
+        clientId: id,
+        fileName: fileLinks[0],
+        bankName: clientData.bankName,
+        method: processingMethod, // "pdfparser" or "ocr"
+      });
+
+      console.log("DEBUG: Backend response:", result.data);
+      alert(result.data.message); // Notify user of success
+
+    } catch (error) {
+      console.error("DEBUG: Error extracting data:", error);
+
+      // Set error message for user feedback
+      setErrorMessage(
+        error.message || "An error occurred during data extraction. Please try again."
+      );
+    } finally {
+      setProcessing(false); // End loading state
+    }
+  };
 
   return (
     <div className="p-8 bg-gray-900 text-white min-h-screen">
@@ -334,47 +362,21 @@ const Testclientprofile = () => {
 
           </div>
 
-          {/* Extract Data button */}
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-sm w-full"
-            onClick={async () => {
-              try {
-                console.log("DEBUG: Starting extraction process...");
-                console.log("DEBUG: clientId:", id);
-                console.log("DEBUG: fileLinks:", fileLinks);
-                console.log("DEBUG: bankName:", clientData.bankName);
-                console.log("DEBUG: processingMethod:", processingMethod);
+          {/* Extract Data Button */}
+            <button
+              className={`${
+                processing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"
+              } text-white py-2 px-4 rounded`}
+              onClick={handleExtractData}
+              disabled={processing}
+            >
+              {processing ? "Processing..." : "Extract Data"}
+            </button>
 
-                // Choose the correct backend function based on the selected method
-                let backendFunction;
-                if (processingMethod === "pdfparser") {
-                  backendFunction = httpsCallable(functions, "extractTextFromPDF");
-                  console.log("DEBUG: Using PDF Parser method");
-                } else if (processingMethod === "ocr") {
-                  backendFunction = httpsCallable(functions, "extractTextWithOCR");
-                  console.log("DEBUG: Using OCR method");
-                } else {
-                  throw new Error("Invalid processing method selected");
-                }
-
-                // Call the selected backend function
-                const result = await backendFunction({
-                  clientId: id, // Use the client ID from URL
-                  fileName: fileLinks[0], // Use the first file link (ensure it's correct)
-                  bankName: clientData.bankName, // Get bank name from client data
-                });
-
-                console.log("DEBUG: Backend response:", result.data);
-                alert(result.data.message);
-                console.log("DEBUG: Extracted Text Preview:", result.data.textPreview);
-              } catch (error) {
-                console.error("DEBUG: Error extracting data:", error);
-                alert("Failed to extract data. Please try again.");
-              }
-            }}
-          >
-            Extract Data
-          </button>
+            {/* Error Message Display */}
+            {errorMessage && (
+              <p className="text-red-500 mt-4">{errorMessage}</p>
+            )}
 
 
 
