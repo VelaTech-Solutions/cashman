@@ -209,7 +209,7 @@ const Testclientprofile = () => {
       console.log("DEBUG: Starting extraction process...");
       console.log("DEBUG: Sending parameters to backend:", {
         clientId: id,
-        fileName: fileLinks[0],
+        fileUrl: fileLinks[0],
         bankName: clientData.bankName,
         method: processingMethod,
       });
@@ -218,7 +218,7 @@ const Testclientprofile = () => {
       const extractData = httpsCallable(functions, "extractData");
       const result = await extractData({
         clientId: id,
-        fileName: fileLinks[0],
+        fileUrl: fileLinks[0],
         bankName: clientData.bankName,
         method: processingMethod, // "pdfparser" or "ocr"
       });

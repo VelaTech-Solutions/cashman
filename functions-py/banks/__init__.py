@@ -10,16 +10,17 @@ from .clean_tyme import clean_data as clean_tyme
 
 # Create a mapping for bank-specific cleaning functions
 CLEAN_FUNCTIONS = {
-    "Absa": clean_absa,
-    "Capitec": clean_capitec,
-    "FNB": clean_fnb,
-    "Nedbank": clean_ned,
+    "Absa Bank": clean_absa,
+    "Capitec Bank": clean_capitec,
+    "Fnb Bank": clean_fnb,
+    "Ned Bank": clean_ned,
     "Standard Bank": clean_standard,
-    "TymeBank": clean_tyme,
+    "Tyme Bank": clean_tyme,
 }
 
+
 # Function to route cleaning based on bank name
-def clean_text_by_bank(bank_name, text):
+def clean_text_by_bank(bank_name, raw_data):
     if bank_name not in CLEAN_FUNCTIONS:
         raise ValueError(f"Unsupported bank: {bank_name}")
-    return CLEAN_FUNCTIONS[bank_name](text)
+    return CLEAN_FUNCTIONS[bank_name](raw_data)

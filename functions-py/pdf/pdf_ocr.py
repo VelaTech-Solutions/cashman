@@ -3,7 +3,7 @@
 from pdf2image import convert_from_path
 import pytesseract
 
-def extract_text_with_ocr(file_path):
+def ocr_pdf(file_path):
     """
     Extracts text from a PDF file using OCR for image-based PDFs.
 

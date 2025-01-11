@@ -3,8 +3,10 @@
 # Deploy with `firebase deploy`
 
 # functions-py/main.py
+
+# Import Firebase Admin SDK
 from firebase_functions import https_fn
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, firestore
 
 # Import necessary libraries
 import os
@@ -16,13 +18,11 @@ from dotenv import load_dotenv
 from pdf.pdf_parser import parse_pdf
 from pdf.pdf_ocr import extract_text_with_ocr
 
-# Import cleaning functions
-from banks.clean_absa import clean_data as clean_absa
-from banks.clean_capitec import clean_data as clean_capitec
-from banks.clean_fnb import clean_data as clean_fnb
-from banks.clean_ned import clean_data as clean_ned
-from banks.clean_standard import clean_data as clean_standard
-from banks.clean_tyme import clean_data as clean_tyme
+# import 
+from utils.request_validator import validate_request
+from utils.response_validator import validate_response
+
+
 
 # Load environment variables
 load_dotenv()
@@ -33,119 +33,162 @@ initialize_app()
 
 
 
-
-
-def create_response(body, status=200):
-    """
-    Helper function to create a consistent response with CORS headers.
-    """
-    return https_fn.Response(
-        json.dumps(body),
-        headers={
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        },
-        status=status,
-    )
-
-
-from firebase_admin import firestore
-
 @https_fn.on_request()
 def extractData(req: https_fn.Request) -> https_fn.Response:
     """
-    Handle data extraction requests from the frontend.
+    Handle data extraction requests. This version tests both request validation and response handling.
     """
     try:
-        # Log incoming request
-        print("DEBUG: Received request for extractData")
+        # Step 1: Validate the request
+        client_id, file_url, bank_name, method = validate_request(req)
 
-        # Handle CORS preflight requests
-        if req.method == "OPTIONS":
-            return create_response({})
+        # Step 2: Log success for debugging
+        print(f"DEBUG: Request validation successful")
+        print(f"DEBUG: clientId={client_id}, fileUrl={file_url}, bankName={bank_name}, method={method}")
 
-        # Ensure the request is a POST
-        if req.method != "POST":
-            return create_response({"error": "Invalid request method. Only POST allowed."}, status=405)
-
-        # Parse JSON body
-        data = req.get_json(silent=True)
-        print("DEBUG: Received data:", data)
-
-        if not data:
-            return create_response({"error": "Missing request body."}, status=400)
-
-        # Extract parameters
-        client_id = data.get("clientId")
-        file_name = data.get("fileName")
-        bank_name = data.get("bankName")
-        method = data.get("method")
-
-        # Validate parameters
-        if not all([client_id, file_name, bank_name, method]):
-            missing_params = [
-                key
-                for key, value in {
-                    "clientId": client_id,
-                    "fileName": file_name,
-                    "bankName": bank_name,
-                    "method": method,
-                }.items()
-                if not value
-            ]
-            return create_response({"error": f"Missing parameters: {', '.join(missing_params)}"}, status=400)
-
-        # Log received parameters
-        print(f"DEBUG: clientId={client_id}, fileName={file_name}, bankName={bank_name}, method={method}")
-
-        # Call the appropriate function based on the selected method
-        if method == "OCR":
-            extracted_text = extract_text_with_ocr(file_name)
-        elif method == "Parser":
-            extracted_text = parse_pdf(file_name)
-        else:
-            return create_response({"error": "Invalid method. Only OCR or Parser allowed."}, status=400)
-
-        # Clean the extracted text
-        cleaned_data = clean_text_by_bank(bank_name, extracted_text)
-
-        # Log cleaned data
-        print("DEBUG: Cleaned data:", cleaned_data)
-
-        # Save cleaned data to Firestore under the client's rawData field
-        db = firestore.client()
-        client_ref = db.collection("clients").document(client_id)
-        client_ref.set({"rawData": cleaned_data}, merge=True)
-
-        # Return a successful response
-        return create_response({
-            "message": "Data extracted and saved successfully",
+        # Step 3: Return success response using response_handler
+        return validate_response({
+            "message": "Request validated successfully",
             "status": "ok",
-            "cleanedDataPreview": cleaned_data[:500],  # Send a preview of the cleaned data
+            "clientId": client_id,
+            "fileUrl": file_url,
+            "bankName": bank_name,
+            "method": method,
         })
 
+    except ValueError as e:
+        # Step 4: Handle validation errors
+        print(f"VALIDATION ERROR: {e}")
+        return validate_response({"error": str(e)}, status=400)
+
     except Exception as e:
-        # Log the error
-        print(f"ERROR: {str(e)}")
-        return create_response({"error": str(e)}, status=500)
+        # Step 5: Handle unexpected errors
+        print(f"ERROR: {e}")
+        return validate_response({"error": "An unexpected error occurred."}, status=500)
 
 
 
-def clean_text_by_bank(bank_name, text):
-    """Route extracted text to the appropriate cleaning function."""
-    clean_function_map = {
-        "Absa Bank": clean_absa,
-        "Capitec Bank": clean_capitec,
-        "Fnb Bank": clean_fnb,
-        "Ned Bank": clean_ned,
-        "Standard Bank": clean_standard,
-        "Tyme Bank": clean_tyme,
-    }
-    if bank_name not in clean_function_map:
-        raise ValueError(f"Unsupported bank: {bank_name}")
-    return clean_function_map[bank_name](text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @https_fn.on_request()
+# def extractData(req: https_fn.Request) -> https_fn.Response:
+#     """
+#     Handle data extraction requests from the frontend.
+#     Spliting the Functions into small functions.
+
+#     """
+#     try:
+#         if not verify_request(req):
+#             return response_handler({"error": "Invalid request."}, status=400)
+
+#         # Extract parameters
+#         client_id = req.get_json(silent=True).get("clientId")
+#         file_url = req.get_json(silent=True).get("fileUrl")
+#         bank_name = req.get_json(silent=True).get("bankName")
+#         method = req.get_json(silent=True).get("method")
+
+#         extracted_text = method_handler(method, file_url)
+
+#         # Save raw data to Firestore
+#         raw_data = save_raw_data(client_id, bank_name, extracted_text)
+
+
+#         # Clean the extracted text
+#         cleaned_data = clean_text_by_bank(bank_name, raw_data)
+
+
+
+#         # Log cleaned data
+#         print("DEBUG: Cleaned data:")
+
+#         # Save cleaned data to Firestore under the client's rawData field
+#         db = firestore.client()
+#         client_ref = db.collection("clients").document(client_id)
+#         client_ref.set({"rawData": cleaned_data}, merge=True)
+
+#         # Return a successful response
+#         return response_handler({
+#             "message": "Data extracted and saved successfully",
+#             "status": "ok",
+#             "cleanedDataPreview": cleaned_data[:500],  # Send a preview of the cleaned data
+#         })
+
+#     except Exception as e:
+#         # Log the error
+#         print(f"ERROR: {str(e)}")
+#         return response_handler({"error": str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # @https_fn.on_request()
 # def process_file(req: https_fn.Request) -> https_fn.Response:

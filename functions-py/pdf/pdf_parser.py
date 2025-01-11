@@ -8,6 +8,9 @@ def parse_pdf(file_url):
     Extract text from a PDF file provided via a URL using pdfplumber.
     """
     try:
+
+        # Debugging 
+        print(f"DEBUG: Parsing PDF from URL: {file_url}")
         # Fetch the PDF file from the given URL
         response = requests.get(file_url)
         response.raise_for_status()

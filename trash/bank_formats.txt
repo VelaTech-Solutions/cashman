@@ -1,0 +1,61 @@
+
+# Absa Bank first format
+# Date
+# Transaction Description
+# Charge Amount
+# Charge Type
+# Debit Amount
+# Credit Amount
+# Balance Amount 
+
+# Absa Bank second format
+# Date
+# Transaction Description
+# Amount
+# Balance Amount
+
+# Capitec Bank
+# Postiing Date
+# Transaction Date
+# Description
+# Money In
+# Money Out
+# Balance
+ 
+# FNB Bank ENG
+# Date
+# Transaction Description
+# Amount
+# Balance
+# Accrued bank Charge
+
+# FNB Bank AFRK
+# Date
+# Transaction Description
+# Amount
+# Balance
+# Accrued bank Charge
+
+# Nedbank
+# Transaction list no
+# Date  
+# Description
+# Fees
+# Debits
+# Credits
+# Balance
+
+# Standard Bank 
+# Date
+# Description
+# Payments
+# Deposits
+# Balance
+
+# Tyme Bank
+# Date
+# Description
+# Fees
+# Money Out
+# Money In
+# Balance
