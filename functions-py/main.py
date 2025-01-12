@@ -6,67 +6,169 @@
 
 # Import Firebase Admin SDK
 from firebase_functions import https_fn
-from firebase_admin import initialize_app, firestore
+from firebase_admin import initialize_app, firestore, storage
+
+# env variables
+from config import API_KEY, PROJECT_ID, STORAGE_BUCKET
+print(API_KEY, PROJECT_ID, STORAGE_BUCKET)  # For debugging
+
 
 # Import necessary libraries
 import os
 import json
 import requests
+import tempfile
 from dotenv import load_dotenv
 
 # Import PDF parsing functions
 from pdf.pdf_parser import parse_pdf
-from pdf.pdf_ocr import extract_text_with_ocr
-
-# import 
-from utils.request_validator import validate_request
-from utils.response_validator import validate_response
-
-
-
-# Load environment variables
-load_dotenv()
-STORAGE_BUCKET = os.getenv("STORAGE_BUCKET")
+from pdf.pdf_ocr import ocr_pdf
 
 # Initialize Firebase Admin SDK
 initialize_app()
 
 
 
+
 @https_fn.on_request()
-def extractData(req: https_fn.Request) -> https_fn.Response:
-    """
-    Handle data extraction requests. This version tests both request validation and response handling.
-    """
+def fetchBankStatement(req: https_fn.Request) -> https_fn.Response:
     try:
-        # Step 1: Validate the request
-        client_id, file_url, bank_name, method = validate_request(req)
+        # Parse the incoming request
+        data = req.get_json(silent=True)
+        if not data or "clientId" not in data:
+            return https_fn.Response(
+                {"error": "Missing clientId in request."}, status=400
+            )
 
-        # Step 2: Log success for debugging
-        print(f"DEBUG: Request validation successful")
-        print(f"DEBUG: clientId={client_id}, fileUrl={file_url}, bankName={bank_name}, method={method}")
+        client_id = data["clientId"]
 
-        # Step 3: Return success response using response_handler
-        return validate_response({
-            "message": "Request validated successfully",
-            "status": "ok",
-            "clientId": client_id,
-            "fileUrl": file_url,
-            "bankName": bank_name,
-            "method": method,
-        })
+        # Firebase Storage reference to the bank statement
+        bucket = storage.bucket()
+        folder_path = f"bank_statements/{client_id}/"
+        blobs = list(bucket.list_blobs(prefix=folder_path))
 
-    except ValueError as e:
-        # Step 4: Handle validation errors
-        print(f"VALIDATION ERROR: {e}")
-        return validate_response({"error": str(e)}, status=400)
+        if not blobs:
+            return https_fn.Response(
+                {"error": "No bank statement found for the given clientId."},
+                status=404,
+            )
 
+        # Assuming there's only one file, fetch the first one
+        blob = blobs[0]
+
+        # Save file to a temp directory
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        blob.download_to_filename(temp_file.name)
+
+        # Clean up the temp file after use (optional)
+        os.unlink(temp_file.name)
+
+        return https_fn.Response(
+            {"message": f"Bank statement {blob.name} fetched successfully."},
+            status=200,
+        )
     except Exception as e:
-        # Step 5: Handle unexpected errors
         print(f"ERROR: {e}")
-        return validate_response({"error": "An unexpected error occurred."}, status=500)
+        return https_fn.Response(
+            {"error": "An error occurred while fetching the bank statement."},
+            status=500,
+        )
 
 
+
+@https_fn.on_call()
+def extractData(data, context):
+    # data will contain the JSON from the front end
+    # Return a plain dict
+    return {"message": "Data processed successfully", "status": "ok"}
+
+
+# from utils.request_validator import validate_request
+# from utils.response_validator import response_handler
+# # If we only want to test request validation and response creation
+# @https_fn.on_request()
+# def extractData(req):
+#     try:
+#         validation_result = validate_request(req)
+#         if isinstance(validation_result, https_fn.Response):
+#             return validation_result
+#         return response_handler({"message": "Validation passed"})
+#     except Exception as e:
+#         return response_handler({"error": str(e)}, status=500)
+
+
+# @https_fn.on_request()
+# def extractData(req: https_fn.Request) -> https_fn.Response:
+#     """
+#     Handle data extraction requests. This version tests both request validation and response handling.
+#     """
+#     try:
+#         # Step 1: Validate the request
+#         client_id, file_url, bank_name, method = validate_request(req)
+
+#         # Step 2: Log success for debugging
+#         print(f"DEBUG: Request validation successful")
+#         print(f"DEBUG: clientId={client_id}, fileUrl={file_url}, bankName={bank_name}, method={method}")
+
+#         # Step 3: Return success response using response_handler
+#         return validate_response({
+#             "message": "Request validated successfully",
+#             "status": "ok",
+#             "clientId": client_id,
+#             "fileUrl": file_url,
+#             "bankName": bank_name,
+#             "method": method,
+#         })
+
+#     except ValueError as e:
+#         # Step 4: Handle validation errors
+#         print(f"VALIDATION ERROR: {e}")
+#         return validate_response({"error": str(e)}, status=400)
+
+#     except Exception as e:
+#         # Step 5: Handle unexpected errors
+#         print(f"ERROR: {e}")
+#         return validate_response({"error": "An unexpected error occurred."}, status=500)
+
+
+
+
+# @https_fn.on_request()
+# def extractData(req: https_fn.Request) -> https_fn.Response:
+#     try:
+#         # 1. Handle CORS preflight
+#         if req.method == "OPTIONS":
+#             return https_fn.Response(
+#                 "",  # No body needed
+#                 headers={
+#                     "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
+#                     "Access-Control-Allow-Methods": "POST, OPTIONS",
+#                     "Access-Control-Allow-Headers": "Content-Type, Authorization",
+#                 },
+#                 status=204  # No Content
+#             )
+
+#         # 2. Validate request, etc.
+#         # (request validation and further logic here)
+
+#         # 3. Return success response
+#         return https_fn.Response(
+#             json.dumps({"message": "Request validation passed"}),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
+#             }
+#         )
+
+#     except Exception as e:
+#         return https_fn.Response(
+#             json.dumps({"error": str(e)}),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
+#             },
+#             status=500
+#         )
 
 
 

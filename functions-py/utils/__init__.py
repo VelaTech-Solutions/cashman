@@ -1,7 +1,7 @@
 # utils/__init__.py
 
 # Import utility functions from individual files
-from .response_validator import validate_response
+from .response_validator import response_handler
 from .request_validator import validate_request
 from .firestore_helper import save_raw_data, save_cleaned_data
 from .method_handler import handle_extraction_method
@@ -9,7 +9,7 @@ from .method_handler import handle_extraction_method
 
 # Organize utilities into categories for easy access
 UTILS_FUNCTIONS = {
-    "response_validator": validate_response,
+    "response_validator": response_handler,
     "request_validator": validate_request,
     "firestore_helper": {
         "save_raw_data": save_raw_data,
@@ -21,7 +21,7 @@ UTILS_FUNCTIONS = {
 
 # Optional: Provide a direct import for common utilities
 __all__ = [
-    "validate_response",
+    "response_handler",
     "validate_request",
     "save_raw_data",
     "save_cleaned_data",

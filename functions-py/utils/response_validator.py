@@ -1,18 +1,8 @@
-
-
-# Import Firebase Admin SDK
+# functions-py/utils/response_validator.py
+import json
 from firebase_functions import https_fn
 
-# Import necessary libraries
-import os
-import json
-
-
-
-def validate_response(body, status=200):
-    """
-    Helper function to create a consistent response with CORS headers.
-    """
+def response_handler(body, status=200):
     return https_fn.Response(
         json.dumps(body),
         headers={
@@ -21,5 +11,5 @@ def validate_response(body, status=200):
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
-        status=status,
+        status=status
     )

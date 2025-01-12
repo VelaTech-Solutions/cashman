@@ -198,45 +198,71 @@ const Testclientprofile = () => {
   if (loading) return <p>Loading client data and files...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-
-  // Logic for handling data extraction
-  const handleExtractData = async () => {
-    setProcessing(true); // Show loading state
-    setErrorMessage(""); // Clear any previous errors
-
+  const handleFetchBankStatement = async () => {
     try {
-      // Debugging logs for the frontend
-      console.log("DEBUG: Starting extraction process...");
-      console.log("DEBUG: Sending parameters to backend:", {
-        clientId: id,
-        fileUrl: fileLinks[0],
-        bankName: clientData.bankName,
-        method: processingMethod,
-      });
-
-      // Call the backend function
-      const extractData = httpsCallable(functions, "extractData");
-      const result = await extractData({
-        clientId: id,
-        fileUrl: fileLinks[0],
-        bankName: clientData.bankName,
-        method: processingMethod, // "pdfparser" or "ocr"
-      });
-
-      console.log("DEBUG: Backend response:", result.data);
-      alert(result.data.message); // Notify user of success
-
-    } catch (error) {
-      console.error("DEBUG: Error extracting data:", error);
-
-      // Set error message for user feedback
-      setErrorMessage(
-        error.message || "An error occurred during data extraction. Please try again."
+      setIsProcessing(true); // Set the processing state
+      const response = await fetch(
+        "https://us-central1-cashman-790ad.cloudfunctions.net/fetchBankStatement", // Replace with your endpoint
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            clientId: id, // Pass the client ID
+          }),
+        }
       );
+  
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log("DEBUG: Backend response:", result);
+      alert(result.message || "Bank statement fetched successfully!");
+    } catch (error) {
+      console.error("DEBUG: Error fetching bank statement:", error);
+      alert(error.message || "An error occurred while fetching the bank statement.");
     } finally {
-      setProcessing(false); // End loading state
+      setIsProcessing(false); // Reset the processing state
     }
   };
+  
+
+
+  // // Logic for handling data extraction
+  // const handleExtractData = async () => {
+  //   try {
+  //     console.log("DEBUG: Starting extraction process...");
+  
+  //     // Instead of httpsCallable, do a fetch:
+  //     const response = await fetch("https://us-central1-cashman-790ad.cloudfunctions.net/extractData", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         clientId: id,
+  //         fileUrl: fileLinks[0],
+  //         bankName: clientData.bankName,
+  //         method: processingMethod, 
+  //       }),
+  //     });
+  
+  //     if (!response.ok) {
+  //       throw new Error(`Request failed with status ${response.status}`);
+  //     }
+  
+  //     const result = await response.json();
+  //     console.log("DEBUG: Backend response:", result);
+  //     alert(result.message || "Extraction successful!");
+  //   } catch (error) {
+  //     console.error("DEBUG: Error extracting data:", error);
+  //     alert(error.message || "An error occurred during data extraction.");
+  //   }
+  // };
+  
 
   return (
     <div className="p-8 bg-gray-900 text-white min-h-screen">
@@ -361,9 +387,20 @@ const Testclientprofile = () => {
             </select>
 
           </div>
+          {/* Fetch Bank Statement Button */}
+          <button
+            className={`${
+              isProcessing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"
+            } text-white py-2 px-4 rounded`}
+            onClick={handleFetchBankStatement}
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Fetching..." : "Fetch Bank Statement"}
+          </button>
+
 
           {/* Extract Data Button */}
-            <button
+            {/* <button
               className={`${
                 processing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"
               } text-white py-2 px-4 rounded`}
@@ -371,12 +408,12 @@ const Testclientprofile = () => {
               disabled={processing}
             >
               {processing ? "Processing..." : "Extract Data"}
-            </button>
+            </button> */}
 
             {/* Error Message Display */}
-            {errorMessage && (
+            {/* {errorMessage && (
               <p className="text-red-500 mt-4">{errorMessage}</p>
-            )}
+            )} */}
 
 
 

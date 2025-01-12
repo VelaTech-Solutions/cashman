@@ -57,18 +57,41 @@
 ├── README.md
 ├── apphosting.yaml
 ├── config
-│   ├── firestore.indexes.json
-│   └── tailwind.config.js
-├── database-debug.log
+│   └── firestore.indexes.json
 ├── deploy.sh
 ├── firebase.json
-├── firestore-debug.log
-├── functions
+├── functions-js
+│   ├── .eslintrc.js
 │   ├── .gitignore
 │   ├── index.js
 │   ├── package-lock.json
 │   └── package.json
+├── functions-py
+│   ├── .env
+│   ├── .gitignore
+│   ├── banks
+│   │   ├── __init__.py
+│   │   ├── clean_absa.py
+│   │   ├── clean_capitec.py
+│   │   ├── clean_fnb.py
+│   │   ├── clean_ned.py
+│   │   ├── clean_standard.py
+│   │   └── clean_tyme.py
+│   ├── main.py
+│   ├── pdf
+│   │   ├── __init__.py
+│   │   ├── pdf_ocr.py
+│   │   └── pdf_parser.py
+│   ├── requirements.txt
+│   └── utils
+│       ├── __init__.py
+│       ├── cleaning_router.py
+│       ├── firestore_helper.py
+│       ├── method_handler.py
+│       ├── request_validator.py
+│       └── response_validator.py
 ├── logs
+│   └── deploy.log
 ├── package-lock.json
 ├── package.json
 ├── public
@@ -79,6 +102,7 @@
 │   └── robots.txt
 ├── rules
 │   ├── firestore.rules
+│   ├── otherfirestore.rules
 │   └── storage.rules
 ├── src
 │   ├── App.css
@@ -88,41 +112,57 @@
 │   │   └── avatar-100.png
 │   ├── components
 │   │   ├── Button.js
-│   │   └── Input.js
+│   │   ├── Input.js
+│   │   └── ProtectedRoute.js
 │   ├── firebase
-│   │   ├── auth.js
-│   │   ├── config.js
-│   │   ├── database.js
 │   │   ├── firebase.js
-│   │   ├── firebase_stuff.txt
-│   │   ├── firestore.js
-│   │   └── storage.js
+│   │   └── firebase_stuff.txt
 │   ├── index.css
 │   ├── index.js
 │   ├── logo.svg
 │   ├── pages
 │   │   ├── Addclient.js
+│   │   ├── CategorizePage.js
+│   │   ├── Clientprofile.js
 │   │   ├── Dashboard.js
 │   │   ├── Developernotes.js
 │   │   ├── Editclient.js
 │   │   ├── Login.js
 │   │   ├── Settings.js
-│   │   ├── Testpage.js
 │   │   └── Viewclient.js
 │   ├── reportWebVitals.js
 │   ├── services
 │   │   └── apiService.js
-│   └── styles
-│       └── tailwind.css
+│   ├── styles
+│   │   └── tailwind.css
+│   └── testpages
+│       ├── FetchSingleFile.js
+│       ├── TestCategorizePage.js
+│       ├── Testaddclient.js
+│       ├── Testclientprofile.js
+│       ├── Testdash.js
+│       ├── Testfirestore.js
+│       ├── Testfunctions.js
+│       ├── Testpage.js
+│       ├── Teststorage.js
+│       └── Testviewclient.js
+├── tailwind.config.js
+├── todo
 └── trash
     ├── Dashboard.css
     ├── Settings.css
+    ├── auth.js
+    ├── bank_formats.txt
     ├── component.html
+    ├── config.js
     ├── dashboard.html
+    ├── database.js
     ├── directory_structure.txt
+    ├── firestore.js
     ├── global.css
     ├── index2.html
     ├── index3.html
-    └── setupTests.js
+    ├── setupTests.js
+    └── storage.js
 
-31 directories, 94 files
+36 directories, 129 files
