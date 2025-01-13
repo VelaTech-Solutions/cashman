@@ -57,7 +57,7 @@ const Addclient = () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUploadStatus("Upload complete!");
           resolve(downloadURL);
-        }
+        },
       );
     });
   };
@@ -86,7 +86,7 @@ const Addclient = () => {
           bankStatementURL: fileURL, // Save the file URL
           timestamp: new Date(),
         },
-        { merge: true }
+        { merge: true },
       );
 
       setSubmitSuccess(true);
@@ -179,7 +179,9 @@ const Addclient = () => {
             <motion.button
               onClick={handleSubmit}
               className={`w-full p-2 rounded ${
-                isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+                isSubmitting
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
               }`}
               disabled={isSubmitting}
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}

@@ -5,11 +5,9 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
-
 // firebase imports
 import { storage } from "../firebase/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; 
-
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const TestPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -45,7 +43,7 @@ const TestPage = () => {
       async () => {
         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
         setUploadStatus(`Upload complete! File URL: ${downloadURL}`);
-      }
+      },
     );
   };
 

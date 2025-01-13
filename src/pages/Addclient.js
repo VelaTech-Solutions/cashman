@@ -50,7 +50,9 @@ const Addclient = () => {
     const maxFileSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(selectedFile.type)) {
-      setUploadStatus("Invalid file type. Please upload a PDF, JPEG, or PNG file.");
+      setUploadStatus(
+        "Invalid file type. Please upload a PDF, JPEG, or PNG file.",
+      );
       return null;
     }
 
@@ -62,7 +64,7 @@ const Addclient = () => {
     setUploadStatus("Uploading file...");
     const storageRef = ref(
       storage,
-      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`
+      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`,
     );
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
@@ -70,7 +72,8 @@ const Addclient = () => {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setUploadStatus(`Upload is ${progress.toFixed(2)}% done`);
         },
         (error) => {
@@ -82,7 +85,7 @@ const Addclient = () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUploadStatus("Upload complete!");
           resolve(downloadURL);
-        }
+        },
       );
     });
   };
@@ -112,7 +115,7 @@ const Addclient = () => {
           timestamp: new Date(),
           userEmail,
         },
-        { merge: true }
+        { merge: true },
       );
 
       setSubmitSuccess(true);
@@ -206,7 +209,9 @@ const Addclient = () => {
             <motion.button
               onClick={handleSubmit}
               className={`w-full p-2 rounded ${
-                isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+                isSubmitting
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
               }`}
               disabled={isSubmitting}
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
@@ -224,18 +229,15 @@ const Addclient = () => {
                 🎉 Client details saved successfully!
               </motion.p>
             )}
-                <p className="text-sm text-gray-400 italic mt-2">
-                  Note: This feature currently supports processing a single PDF file at a time.
-                </p>
+            <p className="text-sm text-gray-400 italic mt-2">
+              Note: This feature currently supports processing a single PDF file
+              at a time.
+            </p>
           </section>
         </motion.div>
       </div>
-    {/*state a Message to User here | Handles a single pdf only at this time*/}
-    {/* Display a Message to User */}
-
-
-
-    
+      {/*state a Message to User here | Handles a single pdf only at this time*/}
+      {/* Display a Message to User */}
     </div>
   );
 };

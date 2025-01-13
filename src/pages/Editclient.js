@@ -1,38 +1,38 @@
 // Editclient.js
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { db } from '../firebase/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { db } from "../firebase/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 const EditClient = () => {
   const { id } = useParams(); // Extract client ID from the route
   const navigate = useNavigate();
   const [formValues, setFormValues] = useState({
-    clientName: '',
-    clientSurname: '',
-    bankName: '',
+    clientName: "",
+    clientSurname: "",
+    bankName: "",
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchClient = async () => {
       try {
-        const clientDoc = doc(db, 'clients', id);
+        const clientDoc = doc(db, "clients", id);
         const clientSnapshot = await getDoc(clientDoc);
 
         if (clientSnapshot.exists()) {
           const client = clientSnapshot.data();
           setFormValues({
-            clientName: client.clientName || '',
-            clientSurname: client.clientSurname || '',
-            bankName: client.bankName || '',
+            clientName: client.clientName || "",
+            clientSurname: client.clientSurname || "",
+            bankName: client.bankName || "",
           });
         } else {
-          setError('Client not found.');
+          setError("Client not found.");
         }
       } catch (err) {
-        setError('Failed to fetch client data.');
+        setError("Failed to fetch client data.");
         console.error(err);
       } finally {
         setLoading(false);
@@ -48,24 +48,28 @@ const EditClient = () => {
   };
 
   const handleUpdateClient = async () => {
-    if (!formValues.clientName || !formValues.clientSurname || !formValues.bankName) {
-      alert('Please fill in all fields.');
+    if (
+      !formValues.clientName ||
+      !formValues.clientSurname ||
+      !formValues.bankName
+    ) {
+      alert("Please fill in all fields.");
       return;
     }
 
     try {
-      const clientDoc = doc(db, 'clients', id);
+      const clientDoc = doc(db, "clients", id);
       await updateDoc(clientDoc, {
         clientName: formValues.clientName,
         clientSurname: formValues.clientSurname,
         bankName: formValues.bankName,
       });
 
-      alert('Client updated successfully!');
-      navigate('/view-clients'); // Redirect back to the clients list
+      alert("Client updated successfully!");
+      navigate("/view-clients"); // Redirect back to the clients list
     } catch (err) {
-      console.error('Error updating client:', err);
-      setError('Failed to update client. Please try again.');
+      console.error("Error updating client:", err);
+      setError("Failed to update client. Please try again.");
     }
   };
 
@@ -86,7 +90,9 @@ const EditClient = () => {
         <h1 className="text-3xl font-bold text-blue-400 mb-4">Edit Client</h1>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-400">Client Name</label>
+            <label className="block text-sm font-medium text-gray-400">
+              Client Name
+            </label>
             <input
               type="text"
               name="clientName"
@@ -96,7 +102,9 @@ const EditClient = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400">Client Surname</label>
+            <label className="block text-sm font-medium text-gray-400">
+              Client Surname
+            </label>
             <input
               type="text"
               name="clientSurname"
@@ -106,7 +114,9 @@ const EditClient = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400">Bank Name</label>
+            <label className="block text-sm font-medium text-gray-400">
+              Bank Name
+            </label>
             <input
               type="text"
               name="bankName"

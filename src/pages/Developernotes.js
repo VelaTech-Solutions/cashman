@@ -1,14 +1,11 @@
 // src/pages/Developernotes.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 // firebase imports
 
-
-
-
 const Developernotes = () => {
-  const [userEmail, setUserEmail] = useState('Not logged in');
+  const [userEmail, setUserEmail] = useState("Not logged in");
   const auth = getAuth();
 
   useEffect(() => {
@@ -16,7 +13,7 @@ const Developernotes = () => {
       if (user) {
         setUserEmail(user.email);
       } else {
-        setUserEmail('Not logged in');
+        setUserEmail("Not logged in");
       }
     });
     return () => unsubscribe();
@@ -29,7 +26,6 @@ const Developernotes = () => {
           <div className="logo">
             <h1 className="logo-title">
               <span>Developer Notes</span>
-              
             </h1>
           </div>
         </div>
@@ -37,8 +33,11 @@ const Developernotes = () => {
           <button className="user-profile">
             <span>{userEmail}</span>
             <span>
-            <img src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png" alt="User Avatar" />
-            </span> 
+              <img
+                src="https://img.icons8.com/pastel-glyph/100/person-male--v1.png"
+                alt="User Avatar"
+              />
+            </span>
           </button>
         </div>
         <div className="app-header-mobile">
@@ -51,7 +50,10 @@ const Developernotes = () => {
       <div className="app-body">
         <div className="app-body-navigation">
           <nav className="navigation">
-            <a href="/dashboard"><i className="ph-sign-out"></i><span>Back to Dashboard</span></a>
+            <a href="/dashboard">
+              <i className="ph-sign-out"></i>
+              <span>Back to Dashboard</span>
+            </a>
           </nav>
         </div>
       </div>

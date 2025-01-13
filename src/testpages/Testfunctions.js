@@ -23,7 +23,7 @@ const FetchAndSendFile = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ fileUrl, bankName, method }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -86,7 +86,9 @@ const FetchAndSendFile = () => {
 
       {/* Feedback Messages */}
       {message && <p className="mt-4 text-yellow-500">{message}</p>}
-      {backendResponse && <p className="mt-4 text-green-500">{backendResponse}</p>}
+      {backendResponse && (
+        <p className="mt-4 text-green-500">{backendResponse}</p>
+      )}
     </div>
   );
 };

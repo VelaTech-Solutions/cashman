@@ -111,9 +111,11 @@ Follow these steps to set up and run the project locally:
 ### Running the App
 
 Start the development server:
+
 ```bash
 npm start
 ```
+
 The app will be available at [http://localhost:3000](http://localhost:3000).
 
 ---
@@ -149,17 +151,20 @@ Launches the test runner in interactive watch mode.
 
 ---
 
-## Get Tree 
+## Get Tree
 
 ```bash
 tree -a -I 'node_modules|objects|build|venv|__pycache__' > trash/directory_structure.txt
 ```
+
 ---
 
 ## Backup Project
+
 ```bash
 zip -r /home/ubuntu/cashman/cashman_v1.5_javafunctions_backup.zip /home/ubuntu/cashman
 ```
+
 ---
 
 ## Contributing
@@ -172,12 +177,12 @@ Contributions are welcome! Please open an issue or submit a pull request with yo
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
-
 Functions
 I am using / changing to python for the functions at functions
 Removed the Java Functions
 
 ###
+
 cd functions-py
 sudo apt install python3-venv
 python3 -m venv venvtest
@@ -185,4 +190,5 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # update requirements.txt
+
 pip freeze > requirements.txt

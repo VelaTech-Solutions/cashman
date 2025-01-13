@@ -60,7 +60,12 @@ const FetchSingleFile = () => {
       {message && <p className="mt-4 text-lg text-green-500">{message}</p>}
       {fileUrl && (
         <div className="mt-4">
-          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 underline"
+          >
             View File
           </a>
         </div>
