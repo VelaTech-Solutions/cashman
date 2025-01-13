@@ -7,7 +7,7 @@ import '../styles/tailwind.css';
 
 // Firebase imports
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../firebase/firebase';
+import { auth, db } from '../firebase/firebase'; // Ensure this is the correct path
 import { collection, getDocs } from 'firebase/firestore';
 
 const Viewclient = () => {
@@ -167,7 +167,7 @@ const Viewclient = () => {
                   <p className="text-sm text-gray-400"><span className="font-bold">Date Closed:</span> {client.dateClosed}</p>
                   <p className="text-sm text-gray-400"><span className="font-bold">Captured By:</span> {client.userEmail}</p>
                   <Link
-                    to={`/client/${client.id}`}
+                    to={`/testclientprofile/${client.id}`}
                     className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
                   >
                     View Details
@@ -181,5 +181,6 @@ const Viewclient = () => {
     </div>
   );
 };
+
 
 export default Viewclient;

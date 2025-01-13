@@ -6,7 +6,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Addclient from './pages/Addclient';
-import Editclient from './pages/Editclient'; 
+import Editclient from './pages/Editclient';
+import ViewEditclient from './pages/ViewEditclient'; 
 import Viewclient from './pages/Viewclient';
 import Settings from './pages/Settings';
 import Developernotes from './pages/Developernotes';
@@ -33,11 +34,16 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}/>
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route path="/addclient" element={<Addclient />} />
+
         <Route path="/editclient" element={<Editclient />} />
+        <Route path="/vieweditclient/:id" element={<ViewEditclient />} />
+
         <Route path="/viewclient" element={<Viewclient />} />
+        <Route path="/client/:id" element={<Clientprofile />} />
+        
         <Route path="/settings" element={<Settings />} />
         <Route path="/developernotes" element={<Developernotes />} />
-        <Route path="/client/:id" element={<Clientprofile />} />
+ 
 
 
         {/* TEST PAGES */}
