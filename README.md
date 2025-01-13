@@ -180,7 +180,7 @@ Removed the Java Functions
 ###
 cd functions-py
 sudo apt install python3-venv
-python3 -m venv venv
+python3 -m venv venvtest
 source venv/bin/activate
 pip install -r requirements.txt
 

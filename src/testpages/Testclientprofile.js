@@ -26,6 +26,10 @@ const Testclientprofile = () => {
   const [processing, setProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // rawData
+  const [rawData, setRawData] = useState('');
+
   const [processingMethod, setProcessingMethod] = useState('pdfparser'); // Default to PDF Parser
   const PROCESS_METHODS = {
     PDF_PARSER: 'pdfparser',
@@ -33,6 +37,50 @@ const Testclientprofile = () => {
   };
 
 
+  // Debugging remove when done
+  const DEBUG = true; // Set to false to disable debug logs globally
+
+  const logDebug = (message, data = null) => {
+    if (DEBUG) {
+      if (data) {
+        console.log(`DEBUG: ${message}`, data);
+      } else {
+        console.log(`DEBUG: ${message}`);
+      }
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const clientDoc = doc(db, 'clients', id);
+        const clientSnapshot = await getDoc(clientDoc);
+  
+        if (clientSnapshot.exists()) {
+          const data = clientSnapshot.data();
+          setClientData(data); // Set client data including all fields
+          setRawData(data.rawData || "No raw data available"); // Set rawData or default message
+  
+          const folderRef = ref(storage, `bank_statements/${id}/`);
+          const fileList = await listAll(folderRef);
+          const urls = await Promise.all(fileList.items.map((item) => getDownloadURL(item)));
+          setFileLinks(urls);
+        } else {
+          setError('Client not found.');
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load client data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, [id]);
   
   
   // Fetch user email
@@ -56,6 +104,8 @@ const Testclientprofile = () => {
 
         if (clientSnapshot.exists()) {
           const clientData = clientSnapshot.data();
+          console.log("DEBUG: Client Data", clientData);
+
           setNotes(clientData.notes || []); // Set notes or empty array
         } else {
           setError('Client not found.');
@@ -180,6 +230,8 @@ const Testclientprofile = () => {
           const fileList = await listAll(folderRef);
           const urls = await Promise.all(fileList.items.map((item) => getDownloadURL(item)));
           setFileLinks(urls);
+          console.log(fileLinks);
+  
         } else {
           setError('Client not found.');
         }
@@ -197,71 +249,57 @@ const Testclientprofile = () => {
 
   if (loading) return <p>Loading client data and files...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
-
-  const handleFetchBankStatement = async () => {
+  
+  // Handle data extraction
+  const handleExtractData = async () => {
+    if (!id) {
+      alert("Client ID is not provided.");
+      return;
+    }
+  
+    logDebug("Starting handleExtractData process", { clientId: id });
+  
+    // Map frontend method to backend method
+    const bankName = clientData.bankName;
+    const selectedMethod = processingMethod === "pdfparser" ? "Parser" : "OCR";
+  
+    logDebug("Bank name", bankName);
+    logDebug("Selected method", selectedMethod);
+  
     try {
-      setIsProcessing(true); // Set the processing state
+      setProcessing(true);
       const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/fetchBankStatement", // Replace with your endpoint
+        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractData",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            clientId: id, // Pass the client ID
+            clientId: id,
+            bankName: bankName,
+            method: selectedMethod, // Send mapped method value
           }),
         }
       );
   
       if (!response.ok) {
+        const errorText = await response.text();
+        logDebug("Request failed", { status: response.status, errorText });
         throw new Error(`Request failed with status ${response.status}`);
       }
   
       const result = await response.json();
-      console.log("DEBUG: Backend response:", result);
-      alert(result.message || "Bank statement fetched successfully!");
+      logDebug("Backend response", result);
+      alert(result.message || "Data extracted successfully!");
     } catch (error) {
-      console.error("DEBUG: Error fetching bank statement:", error);
-      alert(error.message || "An error occurred while fetching the bank statement.");
+      logDebug("Error fetching bank statement", error);
+      alert(error.message || "An error occurred while extracting data.");
     } finally {
-      setIsProcessing(false); // Reset the processing state
+      setProcessing(false);
+      logDebug("Processing state after request");
     }
   };
-  
-
-
-  // // Logic for handling data extraction
-  // const handleExtractData = async () => {
-  //   try {
-  //     console.log("DEBUG: Starting extraction process...");
-  
-  //     // Instead of httpsCallable, do a fetch:
-  //     const response = await fetch("https://us-central1-cashman-790ad.cloudfunctions.net/extractData", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         clientId: id,
-  //         fileUrl: fileLinks[0],
-  //         bankName: clientData.bankName,
-  //         method: processingMethod, 
-  //       }),
-  //     });
-  
-  //     if (!response.ok) {
-  //       throw new Error(`Request failed with status ${response.status}`);
-  //     }
-  
-  //     const result = await response.json();
-  //     console.log("DEBUG: Backend response:", result);
-  //     alert(result.message || "Extraction successful!");
-  //   } catch (error) {
-  //     console.error("DEBUG: Error extracting data:", error);
-  //     alert(error.message || "An error occurred during data extraction.");
-  //   }
-  // };
   
 
   return (
@@ -295,7 +333,7 @@ const Testclientprofile = () => {
                 <span className="font-bold text-white">Last Updated:</span> {clientData.lastUpdated}
               </p>
               <p className="text-lg text-gray-400 mt-1">
-                <span className="font-bold text-white">Total Transactions:</span> {clientData.totalTransactions}
+                <span className="font-bold text-white">Total Transactions:</span> {clientData.number_of_transactions || 0}
               </p>
           </div>
       </div>
@@ -338,113 +376,91 @@ const Testclientprofile = () => {
       </div>
     </div>
 
+    {/*  */}
+{/* Extract Transactions Section */}
+<div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
+  {/* Section Header */}
+  <h1 className="text-4xl font-bold mb-4 text-blue-400">Extract Transactions</h1>
 
-    {/* Extract transactions section: This box allows the user to extract transactions from the client data, which is linked to the client's profile */}
-    <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-      {/* Header for the section */}
-      <h1 className="text-4xl font-bold mb-4 text-blue-400">Extract Transactions</h1>
-      
-      {/* Inner container for functionality */}
-      <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
-        
-        {/* Title for the processing options */}
-        <h2 className="text-2xl font-semibold text-white mb-4">File Processing Options</h2>
-        
-        {/* Instruction for selecting processing method */}
-        <p className="text-sm text-white">
-          <strong>Choose a method to process your file:</strong>
-          <br />
-          - If the text in your file is selectable (e.g., you can copy and paste it), use <strong>PDF Parser</strong>.
-          <br />
-          - If the text is not selectable (e.g., the file contains images of text like scanned documents), use <strong>OCR</strong> (Optical Character Recognition).
-          <br />
-          <br />
-          <em>Examples:</em>
-          <br />
-          <strong>PDF Parser:</strong> Bank statements in PDF format with selectable text.
-          <br />
-          <strong>OCR:</strong> Scanned copies of handwritten or printed documents.
-        </p>
+  {/* Processing Options */}
+  <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
+    <h2 className="text-2xl font-semibold text-white mb-4">File Processing Options</h2>
+    <p className="text-sm text-white">
+      <strong>Choose a method to process your file:</strong>
+      <br />
+      - Use <strong>PDF Parser</strong> for selectable text.
+      <br />
+      - Use <strong>OCR</strong> for scanned or image-based files.
+    </p>
 
-        {/* Dropdown and buttons are stacked vertically */}
-        <div className="flex flex-col gap-4 mt-4">
-
-          {/* Dropdown to select the file processing method */}
-          <div>
-            <label 
-              htmlFor="processing-method" 
-              className="text-white text-sm font-medium mb-2 block">
-              Choose File Processing Method:
-            </label>
-            <select
-              id="processing-method"
-              className="bg-gray-800 text-white py-2 px-3 rounded text-sm w-full"
-              value={processingMethod}
-              onChange={(e) => setProcessingMethod(e.target.value)} // Update selected method
-            >
-              <option value={PROCESS_METHODS.PDF_PARSER}>PDF Parser</option>
-              <option value={PROCESS_METHODS.OCR}>OCR</option>
-            </select>
-
-          </div>
-          {/* Fetch Bank Statement Button */}
-          <button
-            className={`${
-              isProcessing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"
-            } text-white py-2 px-4 rounded`}
-            onClick={handleFetchBankStatement}
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Fetching..." : "Fetch Bank Statement"}
-          </button>
-
-
-          {/* Extract Data Button */}
-            {/* <button
-              className={`${
-                processing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"
-              } text-white py-2 px-4 rounded`}
-              onClick={handleExtractData}
-              disabled={processing}
-            >
-              {processing ? "Processing..." : "Extract Data"}
-            </button> */}
-
-            {/* Error Message Display */}
-            {/* {errorMessage && (
-              <p className="text-red-500 mt-4">{errorMessage}</p>
-            )} */}
-
-
-
-
-
-          {/* If data is extracted, show a view data button here */}
-          
-          {/* {isDataExtracted && (
-            <button 
-              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-sm w-full"
-              onClick={() => {
-                // Add function here to handle view data
-              }}
-            >
-              View Data
-            </button>
-          )} */}
-
-          {/* Delete Extracted Data button */}
-          <button 
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded text-sm w-full"
-            onClick={() => {
-              // Add function here to handle deletion of extracted data
-            }}
-          >
-            Delete Extracted Data
-          </button>
-
-        </div>
-      </div>
+    {/* Dropdown for Processing Method */}
+    <div className="mt-4">
+      <label 
+        htmlFor="processing-method" 
+        className="text-white text-sm font-medium mb-2 block">
+        Choose File Processing Method:
+      </label>
+      <select
+        id="processing-method"
+        className="bg-gray-800 text-white py-2 px-3 rounded text-sm w-full"
+        value={processingMethod}
+        onChange={(e) => setProcessingMethod(e.target.value)}
+      >
+        <option value={PROCESS_METHODS.PDF_PARSER}>PDF Parser</option>
+        <option value={PROCESS_METHODS.OCR}>OCR</option>
+      </select>
     </div>
+
+    {/* Extract Data Button */}
+    <button
+      className={`mt-4 ${isProcessing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"} text-white py-2 px-4 rounded w-full`}
+      onClick={handleExtractData}
+      disabled={isProcessing}
+    >
+      {isProcessing ? "Processing..." : "Extract Bank Statement Transactions"}
+    </button>
+    {errorMessage && (
+      <p className="text-red-500 mt-4">{errorMessage}</p>
+    )}
+
+    {/* Action Buttons */}
+    <div className="flex flex-col gap-4 mt-4">
+      {/* Delete Extracted Data Button */}
+      <button
+        className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded w-full"
+        onClick={() => alert("Delete Extracted Data functionality is under construction.")}
+      >
+        Delete Extracted Data
+      </button>
+
+      {/* View Data Button */}
+      <button
+        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded w-full"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        {sidebarOpen ? "Hide Extracted Data" : "View Extracted Data"}
+      </button>
+    </div>
+  </div>
+
+  {/* Extracted Data Section */}
+  {sidebarOpen && (
+    <div className="bg-gray-900 p-4 rounded-lg shadow-md mt-8 max-h-80 overflow-auto">
+      <h2 className="text-2xl font-semibold text-white">Extracted Data</h2>
+      {clientData.rawData ? (
+        <>
+          <p className="text-lg text-gray-400 mt-2">Display extracted data here:</p>
+          <div className="mt-4">
+            <pre className="text-white whitespace-pre-wrap">{clientData.rawData}</pre>
+          </div>
+        </>
+      ) : (
+        <p className="text-lg text-red-500 mt-2">No extracted data available.</p>
+      )}
+    </div>
+  )}
+</div>
+
 
     {/* Client notes section A box here the user can add note about the client, linked with clients data*/}
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
@@ -510,3 +526,4 @@ const Testclientprofile = () => {
   );
 };
 export default Testclientprofile;
+

@@ -10,7 +10,7 @@ from firebase_admin import initialize_app, firestore, storage
 
 # env variables
 from config import API_KEY, PROJECT_ID, STORAGE_BUCKET
-print(API_KEY, PROJECT_ID, STORAGE_BUCKET)  # For debugging
+# print(API_KEY, PROJECT_ID, STORAGE_BUCKET)  # For debugging
 
 
 # Import necessary libraries
@@ -18,371 +18,204 @@ import os
 import json
 import requests
 import tempfile
-from dotenv import load_dotenv
+
 
 # Import PDF parsing functions
 from pdf.pdf_parser import parse_pdf
 from pdf.pdf_ocr import ocr_pdf
 
+# Your custom CORS handler
+from utils.cors_handler import handle_cors
+
+# Bank statement cleaning functions
+from banks.clean_absa import clean_data as clean_absa
+from banks.clean_capitec import clean_data as clean_capitec
+from banks.clean_fnb import clean_data as clean_fnb
+from banks.clean_ned import clean_data as clean_ned
+from banks.clean_standard import clean_data as clean_standard
+from banks.clean_tyme import clean_data as clean_tyme
+
 # Initialize Firebase Admin SDK
 initialize_app()
 
-
-
-
 @https_fn.on_request()
-def fetchBankStatement(req: https_fn.Request) -> https_fn.Response:
+def handleExtractData(req: https_fn.Request) -> https_fn.Response:
+    response = https_fn.Response()
+
+    # Handle CORS
+    response = handle_cors(req, response)
+    if req.method == "OPTIONS":
+        return response
+
     try:
-        # Parse the incoming request
+        # Parse incoming data
         data = req.get_json(silent=True)
         if not data or "clientId" not in data:
-            return https_fn.Response(
-                {"error": "Missing clientId in request."}, status=400
-            )
+            return error_response(response, "Missing clientId in request.", 400)
 
         client_id = data["clientId"]
+        bank_name = data["bankName"]
+        method = data["method"]
 
-        # Firebase Storage reference to the bank statement
+        print(f"Client ID: {client_id}, Bank Name: {bank_name}, Method: {method}")
+
+        # Get the bank statement from Storage
         bucket = storage.bucket()
         folder_path = f"bank_statements/{client_id}/"
         blobs = list(bucket.list_blobs(prefix=folder_path))
 
         if not blobs:
-            return https_fn.Response(
-                {"error": "No bank statement found for the given clientId."},
-                status=404,
-            )
+            return error_response(response, "No bank statement found for the given clientId.", 404)
 
-        # Assuming there's only one file, fetch the first one
+        # Download the bank statement
         blob = blobs[0]
-
-        # Save file to a temp directory
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         blob.download_to_filename(temp_file.name)
+        temp_file_path = temp_file.name
+        temp_file.close()
 
-        # Clean up the temp file after use (optional)
-        os.unlink(temp_file.name)
+        # Normalize method input
+        normalized_method = method.lower()
+        if normalized_method in ["parser", "pdfparser"]:
+            extracted_text = parse_pdf(temp_file_path)
+        elif normalized_method == "ocr":
+            extracted_text = ocr_pdf(temp_file_path)
+        else:
+            response.set_data(json.dumps({"error": "Invalid method. Use 'Parser' or 'OCR'."}))
+            response.status = 400
+            response.headers["Content-Type"] = "application/json"
+            return response
+        
+        # Save raw data to Firestore
+        db = firestore.client()
+        doc_ref = db.collection("clients").document(client_id)
+        doc_ref.set({
+            
+            "number_of_transactions": 0, 
+            "transactions": [],
+            "rawData": extracted_text
+        }, merge=True)
 
-        return https_fn.Response(
-            {"message": f"Bank statement {blob.name} fetched successfully."},
-            status=200,
-        )
+        # Clean statement based on bank name
+        cleaner_map = {
+            "Absa Bank": clean_absa,
+            "Capitec Bank": clean_capitec,
+            "Fnb Bank": clean_fnb,
+            "Ned Bank": clean_ned,
+            "Standard Bank": clean_standard,
+            "Tyme Bank": clean_tyme,
+        }
+
+        if bank_name not in cleaner_map:
+            os.unlink(temp_file_path)
+            return error_response(response, "Invalid bank name.", 400)
+
+        # Cleaned extracted text
+        cleaned_transactions = cleaner_map[bank_name](extracted_text)
+
+        # Prepare cleaned data
+        number_of_transactions = len(cleaned_transactions)
+
+        # Update Firestore with cleaned data
+        doc_ref.update({
+            "number_of_transactions": number_of_transactions,
+            "transactions": [
+                {
+                    "date1": transaction.get("date1", None),
+                    "date2": transaction.get("date2", None),
+                    "description": transaction.get("description", None),
+                    "fees_description": transaction.get("fees_description", None),
+                    "fees_type": transaction.get("fees_type", None),
+                    "fees_amount": transaction.get("fees_amount", 0.0),
+                    "debit_amount": transaction.get("debit_amount", 0.0),
+                    "credit_amount": transaction.get("credit_amount", 0.0),
+                    "balance_amount": transaction.get("balance_amount", 0.0),
+                }
+                for transaction in cleaned_transactions
+            ],
+        })
+        # Delete temporary file
+        os.unlink(temp_file_path)
+
+
+        # Return success response
+        return success_response(response, "Data cleaned and saved successfully.", 200)
+
     except Exception as e:
         print(f"ERROR: {e}")
-        return https_fn.Response(
-            {"error": "An error occurred while fetching the bank statement."},
-            status=500,
-        )
+        return error_response(response, "An error occurred while processing the bank statement.", 500)
+
+
+# Helper Functions
+def error_response(response, message, status_code):
+    response.set_data(json.dumps({"error": message}))
+    response.status = status_code
+    response.headers["Content-Type"] = "application/json"
+    return response
+
+
+def success_response(response, message, status_code):
+    response.set_data(json.dumps({"message": message}))
+    response.status = status_code
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
-@https_fn.on_call()
-def extractData(data, context):
-    # data will contain the JSON from the front end
-    # Return a plain dict
-    return {"message": "Data processed successfully", "status": "ok"}
-
-
-# from utils.request_validator import validate_request
-# from utils.response_validator import response_handler
-# # If we only want to test request validation and response creation
+# # working 
 # @https_fn.on_request()
-# def extractData(req):
+# def fetchBankStatement(req: https_fn.Request) -> https_fn.Response:
+#     # Create an empty response object
+#     response = https_fn.Response()
+
+#     # 1) Handle CORS (may return immediately if it's an OPTIONS request)
+#     response = handle_cors(req, response)
+#     if req.method == "OPTIONS":
+#         return response  # Preflight response
+
 #     try:
-#         validation_result = validate_request(req)
-#         if isinstance(validation_result, https_fn.Response):
-#             return validation_result
-#         return response_handler({"message": "Validation passed"})
-#     except Exception as e:
-#         return response_handler({"error": str(e)}, status=500)
-
-
-# @https_fn.on_request()
-# def extractData(req: https_fn.Request) -> https_fn.Response:
-#     """
-#     Handle data extraction requests. This version tests both request validation and response handling.
-#     """
-#     try:
-#         # Step 1: Validate the request
-#         client_id, file_url, bank_name, method = validate_request(req)
-
-#         # Step 2: Log success for debugging
-#         print(f"DEBUG: Request validation successful")
-#         print(f"DEBUG: clientId={client_id}, fileUrl={file_url}, bankName={bank_name}, method={method}")
-
-#         # Step 3: Return success response using response_handler
-#         return validate_response({
-#             "message": "Request validated successfully",
-#             "status": "ok",
-#             "clientId": client_id,
-#             "fileUrl": file_url,
-#             "bankName": bank_name,
-#             "method": method,
-#         })
-
-#     except ValueError as e:
-#         # Step 4: Handle validation errors
-#         print(f"VALIDATION ERROR: {e}")
-#         return validate_response({"error": str(e)}, status=400)
-
-#     except Exception as e:
-#         # Step 5: Handle unexpected errors
-#         print(f"ERROR: {e}")
-#         return validate_response({"error": "An unexpected error occurred."}, status=500)
-
-
-
-
-# @https_fn.on_request()
-# def extractData(req: https_fn.Request) -> https_fn.Response:
-#     try:
-#         # 1. Handle CORS preflight
-#         if req.method == "OPTIONS":
-#             return https_fn.Response(
-#                 "",  # No body needed
-#                 headers={
-#                     "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
-#                     "Access-Control-Allow-Methods": "POST, OPTIONS",
-#                     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-#                 },
-#                 status=204  # No Content
-#             )
-
-#         # 2. Validate request, etc.
-#         # (request validation and further logic here)
-
-#         # 3. Return success response
-#         return https_fn.Response(
-#             json.dumps({"message": "Request validation passed"}),
-#             headers={
-#                 "Content-Type": "application/json",
-#                 "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
-#             }
-#         )
-
-#     except Exception as e:
-#         return https_fn.Response(
-#             json.dumps({"error": str(e)}),
-#             headers={
-#                 "Content-Type": "application/json",
-#                 "Access-Control-Allow-Origin": "https://cashflowmanager.web.app",
-#             },
-#             status=500
-#         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @https_fn.on_request()
-# def extractData(req: https_fn.Request) -> https_fn.Response:
-#     """
-#     Handle data extraction requests from the frontend.
-#     Spliting the Functions into small functions.
-
-#     """
-#     try:
-#         if not verify_request(req):
-#             return response_handler({"error": "Invalid request."}, status=400)
-
-#         # Extract parameters
-#         client_id = req.get_json(silent=True).get("clientId")
-#         file_url = req.get_json(silent=True).get("fileUrl")
-#         bank_name = req.get_json(silent=True).get("bankName")
-#         method = req.get_json(silent=True).get("method")
-
-#         extracted_text = method_handler(method, file_url)
-
-#         # Save raw data to Firestore
-#         raw_data = save_raw_data(client_id, bank_name, extracted_text)
-
-
-#         # Clean the extracted text
-#         cleaned_data = clean_text_by_bank(bank_name, raw_data)
-
-
-
-#         # Log cleaned data
-#         print("DEBUG: Cleaned data:")
-
-#         # Save cleaned data to Firestore under the client's rawData field
-#         db = firestore.client()
-#         client_ref = db.collection("clients").document(client_id)
-#         client_ref.set({"rawData": cleaned_data}, merge=True)
-
-#         # Return a successful response
-#         return response_handler({
-#             "message": "Data extracted and saved successfully",
-#             "status": "ok",
-#             "cleanedDataPreview": cleaned_data[:500],  # Send a preview of the cleaned data
-#         })
-
-#     except Exception as e:
-#         # Log the error
-#         print(f"ERROR: {str(e)}")
-#         return response_handler({"error": str(e)}, status=500)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @https_fn.on_request()
-# def process_file(req: https_fn.Request) -> https_fn.Response:
-#     """Handles user selection of either OCR or Parser for text extraction."""
-#     try:
-#         # Handle CORS
-#         cors_response = handle_cors(req)
-#         if cors_response:
-#             return cors_response
-
-#         # Only handle POST requests
-#         if req.method != "POST":
-#             return https_fn.Response(
-#                 json.dumps({"error": "Method not allowed."}),
-#                 headers={
-#                     "Content-Type": "application/json",
-#                     "Access-Control-Allow-Origin": "*",
-#                 },
-#                 status=405,
-#             )
-
-#         # Parse JSON body
+#         # 2) Parse incoming data
 #         data = req.get_json(silent=True)
-#         if not data or "fileUrl" not in data or "bankName" not in data or "method" not in data:
-#             return https_fn.Response(
-#                 json.dumps({"error": "Missing 'fileUrl', 'bankName', or 'method' in request body."}),
-#                 headers={
-#                     "Content-Type": "application/json",
-#                     "Access-Control-Allow-Origin": "*",
-#                 },
-#                 status=400,
-#             )
+#         if not data or "clientId" not in data:
+#             response.set_data(json.dumps({"error": "Missing clientId in request."}))
+#             response.status = 400
+#             response.headers["Content-Type"] = "application/json"
+#             return response
 
-#         file_url = data["fileUrl"]
-#         bank_name = data["bankName"]
-#         method = data["method"]  # "OCR" or "Parser"
+#         client_id = data["clientId"]
 
-#         # Download the file
-#         response = requests.get(file_url)
-#         if response.status_code != 200:
-#             return https_fn.Response(
-#                 json.dumps({"error": "Failed to download the file."}),
-#                 headers={
-#                     "Content-Type": "application/json",
-#                     "Access-Control-Allow-Origin": "*",
-#                 },
-#                 status=500,
-#             )
+#         # 3) Get the bank statement from Storage
+#         bucket = storage.bucket()
+#         folder_path = f"bank_statements/{client_id}/"
+#         blobs = list(bucket.list_blobs(prefix=folder_path))
 
-#         # Save the file temporarily
-#         local_file_path = "/tmp/bank_statement.pdf"
-#         with open(local_file_path, "wb") as file:
-#             file.write(response.content)
+#         if not blobs:
+#             response.set_data(json.dumps({"error": "No bank statement found for the given clientId."}))
+#             response.status = 404
+#             response.headers["Content-Type"] = "application/json"
+#             return response
 
-#         # Extract text based on the selected method
-#         if method == "Parser":
-#             extracted_text = parse_pdf(local_file_path)
-#         elif method == "OCR":
-#             extracted_text = extract_text_with_ocr(local_file_path)
-#         else:
-#             return https_fn.Response(
-#                 json.dumps({"error": "Invalid method. Use 'Parser' or 'OCR'."}),
-#                 headers={
-#                     "Content-Type": "application/json",
-#                     "Access-Control-Allow-Origin": "*",
-#                 },
-#                 status=400,
-#             )
+#         # Assume only one file
+#         blob = blobs[0]
 
-#         # Log extracted text and process it
-#         print(f"Extracted text (first 500 chars): {extracted_text[:500]}")
-#         cleaned_data = clean_text_by_bank(bank_name, extracted_text)
+#         # 4) Download file to a temporary location (but DO NOT delete after)
+#         temp_file = tempfile.NamedTemporaryFile(delete=False)
+#         blob.download_to_filename(temp_file.name)
+        
+#         # If you want the path for later reference:
+#         temp_file_path = temp_file.name
+#         temp_file.close()  # Close the file, but do NOT unlink
 
-#         # Clean up temporary file
-#         if os.path.exists(local_file_path):
-#             os.remove(local_file_path)
-
-#         # Return cleaned data
-#         return https_fn.Response(
-#             json.dumps({"message": "File processed successfully!", "data": cleaned_data}),
-#             headers={
-#                 "Content-Type": "application/json",
-#                 "Access-Control-Allow-Origin": "*",
-#             },
-#         )
+#         # 5) Return a success response
+#         response.set_data(json.dumps({"message": f"Bank statement {blob.name} fetched successfully."}))
+#         response.status = 200
+#         response.headers["Content-Type"] = "application/json"
+#         return response
 
 #     except Exception as e:
-#         return https_fn.Response(
-#             json.dumps({"error": str(e)}),
-#             headers={
-#                 "Content-Type": "application/json",
-#                 "Access-Control-Allow-Origin": "*",
-#             },
-#             status=500,
-#         )
+#         print(f"ERROR: {e}")
+#         # 6) Return an error response with JSON
+#         response.set_data(json.dumps({"error": "An error occurred while fetching the bank statement."}))
+#         response.status = 500
+#         response.headers["Content-Type"] = "application/json"
+#         return response

@@ -4,6 +4,7 @@
       "source": "functions-py",
       "codebase": "default",
       "runtime": "python310",
+      "timeoutSeconds": 540,
       "predeploy": [],
       "ignore": [
         "venv",
@@ -16,6 +17,7 @@
     {
       "source": "functions-js",
       "codebase": "functions-js",
+      "timeoutSeconds": 540,
       "ignore": [
         "node_modules",
         ".git",
