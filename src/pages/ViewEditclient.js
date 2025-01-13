@@ -76,7 +76,7 @@ const ViewEditClient = () => {
       });
 
       alert("Client details updated successfully!");
-      navigate("/viewclient"); // Navigate back to the client list
+      navigate("/Editclient"); // Navigate back to the client list
     } catch (err) {
       console.error("Error updating client data:", err);
       alert("Failed to update client data.");
@@ -97,7 +97,7 @@ const ViewEditClient = () => {
           Back to Dashboard
         </Link>
         <Link
-          to="/viewclient"
+          to="/Editclient"
           className="text-white hover:text-blue-400 transition"
         >
           Back to Client List

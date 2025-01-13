@@ -1,137 +1,176 @@
-// Editclient.js
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { db } from "../firebase/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+// src/pages/EditClient.js
+
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import "../styles/tailwind.css";
+
+// Firebase imports
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 const EditClient = () => {
-  const { id } = useParams(); // Extract client ID from the route
-  const navigate = useNavigate();
-  const [formValues, setFormValues] = useState({
-    clientName: "",
-    clientSurname: "",
-    bankName: "",
-  });
+  const [userEmail, setUserEmail] = useState("Not logged in");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
+  // Track user authentication
   useEffect(() => {
-    const fetchClient = async () => {
-      try {
-        const clientDoc = doc(db, "clients", id);
-        const clientSnapshot = await getDoc(clientDoc);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email);
+      } else {
+        setUserEmail("Not logged in");
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
-        if (clientSnapshot.exists()) {
-          const client = clientSnapshot.data();
-          setFormValues({
-            clientName: client.clientName || "",
-            clientSurname: client.clientSurname || "",
-            bankName: client.bankName || "",
-          });
-        } else {
-          setError("Client not found.");
-        }
+  // Fetch client data
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const clientsCollection = collection(db, "clients");
+        const clientSnapshot = await getDocs(clientsCollection);
+        const clientsList = clientSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setClients(clientsList);
       } catch (err) {
-        setError("Failed to fetch client data.");
-        console.error(err);
+        setError("Failed to fetch clients. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClient();
-  }, [id]);
+    fetchClients();
+  }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleUpdateClient = async () => {
-    if (
-      !formValues.clientName ||
-      !formValues.clientSurname ||
-      !formValues.bankName
-    ) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    try {
-      const clientDoc = doc(db, "clients", id);
-      await updateDoc(clientDoc, {
-        clientName: formValues.clientName,
-        clientSurname: formValues.clientSurname,
-        bankName: formValues.bankName,
-      });
-
-      alert("Client updated successfully!");
-      navigate("/view-clients"); // Redirect back to the clients list
-    } catch (err) {
-      console.error("Error updating client:", err);
-      setError("Failed to update client. Please try again.");
-    }
-  };
-
+  // Loading or error states
   if (loading) {
-    return <p className="text-center text-gray-400">Loading client data...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <p className="text-lg text-gray-400">Loading clients...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <p className="text-lg text-red-500">{error}</p>
+      </div>
+    );
   }
 
+  // Main UI
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <Link to="/view-clients" className="text-blue-400 hover:underline">
-        Back to Clients List
-      </Link>
-      <div className="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
-        <h1 className="text-3xl font-bold text-blue-400 mb-4">Edit Client</h1>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-400">
-              Client Name
-            </label>
-            <input
-              type="text"
-              name="clientName"
-              value={formValues.clientName}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-400">
-              Client Surname
-            </label>
-            <input
-              type="text"
-              name="clientSurname"
-              value={formValues.clientSurname}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-400">
-              Bank Name
-            </label>
-            <input
-              type="text"
-              name="bankName"
-              value={formValues.bankName}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-            />
-          </div>
+    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
+      {/* Sidebar */}
+      <motion.div
+        className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg ${
+          sidebarOpen ? "block" : "hidden lg:block"
+        }`}
+        initial={{ x: -100 }}
+        animate={{ x: 0 }}
+      >
+        <div className="flex items-center space-x-3 pb-4 pt-4">
+          <h1 className="text-2xl font-bold text-blue-400">Cash Flow Manager</h1>
         </div>
-        <button
-          onClick={handleUpdateClient}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-4 w-full"
-        >
-          Save Changes
-        </button>
+        {/* User Email */}
+        <div className="text-sm text-gray-300 border-t border-gray-700 pt-4">
+          <p>Logged in as:</p>
+          <p className="font-medium text-white">{userEmail || "Guest"}</p>
+        </div>
+
+        <nav className="space-y-4 border-t border-gray-700 pt-4">
+          <Link to="/dashboard" className="hover:text-white transition">
+            Back to Dashboard
+          </Link>
+        </nav>
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-8">
+        <header className="flex justify-between items-center mb-8">
+          <button
+            className="lg:hidden text-gray-400"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <i className="ph-list text-2xl"></i>
+          </button>
+        </header>
+
+        {/* Client Overview Section */}
+        <section>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-blue-400 mb-4">
+              Edit Clients
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+              {/* Total Clients */}
+              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
+                <p className="text-lg font-bold text-blue-400">Total Clients</p>
+                <p className="text-3xl font-bold text-white">{clients.length}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Search Bar */}
+        <section className="mt-8">
+          <input
+            type="text"
+            placeholder="Search clients by name, ID, or bank..."
+            onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+            className="w-full p-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </section>
+
+        {/* Clients Listing */}
+        <section className="mt-8">
+          {clients.length === 0 ? (
+            <p className="text-center text-lg text-gray-500">
+              No clients available
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {clients
+                .filter((client) =>
+                  `${client.clientName} ${client.clientSurname}`
+                    .toLowerCase()
+                    .includes(searchQuery)
+                )
+                .map((client) => (
+                  <div
+                    key={client.id}
+                    className="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-2xl transition-shadow"
+                  >
+                    <h3 className="text-xl font-bold text-blue-400">
+                      {client.clientName} {client.clientSurname}
+                    </h3>
+                    <p className="text-sm text-gray-400 mt-2">
+                      <span className="font-bold">ID:</span> {client.id}
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      <span className="font-bold">Bank:</span> {client.bankName}
+                    </p>
+                    <Link
+                      to={`/vieweditclient/${client.id}`}
+                      className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
+                    >
+                      Edit Client
+                    </Link>
+                  </div>
+                ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

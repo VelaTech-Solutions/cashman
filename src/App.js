@@ -8,10 +8,18 @@ import Dashboard from "./pages/Dashboard";
 import Addclient from "./pages/Addclient";
 import Editclient from "./pages/Editclient";
 import ViewEditclient from "./pages/ViewEditclient";
+
 import Viewclient from "./pages/Viewclient";
+import Clientprofile from "./pages/Clientprofile";
+import Profile from "./pages/Profile";
+import ViewTransactions from "./pages/ViewTransactions";
+import EditTransactions from "./pages/EditTransactions";
+import CategorizeTransactions from "./pages/CategorizeTransactions";
+import ViewReports from "./pages/ViewReports";
+
 import Settings from "./pages/Settings";
 import Developernotes from "./pages/Developernotes";
-import Clientprofile from "./pages/Clientprofile";
+
 
 import Testpage from "./testpages/Testpage";
 import Teststorage from "./testpages/Teststorage";
@@ -44,6 +52,11 @@ function App() {
 
         <Route path="/viewclient" element={<Viewclient />} />
         <Route path="/client/:id" element={<Clientprofile />} />
+        <Route path="/client/:id/profile" element={<Profile />} />
+        <Route path="/client/:id/transactions" element={<ViewTransactions />} />
+        <Route path="/client/:id/edit-transactions" element={<EditTransactions />} />
+        <Route path="/client/:id/categorize" element={<CategorizeTransactions />} />
+        <Route path="/client/:id/reports" element={<ViewReports />} />
 
         <Route path="/settings" element={<Settings />} />
         <Route path="/developernotes" element={<Developernotes />} />

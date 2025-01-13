@@ -202,7 +202,7 @@ const Viewclient = () => {
                     {client.userEmail}
                   </p>
                   <Link
-                    to={`/testclientprofile/${client.id}`}
+                    to={`/client/${client.id}`}
                     className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
                   >
                     View Details

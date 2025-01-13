@@ -370,3 +370,83 @@ Debug any issues or edge cases.
 #             },
 #             status=500,
 #         )
+
+
+
+Alright, got it! 🎯 We’ve got five buttons to focus on:
+
+Profile → Likely stays on the current page but could load additional profile details or options.
+View Transactions → Navigates to a transactions page to view all related transactions for the client.
+Edit Transactions → Navigates to an editing page where you can modify transactions.
+Categorize Transactions → Takes the user to a categorization page to group/label transactions.
+View Reports → Navigates to a reports page to see summarized data or reports.
+Each button essentially involves adding navigation to the respective pages. Let’s set up the routing and button functionality:
+
+Example Implementation
+Update your button section in Client Profile like this:
+
+jsx
+Copy code
+<div className="flex flex-col gap-2 mt-4">
+  {/* Profile */}
+  <Link
+    to={`/client/${id}/profile`}
+    className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+  >
+    Profile
+  </Link>
+
+  {/* View Transactions */}
+  <Link
+    to={`/client/${id}/transactions`}
+    className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+  >
+    View Transactions
+  </Link>
+
+  {/* Edit Transactions */}
+  <Link
+    to={`/client/${id}/edit-transactions`}
+    className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+  >
+    Edit Transactions
+  </Link>
+
+  {/* Categorize Transactions */}
+  <Link
+    to={`/client/${id}/categorize`}
+    className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+  >
+    Categorize Transactions
+  </Link>
+
+  {/* View Reports */}
+  <Link
+    to={`/client/${id}/reports`}
+    className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+  >
+    View Reports
+  </Link>
+</div>
+Routing in App.js
+You’ll need to define routes for each of these pages in App.js:
+
+jsx
+Copy code
+<Routes>
+  <Route path="/client/:id/profile" element={<ClientProfile />} />
+  <Route path="/client/:id/transactions" element={<ViewTransactions />} />
+  <Route path="/client/:id/edit-transactions" element={<EditTransactions />} />
+  <Route path="/client/:id/categorize" element={<CategorizeTransactions />} />
+  <Route path="/client/:id/reports" element={<ViewReports />} />
+</Routes>
+Placeholder Pages
+If these pages aren’t built yet, you can create simple placeholder components like:
+
+jsx
+Copy code
+const ViewTransactions = () => <h1>View Transactions Page</h1>;
+const EditTransactions = () => <h1>Edit Transactions Page</h1>;
+const CategorizeTransactions = () => <h1>Categorize Transactions Page</h1>;
+const ViewReports = () => <h1>View Reports Page</h1>;
+Let me know if this works for you, and we can refine it further! 🚀

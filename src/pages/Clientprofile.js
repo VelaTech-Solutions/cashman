@@ -316,10 +316,10 @@ const Clientprofile = () => {
           Back to Dashboard
         </Link>
         <Link
-          to="/testviewclient"
+          to="/Viewclient"
           className="text-white hover:text-blue-400 transition"
         >
-          Back to Test View Client
+          Back to View Client
         </Link>
       </nav>
 
@@ -359,26 +359,49 @@ const Clientprofile = () => {
       </div>
 
       {/* Buttons Stacked Vertically */}
+      
+      {/* Buttons Stacked Vertically */}
       <div className="flex flex-col gap-2 mt-4">
-        {/* Profile Buttons */}
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60">
-          Profile
-        </button>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60">
-          View Transactions
-        </button>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60">
-          Edit Transactions
-        </button>
+          {/* Profile */}
+          <Link
+            to={`/client/${id}/profile`}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+          >
+            Profile
+          </Link>
 
-        {/* This Links with CategorizePage.js */}
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60">
-          Categorize Transactions
-        </button>
+          {/* View Transactions */}
+          <Link
+            to={`/client/${id}/transactions`}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+          >
+            View Transactions
+          </Link>
 
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60">
-          View Reports
-        </button>
+          {/* Edit Transactions */}
+          <Link
+            to={`/client/${id}/edit-transactions`}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+          >
+            Edit Transactions
+          </Link>
+
+          {/* Categorize Transactions */}
+          <Link
+            to={`/client/${id}/categorize`}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+          >
+            Categorize Transactions
+          </Link>
+
+          {/* View Reports */}
+          <Link
+            to={`/client/${id}/reports`}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+          >
+            View Reports
+          </Link>
+        
 
         {/* link with storage and firestore */}
         <div>
