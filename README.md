@@ -162,7 +162,7 @@ tree -a -I 'node_modules|objects|build|venv|__pycache__' > trash/directory_struc
 ## Backup Project
 
 ```bash
-zip -r /home/ubuntu/cashman/cashman_v1.5_javafunctions_backup.zip /home/ubuntu/cashman
+zip -r /home/ubuntu/cashman/cashman_v1.6_adding_pages_backup.zip /home/ubuntu/cashman
 ```
 
 ---
@@ -185,10 +185,16 @@ Removed the Java Functions
 
 cd functions-py
 sudo apt install python3-venv
-python3 -m venv venvtest
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
 # update requirements.txt
 
 pip freeze > requirements.txt
+
+
+# testenv
+
+python3 -m venv venvtest
+source venvtest/bin/activate

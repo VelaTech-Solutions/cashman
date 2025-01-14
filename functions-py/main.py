@@ -38,6 +38,11 @@ from banks.clean_tyme import clean_data as clean_tyme
 # Initialize Firebase Admin SDK
 initialize_app()
 
+# From
+# gcloud functions deploy handleExtractData --memory=256MB
+# To
+# gcloud functions deploy handleExtractData --memory=512MB
+
 @https_fn.on_request()
 def handleExtractData(req: https_fn.Request) -> https_fn.Response:
     response = https_fn.Response()
