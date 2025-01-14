@@ -1,97 +1,97 @@
 import re
-import pandas as pd
+import firebase_admin
+from firebase_admin import firestore, initialize_app
+from config import PROJECT_ID
+from datetime import datetime
 
-# Refined regex for extracting transaction lines
+# env variables
+from config import API_KEY, PROJECT_ID, STORAGE_BUCKET
+# print(API_KEY, PROJECT_ID, STORAGE_BUCKET)  # For debugging
+
+try:
+    # Initialize Firebase Admin SDK
+    initialize_app(options={"projectId": PROJECT_ID})
+    db = firestore.client()
+    print("Firebase Admin SDK initialized successfully.")
+except Exception as e:
+    print(f"Error initializing Firebase Admin SDK: {e}")
+
+
+# Regex for extracting transaction details
 transaction_regex = r"""
 (\d{2}\/\d{2}\/\d{4})            # Group 1: Date 1 (dd/mm/yyyy)
-\s?                              # Optional whitespace between dates
-(\d{2}\/\d{2}\/\d{4})?           # Group 2: Date 2 (optional, dd/mm/yyyy)
-.*?                              # Non-greedy match for description text
-(-?\d*\s?\d*\.\d{2})             # Group 3: Amount (e.g., debit/credit amount, optional negative sign for debit)
-\s?                              # Optional whitespace
-(-?\d*\s?\d*\.\d{2})?            # Group 4: Optional second amount (e.g., balance)
+\s?                                  # Optional whitespace
+(\d{2}\/\d{2}\/\d{4})?           # Group 2: Date 2 (optional)
+.*?                                  # Non-greedy match for description
+(-?\d*\s?\d*\.\d{2})             # Group 3: Debit or Credit Amount
+\s?                                  # Optional whitespace
+(-?\d*\s?\d*\.\d{2})?            # Group 4: Balance Amount
 """
 
-def clean_data(extracted_text):
+def clean_data(extracted_text, client_id):
     """
-    Processes and cleans Capitec bank statement text.
+    Cleans Capitec bank statement text and inserts transactions into Firestore.
 
     Args:
-        extracted_text (str): Extracted text from the PDF.
+        extracted_text (str): Extracted text from the bank statement.
+        client_id (str): Client ID for Firestore document reference.
 
     Returns:
-        pd.DataFrame: Processed transactions as a DataFrame.
+        dict: Response indicating success and transaction count.
     """
     print("Processing Capitec bank statement...")
-    transactions_file = "transactions.csv"  # File for incremental saving
-    first_write = True
 
-    for transactions in extract_transactions_in_chunks(extracted_text):
-        df = pd.DataFrame(transactions)
-        # Save to file incrementally
-        df.to_csv(transactions_file, mode="a", header=first_write, index=False)
-        first_write = False
+    # Split text into lines
+    lines = extracted_text.splitlines()
+    transactions = []
 
-    print("Transaction processing completed.")
-    return pd.read_csv(transactions_file)  # Read the final file back into a DataFrame
-
-
-def extract_transactions_in_chunks(extracted_text, chunk_size=100):
-    """
-    Extracts transactions in smaller chunks to optimize memory usage.
-
-    Args:
-        extracted_text (str): Extracted text from extracted_text.
-        chunk_size (int): Number of transactions per chunk.
-
-    Yields:
-        List[Dict]: Chunk of transactions.
-    """
-    # Clean text: remove commas and asterisks
-    extracted_text = extracted_text.replace(",", "").replace("*", "")
-
-    # Compile regex with verbose flag
+    # Compile regex
     pattern = re.compile(transaction_regex, re.VERBOSE)
 
-    # Find matches
-    matches = pattern.finditer(extracted_text)
-    print("Processing matches in chunks...")
+    for line in lines:
+        match = pattern.search(line)
+        if match:
+            try:
+                # Extract transaction details
+                date1 = match.group(1).strip() if match.group(1) else None
+                date2 = match.group(2).strip() if match.group(2) else None
+                debit_or_credit = match.group(3).strip() if match.group(3) else None
+                balance = match.group(4).strip() if match.group(4) else None
 
-    transactions = []
-    for match in matches:
-        try:
-            # Handle tuple indexes safely
-            date1 = match.group(1).strip() if match.group(1) else None
-            date2 = match.group(2).strip() if match.group(2) else None
-            debit_or_credit = match.group(3).strip() if match.group(3) else None
-            balance = match.group(4).strip() if match.group(4) else None
+                debit_amount, credit_amount = None, None
+                if debit_or_credit:
+                    if "-" in debit_or_credit:
+                        debit_amount = float(debit_or_credit.replace(" ", ""))
+                    else:
+                        credit_amount = float(debit_or_credit.replace(" ", ""))
 
-            # Parse amounts safely
-            debit_amount, credit_amount = None, None
-            if debit_or_credit:
-                if "-" in debit_or_credit:
-                    debit_amount = float(debit_or_credit.replace(" ", ""))
-                else:
-                    credit_amount = float(debit_or_credit.replace(" ", ""))
+                balance_amount = float(balance.replace(" ", "")) if balance else None
 
-            balance_amount = float(balance.replace(" ", "")) if balance else None
+                # Append to transactions list
+                transactions.append({
+                    "date1": date1,
+                    "date2": date2,
+                    "description": None,  # Placeholder, can be populated later
+                    "fees_description": None,  # Placeholder
+                    "fees_type": None,  # Placeholder
+                    "fees_amount": 0.0,  # Default 0 if not available
+                    "debit_amount": debit_amount,
+                    "credit_amount": credit_amount,
+                    "balance_amount": balance_amount,
+                })
+            except Exception as e:
+                print(f"Error processing line: {line}, Error: {e}")
 
-            # Append transaction dictionary
-            transactions.append({
-                "date1": date1,
-                "date2": date2,
-                "debit_amount": debit_amount,
-                "credit_amount": credit_amount,
-                "balance_amount": balance_amount,
-            })
-
-            # Yield transactions in chunks
-            if len(transactions) >= chunk_size:
-                yield transactions
-                transactions = []  # Reset the chunk
-        except Exception as e:
-            print(f"Error processing match: {match.groups()}, Error: {e}")
-
-    # Yield remaining transactions
-    if transactions:
-        yield transactions
+    # Insert transactions into Firestore
+    try:
+        doc_ref = db.collection("clients").document(client_id)
+        doc_ref.update({
+            "transactions": firestore.ArrayUnion(transactions),
+            "number_of_transactions": firestore.Increment(len(transactions)),
+            "last_updated": datetime.utcnow().isoformat()
+        })
+        print(f"Inserted {len(transactions)} transactions into Firestore for client {client_id}.")
+        return {"status": "success", "message": f"Inserted {len(transactions)} transactions."}
+    except Exception as e:
+        print(f"Error inserting into Firestore: {e}")
+        return {"status": "error", "message": str(e)}

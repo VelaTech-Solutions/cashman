@@ -43,6 +43,7 @@ initialize_app()
 # To
 # gcloud functions deploy handleExtractData --memory=512MB
 
+# Working test 2
 @https_fn.on_request()
 def handleExtractData(req: https_fn.Request) -> https_fn.Response:
     response = https_fn.Response()
@@ -116,7 +117,7 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
             return error_response(response, "Invalid bank name.", 400)
 
         # Cleaned extracted text
-        cleaned_transactions = cleaner_map[bank_name](extracted_text)
+        cleaned_transactions = cleaner_map[bank_name](extracted_text)(client_id)
 
         # Prepare cleaned data
         number_of_transactions = len(cleaned_transactions)
