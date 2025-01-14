@@ -23,24 +23,29 @@ def clean_data(extracted_text):
         pd.DataFrame: Processed transactions as a DataFrame.
     """
     print("Processing Capitec bank statement...")
-    cleaned_transactions = extract_transactions(extracted_text)
+    transactions_file = "transactions.csv"  # File for incremental saving
+    first_write = True
 
-    print(f"Processed {len(cleaned_transactions)} transactions.")
-    if not cleaned_transactions.empty:
-        print(cleaned_transactions.head())  # Display first few rows for verification
+    for transactions in extract_transactions_in_chunks(extracted_text):
+        df = pd.DataFrame(transactions)
+        # Save to file incrementally
+        df.to_csv(transactions_file, mode="a", header=first_write, index=False)
+        first_write = False
 
-    return cleaned_transactions
+    print("Transaction processing completed.")
+    return pd.read_csv(transactions_file)  # Read the final file back into a DataFrame
 
 
-def extract_transactions(extracted_text):
+def extract_transactions_in_chunks(extracted_text, chunk_size=100):
     """
-    Extracts transactions from the provided text using regex.
+    Extracts transactions in smaller chunks to optimize memory usage.
 
     Args:
         extracted_text (str): Extracted text from extracted_text.
+        chunk_size (int): Number of transactions per chunk.
 
-    Returns:
-        pd.DataFrame: Cleaned transaction data as a DataFrame.
+    Yields:
+        List[Dict]: Chunk of transactions.
     """
     # Clean text: remove commas and asterisks
     extracted_text = extracted_text.replace(",", "").replace("*", "")
@@ -49,21 +54,20 @@ def extract_transactions(extracted_text):
     pattern = re.compile(transaction_regex, re.VERBOSE)
 
     # Find matches
-    matches = pattern.findall(extracted_text)
-    print(f"Matches found: {len(matches)}")
+    matches = pattern.finditer(extracted_text)
+    print("Processing matches in chunks...")
 
     transactions = []
     for match in matches:
         try:
             # Handle tuple indexes safely
-            date1 = match[0].strip() if len(match) > 0 and match[0] else None
-            date2 = match[1].strip() if len(match) > 1 and match[1] else None
-            debit_or_credit = match[2].strip() if len(match) > 2 and match[2] else None
-            balance = match[3].strip() if len(match) > 3 and match[3] else None
+            date1 = match.group(1).strip() if match.group(1) else None
+            date2 = match.group(2).strip() if match.group(2) else None
+            debit_or_credit = match.group(3).strip() if match.group(3) else None
+            balance = match.group(4).strip() if match.group(4) else None
 
             # Parse amounts safely
-            debit_amount = None
-            credit_amount = None
+            debit_amount, credit_amount = None, None
             if debit_or_credit:
                 if "-" in debit_or_credit:
                     debit_amount = float(debit_or_credit.replace(" ", ""))
@@ -78,15 +82,16 @@ def extract_transactions(extracted_text):
                 "date2": date2,
                 "debit_amount": debit_amount,
                 "credit_amount": credit_amount,
-                "balance_amount": balance_amount
+                "balance_amount": balance_amount,
             })
+
+            # Yield transactions in chunks
+            if len(transactions) >= chunk_size:
+                yield transactions
+                transactions = []  # Reset the chunk
         except Exception as e:
-            print(f"Error processing match: {match}, Error: {e}")
+            print(f"Error processing match: {match.groups()}, Error: {e}")
 
-    # Convert to DataFrame
+    # Yield remaining transactions
     if transactions:
-        return pd.DataFrame(transactions)
-    else:
-        print("No valid transactions found.")
-        return pd.DataFrame()
-
+        yield transactions
