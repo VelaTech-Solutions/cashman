@@ -3,6 +3,7 @@
     {
       "source": "functions-py",
       "codebase": "default",
+      "memory": "512MB",
       "runtime": "python310",
       "timeoutSeconds": 540,
       "predeploy": [],
