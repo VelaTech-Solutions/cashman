@@ -255,55 +255,50 @@ const Clientprofile = () => {
   if (error) return <p className="text-red-500">{error}</p>;
 
   // Handle data extraction
-  const handleExtractData = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
 
-    logDebug("Starting handleExtractData process", { clientId: id });
 
-    // Map frontend method to backend method
-    const bankName = clientData.bankName;
-    const selectedMethod = processingMethod === "pdfparser" ? "Parser" : "OCR";
-
-    logDebug("Bank name", bankName);
-    logDebug("Selected method", selectedMethod);
-
-    try {
-      setProcessing(true);
-      const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractData",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: id,
-            bankName: bankName,
-            method: selectedMethod, // Send mapped method value
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        logDebug("Request failed", { status: response.status, errorText });
-        throw new Error(`Request failed with status ${response.status}`);
+  
+    // Handle data extraction
+    const handleExtractData = async () => {
+      if (!id) {
+        alert("Client ID is not provided.");
+        return;
       }
-
-      const result = await response.json();
-      logDebug("Backend response", result);
-      alert(result.message || "Data extracted successfully!");
-    } catch (error) {
-      logDebug("Error fetching bank statement", error);
-      alert(error.message || "An error occurred while extracting data.");
-    } finally {
-      setProcessing(false);
-      logDebug("Processing state after request");
-    }
-  };
+    
+      setIsProcessing(true);
+      setErrorMessage("");
+    
+      try {
+        const response = await fetch(
+          "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractData",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              clientId: id,
+              bankName: clientData.bankName,
+              method: processingMethod === "pdfparser" ? "Parser" : "OCR",
+            }),
+          }
+        );
+    
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+        }
+    
+        const result = await response.json();
+        alert(result.message || "Data extracted successfully!");
+      } catch (error) {
+        console.error("Error extracting data:", error);
+        setErrorMessage("An error occurred while extracting data. Please try again.");
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+    
 
   return (
     <div className="p-8 bg-gray-900 text-white min-h-screen">
@@ -435,7 +430,7 @@ const Clientprofile = () => {
           <p className="text-sm text-white">
             <strong>Choose a method to process your file:</strong>
             <br />- Use <strong>PDF Parser</strong> for selectable text.
-            <br />- Use <strong>OCR</strong> for scanned or image-based files.
+            <br />- Use <strong>OCR</strong> for scanned or image-based files. Not Working for now
           </p>
 
           {/* Dropdown for Processing Method */}
@@ -458,16 +453,55 @@ const Clientprofile = () => {
           </div>
 
           {/* Extract Data Button */}
-          <button
-            className={`mt-4 ${isProcessing ? "bg-gray-500" : "bg-green-500 hover:bg-green-600"} text-white py-2 px-4 rounded w-full`}
-            onClick={handleExtractData}
-            disabled={isProcessing}
-          >
-            {isProcessing
-              ? "Processing..."
-              : "Extract Bank Statement Transactions"}
-          </button>
-          {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
+          {/* Extract Data Button with Loading */}
+          <div className="w-full">
+            <button
+              className={`mt-4 w-full py-2 px-4 rounded ${
+                isProcessing
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
+              onClick={handleExtractData}
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                "Extract Bank Statement Transactions"
+              )}
+            </button>
+
+            {/* Error Message */}
+            {errorMessage && (
+              <p className="text-red-500 mt-4" role="alert">
+                {errorMessage}
+              </p>
+            )}
+          </div>
+
+
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-4 mt-4">

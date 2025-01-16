@@ -1,4 +1,5 @@
 .
+├── .env
 ├── .firebase
 │   ├── hosting.YnVpbGQ.cache
 │   ├── hosting.cHVibGlj.cache
@@ -60,6 +61,7 @@
 │   └── firestore.indexes.json
 ├── deploy.sh
 ├── firebase.json
+├── firestore-debug.log
 ├── functions-js
 │   ├── .eslintrc.js
 │   ├── .gitignore
@@ -67,7 +69,7 @@
 │   ├── package-lock.json
 │   └── package.json
 ├── functions-py
-│   ├── .env
+│   ├── .gcloudignore
 │   ├── .gitignore
 │   ├── banks
 │   │   ├── __init__.py
@@ -77,6 +79,7 @@
 │   │   ├── clean_ned.py
 │   │   ├── clean_standard.py
 │   │   └── clean_tyme.py
+│   ├── config.py
 │   ├── main.py
 │   ├── pdf
 │   │   ├── __init__.py
@@ -86,7 +89,8 @@
 │   └── utils
 │       ├── __init__.py
 │       ├── cleaning_router.py
-│       ├── firestore_helper.py
+│       ├── cors_handler.py
+│       ├── firestore_handler.py
 │       ├── method_handler.py
 │       ├── request_validator.py
 │       └── response_validator.py
@@ -123,12 +127,18 @@
 │   ├── pages
 │   │   ├── Addclient.js
 │   │   ├── CategorizePage.js
+│   │   ├── CategorizeTransactions.js
 │   │   ├── Clientprofile.js
 │   │   ├── Dashboard.js
 │   │   ├── Developernotes.js
+│   │   ├── EditTransactions.js
 │   │   ├── Editclient.js
 │   │   ├── Login.js
+│   │   ├── Profile.js
 │   │   ├── Settings.js
+│   │   ├── ViewEditclient.js
+│   │   ├── ViewReports.js
+│   │   ├── ViewTransactions.js
 │   │   └── Viewclient.js
 │   ├── reportWebVitals.js
 │   ├── services
@@ -151,18 +161,30 @@
 └── trash
     ├── Dashboard.css
     ├── Settings.css
+    ├── Untitled.ipynb
+    ├── Untitled1.ipynb
+    ├── Untitled2.ipynb
+    ├── Untitled3.ipynb
     ├── auth.js
     ├── bank_formats.txt
+    ├── clean_capitec_test.py
+    ├── clean_fnb_test.py
     ├── component.html
     ├── config.js
     ├── dashboard.html
     ├── database.js
+    ├── debug.log
     ├── directory_structure.txt
+    ├── extracted_transactions.csv
     ├── firestore.js
     ├── global.css
     ├── index2.html
     ├── index3.html
+    ├── matches.csv
     ├── setupTests.js
-    └── storage.js
+    ├── storage.js
+    ├── test_cors.py
+    ├── testcap.csv
+    └── untitled.py
 
-36 directories, 129 files
+36 directories, 151 files

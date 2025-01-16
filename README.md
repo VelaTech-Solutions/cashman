@@ -154,7 +154,7 @@ Launches the test runner in interactive watch mode.
 ## Get Tree
 
 ```bash
-tree -a -I 'node_modules|objects|build|venv|__pycache__' > trash/directory_structure.txt
+tree -a -I 'node_modules|objects|build|venv|__pycache__|venvtest' > trash/directory_structure.txt
 ```
 
 ---

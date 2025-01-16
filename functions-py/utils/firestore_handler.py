@@ -1,21 +1,28 @@
 # utils/firestore_handler.py
 
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-from firebase_admin import firestore
+def handle_firestore():
+    # Check if the default app is already initialized
+    if not firebase_admin._apps:
+        # Path to your Firebase Admin SDK private key JSON file
+        cred = credentials.Certificate("firebase_credentials.json")
+        firebase_admin.initialize_app(cred)
 
-# Creating the Firestore client assumes that initialize_app() has already been called.
-db = firestore.client()
+    return firestore.client()
 
-def store_bank_statement(client_id: str, raw_data: str) -> None:
-    """
-    Stores the extracted bank statement text under a document with ID equal to client_id.
-    Stores the text in a field 'rawData' and adds a timestamp for when the data was stored.
-    """
-    doc_ref = db.collection("bank_statements").document(client_id)
-    doc_ref.set({
-        "rawData": raw_data,
-        "lastUpdated": firestore.SERVER_TIMESTAMP
-    }, merge=True)
+
+# def store_bank_statement(client_id: str, raw_data: str) -> None:
+#     """
+#     Stores the extracted bank statement text under a document with ID equal to client_id.
+#     Stores the text in a field 'rawData' and adds a timestamp for when the data was stored.
+#     """
+#     doc_ref = db.collection("bank_statements").document(client_id)
+#     doc_ref.set({
+#         "rawData": raw_data,
+#         "lastUpdated": firestore.SERVER_TIMESTAMP
+#     }, merge=True)
 
 # def save_cleaned_data(client_id, bank_name, cleaned_data):
 #     """
@@ -47,4 +54,5 @@ def store_bank_statement(client_id: str, raw_data: str) -> None:
 #     print("DEBUG: Saving raw data to Firestore")
 #     db = firestore.client()
 #     db.collection("clients").document(client_id).set({"rawData": extracted_text}, merge=True)
+
 
