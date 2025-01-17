@@ -57,6 +57,7 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
         client_id = data["clientId"]
         bank_name = data["bankName"]
         method = data["method"]
+        # linesToDelete = data["linesToDelete"]
 
         print(f"Client ID: {client_id}, Bank Name: {bank_name}, Method: {method}")
 
@@ -309,6 +310,12 @@ def extract_transactions_capitec(extracted_text, client_id):
     Returns:
         list: Processed transaction data as dictionaries.
     """
+
+    # linesToDelete coming from the frontend
+    # for line in linesToDelete:
+    #     extracted_text = extracted_text.replace(line, "")
+
+
     # Clean text Here
     extracted_text = extracted_text.replace(",", "").replace("*", "")
     
@@ -400,6 +407,9 @@ def extract_transactions_fnb(extracted_text, client_id):
     Returns:
         list: Processed transaction data in the form of dictionaries.
     """
+    # linesToDelete
+
+
     # Clean text: remove commas and asterisks to reduce memory usage
     extracted_text = extracted_text.replace(",", "").replace("*", "")
 

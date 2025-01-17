@@ -21,7 +21,6 @@ import Settings from "./pages/Settings";
 import CategorySettings from "./pages/CategorySettings";
 import Developernotes from "./pages/Developernotes";
 
-
 import Testpage from "./testpages/Testpage";
 import Teststorage from "./testpages/Teststorage";
 // import Testfirestore from './testpages/Testfirestore';
@@ -55,8 +54,14 @@ function App() {
         <Route path="/client/:id" element={<Clientprofile />} />
         <Route path="/client/:id/profile" element={<Profile />} />
         <Route path="/client/:id/transactions" element={<ViewTransactions />} />
-        <Route path="/client/:id/edit-transactions" element={<EditTransactions />} />
-        <Route path="/client/:id/categorize" element={<CategorizeTransactions />} />
+        <Route
+          path="/client/:id/edit-transactions"
+          element={<EditTransactions />}
+        />
+        <Route
+          path="/client/:id/categorize"
+          element={<CategorizeTransactions />}
+        />
         <Route path="/client/:id/reports" element={<ViewReports />} />
 
         <Route path="/settings" element={<Settings />} />

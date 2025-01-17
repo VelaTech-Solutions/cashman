@@ -53,12 +53,16 @@ const ViewTransactions = () => {
   }
 
   // Filter transactions based on search query
-  const filteredTransactions = clientData?.transactions?.filter((transaction) => {
-    return (
-      transaction.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  const filteredTransactions = clientData?.transactions?.filter(
+    (transaction) => {
+      return (
+        transaction.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    },
+  );
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
@@ -69,25 +73,27 @@ const ViewTransactions = () => {
         animate={{ x: 0 }}
       >
         <div className="flex items-center space-x-3 pb-4 pt-4">
-          <h1 className="text-2xl font-bold text-blue-400">Cash Flow Manager</h1>
+          <h1 className="text-2xl font-bold text-blue-400">
+            Cash Flow Manager
+          </h1>
         </div>
 
         <nav className="space-y-4 border-t border-gray-700 pt-4">
-          
-          <Link 
-            to="/dashboard" 
-            className="flex items-center space-x-3 hover:text-white transition">
+          <Link
+            to="/dashboard"
+            className="flex items-center space-x-3 hover:text-white transition"
+          >
             Back to Dashboard
             <i className="ph-check-square text-xl"></i>
           </Link>
-          
-          <Link 
-            to={`/client/${id}`} 
-            className="flex items-center space-x-3 hover:text-white transition">
+
+          <Link
+            to={`/client/${id}`}
+            className="flex items-center space-x-3 hover:text-white transition"
+          >
             Back to Client Profile
             <i className="ph-check-square text-xl"></i>
           </Link>
-
         </nav>
       </motion.div>
 
@@ -95,7 +101,9 @@ const ViewTransactions = () => {
       <div className="flex-1 p-8">
         {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">View Transactions</h1>
+          <h1 className="text-3xl font-bold text-blue-400">
+            View Transactions
+          </h1>
         </header>
 
         {/* Overview Section */}
@@ -105,18 +113,28 @@ const ViewTransactions = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">Total Transactions</p>
+              <p className="text-lg font-bold text-blue-400">
+                Total Transactions
+              </p>
               <p className="text-3xl font-bold text-white">
                 {clientData.transactions?.length || 0}
               </p>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">Transactions Needing Review</p>
-              <p className="text-3xl font-bold text-white">{/* Placeholder */}0</p>
+              <p className="text-lg font-bold text-blue-400">
+                Transactions Needing Review
+              </p>
+              <p className="text-3xl font-bold text-white">
+                {/* Placeholder */}0
+              </p>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">Corrected Transactions</p>
-              <p className="text-3xl font-bold text-white">{/* Placeholder */}0</p>
+              <p className="text-lg font-bold text-blue-400">
+                Corrected Transactions
+              </p>
+              <p className="text-3xl font-bold text-white">
+                {/* Placeholder */}0
+              </p>
             </div>
           </div>
         </section>
@@ -138,28 +156,48 @@ const ViewTransactions = () => {
               <table className="table-auto w-full text-left">
                 <thead>
                   <tr className="border-b border-gray-700">
-                  <th className="px-4 py-2 text-sm">Date1</th>
-                  <th className="px-4 py-2 text-sm">Date2</th>
-                  <th className="px-4 py-2 text-sm">Description</th>
-                  <th className="px-4 py-2 text-sm">Fee Type</th>
-                  <th className="px-4 py-2 text-sm">Fee Amount</th>
-                  <th className="px-4 py-2 text-sm">Credit Amount</th>
-                  <th className="px-4 py-2 text-sm">Debit Amount</th>
-                  <th className="px-4 py-2 text-sm">Balance Amount</th>
+                    <th className="px-4 py-2 text-sm">Date1</th>
+                    <th className="px-4 py-2 text-sm">Date2</th>
+                    <th className="px-4 py-2 text-sm">Description</th>
+                    <th className="px-4 py-2 text-sm">Fee Type</th>
+                    <th className="px-4 py-2 text-sm">Fee Amount</th>
+                    <th className="px-4 py-2 text-sm">Credit Amount</th>
+                    <th className="px-4 py-2 text-sm">Debit Amount</th>
+                    <th className="px-4 py-2 text-sm">Balance Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTransactions.map((transaction, index) => (
-                  <tr key={index} className="border-b border-gray-700">
-                    <td className="px-4 py-2 text-sm">{transaction.date1}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.date2}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.description}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.fee_type}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.fee_amount ? `R ${transaction.fee_amount.toFixed(2)}` : "-"}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.credit_amount ? `R ${transaction.credit_amount.toFixed(2)}` : "-"}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.debit_amount ? `R ${transaction.debit_amount.toFixed(2)}` : "-"}</td>
-                    <td className="px-4 py-2 text-sm">{transaction.balance_amount ? `R ${transaction.balance_amount.toFixed(2)}` : "-"}</td>
-                  </tr>
+                    <tr key={index} className="border-b border-gray-700">
+                      <td className="px-4 py-2 text-sm">{transaction.date1}</td>
+                      <td className="px-4 py-2 text-sm">{transaction.date2}</td>
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.description}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.fee_type}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.fee_amount
+                          ? `R ${transaction.fee_amount.toFixed(2)}`
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.credit_amount
+                          ? `R ${transaction.credit_amount.toFixed(2)}`
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.debit_amount
+                          ? `R ${transaction.debit_amount.toFixed(2)}`
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.balance_amount
+                          ? `R ${transaction.balance_amount.toFixed(2)}`
+                          : "-"}
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>

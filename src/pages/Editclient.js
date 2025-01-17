@@ -80,7 +80,9 @@ const EditClient = () => {
         animate={{ x: 0 }}
       >
         <div className="flex items-center space-x-3 pb-4 pt-4">
-          <h1 className="text-2xl font-bold text-blue-400">Cash Flow Manager</h1>
+          <h1 className="text-2xl font-bold text-blue-400">
+            Cash Flow Manager
+          </h1>
         </div>
         {/* User Email */}
         <div className="text-sm text-gray-300 border-t border-gray-700 pt-4">
@@ -116,7 +118,9 @@ const EditClient = () => {
               {/* Total Clients */}
               <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
                 <p className="text-lg font-bold text-blue-400">Total Clients</p>
-                <p className="text-3xl font-bold text-white">{clients.length}</p>
+                <p className="text-3xl font-bold text-white">
+                  {clients.length}
+                </p>
               </div>
             </div>
           </div>
@@ -144,7 +148,7 @@ const EditClient = () => {
                 .filter((client) =>
                   `${client.clientName} ${client.clientSurname}`
                     .toLowerCase()
-                    .includes(searchQuery)
+                    .includes(searchQuery),
                 )
                 .map((client) => (
                   <div

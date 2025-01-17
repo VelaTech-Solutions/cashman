@@ -18,8 +18,6 @@ const CategorySettings = () => {
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate(); // Initialize the navigate function
 
-  
-
   // Fetch categories and subcategories
   const fetchCategoriesAndSubcategories = async () => {
     try {
@@ -142,38 +140,43 @@ const CategorySettings = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-    {/* Sidebar */}
-    <motion.div
-      className="lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg hidden lg:block"
-      initial={{ x: -100 }}
-      animate={{ x: 0 }}
-    >
-      <div className="flex items-center space-x-3 pb-4 pt-4">
-        <h1 className="text-2xl font-bold text-blue-400">Cash Flow Manager</h1>
-      </div>
+      {/* Sidebar */}
+      <motion.div
+        className="lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg hidden lg:block"
+        initial={{ x: -100 }}
+        animate={{ x: 0 }}
+      >
+        <div className="flex items-center space-x-3 pb-4 pt-4">
+          <h1 className="text-2xl font-bold text-blue-400">
+            Cash Flow Manager
+          </h1>
+        </div>
 
-      <nav className="space-y-4 border-t border-gray-700 pt-4">
-        <button
-          onClick={() => navigate(-1)} // Navigate back to the previous page
-          className="flex items-center space-x-3 text-white hover:text-blue-400 transition"
-        >
-          <i className="ph-arrow-left text-xl"></i> Back
-        </button>
+        <nav className="space-y-4 border-t border-gray-700 pt-4">
+          <button
+            onClick={() => navigate(-1)} // Navigate back to the previous page
+            className="flex items-center space-x-3 text-white hover:text-blue-400 transition"
+          >
+            <i className="ph-arrow-left text-xl"></i> Back
+          </button>
 
-        <Link
+          {/* <Link
           to="/dashboard"
           className="flex items-center space-x-3 hover:text-white transition"
         >
           Back to Dashboard
           <i className="ph-check-square text-xl"></i>
-        </Link>
-        
-      </nav>
-    </motion.div>
+        </Link> */}
+          {/* Line */}
+          <div className="w-full h-0.5 bg-gray-700"></div>
+        </nav>
+      </motion.div>
 
       {/* Main Content */}
       <div className="flex-grow p-6">
-        <h1 className="text-3xl font-bold mb-6 text-blue-400">Category Settings</h1>
+        <h1 className="text-3xl font-bold mb-6 text-blue-400">
+          Category Settings
+        </h1>
 
         {/* Toggle Button */}
         <button
@@ -232,7 +235,9 @@ const CategorySettings = () => {
 
             {/* Subcategories Section */}
             <div>
-              <h2 className="text-2xl font-semibold mb-2">Manage Subcategories</h2>
+              <h2 className="text-2xl font-semibold mb-2">
+                Manage Subcategories
+              </h2>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -276,7 +281,9 @@ const CategorySettings = () => {
                           Parent: {subcategory.parentCategory || "None"}
                         </p>
                         <button
-                          onClick={() => handleDeleteSubcategory(subcategory.id)}
+                          onClick={() =>
+                            handleDeleteSubcategory(subcategory.id)
+                          }
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mt-2"
                         >
                           Delete Subcategory

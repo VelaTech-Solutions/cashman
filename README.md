@@ -162,7 +162,8 @@ tree -a -I 'node_modules|objects|build|venv|__pycache__|venvtest' > trash/direct
 ## Backup Project
 
 ```bash
-zip -r /home/ubuntu/cashman/cashman_v1.6_adding_pages_backup.zip /home/ubuntu/cashman
+zip -r /home/ubuntu/cashman/cashman_v1.7_Update_CategorizeTransactions_etc_backup.zip /home/ubuntu/cashman
+
 ```
 
 ---
@@ -198,3 +199,6 @@ pip freeze > requirements.txt
 
 python3 -m venv venvtest
 source venvtest/bin/activate
+
+# npx prettier --write .
+npx prettier --write .

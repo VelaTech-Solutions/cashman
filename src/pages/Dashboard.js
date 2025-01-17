@@ -26,118 +26,92 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
       {/* Sidebar */}
-      <div
-        className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 ${sidebarOpen ? "block" : "hidden lg:block"}`}
+      <motion.div
+        className="lg:w-64 w-72 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6 space-y-8 shadow-xl hidden lg:block"
+        initial={{ x: -100 }}
+        animate={{ x: 0 }}
       >
+        {/* Header */}
         <div className="flex items-center space-x-3 pb-4 pt-4">
-          <h1 className="text-2xl font-bold text-blue-400">
+          <h1 className="text-2xl font-extrabold text-blue-400 tracking-wide">
             Cash Flow Manager
           </h1>
         </div>
-        {/* User Email */}
-        <div className="text-sm text-gray-300 border-t border-gray-700 pt-4">
-          <p className="font-medium text-white">{userEmail || "Guest"}</p>
+
+        <Link
+          to="/"
+          className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
+        >
+          <i className="ph-sign-out text-xl text-blue-400"></i>
+          <span className="text-white">Logout</span>
+        </Link>
+
+        {/* User Info */}
+        <div className="bg-gray-800 p-4 rounded-lg shadow-sm">
+          <p className="text-sm font-medium text-white">
+            Logged in as:{" "}
+            <span className="text-blue-400">{userEmail || "Guest"}</span>
+          </p>
         </div>
-        <nav className="space-y-4 border-t border-gray-700 pt-4">
-          <Link
-            to="/"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-sign-out text-xl"></i>
-            <span>Logout</span>
-          </Link>
+
+        {/* Divider */}
+        <div className="w-full h-0.5 bg-gray-700"></div>
+
+        {/* Navigation */}
+        <nav className="space-y-6">
+          {/* Navigation Label */}
+          <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+            Main Navigation
+          </div>
+
+          {/* Links */}
+
           <Link
             to="/addclient"
-            className="flex items-center space-x-3 hover:text-white transition"
+            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
           >
-            <i className="ph-check-square text-xl"></i>
-            <span>Add Client</span>
+            <i className="ph-check-square text-xl text-blue-400"></i>
+            <span className="text-white">Add Client</span>
           </Link>
           <Link
             to="/editclient"
-            className="flex items-center space-x-3 hover:text-white transition"
+            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
           >
-            <i className="ph-swap text-xl"></i>
-            <span>Edit Client</span>
+            <i className="ph-swap text-xl text-blue-400"></i>
+            <span className="text-white">Edit Client</span>
           </Link>
           <Link
             to="/viewclient"
-            className="flex items-center space-x-3 hover:text-white transition"
+            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
           >
-            <i className="ph-file-text text-xl"></i>
-            <span>View Client</span>
+            <i className="ph-file-text text-xl text-blue-400"></i>
+            <span className="text-white">View Client</span>
           </Link>
           <Link
             to="/settings"
-            className="flex items-center space-x-3 hover:text-white transition"
+            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
           >
-            <i className="ph-globe text-xl"></i>
-            <span>Settings</span>
+            <i className="ph-globe text-xl text-blue-400"></i>
+            <span className="text-white">Settings</span>
           </Link>
           <Link
             to="/developernotes"
-            className="flex items-center space-x-3 hover:text-white transition"
+            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
           >
-            <i className="ph-gear text-xl"></i>
-            <span>Developer Notes</span>
+            <i className="ph-gear text-xl text-blue-400"></i>
+            <span className="text-white">Developer Notes</span>
           </Link>
 
-          {/* Make a line */}
-          <div className="border-t border-gray-700"></div>
+          {/* Divider */}
+          <div className="w-full h-0.5 bg-gray-700"></div>
 
-          {/* Dev Pages */}
-          <h1 className="text-2xl font-bold text-blue-400">
-            Dev And Test Pages
-          </h1>
-
-          <Link
-            to="/testpage"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-gear text-xl"></i>
-            <span>Test Page</span>
-          </Link>
-          <Link
-            to="/testfirestore"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-gear text-xl"></i>
-            <span>Test Firestore</span>
-          </Link>
-          <Link
-            to="/teststorage"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-gear text-xl"></i>
-            <span>Test Storage</span>
-          </Link>
-          <Link
-            to="/testfunctions"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-gear text-xl"></i>
-            <span>Test Functions</span>
-          </Link>
-          <Link
-            to="/testdash"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-gear text-xl"></i>
-            <span>Test Dashboard</span>
-          </Link>
-          <Link
-            to="/testviewclient"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            <i className="ph-gear text-xl"></i>
-            <span>Test View Client</span>
-          </Link>
+          {/* Navigation Label */}
+          <div className="mt-auto text-left text-gray-500 text-sm">
+            Integra Wealth ©<br />
+            All Rights Reserved 2025
+          </div>
         </nav>
-        <div className="mt-auto text-left text-gray-500 text-sm">
-          Integra Wealth ©<br />
-          All Rights Reserved 2025
-        </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
       <div className="flex-1 p-8">

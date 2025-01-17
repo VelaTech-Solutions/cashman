@@ -20,7 +20,6 @@ const Viewclient = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const clientsPerPage = 6; // Number of clients per page
 
-
   // Track user authentication
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -75,7 +74,7 @@ const Viewclient = () => {
   const filteredClients = clients.filter((client) =>
     `${client.clientName} ${client.clientSurname} ${client.id} ${client.bankName}`
       .toLowerCase()
-      .includes(searchQuery)
+      .includes(searchQuery),
   );
   // Paginate the filtered clients
   // const currentClients = filteredClients.slice(
@@ -179,67 +178,77 @@ const Viewclient = () => {
         {/* Client Listing with Pagination */}
         <section className="mt-8">
           {filteredClients.length === 0 ? (
-            <p className="text-center text-lg text-gray-500">No clients found.</p>
+            <p className="text-center text-lg text-gray-500">
+              No clients found.
+            </p>
           ) : (
             <div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredClients
-                  .slice(currentPage * clientsPerPage, (currentPage + 1) * clientsPerPage)
+                  .slice(
+                    currentPage * clientsPerPage,
+                    (currentPage + 1) * clientsPerPage,
+                  )
                   .map((client) => (
                     <div
                       key={client.id}
                       className="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-2xl transition-shadow"
                     >
-                    <h3 className="text-xl font-bold text-blue-400">
-                      {client.clientName} {client.clientSurname}
-                    </h3>
-                    <p className="text-sm text-gray-400 mt-2">
-                      <span className="font-bold">ID:</span> {client.id}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Bank:</span> {client.bankName}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Status:</span> {client.status}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Date Created:</span>{" "}
-                      {client.dateCreated}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Date Updated:</span>{" "}
-                      {client.dateUpdated}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Date Closed:</span>{" "}
-                      {client.dateClosed}
-                    </p>
-                    {/* if no transactions say no Extract Transactions */}
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Transactions:</span>{" "}
-                      {client.number_of_transactions && client.number_of_transactions > 0
-                        ? client.number_of_transactions
-                        : "Extract Transactions"}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Captured By:</span>{" "}
-                      {client.userEmail}
-                    </p>
-                    <Link
-                      to={`/client/${client.id}`}
-                      className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                ))}
+                      <h3 className="text-xl font-bold text-blue-400">
+                        {client.clientName} {client.clientSurname}
+                      </h3>
+                      <p className="text-sm text-gray-400 mt-2">
+                        <span className="font-bold">ID:</span> {client.id}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Bank:</span>{" "}
+                        {client.bankName}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Status:</span>{" "}
+                        {client.status}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Date Created:</span>{" "}
+                        {client.dateCreated}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Date Updated:</span>{" "}
+                        {client.dateUpdated}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Date Closed:</span>{" "}
+                        {client.dateClosed}
+                      </p>
+                      {/* if no transactions say no Extract Transactions */}
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Transactions:</span>{" "}
+                        {client.number_of_transactions &&
+                        client.number_of_transactions > 0
+                          ? client.number_of_transactions
+                          : "Extract Transactions"}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        <span className="font-bold">Captured By:</span>{" "}
+                        {client.userEmail}
+                      </p>
+                      <Link
+                        to={`/client/${client.id}`}
+                        className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  ))}
               </div>
 
               {/* Pagination Controls */}
               <div className="flex justify-center mt-6 space-x-4">
                 <button
                   className="bg-gray-700 text-white py-2 px-4 rounded disabled:opacity-50"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 0))
+                  }
                   disabled={currentPage === 0}
                 >
                   Previous
@@ -248,11 +257,15 @@ const Viewclient = () => {
                   className="bg-gray-700 text-white py-2 px-4 rounded disabled:opacity-50"
                   onClick={() =>
                     setCurrentPage((prev) =>
-                      Math.min(prev + 1, Math.ceil(filteredClients.length / clientsPerPage) - 1)
+                      Math.min(
+                        prev + 1,
+                        Math.ceil(filteredClients.length / clientsPerPage) - 1,
+                      ),
                     )
                   }
                   disabled={
-                    currentPage === Math.ceil(filteredClients.length / clientsPerPage) - 1
+                    currentPage ===
+                    Math.ceil(filteredClients.length / clientsPerPage) - 1
                   }
                 >
                   Next
