@@ -13,6 +13,7 @@ const ViewTransactions = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch client data
   useEffect(() => {
     const fetchClientData = async () => {
       try {
@@ -72,12 +73,21 @@ const ViewTransactions = () => {
         </div>
 
         <nav className="space-y-4 border-t border-gray-700 pt-4">
-          <Link to="/dashboard" className="hover:text-white transition">
+          
+          <Link 
+            to="/dashboard" 
+            className="flex items-center space-x-3 hover:text-white transition">
             Back to Dashboard
+            <i className="ph-check-square text-xl"></i>
           </Link>
-          <Link to={`/client/${id}`} className="hover:text-white transition">
+          
+          <Link 
+            to={`/client/${id}`} 
+            className="flex items-center space-x-3 hover:text-white transition">
             Back to Client Profile
+            <i className="ph-check-square text-xl"></i>
           </Link>
+
         </nav>
       </motion.div>
 
@@ -85,7 +95,7 @@ const ViewTransactions = () => {
       <div className="flex-1 p-8">
         {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">Transactions</h1>
+          <h1 className="text-3xl font-bold text-blue-400">View Transactions</h1>
         </header>
 
         {/* Overview Section */}

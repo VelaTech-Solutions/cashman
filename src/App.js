@@ -18,6 +18,7 @@ import CategorizeTransactions from "./pages/CategorizeTransactions";
 import ViewReports from "./pages/ViewReports";
 
 import Settings from "./pages/Settings";
+import CategorySettings from "./pages/CategorySettings";
 import Developernotes from "./pages/Developernotes";
 
 
@@ -59,6 +60,7 @@ function App() {
         <Route path="/client/:id/reports" element={<ViewReports />} />
 
         <Route path="/settings" element={<Settings />} />
+        <Route path="/categorysettings" element={<CategorySettings />} />
         <Route path="/developernotes" element={<Developernotes />} />
 
         {/* TEST PAGES */}

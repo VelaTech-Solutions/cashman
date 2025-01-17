@@ -214,10 +214,12 @@ const Viewclient = () => {
                       <span className="font-bold">Date Closed:</span>{" "}
                       {client.dateClosed}
                     </p>
+                    {/* if no transactions say no Extract Transactions */}
                     <p className="text-sm text-gray-400">
-                      {/* placeholder Please Extract Transactions */}
-                      <span className="font-bold">Transactions:</span> | Extract Transactions
-                      {client.number_of_transactions}
+                      <span className="font-bold">Transactions:</span>{" "}
+                      {client.number_of_transactions && client.number_of_transactions > 0
+                        ? client.number_of_transactions
+                        : "Extract Transactions"}
                     </p>
                     <p className="text-sm text-gray-400">
                       <span className="font-bold">Captured By:</span>{" "}
