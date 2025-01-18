@@ -25,6 +25,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
+      
       {/* Sidebar */}
       <motion.div
         className="lg:w-64 w-72 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6 space-y-8 shadow-xl hidden lg:block"
@@ -47,12 +48,12 @@ const Dashboard = () => {
         </Link>
 
         {/* User Info */}
-        <div className="bg-gray-800 p-4 rounded-lg shadow-sm">
+        {/* <div className="bg-gray-800 p-4 rounded-lg shadow-sm">
           <p className="text-sm font-medium text-white">
             Logged in as:{" "}
             <span className="text-blue-400">{userEmail || "Guest"}</span>
           </p>
-        </div>
+        </div> */}
 
         {/* Divider */}
         <div className="w-full h-0.5 bg-gray-700"></div>

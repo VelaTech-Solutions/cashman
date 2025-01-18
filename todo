@@ -450,3 +450,25 @@ const EditTransactions = () => <h1>Edit Transactions Page</h1>;
 const CategorizeTransactions = () => <h1>Categorize Transactions Page</h1>;
 const ViewReports = () => <h1>View Reports Page</h1>;
 Let me know if this works for you, and we can refine it further! 🚀
+
+
+
+Extract Statement Button: This function is working well.
+View Raw Extracted Data: Also functioning as expected.
+Add/Edit/Remove Line and View Removed Lines: You plan to allow users to highlight specific words or sentences from extracted data for removal. This will involve:
+Setting up front-end interactions for highlighting and selecting text.
+Creating back-end logic to process these selections and remove the lines.
+Re-running the extraction function to reflect the cleaned data.
+API Integration: You need to set up the communication between the front-end and back-end to handle these interactions.
+
+
+
+app mini game
+
+use transactions as a ball 
+
+the shoot the balls into a category
+
+the goal is to make the catagories as small as possible
+
+

@@ -39,6 +39,119 @@ from banks.clean_tyme import clean_data as clean_tyme
 # Initialize Firebase Admin SDK
 initialize_app()
 
+# @https_fn.on_request()
+# def handleExtractData(req: https_fn.Request) -> https_fn.Response:
+#     response = https_fn.Response()
+
+#     # Handle CORS
+#     response = handle_cors(req, response)
+#     if req.method == "OPTIONS":
+#         return response
+
+#     try:
+#         # Parse incoming data
+#         data = req.get_json(silent=True)
+#         if not data or "clientId" not in data:
+#             return error_response(response, "Missing clientId in request.", 400)
+
+#         client_id = data["clientId"]
+#         bank_name = data["bankName"]
+#         method = data["method"]
+#         # linesToDelete = data["linesToDelete"]
+
+#         print(f"Client ID: {client_id}, Bank Name: {bank_name}, Method: {method}")
+
+#         # Get the bank statement from Storage
+#         bucket = storage.bucket()
+#         folder_path = f"bank_statements/{client_id}/"
+#         blobs = list(bucket.list_blobs(prefix=folder_path))
+
+#         if not blobs:
+#             return error_response(response, "No bank statement found for the given clientId.", 404)
+
+#         # Download the bank statement
+#         blob = blobs[0]
+#         temp_file = tempfile.NamedTemporaryFile(delete=False)
+#         blob.download_to_filename(temp_file.name)
+#         temp_file_path = temp_file.name
+#         temp_file.close()
+
+#         # Normalize method input
+#         normalized_method = method.lower()
+#         if normalized_method in ["parser", "pdfparser"]:
+#             extracted_text = parse_pdf(temp_file_path)
+#         elif normalized_method == "ocr":
+#             extracted_text = ocr_pdf(temp_file_path)
+#         else:
+#             response.set_data(json.dumps({"error": "Invalid method. Use 'Parser' or 'OCR'."}))
+#             response.status = 400
+#             response.headers["Content-Type"] = "application/json"
+#             return response
+        
+#         # Fetch removal lines for the bank
+#         removal_lines = fetch_removal_lines(bank_name)
+
+#         # Filter the extracted text using the removal lines
+#         filtered_text = filter_extracted_text(extracted_text, removal_lines)
+
+#         # Save filtered data to Firestore
+#         db = firestore.client()
+#         doc_ref = db.collection("clients").document(client_id)
+#         doc_ref.set({
+#             "rawData": extracted_text,
+#             "filteredData": filtered_text
+#         }, merge=True)
+
+#         # Clean statement based on bank name
+#         cleaner_map = {
+#             "Absa Bank": clean_data_absa,
+#             "Capitec Bank": clean_data_capitec,
+#             "Fnb Bank": clean_data_fnb,
+#             "Ned Bank": clean_data_ned,
+#             "Standard Bank": clean_data_standard,
+#             "Tyme Bank": clean_tyme,
+#         }
+
+#         if bank_name not in cleaner_map:
+#             os.unlink(temp_file_path)
+#             return error_response(response, "Invalid bank name.", 400)
+
+#         # Cleaned extracted text
+#         cleaned_transactions = cleaner_map[bank_name](extracted_text, client_id)
+
+#         # Prepare cleaned data
+#         number_of_transactions = len(cleaned_transactions)
+
+#         # Update Firestore with cleaned data
+#         # doc_ref.update({
+#         #     "number_of_transactions": number_of_transactions,
+#         #     "transactions": [
+#         #         {
+#         #             "date1": transaction.get("date1", None),
+#         #             "date2": transaction.get("date2", None),
+#         #             "description": transaction.get("description", None),
+#         #             "fees_description": transaction.get("fees_description", None),
+#         #             "fees_type": transaction.get("fees_type", None),
+#         #             "fees_amount": transaction.get("fees_amount", 0.0),
+#         #             "debit_amount": transaction.get("debit_amount", 0.0),
+#         #             "credit_amount": transaction.get("credit_amount", 0.0),
+#         #             "balance_amount": transaction.get("balance_amount", 0.0),
+#         #         }
+#         #         for transaction in cleaned_transactions
+#         #     ],
+#         # })
+#         # Delete temporary file
+#         os.unlink(temp_file_path)
+
+
+#         # Return success response
+#         return success_response(response, "Data cleaned and saved successfully.", 200)
+
+#     except Exception as e:
+#         print(f"ERROR: {e}")
+#         return error_response(response, "An error occurred while processing the bank statement.", 500)
+
+
 @https_fn.on_request()
 def handleExtractData(req: https_fn.Request) -> https_fn.Response:
     response = https_fn.Response()
@@ -57,7 +170,6 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
         client_id = data["clientId"]
         bank_name = data["bankName"]
         method = data["method"]
-        # linesToDelete = data["linesToDelete"]
 
         print(f"Client ID: {client_id}, Bank Name: {bank_name}, Method: {method}")
 
@@ -87,15 +199,19 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
             response.status = 400
             response.headers["Content-Type"] = "application/json"
             return response
-        
-        # Save raw data to Firestore
+
+        # Fetch removal lines for the bank
+        removal_lines = fetch_removal_lines(bank_name)
+
+        # Filter the extracted text using the removal lines
+        filtered_text = filter_extracted_text(extracted_text, removal_lines)
+
+        # Save filtered data to Firestore
         db = firestore.client()
         doc_ref = db.collection("clients").document(client_id)
         doc_ref.set({
-            
-            # "number_of_transactions": 0, 
-            # "transactions": [],
-            "rawData": extracted_text
+            "rawData": extracted_text,
+            "filteredData": filtered_text
         }, merge=True)
 
         # Clean statement based on bank name
@@ -112,33 +228,17 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
             os.unlink(temp_file_path)
             return error_response(response, "Invalid bank name.", 400)
 
-        # Cleaned extracted text
-        cleaned_transactions = cleaner_map[bank_name](extracted_text, client_id)
-
-        # Prepare cleaned data
-        number_of_transactions = len(cleaned_transactions)
+        # Cleaned transactions based on filtered text
+        cleaned_transactions = cleaner_map[bank_name](filtered_text, client_id)
 
         # Update Firestore with cleaned data
-        # doc_ref.update({
-        #     "number_of_transactions": number_of_transactions,
-        #     "transactions": [
-        #         {
-        #             "date1": transaction.get("date1", None),
-        #             "date2": transaction.get("date2", None),
-        #             "description": transaction.get("description", None),
-        #             "fees_description": transaction.get("fees_description", None),
-        #             "fees_type": transaction.get("fees_type", None),
-        #             "fees_amount": transaction.get("fees_amount", 0.0),
-        #             "debit_amount": transaction.get("debit_amount", 0.0),
-        #             "credit_amount": transaction.get("credit_amount", 0.0),
-        #             "balance_amount": transaction.get("balance_amount", 0.0),
-        #         }
-        #         for transaction in cleaned_transactions
-        #     ],
-        # })
+        doc_ref.update({
+            "number_of_transactions": len(cleaned_transactions),
+            "transactions": cleaned_transactions,
+        })
+
         # Delete temporary file
         os.unlink(temp_file_path)
-
 
         # Return success response
         return success_response(response, "Data cleaned and saved successfully.", 200)
@@ -161,6 +261,64 @@ def success_response(response, message, status_code):
     response.status = status_code
     response.headers["Content-Type"] = "application/json"
     return response
+
+
+# Helper Functions
+def fetch_removal_lines(bank_name):
+    """
+    Fetches the list of lines to remove for the given bank from Firestore.
+    Args:
+        bank_name (str): Name of the bank.
+    Returns:
+        list: List of lines to remove.
+    """
+    try:
+        print(f"DEBUG: Starting to fetch removal lines for bank: {bank_name}")
+        
+        # Initialize Firestore client
+        db = firestore.client()
+        
+        # Create document reference for the bank
+        bank_doc_ref = db.collection("banks").document(bank_name)
+        print(f"DEBUG: Firestore document reference created for bank: {bank_name}")
+        
+        # Fetch the document snapshot
+        bank_snapshot = bank_doc_ref.get()
+        print(f"DEBUG: Document snapshot fetched for bank: {bank_name}, exists: {bank_snapshot.exists}")
+
+        # Check if the document exists
+        if not bank_snapshot.exists:
+            print(f"DEBUG: No document found for bank: {bank_name}")
+            return []
+
+        # Retrieve the "removalLines" field or return an empty list if not present
+        removal_lines = bank_snapshot.get("removalLines") or []
+
+        print(f"DEBUG: Fetched removal lines: {removal_lines}")
+
+        return removal_lines
+
+    except Exception as e:
+        print(f"ERROR: Exception occurred while fetching removal lines for bank {bank_name}: {e}")
+        return []
+
+def filter_extracted_text(extracted_text, removal_lines):
+    """
+    Filters out lines in the extracted text that match the removal lines.
+    Args:
+        extracted_text (str): The raw extracted text from the statement.
+        removal_lines (list): List of lines to remove.
+    Returns:
+        str: Filtered text.
+    """
+    filtered_lines = [
+        line for line in extracted_text.split("\n") 
+        if not any(removal_line in line for removal_line in removal_lines)
+    ]
+    return "\n".join(filtered_lines)
+
+
+
 
 ###################### ( Cleaning Functions ) Start ###############################
 
@@ -267,6 +425,9 @@ def extract_transactions_absa(extracted_text, client_id):
     print(f"Updated Firestore with {len(transactions)} transactions.")
 
     return transactions
+
+
+############ Absa Bank Statement ############
 
 ###############################################################
 

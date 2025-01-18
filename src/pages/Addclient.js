@@ -238,6 +238,7 @@ const Addclient = () => {
       </div>
       {/*state a Message to User here | Handles a single pdf only at this time*/}
       {/* Display a Message to User */}
+      {/* a button to pop up taking you to the clients profile */}
     </div>
   );
 };
