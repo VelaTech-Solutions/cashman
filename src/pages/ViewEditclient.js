@@ -2,10 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+
+// Firebase imports
 import { auth } from "../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+
+// Component imports
+import Sidebar from "../components/Sidebar";
+import "../styles/tailwind.css";
+
+const links = [
+  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+  { path: "/Editclient", label: "Edit Client", icon: "ph-file-text" },
+];
 
 const ViewEditClient = () => {
   const { id } = useParams();
@@ -76,46 +87,25 @@ const ViewEditClient = () => {
       });
 
       alert("Client details updated successfully!");
-      navigate("/Editclient"); // Navigate back to the client list
+      navigate("/Editclient");
     } catch (err) {
       console.error("Error updating client data:", err);
       alert("Failed to update client data.");
     }
   };
 
-  if (loading) return <p>Loading client data...</p>;
+  if (loading) return <p className="text-gray-400">Loading client data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="p-8 bg-gray-900 text-white min-h-screen">
-      {/* Navigation */}
-      <nav className="flex space-x-4 bg-gray-800 p-4 rounded-lg shadow-md">
-        <Link
-          to="/dashboard"
-          className="text-white hover:text-blue-400 transition"
-        >
-          Back to Dashboard
-        </Link>
-        <Link
-          to="/Editclient"
-          className="text-white hover:text-blue-400 transition"
-        >
-          Back to Client List
-        </Link>
-      </nav>
+    <div className="flex min-h-screen bg-gray-900 text-white">
+      <Sidebar title="View/Edit Client" links={links} />
 
-      {/* Client Profile and Edit Section */}
-      <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-        <h1 className="text-4xl font-bold mb-4 text-blue-400">
-          View/Edit Client
-        </h1>
+      <div className="flex-1 p-8 space-y-8">
+        <h1 className="text-4xl font-bold text-blue-400">View/Edit Client</h1>
 
-        <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
-          <h2 className="text-2xl font-semibold text-white">
-            Edit Client Details
-          </h2>
-
-          {/* Editable Fields */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold text-white">Edit Details</h2>
           <div className="space-y-4 mt-4">
             <div>
               <label className="block text-sm font-medium text-gray-400">
@@ -154,8 +144,6 @@ const ViewEditClient = () => {
               />
             </div>
           </div>
-
-          {/* Save Changes Button */}
           <button
             onClick={handleUpdateClient}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-4 w-full"
@@ -164,12 +152,9 @@ const ViewEditClient = () => {
           </button>
         </div>
 
-        {/* View-Only Data */}
         {clientData && (
-          <div className="bg-gray-900 p-4 rounded-lg shadow-md mt-8">
-            <h2 className="text-2xl font-semibold text-white">
-              Client Details
-            </h2>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-white">Client Details</h2>
             <p className="text-lg text-gray-400 mt-2">
               <strong className="text-white">Captured By:</strong>{" "}
               {clientData.userEmail || "N/A"}

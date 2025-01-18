@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from "react"; // Ensure `useEffect` is imported
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
+import Sidebar from "../components/Sidebar";
 
 // Firebase imports
 import { db, storage } from "../firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/firebase"; // Ensure the path is correct
+import { auth } from "../firebase/firebase";
 
-const Addclient = () => {
+const links = [
+  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+  { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
+];
+
+const AddClient = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [clientDetails, setClientDetails] = useState({
@@ -22,6 +28,8 @@ const Addclient = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+
+
 
   // Fetch authenticated user
   useEffect(() => {
@@ -51,7 +59,7 @@ const Addclient = () => {
 
     if (!allowedTypes.includes(selectedFile.type)) {
       setUploadStatus(
-        "Invalid file type. Please upload a PDF, JPEG, or PNG file.",
+        "Invalid file type. Please upload a PDF, JPEG, or PNG file."
       );
       return null;
     }
@@ -64,7 +72,7 @@ const Addclient = () => {
     setUploadStatus("Uploading file...");
     const storageRef = ref(
       storage,
-      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`,
+      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`
     );
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
@@ -85,7 +93,7 @@ const Addclient = () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUploadStatus("Upload complete!");
           resolve(downloadURL);
-        },
+        }
       );
     });
   };
@@ -115,7 +123,7 @@ const Addclient = () => {
           timestamp: new Date(),
           userEmail,
         },
-        { merge: true },
+        { merge: true }
       );
 
       setSubmitSuccess(true);
@@ -130,21 +138,11 @@ const Addclient = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <motion.div
-        className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg transition-all duration-300`}
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-      >
-        <div className="flex items-center space-x-3 pb-4">
-          <h1 className="text-xl font-semibold text-white">Add Client</h1>
-        </div>
-        <nav className="space-y-4">
-          <Link to="/dashboard" className="hover:text-white transition">
-            Back to Dashboard
-          </Link>
-        </nav>
-      </motion.div>
-
+      
+      {/* Sidebar */}
+      <Sidebar title="Add Client" links={links} />
+      
+      {/* Main content */}
       <div className="flex-1 p-8">
         <motion.div
           className="space-y-8"
@@ -236,11 +234,8 @@ const Addclient = () => {
           </section>
         </motion.div>
       </div>
-      {/*state a Message to User here | Handles a single pdf only at this time*/}
-      {/* Display a Message to User */}
-      {/* a button to pop up taking you to the clients profile */}
     </div>
   );
 };
 
-export default Addclient;
+export default AddClient;

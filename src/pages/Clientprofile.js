@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/tailwind.css";
+import Sidebar from "../components/Sidebar";
 
 // firebase imports
 import { onAuthStateChanged } from "firebase/auth";
@@ -18,6 +19,10 @@ import { functions, db, storage } from "../firebase/firebase";
 import { doc, getDoc, deleteDoc, updateDoc, deleteField, setDoc  } from "firebase/firestore";
 import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 import { filter } from "framer-motion/client";
+
+const links = [
+  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+];
 
 const Clientprofile = () => {
   const { id } = useParams();
@@ -447,70 +452,11 @@ const Clientprofile = () => {
   
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
+      
+
       {/* Sidebar */}
-      <motion.div
-        className="lg:w-64 w-72 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6 space-y-8 shadow-xl hidden lg:block"
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-      >
-        {/* Header */}
-        <div className="flex items-center space-x-3">
-          <h1 className="text-2xl font-extrabold text-blue-400 tracking-wide">
-            Cash Flow Manager
-          </h1>
-        </div>
+      <Sidebar title="Client Profile" links={links} />
 
-        {/* Divider */}
-        <div className="w-full h-0.5 bg-gray-700"></div>
-
-        {/* Navigation Section */}
-        <nav className="space-y-6">
-          {/* Section Label */}
-          <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
-            Navigation
-          </div>
-
-          {/* Dashboard Link */}
-          <Link
-            to="/dashboard"
-            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
-          >
-            <i className="ph-house text-xl text-blue-400"></i>
-            <span className="text-white">Dashboard</span>
-          </Link>
-
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
-          >
-            <i className="ph-arrow-left text-xl text-blue-400"></i>
-            <span className="text-white">Back</span>
-          </button>
-
-          {/* Divider */}
-          <div className="w-full h-0.5 bg-gray-700"></div>
-
-          {/* Additional Links */}
-          <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
-            Other Pages
-          </div>
-          <Link
-            to="/settings"
-            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
-          >
-            <i className="ph-gear text-xl text-blue-400"></i>
-            <span className="text-white">Settings</span>
-          </Link>
-          <Link
-            to="/reports"
-            className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md"
-          >
-            <i className="ph-chart-bar text-xl text-blue-400"></i>
-            <span className="text-white">Reports</span>
-          </Link>
-        </nav>
-      </motion.div>
 
       {/* Main Content */}
       <div className="flex-1 p-8">

@@ -3,12 +3,18 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import Sidebar from "../components/Sidebar";
 import "../styles/tailwind.css";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
+
+const links = [
+  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+
+];
 
 const EditClient = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
@@ -71,31 +77,10 @@ const EditClient = () => {
   // Main UI
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
-      <motion.div
-        className={`lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg ${
-          sidebarOpen ? "block" : "hidden lg:block"
-        }`}
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-      >
-        <div className="flex items-center space-x-3 pb-4 pt-4">
-          <h1 className="text-2xl font-bold text-blue-400">
-            Cash Flow Manager
-          </h1>
-        </div>
-        {/* User Email */}
-        <div className="text-sm text-gray-300 border-t border-gray-700 pt-4">
-          <p>Logged in as:</p>
-          <p className="font-medium text-white">{userEmail || "Guest"}</p>
-        </div>
-
-        <nav className="space-y-4 border-t border-gray-700 pt-4">
-          <Link to="/dashboard" className="hover:text-white transition">
-            Back to Dashboard
-          </Link>
-        </nav>
-      </motion.div>
+      
+      
+      <Sidebar title="Edit Client" links={links} />
+      
 
       {/* Main Content */}
       <div className="flex-1 p-8">
