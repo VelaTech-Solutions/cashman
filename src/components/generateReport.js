@@ -73,7 +73,7 @@ const generateReport = async (clientId) => {
 
     console.log("Data mapped to template.");
 
-    // 4. Save the Report
+    // 4. Save the Report have like a confirm or something here
     const reportBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
     const reportPath = `reports/${clientId}/report_${Date.now()}.xlsx`;
     const reportRef = ref(storage, reportPath);

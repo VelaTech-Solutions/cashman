@@ -27,3 +27,5 @@ const LoadClientData = async (idNumber) => {
 };
 
 export default LoadClientData;
+
+
