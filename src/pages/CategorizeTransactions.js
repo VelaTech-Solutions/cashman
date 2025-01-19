@@ -1,351 +1,352 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { db } from "../firebase/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import "../styles/tailwind.css";
-import { motion } from "framer-motion";
-
+import { doc, getDoc, updateDoc, collection, getDocs, addDoc } from "firebase/firestore";
+import Sidebar from "../components/Sidebar";
+import LoadClientData from "../components/LoadClientData"; // Import the fetch function
 const CategorizeTransactions = () => {
-  const { id } = useParams();
-  const [clientData, setClientData] = useState(null);
-
+  const { id } = useParams(); // Client ID or folder number
   const [transactions, setTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-
+  const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+  const [category, setCategory] = useState("");
+  const [subcategory, setSubcategory] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch client data
+  const links = [
+    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+    { path: `/client/${id}`, label: "Back to Client Profile", icon: "ph-file-text" },
+    { path: `/categorysettings`, label: "Category Settings", icon: "ph-file-text" },
+    { path: `/transactiondatabase/${id}`, label: "Transaction Database", icon: "ph-file-text" },
+  ];
+// Fetch client data
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      console.log("Fetching client data for ID:", id);
+
+      // Load client data using the reusable function
+      const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
+      console.log("Fetched client data:", clientData);
+
+      // Extract transactions and bank name from the client document
+      const fetchedTransactions = clientData.transactions || [];
+      const bankName = clientData.bankName;
+
+      setTransactions(fetchedTransactions);
+      setFilteredTransactions(fetchedTransactions);
+
+      // Fetch categories
+      console.log("Fetching categories...");
+      const categoriesSnapshot = await getDocs(collection(db, "categories"));
+      const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(fetchedCategories);
+
+      // Process subcategories
+      const organizedSubcategories = fetchedCategories.flatMap((category) =>
+        category.subcategories
+          ? category.subcategories.map((sub) => ({
+              id: sub.id,
+              name: sub.name,
+              parentCategory: category.name,
+            }))
+          : []
+      );
+      setSubcategories(organizedSubcategories);
+    } catch (err) {
+      console.error("Error fetching data:", err.message);
+      setError("Failed to fetch transactions or categories.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [id]);
+
+  // Filter subcategories based on the selected category
   useEffect(() => {
-    const fetchClientData = async () => {
-      try {
-        const docRef = doc(db, "clients", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setClientData(docSnap.data());
-        } else {
-          setError("Client not found.");
-        }
-      } catch (err) {
-        console.error("Error fetching client data:", err);
-        setError("Failed to fetch client data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClientData();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-gray-400">Loading transactions...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  const handleCategoryChange = async (transactionId, newCategory) => {
-    try {
-      const transactionRef = doc(db, "transactions", transactionId);
-      await updateDoc(transactionRef, { category: newCategory });
-      setTransactions((prev) =>
-        prev.map((tx) =>
-          tx.id === transactionId ? { ...tx, category: newCategory } : tx,
-        ),
+    if (category) {
+      const filtered = subcategories.filter(
+        (sub) => sub.parentCategory === category
       );
-    } catch (error) {
-      console.error("Error updating category: ", error);
+      setFilteredSubcategories(filtered);
+    } else {
+      setFilteredSubcategories([]);
     }
-  };
+  }, [category, subcategories]);
 
-  const handleSubcategoryChange = async (transactionId, newSubcategory) => {
-    try {
-      const transactionRef = doc(db, "transactions", transactionId);
-      await updateDoc(transactionRef, { subcategory: newSubcategory });
-      setTransactions((prev) =>
-        prev.map((tx) =>
-          tx.id === transactionId ? { ...tx, subcategory: newSubcategory } : tx,
-        ),
-      );
-    } catch (error) {
-      console.error("Error updating subcategory: ", error);
-    }
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  //
-  // Filter transactions based on search query
-  const filteredTransactions = clientData?.transactions?.filter(
-    (transaction) => {
-      return (
+  // Filter transactions based on the search query
+  useEffect(() => {
+    const filtered = transactions.filter(
+      (transaction) =>
         transaction.description
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
         transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredTransactions(filtered);
+  }, [searchQuery, transactions]);
+
+  // Function to toggle Select All
+  const handleSelectAll = () => {
+    if (selectedTransactions.length === filteredTransactions.length) {
+      setSelectedTransactions([]); // Deselect all
+    } else {
+      const allIndexes = filteredTransactions.map((_, index) => index);
+      setSelectedTransactions(allIndexes); // Select all
+    }
+  };
+
+  // Check if all transactions are selected
+  const isAllSelected = 
+    filteredTransactions.length > 0 && 
+    selectedTransactions.length === filteredTransactions.length;
+
+  // Individual checkbox logic remains the same
+  const handleCheckboxChange = (transactionIndex) => {
+    setSelectedTransactions((prevSelected) =>
+      prevSelected.includes(transactionIndex)
+        ? prevSelected.filter((index) => index !== transactionIndex)
+        : [...prevSelected, transactionIndex]
+    );
+  };
+
+
+  // Categorize selected transactions
+  const categorize = async () => {
+    try {
+      if (!category || !subcategory) {
+        alert("Please select both a category and a subcategory.");
+        return;
+      }
+
+      if (selectedTransactions.length === 0) {
+        alert("No transactions selected for categorization.");
+        return;
+      }
+
+      console.log("Starting categorization...");
+      console.log("Selected Transactions Indices:", selectedTransactions);
+
+      const updatedTransactions = [...transactions];
+
+      selectedTransactions.forEach((transactionIndex) => {
+        const originalIndex = transactions.findIndex(
+          (txn) => txn === filteredTransactions[transactionIndex]
+        );
+
+        if (originalIndex !== -1) {
+          updatedTransactions[originalIndex] = {
+            ...updatedTransactions[originalIndex],
+            category,
+            subcategory,
+          };
+
+          saveToTransactionDatabase(
+            updatedTransactions[originalIndex].bankName,
+            updatedTransactions[originalIndex].description,
+            category,
+            subcategory
+          );
+        } else {
+          console.warn(
+            `Transaction at filtered index ${transactionIndex} not found in the original list.`
+          );
+        }
+      });
+
+      const clientDocRef = doc(db, "clients", id);
+      await updateDoc(clientDocRef, { transactions: updatedTransactions });
+
+      console.log("Transactions updated successfully:", updatedTransactions);
+      alert("Transactions categorized successfully!");
+
+      setTransactions(updatedTransactions);
+      setSelectedTransactions([]);
+    } catch (err) {
+      console.error("Error during categorization:", err.message, err.stack);
+      alert("Failed to categorize transactions. Check the console for details.");
+    }
+  };
+
+  const saveToTransactionDatabase = async (bankName, description, category, subcategory) => {
+    try {
+      if (!bankName) {
+        throw new Error("Bank name is undefined or missing.");
+      }
+
+      console.log(`Saving transaction for bank: ${bankName}, description: ${description}`);
+      const bankCollectionRef = collection(db, "transaction_database", bankName, "transactions");
+
+      const querySnapshot = await getDocs(bankCollectionRef);
+      const existingTransaction = querySnapshot.docs.find(
+        (doc) => doc.data().description === description
       );
-    },
-  );
+
+      if (existingTransaction) {
+        console.log("Transaction already exists. Skipping:", description);
+        return;
+      }
+
+      await addDoc(bankCollectionRef, {
+        description,
+        category,
+        subcategory,
+        createdAt: new Date().toISOString(),
+      });
+
+      console.log("Transaction added to database:", { description, category, subcategory });
+    } catch (err) {
+      console.error("Error saving to transaction database:", err.message);
+    }
+  };
+
+  const clearAllCategories = async () => {
+    try {
+      console.log("Clearing all categories and subcategories...");
+  
+      // Clone the transactions array and remove categories
+      const updatedTransactions = transactions.map((transaction) => ({
+        ...transaction,
+        category: "",
+        subcategory: "",
+      }));
+  
+      // Update the Firestore document
+      const clientDocRef = doc(db, "clients", id);
+      await updateDoc(clientDocRef, { transactions: updatedTransactions });
+  
+      console.log("All categories and subcategories cleared.");
+      alert("All transactions cleared successfully!");
+  
+      // Update state
+      setTransactions(updatedTransactions);
+    } catch (err) {
+      console.error("Error clearing categories:", err.message);
+      alert("Failed to clear categories.");
+    }
+  };
+
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  
+
+  
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
-      <motion.div
-        className="lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg hidden lg:block"
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-      >
-        <div className="flex items-center space-x-3 pb-4 pt-4">
-          <h1 className="text-2xl font-bold text-blue-400">
-            Cash Flow Manager
-          </h1>
-        </div>
-
-        <nav className="space-y-4 border-t border-gray-700 pt-4">
-          <Link
-            to="/dashboard"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            Back to Dashboard
-            <i className="ph-check-square text-xl"></i>
-          </Link>
-
-          <Link
-            to={`/client/${id}`}
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            Back to Client Profile
-            <i className="ph-check-square text-xl"></i>
-          </Link>
-          {/* Line */}
-          <div className="border-t border-gray-700"></div>
-
-          {/* Category Settings modification for categorization */}
-          <Link
-            to="/categorysettings"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            Category Settings
-            <i className="ph-check-square text-xl"></i>
-          </Link>
-
-          {/* Modify Manage Transactions Knowledge Base */}
-          <Link
-            //to="/Knowledgebase" still need to create page
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            Manage Transactions Knowledge Database
-            <i className="ph-check-square text-xl"></i>
-          </Link>
-        </nav>
-      </motion.div>
-
-      {/* Main Content */}
-
+    <div className="min-h-screen flex bg-gray-900 text-white">
+      <Sidebar title="Categorize Transactions" links={links} />
       <div className="flex-1 p-8">
-        {/* Header Section */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">
-            Categorize Transactions
-          </h1>
-        </header>
-
-        {/* Overview Section */}
-        <section className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">
-            Categorized Overview
-          </h2>
-
-          {/* Cards for Total Transactions, Needs Review, and Categorized Transactions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Total Transactions
-              </p>
-              <p className="text-3xl font-bold text-white">
-                {clientData.transactions?.length || 0}
-              </p>
-            </div>
-
-            {/* Card for needs review in db*/}
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">Needs Review</p>
-              <p className="text-3xl font-bold text-white">
-                {/* Placeholder for what? */}0
-              </p>
-            </div>
-
-            {/* Card for Categorized Transactions in db*/}
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Transactions Categorized{" "}
-              </p>
-              <p className="text-3xl font-bold text-white">
-                {clientData.transactions.categoried?.length || 0}
-              </p>
-            </div>
-
-            {/* Card for Known Categoried Transactions in db*/}
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Known Categories
-              </p>
-              <p className="text-3xl font-bold text-white">
-                {/* Placeholder for what? */}0
-                {/* Create the logic to count the number of known categorized transactions */}
-                {/* {categoriedTransactionData.categorieddata?.length || 0} */}
-              </p>
-            </div>
-
-            {/* Card for Total Categorized Amount */}
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Total Categorized Amount
-              </p>
-              <p className="text-3xl font-bold text-white">
-                {clientData.transactions.categorizedAmount?.toFixed(2) ||
-                  "0.00"}
-              </p>
-            </div>
-          </div>
-        </section>
+        <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
 
         {/* Search Bar */}
-        <section className="mt-8">
-          <input
-            type="text"
-            placeholder="Search transactions by date or description..."
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </section>
+        <input
+          type="text"
+          placeholder="Search transactions by date or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-4 mb-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        {/* Category and Subcategory Select */}
+        <div className="flex gap-4 mb-4">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="p-2 rounded bg-gray-700 text-white"
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={subcategory}
+            onChange={(e) => setSubcategory(e.target.value)}
+            className="p-2 rounded bg-gray-700 text-white"
+          >
+            <option value="">Select Subcategory</option>
+            {filteredSubcategories.map((sub) => (
+              <option key={sub.id} value={sub.name}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={categorize}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Categorize Selected
+          </button>
+
+          <button
+            onClick={clearAllCategories}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Clear All Categories
+          </button>
+        </div>
+
 
         {/* Transactions Table */}
-        <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
-          {filteredTransactions?.length > 0 ? (
-            <div className="overflow-y-auto h-96">
-              <table className="table-auto w-full text-left">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="px-4 py-2 text-sm">Date1</th>
-                    <th className="px-4 py-2 text-sm">Date2</th>
-                    <th className="px-4 py-2 text-sm">Description</th>
-                    <th className="px-4 py-2 text-sm">Fee Type</th>
-                    <th className="px-4 py-2 text-sm">Fee Amount</th>
-                    <th className="px-4 py-2 text-sm">Credit Amount</th>
-                    <th className="px-4 py-2 text-sm">Debit Amount</th>
-                    <th className="px-4 py-2 text-sm">Balance Amount</th>
-                    <th className="px-4 py-2 text-sm">Category</th>
-                    <th className="px-4 py-2 text-sm">Subcategory</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTransactions.map((transaction, index) => (
-                    <tr key={index} className="border-b border-gray-700">
-                      <td className="px-4 py-2 text-sm">{transaction.date1}</td>
-                      <td className="px-4 py-2 text-sm">{transaction.date2}</td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.description}
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.fee_type}
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.fee_amount
-                          ? `R ${transaction.fee_amount.toFixed(2)}`
-                          : "-"}
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_amount
-                          ? `R ${transaction.credit_amount.toFixed(2)}`
-                          : "-"}
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.debit_amount
-                          ? `R ${transaction.debit_amount.toFixed(2)}`
-                          : "-"}
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.balance_amount
-                          ? `R ${transaction.balance_amount.toFixed(2)}`
-                          : "-"}
-                      </td>
+        <table className="w-full table-auto bg-gray-800 rounded shadow-md">
+            <thead>
+              <tr>
+                <th className="p-2">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Description</th>
+                <th className="p-2">Debit</th>
+                <th className="p-2">Credit</th>
+                <th className="p-2">Balance</th>
+                <th className="p-2">Category</th>
+                <th className="p-2">Subcategory</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((transaction, index) => (
+                <tr key={index} className="border-b border-gray-700">
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTransactions.includes(index)}
+                      onChange={() => handleCheckboxChange(index)}
+                    />
+                  </td>
+                  <td className="p-2">{transaction.date1 || "-"}</td>
+                  <td className="p-2">{transaction.description || "-"}</td>
+                  <td className="p-2">{transaction.debit_amount || "-"}</td>
+                  <td className="p-2">{transaction.credit_amount || "-"}</td>
+                  <td className="p-2">{transaction.balance_amount || "-"}</td>
+                  <td className="p-2">{transaction.category || "-"}</td>
+                  <td className="p-2">{transaction.subcategory || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-                      {/* Category and Subcategory in firebase are named categories  */}
-                      <td className="px-4 py-2 text-sm">
-                        <select
-                          value={transaction.category || ""}
-                          onChange={(e) =>
-                            handleCategoryChange(transaction.id, e.target.value)
-                          }
-                        >
-                          <option value="">Select Category</option>
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.name}>
-                              {category.name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      {/* Category and Subcategory in firebase are named subcategories  */}
-                      <td className="px-4 py-2 text-sm"></td>
-                      <select
-                        value={transaction.subcategory || ""}
-                        onChange={(e) =>
-                          handleSubcategoryChange(
-                            transaction.id,
-                            e.target.value,
-                          )
-                        }
-                      >
-                        <option value="">Select Subcategory</option>
-                        {subcategories.map((subcategory) => (
-                          <option key={subcategory.id} value={subcategory.name}>
-                            {subcategory.name}
-                          </option>
-                        ))}
-                      </select>
-                    </tr>
-
-                    // categories and subcategories are not being displayed
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-center text-lg text-gray-500">
-              No transactions found.
-            </p>
-          )}
-        </section>
-
-        {/* Automatic Categorization Button */}
-        <section className="mt-8">
-          <button
-            // onClick={handleAutomaticCategorization}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-          >
-            Automatic Categorization
-          </button>
-        </section>
       </div>
     </div>
   );
 };
+
 export default CategorizeTransactions;

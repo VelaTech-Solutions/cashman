@@ -6,13 +6,16 @@
     "cra-template": "1.2.0",
     "firebase": "^11.1.0",
     "framer-motion": "^11.15.0",
+    "fs-extra": "^11.3.0",
+    "node-fetch": "^3.3.2",
     "phosphor-icons": "^1.4.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-firebase-hooks": "^5.1.1",
     "react-router-dom": "^6.28.1",
     "react-scripts": "^5.0.1",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",

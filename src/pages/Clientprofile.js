@@ -22,6 +22,7 @@ import { filter } from "framer-motion/client";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+  { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
 ];
 
 const Clientprofile = () => {
@@ -606,7 +607,7 @@ const Clientprofile = () => {
                 onChange={(e) => setProcessingMethod(e.target.value)}
               >
                 <option value={PROCESS_METHODS.PDF_PARSER}>PDF Parser</option>
-                <option value={PROCESS_METHODS.OCR}>OCR</option>
+                <option value={PROCESS_METHODS.OCR}>OCR  Not Supported yet.</option>
               </select>
             </div>
           </div>

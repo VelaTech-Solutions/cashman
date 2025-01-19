@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import ViewTransactions from "./pages/ViewTransactions";
 import EditTransactions from "./pages/EditTransactions";
 import CategorizeTransactions from "./pages/CategorizeTransactions";
+import Transactiondatabase from "./pages/Transactiondatabase";
 import ViewReports from "./pages/ViewReports";
 
 import Settings from "./pages/Settings";
@@ -63,6 +64,8 @@ function App() {
           element={<CategorizeTransactions />}
         />
         <Route path="/client/:id/reports" element={<ViewReports />} />
+
+        <Route path="/transactiondatabase/:id" element={<Transactiondatabase />} />
 
         <Route path="/settings" element={<Settings />} />
         <Route path="/categorysettings" element={<CategorySettings />} />

@@ -1,10 +1,13 @@
+// src/pages/ViewTransactions.js
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { db } from "../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import "../styles/tailwind.css";
 import { motion } from "framer-motion";
+
+// Component Imports
+import "../styles/tailwind.css";
+import Sidebar from "../components/Sidebar";
 
 const ViewTransactions = () => {
   const { id } = useParams();
@@ -12,6 +15,12 @@ const ViewTransactions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Dynamically generate links with the `id`
+  const links = [
+    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+    { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
+  ];
 
   // Fetch client data
   useEffect(() => {
@@ -53,49 +62,19 @@ const ViewTransactions = () => {
   }
 
   // Filter transactions based on search query
-  const filteredTransactions = clientData?.transactions?.filter(
-    (transaction) => {
-      return (
-        transaction.description
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    },
-  );
+  const filteredTransactions = clientData?.transactions?.filter((transaction) => {
+    return (
+      transaction.description
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       {/* Sidebar */}
-      <motion.div
-        className="lg:w-64 w-72 bg-gray-800 p-4 space-y-6 shadow-lg hidden lg:block"
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-      >
-        <div className="flex items-center space-x-3 pb-4 pt-4">
-          <h1 className="text-2xl font-bold text-blue-400">
-            Cash Flow Manager
-          </h1>
-        </div>
-
-        <nav className="space-y-4 border-t border-gray-700 pt-4">
-          <Link
-            to="/dashboard"
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            Back to Dashboard
-            <i className="ph-check-square text-xl"></i>
-          </Link>
-
-          <Link
-            to={`/client/${id}`}
-            className="flex items-center space-x-3 hover:text-white transition"
-          >
-            Back to Client Profile
-            <i className="ph-check-square text-xl"></i>
-          </Link>
-        </nav>
-      </motion.div>
+      <Sidebar title="View Transactions" links={links} />
 
       {/* Main Content */}
       <div className="flex-1 p-8">
