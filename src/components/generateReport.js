@@ -1,5 +1,6 @@
 // component/generateReport.js
 import * as XLSX from "xlsx"; // To handle Excel templates
+import { storage } from "../firebase/firebase";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import LoadClientData from "./LoadClientData"; // Adjusted import
 
@@ -17,8 +18,15 @@ const generateReport = async (clientId) => {
     // 2. Grab the Report Template
     const templatePath = "template/template_budget.xlsx";
     const templateRef = ref(storage, templatePath);
+
+    // Get download URL and fetch template
     const templateURL = await getDownloadURL(templateRef);
-    const templateBuffer = await fetch(templateURL).then((res) => res.arrayBuffer());
+    console.log(`Fetching template from: ${templateURL}`);
+    const response = await fetch(templateURL);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch template: ${response.statusText}`);
+    }
+    const templateBuffer = await response.arrayBuffer();
     console.log("Template downloaded successfully.");
 
     // Load the template into XLSX
@@ -73,7 +81,7 @@ const generateReport = async (clientId) => {
 
     console.log("Data mapped to template.");
 
-    // 4. Save the Report have like a confirm or something here
+    // 4. Save the Report
     const reportBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
     const reportPath = `reports/${clientId}/report_${Date.now()}.xlsx`;
     const reportRef = ref(storage, reportPath);
