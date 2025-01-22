@@ -15,6 +15,8 @@ const links = [
   { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
   { path: "/settings", label: "Settings", icon: "ph-globe" },
   { path: "/developernotes", label: "Developer Notes", icon: "ph-gear" },
+  // testing pages
+  { path: "/teststorage", label: "Test Storage", icon: "ph-file-text" },
 ];
 
 const Dashboard = () => {
