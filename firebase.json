@@ -3,7 +3,7 @@
     {
       "source": "functions-py",
       "codebase": "default",
-      "runtime": "python310",
+      "runtime": "python312",
       "timeoutSeconds": 540,
       "predeploy": [],
       "ignore": [

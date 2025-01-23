@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Instructions from "./pages/Instructions";
 import Addclient from "./pages/Addclient";
 import Editclient from "./pages/Editclient";
 import ViewEditclient from "./pages/ViewEditclient";
@@ -16,6 +17,7 @@ import ViewTransactions from "./pages/ViewTransactions";
 import EditTransactions from "./pages/EditTransactions";
 import CategorizeTransactions from "./pages/CategorizeTransactions";
 import Transactiondatabase from "./pages/Transactiondatabase";
+import ExtractTransactions from "./pages/ExtractTransactions";
 import ViewReports from "./pages/ViewReports";
 
 import Settings from "./pages/Settings";
@@ -45,6 +47,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/instructions" element={<Instructions />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route path="/addclient" element={<Addclient />} />
 
@@ -66,6 +70,7 @@ function App() {
         <Route path="/client/:id/reports" element={<ViewReports />} />
 
         <Route path="/transactiondatabase/:id" element={<Transactiondatabase />} />
+        <Route path="/ExtractTransactions/:id" element={<ExtractTransactions />} />
 
         <Route path="/settings" element={<Settings />} />
         <Route path="/categorysettings" element={<CategorySettings />} />
