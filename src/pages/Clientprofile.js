@@ -64,21 +64,6 @@ const Clientprofile = () => {
     { path: `/transactiondatabase/${id}`, label: "Transaction Database", icon: "ph-file-text" },
   ];
 
-
-
-  // Debugging remove when done
-  const DEBUG = true; // Set to false to disable debug logs globally
-
-  const logDebug = (message, data = null) => {
-    if (DEBUG) {
-      if (data) {
-        console.log(`DEBUG: ${message}`, data);
-      } else {
-        console.log(`DEBUG: ${message}`);
-      }
-    }
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -132,8 +117,6 @@ const Clientprofile = () => {
 
         if (clientSnapshot.exists()) {
           const clientData = clientSnapshot.data();
-          console.log("DEBUG: Client Data", clientData);
-
           setNotes(clientData.notes || []); // Set notes or empty array
         } else {
           setError("Client not found.");
@@ -266,7 +249,6 @@ const Clientprofile = () => {
             fileList.items.map((item) => getDownloadURL(item)),
           );
           setFileLinks(urls);
-          console.log(fileLinks);
         } else {
           setError("Client not found.");
         }

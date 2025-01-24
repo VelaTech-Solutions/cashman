@@ -151,6 +151,146 @@ initialize_app()
 #         print(f"ERROR: {e}")
 #         return error_response(response, "An error occurred while processing the bank statement.", 500)
 
+####################################
+
+# backend function to handle the extraction of transactions
+@https_fn.on_request()
+def handleExtractTransactions(req: https_fn.Request) -> https_fn.Response:
+    response = https_fn.Response()
+
+    # Handle CORS
+    response = handle_cors(req, response)
+    if req.method == "OPTIONS":
+        return response
+
+    try:
+        # Parse incoming request data
+        data = req.get_json(silent=True)
+        if not data or "clientId" not in data or "bankName" not in data:
+            return error_response(response, "Missing clientId or bankName in request.", 400)
+
+        client_id = data["clientId"]
+        bank_name = data["bankName"]
+
+        # Firestore initialization
+        db = firestore.client()
+
+        # Fetch client document
+        doc_ref = db.collection("clients").document(client_id)
+        doc_snapshot = doc_ref.get()
+
+        if not doc_snapshot.exists:
+            return error_response(response, f"Client with ID {client_id} does not exist.", 404)
+
+        # Get filteredData from Firestore
+        client_data = doc_snapshot.to_dict()
+        filtered_text = client_data.get("filteredData", None)
+
+        if not filtered_text:
+            return error_response(response, "No filtered data available for this client.", 404)
+
+        # Map the bank to its cleaning function
+        cleaner_map = {
+            "Absa Bank": clean_data_absa,
+            "Capitec Bank": clean_data_capitec,
+            "Fnb Bank": clean_data_fnb,
+            "Ned Bank": clean_data_ned,
+            "Standard Bank": clean_data_standard,
+            "Tyme Bank": clean_tyme,
+        }
+
+        # Check if the bank name is valid
+        if bank_name not in cleaner_map:
+            return error_response(response, "Invalid bank name provided.", 400)
+
+        # Clean the transactions using the relevant function
+        cleaning_function = cleaner_map[bank_name]
+        cleaned_transactions = cleaning_function(filtered_text, client_id)
+
+        # Update Firestore with cleaned data
+        doc_ref.update({
+            "number_of_transactions": len(cleaned_transactions),
+            "transactions": cleaned_transactions,
+        })
+
+        # Return a success response
+        return success_response(response, "Transactions extracted and cleaned successfully.", 200)
+
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return error_response(response, f"An error occurred: {str(e)}", 500)
+
+
+###############################
+@https_fn.on_request()
+def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
+    response = https_fn.Response()
+
+    # Handle CORS
+    response = handle_cors(req, response)
+    if req.method == "OPTIONS":
+        return response
+
+    try:
+        # Parse incoming data
+        data = req.get_json(silent=True)
+        if not data or "clientId" not in data:
+            return error_response(response, "Missing clientId in request.", 400)
+
+        client_id = data["clientId"]
+        bank_name = data["bankName"]
+        method = data["method"]
+
+        print(f"Client ID: {client_id}, Bank Name: {bank_name}, Method: {method}")
+
+        # Get the bank statement from Storage
+        bucket = storage.bucket()
+        folder_path = f"bank_statements/{client_id}/"
+        blobs = list(bucket.list_blobs(prefix=folder_path))
+
+        if not blobs:
+            return error_response(response, "No bank statement found for the given clientId.", 404)
+
+        # Download the bank statement
+        blob = blobs[0]
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        blob.download_to_filename(temp_file.name)
+        temp_file_path = temp_file.name
+        temp_file.close()
+
+        # Normalize method input
+        normalized_method = method.lower()
+        if normalized_method in ["parser", "pdfparser"]:
+            extracted_text = parse_pdf(temp_file_path)
+        elif normalized_method == "ocr":
+            extracted_text = ocr_pdf(temp_file_path)
+        else:
+            response.set_data(json.dumps({"error": "Invalid method. Use 'Parser' or 'OCR'."}))
+            response.status = 400
+            response.headers["Content-Type"] = "application/json"
+            return response
+
+        # Save filtered data to Firestore
+        db = firestore.client()
+        doc_ref = db.collection("clients").document(client_id)
+        doc_ref.set({
+            "rawData": extracted_text,
+            # Empty filtered data Just create the fieldfilteredData": extracted_text
+
+            "filteredData": None
+
+        }, merge=True)
+
+        # Delete temporary file
+        os.unlink(temp_file_path)
+
+        # Return success response
+        return success_response(response, "Data cleaned and saved successfully.", 200)
+
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return error_response(response, "An error occurred while processing the bank statement.", 500)
+##########################
 
 @https_fn.on_request()
 def handleExtractData(req: https_fn.Request) -> https_fn.Response:

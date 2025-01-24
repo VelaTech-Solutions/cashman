@@ -41,11 +41,13 @@ function ExtractTransactions() {
   const [clientData, setClientData] = useState(null);
   const [fileLinks, setFileLinks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
+
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const [processing, setProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // handleExtractTransactions
+  const [processing, setProcessing] = useState(false); // handleExtractDataManual
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const [rawData, setRawData] = useState("");
@@ -58,6 +60,7 @@ function ExtractTransactions() {
   };
 
   const [newLine, setNewLine] = useState(""); // To manage the input for new lines
+  const [successMessage, setSuccessMessage] = useState(""); // To display success messages
 
 
   const [viewRemovedLinesOpen, setViewRemovedLinesOpen] = useState(false);
@@ -77,8 +80,8 @@ function ExtractTransactions() {
   const [manualFilteredSidebarOpen, setManualFilteredSidebarOpen] = useState(false);
   const [manualRemoveLineDropdownOpen, setManualRemoveLineDropdownOpen] = useState(false);
   const [editRawDataOpen, setEditRawDataOpen] = useState(false);
-  console.log("Raw Data:", clientData?.rawData);
-  console.log("Type of Raw Data:", typeof clientData?.rawData);
+  const [isProcessingtransactions, setisProcessingtransactions] = useState(false);
+  const [ProcessingTransactions, setProcessingtransactions] = useState(false);
 
 
 
@@ -88,8 +91,6 @@ function ExtractTransactions() {
       try {
         // Load client data using the reusable function
         const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
-        console.log("Fetched client data:", clientData);
-
         setClientData(clientData);
       } catch (err) {
         console.error("Error fetching data:", err.message);
@@ -270,7 +271,7 @@ function ExtractTransactions() {
 
   // handle view filtered data
   const handleViewFilteredData = () => {
-    setAuotFilteredSidebarOpen(!autofilteredSidebarOpen);
+    setFilteredSidebarOpen(!autofilteredSidebarOpen);
   };
 
 
@@ -281,7 +282,7 @@ function ExtractTransactions() {
       return;
     }
 
-    setIsProcessing(true);
+    setProcessing(true);
     setErrorMessage("");
 
     try {
@@ -296,9 +297,6 @@ function ExtractTransactions() {
             clientId: id,
             bankName: clientData.bankName,
             method: processingMethod === "pdfparser" ? "Parser" : "OCR",
-            // lines to be deleted
-            // linesToDelete: linesToDelete, push removed list to backend
-            // linesToDelete: removedLines,
           }),
         }
       );
@@ -321,43 +319,65 @@ function ExtractTransactions() {
         "An error occurred while extracting data. Please try again."
       );
     } finally {
-      setIsProcessing(false);
+      setProcessing(false);
     }
   };
 
-  // Handle Transactions Extraction Manually 
-  // const handleExtractTransactions = async () => {
-  //   if (!id) {
-  //     alert("Client ID is not provided.");
-  //     return;
-  //   }
+  // Handle Transactions Extraction Manually
+  const handleExtractTransactions = async () => {
+    if (!id) {
+      alert("Client ID is not provided.");
+      return;
+    }
 
-  //   setIsProcessing(true);
-  //   setErrorMessage("");
+    setProcessingtransactions(true); // Start processing
+    setErrorMessage(""); // Clear error messages
+    setSuccessMessage(""); // Clear success messages
 
-  //   try {
-  //     const response = await fetch(
-  //       "https://us-central1-cashman-790ad.cloud/handleExtractTransactions",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           clientId: id,
-  //           bankName: clientData.bankName,
-  //         }),
-  //       }
+    try {
+      const response = await fetch(
+        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractTransactions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            clientId: id,
+            bankName: clientData.bankName,
+          }),
+        }
+      );
 
-  //     );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Request failed with status ${response.status}: ${errorText}`
+        );
+      }
 
-  //     if (!response.ok) {
-  //       const errorText = await response.text();
-  //       throw new Error(
-  //         `Request failed with status ${response.status}: ${errorText}`
-  //       );
-  //     }
-      
+      const result = await response.json();
+
+      // Show success message if the request succeeded
+      setSuccessMessage(result.message || "Transactions extracted successfully!");
+
+      // Optionally refresh or update UI with new transactions
+      if (result.transactions) {
+        setClientData((prevData) => ({
+          ...prevData,
+          transactions: result.transactions,
+        }));
+      }
+    } catch (error) {
+      console.error("Error extracting transactions:", error);
+      setErrorMessage(
+        error.message || "Failed to extract transactions. Please try again."
+      );
+    } finally {
+      setProcessingtransactions(false); // Stop processing
+    }
+  };
+
 
   const handleDeleteLine = (index) => {
     const updatedRawData = [...clientData.rawData];
@@ -367,31 +387,24 @@ function ExtractTransactions() {
   
   const handleSaveFilteredData = async () => {
     try {
-      console.log("Saving filtered data:", clientData?.rawData); // Debug data
-  
-      if (!clientData?.id) throw new Error("Client ID is missing.");
-      if (!Array.isArray(clientData.rawData)) {
-        throw new Error("Filtered data must be an array.");
+      if (!clientData?.filteredData || clientData.filteredData.length === 0) {
+        setErrorMessage("No data to save.");
+        return;
       }
   
-      // Save filtered data directly under the client document
-      await setDoc(
-        doc(db, "clients", clientData.id), // Targeting the document by ID
-        { filteredData: clientData.rawData }, // Save rawData as filteredData
-        { merge: true } // Prevent overwriting other fields
-      );
+      // Save filteredData to Firestore using db
+      await updateDoc(doc(db, "clients", clientData.idNumber), {
+        filteredData: clientData.filteredData,
+      });
   
-      alert("Filtered data saved successfully!");
+      console.log("Filtered data saved successfully!");
+      // setSuccessMessage("Filtered data saved!");
     } catch (error) {
-      console.error("Error saving filtered data:", error.message); // Log the error
-      alert("Failed to save filtered data. Please try again.");
+      console.error("Error saving filtered data:", error.message);
+      setErrorMessage("Failed to save filtered data. Please try again.");
     }
   };
   
-  
-  
-
-
 
   return (
 
@@ -489,9 +502,9 @@ function ExtractTransactions() {
               {/* Button 1: Manual Extract */}
               <Button
                 onClick={handleExtractDataManual}
-                text={isProcessing ? "Processing..." : "Manual Extract"}
+                text={processing ? "Processing..." : "Manual Extract"}
                 className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                disabled={isProcessing}
+                disabled={processing}
               />
 
               {/* Error Message */}
@@ -558,20 +571,25 @@ function ExtractTransactions() {
                           ? clientData.rawData.join("\n")
                           : clientData?.rawData || ""
                       }
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const updatedRawData = e.target.value.split("\n"); // Convert textarea input to array
                         setClientData({
                           ...clientData,
-                          rawData: e.target.value.split("\n"), // Convert back to array
-                        })
-                      }
+                          rawData: updatedRawData, // Update rawData
+                          filteredData: updatedRawData.filter(line => line.trim() !== ""), // Update filteredData dynamically
+                        });
+                      }}
                       className="w-full h-60 bg-gray-800 text-white p-3 rounded-lg resize-none"
                       placeholder="Edit your transactions here..."
                     ></textarea>
 
+
                     {/* Save Button (Sticky at the Bottom) */}
                     <div className="sticky bottom-0 bg-gray-900 p-4 mt-4">
                       <Button
-                        onClick={handleSaveFilteredData}
+                        onClick={() => handleSaveFilteredData(clientData.idNumber)
+
+                        }
                         text="Save Filtered Data"
                         className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-medium text-center"
                       />
@@ -580,13 +598,45 @@ function ExtractTransactions() {
                 )}
               </div>
 
+              {/* View Filitered data */}
+              {/* View Filtered Data */}
+              <div className="relative">
+                <Button
+                  onClick={() => setManualFilteredSidebarOpen(!manualFilteredSidebarOpen)}
+                  text="View Filtered Data"
+                  className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
+                />
+                {/* Data Display */}
+                {manualFilteredSidebarOpen && (
+                  <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
+                    <h2 className="text-xl font-semibold text-white mb-2">Filtered Data</h2>
+                    {clientData?.filteredData ? (
+                      <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
+                        {Array.isArray(clientData.filteredData)
+                          ? clientData.filteredData.join("\n") // Convert array to a newline-separated string
+                          : clientData.filteredData} {/* Directly render if already a string */}
+                      </pre>
+                    ) : (
+                      <p className="text-gray-400">No filtered data available.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+
               {/* Button 4: Extract Transactions */}
               <Button
-                // onClick={handleExtractTransactions}
-                text={isProcessing ? "Processing..." : "Extract Transactions"}
+                onClick={handleExtractTransactions}
+                text={ProcessingTransactions ? "Processing..." : "Extract Transactions"}
                 className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                disabled={isProcessing}
+                disabled={ProcessingTransactions}
               />
+              {/* Error Message */}
+              {errorMessage && (
+                <p className="text-red-500 mt-4 text-center" role="alert">
+                  {errorMessage}
+                </p>
+              )}
 
               {/* Placeholder for Displaying Transactions */}
               {manualSidebarOpen && (

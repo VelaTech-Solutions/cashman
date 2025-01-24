@@ -28,7 +28,6 @@ const CategorizeTransactions = () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      console.log("Fetching client data for ID:", id);
 
       // Load client data using the reusable function
       const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function

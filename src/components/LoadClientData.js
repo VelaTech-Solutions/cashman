@@ -8,7 +8,7 @@ const LoadClientData = async (idNumber) => {
   try {
     if (!idNumber) throw new Error("ID number is required to fetch client data.");
 
-    console.log("Fetching client data for ID:", idNumber);
+    // console.log("Fetching client data for ID:", idNumber);
 
     // Reference the client's document in Firestore
     const clientDocRef = doc(db, "clients", idNumber);
