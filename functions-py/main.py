@@ -171,6 +171,7 @@ def handleExtractTransactions(req: https_fn.Request) -> https_fn.Response:
 
         client_id = data["clientId"]
         bank_name = data["bankName"]
+        print(client_id, bank_name)
 
         # Firestore initialization
         db = firestore.client()
@@ -188,6 +189,10 @@ def handleExtractTransactions(req: https_fn.Request) -> https_fn.Response:
 
         if not filtered_text:
             return error_response(response, "No filtered data available for this client.", 404)
+        # GotERROR: 'list' object has no attribute 'replace'
+
+        # Convert to string again   
+        filtered_text = str(filtered_text)
 
         # Map the bank to its cleaning function
         cleaner_map = {
@@ -261,22 +266,29 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
         # Normalize method input
         normalized_method = method.lower()
         if normalized_method in ["parser", "pdfparser"]:
-            extracted_text = parse_pdf(temp_file_path)
+            extracted_text = parse_pdf(temp_file_path)  # Extracted as a single string
         elif normalized_method == "ocr":
-            extracted_text = ocr_pdf(temp_file_path)
+            extracted_text = ocr_pdf(temp_file_path)  # Extracted as a single string
         else:
             response.set_data(json.dumps({"error": "Invalid method. Use 'Parser' or 'OCR'."}))
             response.status = 400
             response.headers["Content-Type"] = "application/json"
             return response
 
-        # Save filtered data to Firestore
+        # Convert rawData to Array
+        raw_data_array = extracted_text.split("\n")  # Convert the string into an array of lines
+
+        # Fetch removal lines for the bank
+        removal_lines = fetch_removal_lines(bank_name)
+
+        # Filter the extracted text using the removal lines
+        filtered_text = filter_extracted_text(raw_data_array, removal_lines)  # Process as array
+
+        # Save rawData and filteredData to Firestore as arrays
         db = firestore.client()
         doc_ref = db.collection("clients").document(client_id)
         doc_ref.set({
-            "rawData": extracted_text,
-            # Empty filtered data Just create the fieldfilteredData": extracted_text
-
+            "rawData": raw_data_array,       # Save as array
             "filteredData": None
 
         }, merge=True)
@@ -292,6 +304,19 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
         return error_response(response, "An error occurred while processing the bank statement.", 500)
 ##########################
 
+
+def chunk_array(data_array, chunk_size):
+    """
+    Splits an array into smaller chunks.
+    Args:
+        data_array (list): The array to chunk.
+        chunk_size (int): The maximum size of each chunk.
+    Returns:
+        list: A list of chunks.
+    """
+    return [data_array[i:i + chunk_size] for i in range(0, len(data_array), chunk_size)]
+
+# handleExtractDataautomatic
 @https_fn.on_request()
 def handleExtractData(req: https_fn.Request) -> https_fn.Response:
     response = https_fn.Response()
@@ -331,51 +356,86 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
         # Normalize method input
         normalized_method = method.lower()
         if normalized_method in ["parser", "pdfparser"]:
-            extracted_text = parse_pdf(temp_file_path)
+            extracted_text = parse_pdf(temp_file_path)  # Extracted as a single string
         elif normalized_method == "ocr":
-            extracted_text = ocr_pdf(temp_file_path)
+            extracted_text = ocr_pdf(temp_file_path)  # Extracted as a single string
         else:
             response.set_data(json.dumps({"error": "Invalid method. Use 'Parser' or 'OCR'."}))
             response.status = 400
             response.headers["Content-Type"] = "application/json"
             return response
 
+        # Convert rawData to Array
+        raw_data_array = extracted_text.split("\n")  # Convert the string into an array of lines
+        if not raw_data_array:
+            print("No data to process.")
+            return error_response(response, "No data to process.", 400)
+
+        # Define chunk size (e.g., 25 lines per chunk)
+        chunk_size = 50
+
+        # Split raw_data_array into chunks
+        raw_data_chunks = chunk_array(raw_data_array, chunk_size)
+        # debug print
+        print(f"DEBUG: Split raw data into {len(raw_data_chunks)} chunks.")
+
         # Fetch removal lines for the bank
         removal_lines = fetch_removal_lines(bank_name)
 
         # Filter the extracted text using the removal lines
-        filtered_text = filter_extracted_text(extracted_text, removal_lines)
+        filtered_text = filter_extracted_text(raw_data_chunks, removal_lines)  # Process as array
 
-        # Save filtered data to Firestore
+        # Save rawData and filteredData to Firestore as arrays
         db = firestore.client()
         doc_ref = db.collection("clients").document(client_id)
-        doc_ref.set({
-            "rawData": extracted_text,
-            "filteredData": filtered_text
-        }, merge=True)
+        # Flatten raw_data_chunks into a single array
+        flattened_raw_data = [line for chunk in raw_data_chunks for line in chunk]
+        print(f"DEBUG: Flattened raw data into a single array of length {len(flattened_raw_data)}.")
+
+        # Save to Firestore
+        try:
+            doc_ref.set({
+                "rawData": flattened_raw_data,
+                "rawDataMetadata": {
+                    "chunk_size": chunk_size,
+                    "total_chunks": len(raw_data_chunks)
+                },
+                "filteredData": filtered_text  # Save as array
+            }, merge=True)
+            print(f"DEBUG: Successfully saved rawData for client {client_id}.")
+        except Exception as e:
+            print(f"ERROR: Failed to save rawData for client {client_id}: {e}")
+
+
+        # doc_ref.set({
+        #     "rawData": raw_data_chunks       # Save as array
+        #     # "filteredData": filtered_text  # Save as array
+        # }, merge=True)
+
+        print(f"DEBUG: rawData and filteredData saved as arrays for client {client_id}")
 
         # Clean statement based on bank name
-        cleaner_map = {
-            "Absa Bank": clean_data_absa,
-            "Capitec Bank": clean_data_capitec,
-            "Fnb Bank": clean_data_fnb,
-            "Ned Bank": clean_data_ned,
-            "Standard Bank": clean_data_standard,
-            "Tyme Bank": clean_tyme,
-        }
+        # cleaner_map = {
+        #     "Absa Bank": clean_data_absa,
+        #     "Capitec Bank": clean_data_capitec,
+        #     "Fnb Bank": clean_data_fnb,
+        #     "Ned Bank": clean_data_ned,
+        #     "Standard Bank": clean_data_standard,
+        #     "Tyme Bank": clean_tyme,
+        # }
 
-        if bank_name not in cleaner_map:
-            os.unlink(temp_file_path)
-            return error_response(response, "Invalid bank name.", 400)
+        # if bank_name not in cleaner_map:
+        #     os.unlink(temp_file_path)
+        #     return error_response(response, "Invalid bank name.", 400)
 
-        # Cleaned transactions based on filtered text
-        cleaned_transactions = cleaner_map[bank_name](filtered_text, client_id)
+        # # Cleaned transactions based on filtered text
+        # cleaned_transactions = cleaner_map[bank_name](filtered_text, client_id)
 
-        # Update Firestore with cleaned data
-        doc_ref.update({
-            "number_of_transactions": len(cleaned_transactions),
-            "transactions": cleaned_transactions,
-        })
+        # # Update Firestore with cleaned data
+        # doc_ref.update({
+        #     "number_of_transactions": len(cleaned_transactions),
+        #     "transactions": cleaned_transactions,
+        # })
 
         # Delete temporary file
         os.unlink(temp_file_path)
@@ -401,7 +461,6 @@ def success_response(response, message, status_code):
     response.status = status_code
     response.headers["Content-Type"] = "application/json"
     return response
-
 
 # Helper Functions
 def fetch_removal_lines(bank_name):
@@ -442,22 +501,27 @@ def fetch_removal_lines(bank_name):
         print(f"ERROR: Exception occurred while fetching removal lines for bank {bank_name}: {e}")
         return []
 
-def filter_extracted_text(extracted_text, removal_lines):
+def filter_extracted_text(raw_data_chunks, removal_lines):
     """
-    Filters out lines in the extracted text that match the removal lines.
+    Filters out lines in the raw data chunks that match the removal lines.
     Args:
-        extracted_text (str): The raw extracted text from the statement.
+        raw_data_chunks (list): The raw extracted text split into chunks.
         removal_lines (list): List of lines to remove.
     Returns:
-        str: Filtered text.
+        list: Filtered chunks of text.
     """
-    filtered_lines = [
-        line for line in extracted_text.split("\n") 
-        if not any(removal_line in line for removal_line in removal_lines)
+    
+    # Process each chunk and filter its lines
+    filtered_chunks = [
+        [line for line in chunk if not any(removal_line in line for removal_line in removal_lines)]
+        for chunk in raw_data_chunks
     ]
-    return "\n".join(filtered_lines)
 
+    # Debug output
+    total_lines = sum(len(chunk) for chunk in filtered_chunks)
+    print(f"DEBUG: Filtered lines count: {total_lines} (across {len(filtered_chunks)} chunks)")
 
+    return filtered_chunks
 
 
 ###################### ( Cleaning Functions ) Start ###############################
@@ -799,80 +863,242 @@ def clean_data_ned(extracted_text, client_id):
 
 def extract_transactions_ned(extracted_text, client_id):
     """
-    Extracts transactions from the provided text using regex.
+    Extracts transactions from the raw text using regex.
 
     Args:
-        extracted_text (str): Extracted text from the bank statement.
+        extracted_text (str): Raw extracted text from the bank statement.
+        client_id (str): Client identifier for Firestore.
 
     Returns:
         list: Processed transaction data in the form of dictionaries.
     """
-    # Clean text: remove commas and asterisks to reduce memory usage
-    extracted_text = extracted_text.replace(",", "").replace("*", "")
-
-    # Match all transactions with regex
-    matches = re.findall(transaction_regex_ned, extracted_text, re.DOTALL)
-    print(f"Found {len(matches)} transactions.")
-
-    # Group Matches
-    # (\d{2}\/\d{2}\/\d{4})            # Group Date 1 (dd/mm/yyyy)
-    # \s                               # whitespace
-    # (.*?)                            # match for description
-    # (-?\d*\s?\d*\.\d{2})?            # Group Fees Amount if three dots
-    # \s                               # whitespace
-    # (-?\d*\s?\d*\.\d{2})             # Group Debit or Credit Amount
-    # \s                               # whitespace
-    # (-?\d*\s?\d*\.\d{2})             # Group Balance Amount If two dots or three dots
-
-    # Group Regex ?
-
-    detailed_regex = r"(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?\d*\s?\d*\.\d{2})?\s+(-?\d*\s?\d*\.\d{2})\s+(-?\d*\s?\d*\.\d{2}) "
-    matches = re.findall(detailed_regex, matches, re.DOTALL)
-    
+    # Split the extracted text into an array of lines for easier processing
+    raw_data_array = extracted_text.split("\n")
 
     transactions = []
-    for match in matches:
-        date1 = match[0].strip() if match[0] else None
-        date2 = match[1].strip() if match[1] else None
-        description = match[2].strip() if match[2] else "No description"
-        balance = match[3].strip() if match[3] else None
+    detailed_regex = r"(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?\d*\s?\d*\.\d{2})?\s+(-?\d*\s?\d*\.\d{2})\s+(-?\d*\s?\d*\.\d{2})"
 
-        # Parse amounts safely and minimize memory usage
-        # Remove spaces before converting to float
-        credit_amount = float(match[3].replace("-", "").replace(" ", "")) if match[3] else None
-        balance_amount = float(balance.replace(" ", "")) if balance else None
-        debit_amount = None
+    for line in raw_data_array:
+        # Apply regex to each line
+        details = re.match(detailed_regex, line)
+        if details:
+            date1 = details.group(1).strip() if details.group(1) else None
+            description = details.group(2).strip() if details.group(2) else "No description"
+            fees_amount = float(details.group(3).replace(" ", "")) if details.group(3) else None
+            balance_amount = float(details.group(5).replace(" ", "")) if details.group(5) else None
 
-        # Remove " " in amounts (for debit_amount, if applicable)
-        if debit_amount:
-            debit_amount = debit_amount.replace(" ", "")
+            # Determine debit or credit amount
+            debit_amount, credit_amount = None, None
+            if details.group(4):
+                if details.group(4).startswith("-"):
+                    debit_amount = float(details.group(4).replace("-", "").replace(" ", ""))
+                else:
+                    credit_amount = float(details.group(4).replace(" ", ""))
 
-        # Append the processed transaction to the list
-        transactions.append({
-            "date1": date1,
-            "date2": date2,
-            "description": description,
-            "fees_description": None,
-            "fees_type": None,
-            "fees_amount": 0.0,
-            "debit_amount": debit_amount,
-            "credit_amount": credit_amount,
-            "balance_amount": balance_amount
-        })
+            # Append a complete transaction to the list
+            transactions.append({
+                "date1": date1,
+                "date2": None,  # Assuming `date2` is not part of this regex
+                "description": description,
+                "fees_description": None,
+                "fees_type": None,
+                "fees_amount": fees_amount,
+                "debit_amount": debit_amount,
+                "credit_amount": credit_amount,
+                "balance_amount": balance_amount
+            })
+        else:
+            # Append placeholder transaction if line doesn't match
+            transactions.append({
+                "date1": None,
+                "date2": None,
+                "description": None,
+                "fees_description": None,
+                "fees_type": None,
+                "fees_amount": None,
+                "debit_amount": None,
+                "credit_amount": None,
+                "balance_amount": None
+            })
 
-    # Update Firestore with the number of transactions and transaction data
-    db = firestore.client()
+    print(f"Processed {len(transactions)} transactions successfully.")
+
+    # Save transactions to Firestore
+    db = firestore.Client()
     doc_ref = db.collection("clients").document(client_id)
-
-    # Use merge=True to avoid overwriting other fields if necessary
     doc_ref.update({
-        "number_of_transactions": len(matches),
+        "number_of_transactions": len(transactions),
         "transactions": transactions
     })
 
-    print(f"Updated Firestore with {len(matches)} transactions.")
-
+    print(f"Updated Firestore with {len(transactions)} transactions.")
     return transactions
+
+# def extract_transactions_ned(extracted_text, client_id):
+#     """
+#     Extracts transactions from the provided text using regex.
+
+#     Args:
+#         extracted_text (str): Extracted text from the bank statement.
+#         client_id (str): Client identifier for Firestore.
+
+#     Returns:
+#         list: Processed transaction data in the form of dictionaries.
+#     """
+#     # Clean text: remove commas and asterisks
+#     extracted_text = extracted_text.replace(",", "").replace("*", "")
+
+#     # Match all transactions with regex
+#     transaction_regex_ned = r"(\d{2}/\d{2}/\d{4})(.*?)(?=\s\d{2}/\d{2}/\d{4}|$)"
+#     matches = re.findall(transaction_regex_ned, extracted_text, re.DOTALL)
+#     print(f"Initial Matches Found: {len(matches)}")
+#     print(f"First few matches: {matches[:3]}")
+
+#     # Define the detailed regex
+#     detailed_regex = r"(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?\d*\s?\d*\.\d{2})?\s+(-?\d*\s?\d*\.\d{2})\s+(-?\d*\s?\d*\.\d{2})"
+
+#     transactions = []
+
+#     # Process each match using the detailed regex
+#     for match in matches:
+#         # Extract `date1` from the initial regex
+#         date1 = match[0].strip() if match[0] else None
+
+#         # Use the detailed regex on the description part of the match
+#         details = re.match(detailed_regex, match[1], re.DOTALL)
+#         if details:
+#             date2 = details.group(1).strip() if details.group(1) else None
+#             description = details.group(2).strip() if details.group(2) else "No description"
+#             fees_amount = float(details.group(3).replace(" ", "")) if details.group(3) else None
+#             balance_amount = float(details.group(5).replace(" ", "")) if details.group(5) else None
+
+#             # Determine debit or credit amount
+#             debit_amount, credit_amount = None, None
+#             if details.group(4):
+#                 if details.group(4).startswith("-"):
+#                     debit_amount = float(details.group(4).replace("-", "").replace(" ", ""))
+#                 else:
+#                     credit_amount = float(details.group(4).replace(" ", ""))
+
+#             # Append a complete transaction to the list
+#             transactions.append({
+#                 "date1": date1,
+#                 "date2": date2,
+#                 "description": description,
+#                 "fees_description": None,
+#                 "fees_type": None,
+#                 "fees_amount": fees_amount,
+#                 "debit_amount": debit_amount,
+#                 "credit_amount": credit_amount,
+#                 "balance_amount": balance_amount
+#             })
+#         else:
+#             # Append a placeholder transaction if details regex fails
+#             transactions.append({
+#                 "date1": date1,
+#                 "date2": None,
+#                 "description": None,
+#                 "fees_description": None,
+#                 "fees_type": None,
+#                 "fees_amount": None,
+#                 "debit_amount": None,
+#                 "credit_amount": None,
+#                 "balance_amount": None
+#             })
+
+#     print(f"Processed {len(transactions)} transactions successfully.")
+
+#     # Update Firestore with the number of transactions and transaction data
+#     db = firestore.Client()
+#     doc_ref = db.collection("clients").document(client_id)
+#     doc_ref.update({
+#         "number_of_transactions": len(transactions),
+#         "transactions": transactions
+#     })
+
+#     print(f"Updated Firestore with {len(transactions)} transactions.")
+#     return transactions
+
+# def extract_transactions_ned(extracted_text, client_id):
+#     """
+#     Extracts transactions from the provided text using regex.
+
+#     Args:
+#         extracted_text (str): Extracted text from the bank statement.
+
+#     Returns:
+#         list: Processed transaction data in the form of dictionaries.
+#     """
+#     # Clean text: remove commas and asterisks to reduce memory usage
+#     extracted_text = extracted_text.replace(",", "").replace("*", "")
+
+#     # Match all transactions with regex
+#     matches = re.findall(transaction_regex_ned, extracted_text, re.DOTALL)
+#     print(f"Found {len(matches)} transactions.")
+
+#     # Group Matches
+#     # (\d{2}\/\d{2}\/\d{4})            # Group Date 1 (dd/mm/yyyy)
+#     # \s                               # whitespace
+#     # (.*?)                            # match for description
+#     # (-?\d*\s?\d*\.\d{2})?            # Group Fees Amount if three dots
+#     # \s                               # whitespace
+#     # (-?\d*\s?\d*\.\d{2})             # Group Debit or Credit Amount
+#     # \s                               # whitespace
+#     # (-?\d*\s?\d*\.\d{2})             # Group Balance Amount If two dots or three dots
+
+#     # Group Regex ?
+
+#     detailed_regex = r"(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?\d*\s?\d*\.\d{2})?\s+(-?\d*\s?\d*\.\d{2})\s+(-?\d*\s?\d*\.\d{2}) "
+#     # Process matches without reusing the variable incorrectly
+#     matches = re.findall(detailed_regex, extracted_text, re.DOTALL)
+#     print(f"Found {len(matches)} transactions.")
+#     print(f"Type of matches: {type(matches)}")
+
+
+
+    
+
+#     transactions = []
+#     for match in matches:
+#         date1 = match[0].strip() if len(match) > 0 and match[0] else None
+#         description = match[1].strip() if len(match) > 1 and match[1] else "No description"
+#         fees_amount = float(match[2].replace(" ", "")) if len(match) > 2 and match[2] else 0.0
+#         debit_amount = None
+#         credit_amount = None
+#         balance_amount = float(match[4].replace(" ", "")) if len(match) > 4 and match[4] else None
+
+#         # Determine if amount is debit or credit
+#         if len(match) > 3 and match[3]:
+#             if match[3].startswith("-"):
+#                 debit_amount = float(match[3].replace("-", "").replace(" ", ""))
+#             else:
+#                 credit_amount = float(match[3].replace(" ", ""))
+
+#         # Append the processed transaction to the list
+#         transactions.append({
+#             "date1": date1,
+#             "date2": None,  # Always include `date2` even if not used
+#             "description": description,
+#             "fees_description": None,
+#             "fees_type": None,
+#             "fees_amount": fees_amount,
+#             "debit_amount": debit_amount,
+#             "credit_amount": credit_amount,
+#             "balance_amount": balance_amount
+#         })
+
+#     # Update Firestore with the number of transactions and transaction data
+#     db = firestore.client()
+#     doc_ref = db.collection("clients").document(client_id)
+
+#     # Use merge=True to avoid overwriting other fields if necessary
+#     doc_ref.update({
+#         "number_of_transactions": len(matches),
+#         "transactions": transactions
+#     })
+
+#     print(f"Updated Firestore with {len(matches)} transactions.")
+#     return transactions
 
 ############ Ned Bank Statement ############
 

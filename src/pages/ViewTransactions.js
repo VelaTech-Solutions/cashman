@@ -96,7 +96,7 @@ const ViewTransactions = () => {
                 Total Transactions
               </p>
               <p className="text-3xl font-bold text-white">
-                {clientData.transactions?.length || 0}
+                {clientData?.transactions?.length ?? 0}
               </p>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg">

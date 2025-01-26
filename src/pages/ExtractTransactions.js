@@ -39,12 +39,8 @@ const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-home" }];
 function ExtractTransactions() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-  const [fileLinks, setFileLinks] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-
   const [isProcessing, setIsProcessing] = useState(false); // handleExtractTransactions
   const [processing, setProcessing] = useState(false); // handleExtractDataManual
 
@@ -345,9 +341,13 @@ function ExtractTransactions() {
           body: JSON.stringify({
             clientId: id,
             bankName: clientData.bankName,
+
           }),
         }
       );
+      // console log method and bankname
+      console.log("Method: ", processingMethod);
+      console.log("Bank Name: ", clientData.bankName);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -360,6 +360,8 @@ function ExtractTransactions() {
 
       // Show success message if the request succeeded
       setSuccessMessage(result.message || "Transactions extracted successfully!");
+      // Refresh the page by reloading
+      window.location.reload();
 
       // Optionally refresh or update UI with new transactions
       if (result.transactions) {
@@ -377,7 +379,6 @@ function ExtractTransactions() {
       setProcessingtransactions(false); // Stop processing
     }
   };
-
 
   const handleDeleteLine = (index) => {
     const updatedRawData = [...clientData.rawData];
@@ -433,7 +434,7 @@ function ExtractTransactions() {
                 Total Transactions
               </p>
               <p className="text-3xl font-bold text-white">
-                {/* {clientData.transactions?.length || 0} */}
+                {clientData?.transactions?.length ?? 0}
               </p>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
@@ -491,7 +492,6 @@ function ExtractTransactions() {
           </div>
 
           {/* Extract and Manage Options in Grid Layout */}
-          {/* Extract and Manage Options in Grid Layout */}
           <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
             <h2 className="text-2xl font-semibold text-white mb-4">
               Manually Extract Data
@@ -544,7 +544,6 @@ function ExtractTransactions() {
               </div>
 
               {/* Button 3: Edit Extracted Raw Data */}
-              {/* Button 3: Edit Extracted Raw Data */}
               <div className="relative">
                 {/* Button to toggle dropdown */}
                 <Button
@@ -559,7 +558,7 @@ function ExtractTransactions() {
 
                 {/* Dropdown for editing raw transactions */}
                 {editRawDataOpen && (
-                  <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
+                  <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold text-blue-400 mb-4">
                       Edit Extracted Transactions
                     </h2>
@@ -579,26 +578,22 @@ function ExtractTransactions() {
                           filteredData: updatedRawData.filter(line => line.trim() !== ""), // Update filteredData dynamically
                         });
                       }}
-                      className="w-full h-60 bg-gray-800 text-white p-3 rounded-lg resize-none"
+                      className="w-full h-80 bg-gray-800 text-white p-3 rounded-lg resize-none"
                       placeholder="Edit your transactions here..."
                     ></textarea>
 
-
-                    {/* Save Button (Sticky at the Bottom) */}
-                    <div className="sticky bottom-0 bg-gray-900 p-4 mt-4">
+                    {/* Save Button */}
+                    <div className="flex justify-end mt-4">
                       <Button
-                        onClick={() => handleSaveFilteredData(clientData.idNumber)
-
-                        }
+                        onClick={() => handleSaveFilteredData(clientData.idNumber)}
                         text="Save Filtered Data"
-                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-medium text-center"
+                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-medium"
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* View Filitered data */}
               {/* View Filtered Data */}
               <div className="relative">
                 <Button
