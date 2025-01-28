@@ -305,16 +305,6 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
 ##########################
 
 
-def chunk_array(data_array, chunk_size):
-    """
-    Splits an array into smaller chunks.
-    Args:
-        data_array (list): The array to chunk.
-        chunk_size (int): The maximum size of each chunk.
-    Returns:
-        list: A list of chunks.
-    """
-    return [data_array[i:i + chunk_size] for i in range(0, len(data_array), chunk_size)]
 
 # handleExtractDataautomatic
 @https_fn.on_request()
@@ -383,7 +373,7 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
         removal_lines = fetch_removal_lines(bank_name)
 
         # Filter the extracted text using the removal lines
-        filtered_text = filter_extracted_text(raw_data_chunks, removal_lines)  # Process as array
+        filtered_lines = filter_extracted_text(raw_data_chunks, removal_lines)  # Process as array
 
         # Save rawData and filteredData to Firestore as arrays
         db = firestore.client()
@@ -400,7 +390,7 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
                     "chunk_size": chunk_size,
                     "total_chunks": len(raw_data_chunks)
                 },
-                "filteredData": filtered_text  # Save as array
+                "filteredData": filtered_lines  # Save as array
             }, merge=True)
             print(f"DEBUG: Successfully saved rawData for client {client_id}.")
         except Exception as e:
@@ -503,26 +493,38 @@ def fetch_removal_lines(bank_name):
 
 def filter_extracted_text(raw_data_chunks, removal_lines):
     """
-    Filters out lines in the raw data chunks that match the removal lines.
+    Filters out lines in the raw data chunks that match any of the removal lines.
     Args:
-        raw_data_chunks (list): The raw extracted text split into chunks.
-        removal_lines (list): List of lines to remove.
+        raw_data_chunks (list of lists): The raw data split into chunks, each chunk is a list of lines.
+        removal_lines (list): List of lines or keywords to remove.
+
     Returns:
-        list: Filtered chunks of text.
+        list: Filtered text as a single list of lines.
     """
-    
-    # Process each chunk and filter its lines
-    filtered_chunks = [
-        [line for line in chunk if not any(removal_line in line for removal_line in removal_lines)]
-        for chunk in raw_data_chunks
-    ]
+    filtered_lines = []
 
-    # Debug output
-    total_lines = sum(len(chunk) for chunk in filtered_chunks)
-    print(f"DEBUG: Filtered lines count: {total_lines} (across {len(filtered_chunks)} chunks)")
+    # Iterate over each chunk
+    for chunk in raw_data_chunks:
+        # Iterate over each line in the chunk
+        for line in chunk:
+            # Keep the line only if it doesn't contain any removal line
+            if not any(removal_line in line for removal_line in removal_lines):
+                filtered_lines.append(line)
 
-    return filtered_chunks
+    print(f"DEBUG: Filtered lines count: {len(filtered_lines)}")
+    return filtered_lines
 
+# Helper Functions
+def chunk_array(data_array, chunk_size):
+    """
+    Splits an array into smaller chunks.
+    Args:
+        data_array (list): The array to chunk.
+        chunk_size (int): The maximum size of each chunk.
+    Returns:
+        list: A list of chunks.
+    """
+    return [data_array[i:i + chunk_size] for i in range(0, len(data_array), chunk_size)]
 
 ###################### ( Cleaning Functions ) Start ###############################
 
