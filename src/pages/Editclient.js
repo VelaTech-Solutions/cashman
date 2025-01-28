@@ -13,7 +13,6 @@ import { collection, getDocs } from "firebase/firestore";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-
 ];
 
 const EditClient = () => {
@@ -77,10 +76,7 @@ const EditClient = () => {
   // Main UI
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      
-      
       <Sidebar title="Edit Client" links={links} />
-      
 
       {/* Main Content */}
       <div className="flex-1 p-8">

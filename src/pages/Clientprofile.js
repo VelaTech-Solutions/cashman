@@ -16,11 +16,16 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { httpsCallable } from "firebase/functions";
 import { functions, db, storage } from "../firebase/firebase";
-import { doc, getDoc, deleteDoc, updateDoc, deleteField, setDoc  } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  deleteDoc,
+  updateDoc,
+  deleteField,
+  setDoc,
+} from "firebase/firestore";
 import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 import { filter } from "framer-motion/client";
-
-
 
 const Clientprofile = () => {
   const { id } = useParams();
@@ -45,7 +50,6 @@ const Clientprofile = () => {
     OCR: "ocr",
   };
 
-
   const [newLine, setNewLine] = useState(""); // To manage the input for new lines
   const [removalLines, setRemovalLines] = useState([]);
 
@@ -60,8 +64,16 @@ const Clientprofile = () => {
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
-    { path: `/ExtractTransactions/${id}`, label: "Extract Transactions", icon: "ph-home" },
-    { path: `/transactiondatabase/${id}`, label: "Transaction Database", icon: "ph-file-text" },
+    {
+      path: `/ExtractTransactions/${id}`,
+      label: "Extract Transactions",
+      icon: "ph-home",
+    },
+    {
+      path: `/transactiondatabase/${id}`,
+      label: "Transaction Database",
+      icon: "ph-file-text",
+    },
   ];
 
   useEffect(() => {
@@ -232,7 +244,6 @@ const Clientprofile = () => {
     }
   };
 
-
   // Fetch client data
   useEffect(() => {
     const fetchData = async () => {
@@ -266,16 +277,10 @@ const Clientprofile = () => {
   if (loading) return <p>Loading client data and files...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-
-
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      
-
       {/* Sidebar */}
       <Sidebar title="Client Profile" links={links} />
-
 
       {/* Main Content */}
       <div className="flex-1 p-8">
@@ -389,9 +394,6 @@ const Clientprofile = () => {
             </div>
           </div>
         </div>
-
-
-
 
         {/* Client notes section A box here the user can add note about the client, linked with clients data*/}
         <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">

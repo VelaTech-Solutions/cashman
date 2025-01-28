@@ -15,7 +15,7 @@ const links = [
   { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
   { path: "/settings", label: "Settings", icon: "ph-globe" },
   { path: "/developernotes", label: "Developer Notes", icon: "ph-gear" },
-  { path : "/instructions", label: "Instructions", icon: "ph-file-text" },
+  { path: "/instructions", label: "Instructions", icon: "ph-file-text" },
   // testing pages
   { path: "/teststorage", label: "Test Storage", icon: "ph-file-text" },
 ];
@@ -43,7 +43,6 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-8">
-
         {/* Header */}
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -64,7 +63,6 @@ const Dashboard = () => {
             <p className="text-lg font-bold text-blue-400">{userEmail}</p>
           </div>
         </div>
-
 
         {/* Add your dashboard content here */}
         <div className="text-gray-300">

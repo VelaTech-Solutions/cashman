@@ -29,8 +29,6 @@ const AddClient = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
-
-
   // Fetch authenticated user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -59,7 +57,7 @@ const AddClient = () => {
 
     if (!allowedTypes.includes(selectedFile.type)) {
       setUploadStatus(
-        "Invalid file type. Please upload a PDF, JPEG, or PNG file."
+        "Invalid file type. Please upload a PDF, JPEG, or PNG file.",
       );
       return null;
     }
@@ -72,7 +70,7 @@ const AddClient = () => {
     setUploadStatus("Uploading file...");
     const storageRef = ref(
       storage,
-      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`
+      `bank_statements/${clientDetails.idNumber}/${selectedFile.name}`,
     );
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
@@ -93,7 +91,7 @@ const AddClient = () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUploadStatus("Upload complete!");
           resolve(downloadURL);
-        }
+        },
       );
     });
   };
@@ -123,7 +121,7 @@ const AddClient = () => {
           timestamp: new Date(),
           userEmail,
         },
-        { merge: true }
+        { merge: true },
       );
 
       setSubmitSuccess(true);
@@ -138,10 +136,9 @@ const AddClient = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      
       {/* Sidebar */}
       <Sidebar title="Add Client" links={links} />
-      
+
       {/* Main content */}
       <div className="flex-1 p-8">
         <motion.div

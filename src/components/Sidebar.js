@@ -32,7 +32,7 @@ const Sidebar = ({ links }) => {
       {/* Navigation */}
       <nav className="space-y-6">
         {links && links.length > 0 ? (
-          links.map((link, index) => (
+          links.map((link, index) =>
             link.path === "javascript:void(0)" ? (
               <button
                 key={index}
@@ -51,8 +51,8 @@ const Sidebar = ({ links }) => {
                 <i className={`${link.icon} text-xl text-blue-400`}></i>
                 <span className="text-white">{link.label}</span>
               </Link>
-            )
-          ))
+            ),
+          )
         ) : (
           <p className="text-gray-500">No navigation links provided.</p>
         )}

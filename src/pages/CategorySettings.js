@@ -27,7 +27,11 @@ const CategorySettings = () => {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "javascript:void(0)", label: "Back to Previous Page", icon: "ph-arrow-left" },
+    {
+      path: "javascript:void(0)",
+      label: "Back to Previous Page",
+      icon: "ph-arrow-left",
+    },
   ];
 
   // Fetch categories from Firestore
@@ -57,7 +61,10 @@ const CategorySettings = () => {
 
     try {
       const categoryCollection = collection(db, "categories");
-      await addDoc(categoryCollection, { name: newCategory, subcategories: [] });
+      await addDoc(categoryCollection, {
+        name: newCategory,
+        subcategories: [],
+      });
       setNewCategory("");
       alert("Category added successfully!");
       fetchCategories();
@@ -76,7 +83,10 @@ const CategorySettings = () => {
     try {
       const categoryRef = doc(db, "categories", selectedCategoryId);
       await updateDoc(categoryRef, {
-        subcategories: arrayUnion({ id: Date.now().toString(), name: newSubcategory }),
+        subcategories: arrayUnion({
+          id: Date.now().toString(),
+          name: newSubcategory,
+        }),
       });
       setNewSubcategory("");
       alert("Subcategory added successfully!");
@@ -95,7 +105,7 @@ const CategorySettings = () => {
         alert("Category deleted successfully!");
         // Refresh data
         setCategories((prevCategories) =>
-          prevCategories.filter((category) => category.id !== categoryId)
+          prevCategories.filter((category) => category.id !== categoryId),
         );
       } catch (err) {
         console.error("Failed to delete category:", err);
@@ -113,7 +123,9 @@ const CategorySettings = () => {
         alert("Subcategory deleted successfully!");
         // Refresh data
         setSubcategories((prevSubcategories) =>
-          prevSubcategories.filter((subcategory) => subcategory.id !== subcategoryId)
+          prevSubcategories.filter(
+            (subcategory) => subcategory.id !== subcategoryId,
+          ),
         );
       } catch (err) {
         console.error("Failed to delete subcategory:", err);
@@ -121,7 +133,6 @@ const CategorySettings = () => {
       }
     }
   };
-
 
   useEffect(() => {
     fetchCategories();
@@ -138,15 +149,17 @@ const CategorySettings = () => {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Category Settings" links={links} />
-  
+
       <div className="flex-grow p-6">
         <h1 className="text-3xl font-bold mb-6 text-blue-400">
           Manage Categories & Subcategories
         </h1>
-  
+
         {/* Add Category */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue-400">Add New Category</h2>
+          <h2 className="text-xl font-semibold text-blue-400">
+            Add New Category
+          </h2>
           <input
             type="text"
             value={newCategory}
@@ -161,10 +174,12 @@ const CategorySettings = () => {
             Add Category
           </button>
         </div>
-  
+
         {/* Add Subcategory */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue-400">Add New Subcategory</h2>
+          <h2 className="text-xl font-semibold text-blue-400">
+            Add New Subcategory
+          </h2>
           <select
             value={selectedCategoryId}
             onChange={(e) => setSelectedCategoryId(e.target.value)}
@@ -191,25 +206,29 @@ const CategorySettings = () => {
             Add Subcategory
           </button>
         </div>
-  
+
         {/* List Categories and Subcategories */}
         <div>
-          <h2 className="text-xl font-semibold text-blue-400">Existing Categories</h2>
+          <h2 className="text-xl font-semibold text-blue-400">
+            Existing Categories
+          </h2>
           {categories.map((category) => (
             <div key={category.id} className="bg-gray-800 p-4 rounded-lg mb-4">
-                <p className="text-lg font-bold text-blue-400">{category.name}</p>
-                  <button
-                    onClick={() => handleDeleteCategory(category.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mt-2"
-                  >
-                    Delete Category
-                  </button>
+              <p className="text-lg font-bold text-blue-400">{category.name}</p>
+              <button
+                onClick={() => handleDeleteCategory(category.id)}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mt-2"
+              >
+                Delete Category
+              </button>
               <ul className="mt-4 space-y-2">
                 {(category.subcategories || []).map((subcategory) => (
                   <li key={subcategory.id} className="text-gray-400">
                     {subcategory.name}{" "}
                     <button
-                      onClick={() => handleDeleteSubcategory(category.id, subcategory)}
+                      onClick={() =>
+                        handleDeleteSubcategory(category.id, subcategory)
+                      }
                       className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded ml-2"
                     >
                       Delete
@@ -225,4 +244,4 @@ const CategorySettings = () => {
   );
 };
 
-export default CategorySettings;  
+export default CategorySettings;

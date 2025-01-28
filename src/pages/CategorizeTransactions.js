@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { db } from "../firebase/firebase";
-import { doc, getDoc, updateDoc, collection, getDocs, addDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+  addDoc,
+} from "firebase/firestore";
 import Sidebar from "../components/Sidebar";
 import LoadClientData from "../components/LoadClientData"; // Import the fetch function
 const CategorizeTransactions = () => {
@@ -20,62 +27,73 @@ const CategorizeTransactions = () => {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}`, label: "Back to Client Profile", icon: "ph-file-text" },
-    { path: `/categorysettings`, label: "Category Settings", icon: "ph-file-text" },
-    { path: `/transactiondatabase/${id}`, label: "Transaction Database", icon: "ph-file-text" },
+    {
+      path: `/client/${id}`,
+      label: "Back to Client Profile",
+      icon: "ph-file-text",
+    },
+    {
+      path: `/categorysettings`,
+      label: "Category Settings",
+      icon: "ph-file-text",
+    },
+    {
+      path: `/transactiondatabase/${id}`,
+      label: "Transaction Database",
+      icon: "ph-file-text",
+    },
   ];
-// Fetch client data
-useEffect(() => {
-  const fetchData = async () => {
-    try {
+  // Fetch client data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Load client data using the reusable function
+        const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
+        console.log("Fetched client data:", clientData);
 
-      // Load client data using the reusable function
-      const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
-      console.log("Fetched client data:", clientData);
+        // Extract transactions and bank name from the client document
+        const fetchedTransactions = clientData.transactions || [];
+        const bankName = clientData.bankName;
 
-      // Extract transactions and bank name from the client document
-      const fetchedTransactions = clientData.transactions || [];
-      const bankName = clientData.bankName;
+        setTransactions(fetchedTransactions);
+        setFilteredTransactions(fetchedTransactions);
 
-      setTransactions(fetchedTransactions);
-      setFilteredTransactions(fetchedTransactions);
+        // Fetch categories
+        console.log("Fetching categories...");
+        const categoriesSnapshot = await getDocs(collection(db, "categories"));
+        const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCategories(fetchedCategories);
 
-      // Fetch categories
-      console.log("Fetching categories...");
-      const categoriesSnapshot = await getDocs(collection(db, "categories"));
-      const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCategories(fetchedCategories);
+        // Process subcategories
+        const organizedSubcategories = fetchedCategories.flatMap((category) =>
+          category.subcategories
+            ? category.subcategories.map((sub) => ({
+                id: sub.id,
+                name: sub.name,
+                parentCategory: category.name,
+              }))
+            : [],
+        );
+        setSubcategories(organizedSubcategories);
+      } catch (err) {
+        console.error("Error fetching data:", err.message);
+        setError("Failed to fetch transactions or categories.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      // Process subcategories
-      const organizedSubcategories = fetchedCategories.flatMap((category) =>
-        category.subcategories
-          ? category.subcategories.map((sub) => ({
-              id: sub.id,
-              name: sub.name,
-              parentCategory: category.name,
-            }))
-          : []
-      );
-      setSubcategories(organizedSubcategories);
-    } catch (err) {
-      console.error("Error fetching data:", err.message);
-      setError("Failed to fetch transactions or categories.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, [id]);
+    fetchData();
+  }, [id]);
 
   // Filter subcategories based on the selected category
   useEffect(() => {
     if (category) {
       const filtered = subcategories.filter(
-        (sub) => sub.parentCategory === category
+        (sub) => sub.parentCategory === category,
       );
       setFilteredSubcategories(filtered);
     } else {
@@ -90,7 +108,7 @@ useEffect(() => {
         transaction.description
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
+        transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
     setFilteredTransactions(filtered);
   }, [searchQuery, transactions]);
@@ -106,8 +124,8 @@ useEffect(() => {
   };
 
   // Check if all transactions are selected
-  const isAllSelected = 
-    filteredTransactions.length > 0 && 
+  const isAllSelected =
+    filteredTransactions.length > 0 &&
     selectedTransactions.length === filteredTransactions.length;
 
   // Individual checkbox logic remains the same
@@ -115,10 +133,9 @@ useEffect(() => {
     setSelectedTransactions((prevSelected) =>
       prevSelected.includes(transactionIndex)
         ? prevSelected.filter((index) => index !== transactionIndex)
-        : [...prevSelected, transactionIndex]
+        : [...prevSelected, transactionIndex],
     );
   };
-
 
   // Categorize selected transactions
   const categorize = async () => {
@@ -140,7 +157,7 @@ useEffect(() => {
 
       selectedTransactions.forEach((transactionIndex) => {
         const originalIndex = transactions.findIndex(
-          (txn) => txn === filteredTransactions[transactionIndex]
+          (txn) => txn === filteredTransactions[transactionIndex],
         );
 
         if (originalIndex !== -1) {
@@ -154,11 +171,11 @@ useEffect(() => {
             updatedTransactions[originalIndex].bankName,
             updatedTransactions[originalIndex].description,
             category,
-            subcategory
+            subcategory,
           );
         } else {
           console.warn(
-            `Transaction at filtered index ${transactionIndex} not found in the original list.`
+            `Transaction at filtered index ${transactionIndex} not found in the original list.`,
           );
         }
       });
@@ -173,22 +190,36 @@ useEffect(() => {
       setSelectedTransactions([]);
     } catch (err) {
       console.error("Error during categorization:", err.message, err.stack);
-      alert("Failed to categorize transactions. Check the console for details.");
+      alert(
+        "Failed to categorize transactions. Check the console for details.",
+      );
     }
   };
 
-  const saveToTransactionDatabase = async (bankName, description, category, subcategory) => {
+  const saveToTransactionDatabase = async (
+    bankName,
+    description,
+    category,
+    subcategory,
+  ) => {
     try {
       if (!bankName) {
         throw new Error("Bank name is undefined or missing.");
       }
 
-      console.log(`Saving transaction for bank: ${bankName}, description: ${description}`);
-      const bankCollectionRef = collection(db, "transaction_database", bankName, "transactions");
+      console.log(
+        `Saving transaction for bank: ${bankName}, description: ${description}`,
+      );
+      const bankCollectionRef = collection(
+        db,
+        "transaction_database",
+        bankName,
+        "transactions",
+      );
 
       const querySnapshot = await getDocs(bankCollectionRef);
       const existingTransaction = querySnapshot.docs.find(
-        (doc) => doc.data().description === description
+        (doc) => doc.data().description === description,
       );
 
       if (existingTransaction) {
@@ -203,7 +234,11 @@ useEffect(() => {
         createdAt: new Date().toISOString(),
       });
 
-      console.log("Transaction added to database:", { description, category, subcategory });
+      console.log("Transaction added to database:", {
+        description,
+        category,
+        subcategory,
+      });
     } catch (err) {
       console.error("Error saving to transaction database:", err.message);
     }
@@ -212,21 +247,21 @@ useEffect(() => {
   const clearAllCategories = async () => {
     try {
       console.log("Clearing all categories and subcategories...");
-  
+
       // Clone the transactions array and remove categories
       const updatedTransactions = transactions.map((transaction) => ({
         ...transaction,
         category: "",
         subcategory: "",
       }));
-  
+
       // Update the Firestore document
       const clientDocRef = doc(db, "clients", id);
       await updateDoc(clientDocRef, { transactions: updatedTransactions });
-  
+
       console.log("All categories and subcategories cleared.");
       alert("All transactions cleared successfully!");
-  
+
       // Update state
       setTransactions(updatedTransactions);
     } catch (err) {
@@ -235,12 +270,8 @@ useEffect(() => {
     }
   };
 
-  
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  
-
-  
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
@@ -300,49 +331,47 @@ useEffect(() => {
           </button>
         </div>
 
-
         {/* Transactions Table */}
         <table className="w-full table-auto bg-gray-800 rounded shadow-md">
-            <thead>
-              <tr>
-                <th className="p-2">
+          <thead>
+            <tr>
+              <th className="p-2">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={handleSelectAll}
+                />
+              </th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Description</th>
+              <th className="p-2">Debit</th>
+              <th className="p-2">Credit</th>
+              <th className="p-2">Balance</th>
+              <th className="p-2">Category</th>
+              <th className="p-2">Subcategory</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTransactions.map((transaction, index) => (
+              <tr key={index} className="border-b border-gray-700">
+                <td className="p-2">
                   <input
                     type="checkbox"
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
+                    checked={selectedTransactions.includes(index)}
+                    onChange={() => handleCheckboxChange(index)}
                   />
-                </th>
-                <th className="p-2">Date</th>
-                <th className="p-2">Description</th>
-                <th className="p-2">Debit</th>
-                <th className="p-2">Credit</th>
-                <th className="p-2">Balance</th>
-                <th className="p-2">Category</th>
-                <th className="p-2">Subcategory</th>
+                </td>
+                <td className="p-2">{transaction.date1 || "-"}</td>
+                <td className="p-2">{transaction.description || "-"}</td>
+                <td className="p-2">{transaction.debit_amount || "-"}</td>
+                <td className="p-2">{transaction.credit_amount || "-"}</td>
+                <td className="p-2">{transaction.balance_amount || "-"}</td>
+                <td className="p-2">{transaction.category || "-"}</td>
+                <td className="p-2">{transaction.subcategory || "-"}</td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.map((transaction, index) => (
-                <tr key={index} className="border-b border-gray-700">
-                  <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedTransactions.includes(index)}
-                      onChange={() => handleCheckboxChange(index)}
-                    />
-                  </td>
-                  <td className="p-2">{transaction.date1 || "-"}</td>
-                  <td className="p-2">{transaction.description || "-"}</td>
-                  <td className="p-2">{transaction.debit_amount || "-"}</td>
-                  <td className="p-2">{transaction.credit_amount || "-"}</td>
-                  <td className="p-2">{transaction.balance_amount || "-"}</td>
-                  <td className="p-2">{transaction.category || "-"}</td>
-                  <td className="p-2">{transaction.subcategory || "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

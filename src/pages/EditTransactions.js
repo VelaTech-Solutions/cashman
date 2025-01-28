@@ -1,5 +1,5 @@
 // src/pages/ViewReports.js
-import React, { useEffect, useState }  from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import LoadClientData from "../components/LoadClientData";
@@ -10,8 +10,6 @@ const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
   { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
 ];
-
-
 
 const EditTransactions = () => {
   const { id } = useParams();
@@ -41,14 +39,16 @@ const EditTransactions = () => {
     fetchData();
   }, [id]);
   // Filter transactions based on search query
-  const filteredTransactions = clientData?.transactions?.filter((transaction) => {
-    return (
-      transaction.description
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  const filteredTransactions = clientData?.transactions?.filter(
+    (transaction) => {
+      return (
+        transaction.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    },
+  );
 
   const handleEdit = (index) => setIsEditing(index); // Start editing a row
 
@@ -68,7 +68,6 @@ const EditTransactions = () => {
     setEditedTransactions(clientData.transactions); // Reset changes
     setIsEditing(null);
   };
-
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
@@ -94,7 +93,7 @@ const EditTransactions = () => {
           </section>
         </motion.div>
 
-               {/* Transactions Table */}
+        {/* Transactions Table */}
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
           {filteredTransactions?.length > 0 ? (
             <div className="overflow-y-auto h-96">
@@ -153,9 +152,9 @@ const EditTransactions = () => {
             </p>
           )}
         </section>
-      
-              {/* Transactions Table */}
-              <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+
+        {/* Transactions Table */}
+        <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
           {filteredTransactions?.length > 0 ? (
             <div className="overflow-y-auto h-96">
               <table className="table-auto w-full text-left">
@@ -270,10 +269,18 @@ const EditTransactions = () => {
                         </>
                       ) : (
                         <>
-                          <td className="px-4 py-2 text-sm">{transaction.date1}</td>
-                          <td className="px-4 py-2 text-sm">{transaction.date2}</td>
-                          <td className="px-4 py-2 text-sm">{transaction.description}</td>
-                          <td className="px-4 py-2 text-sm">{transaction.fee_type}</td>
+                          <td className="px-4 py-2 text-sm">
+                            {transaction.date1}
+                          </td>
+                          <td className="px-4 py-2 text-sm">
+                            {transaction.date2}
+                          </td>
+                          <td className="px-4 py-2 text-sm">
+                            {transaction.description}
+                          </td>
+                          <td className="px-4 py-2 text-sm">
+                            {transaction.fee_type}
+                          </td>
                           <td className="px-4 py-2 text-sm">
                             {transaction.fee_amount
                               ? `R ${transaction.fee_amount.toFixed(2)}`
@@ -315,15 +322,9 @@ const EditTransactions = () => {
             </p>
           )}
         </section>
-      
-      
-      
-      
       </div>
     </div>
   );
 };
 
 export default EditTransactions;
-
-

@@ -83,12 +83,9 @@ const Viewclient = () => {
       .includes(searchQuery),
   );
 
-
-
   // Main UI
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      
       {/* Sidebar */}
       <Sidebar title="Add Client" links={links} />
 

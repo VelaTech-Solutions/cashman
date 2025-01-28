@@ -69,8 +69,14 @@ function App() {
         />
         <Route path="/client/:id/reports" element={<ViewReports />} />
 
-        <Route path="/transactiondatabase/:id" element={<Transactiondatabase />} />
-        <Route path="/ExtractTransactions/:id" element={<ExtractTransactions />} />
+        <Route
+          path="/transactiondatabase/:id"
+          element={<Transactiondatabase />}
+        />
+        <Route
+          path="/ExtractTransactions/:id"
+          element={<ExtractTransactions />}
+        />
 
         <Route path="/settings" element={<Settings />} />
         <Route path="/categorysettings" element={<CategorySettings />} />

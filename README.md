@@ -194,11 +194,11 @@ pip install -r requirements.txt
 
 pip freeze > requirements.txt
 
-
 # testenv
 
 python3 -m venv venvtest
 source venvtest/bin/activate
 
 # npx prettier --write .
+
 npx prettier --write .

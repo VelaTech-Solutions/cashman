@@ -62,14 +62,16 @@ const ViewTransactions = () => {
   }
 
   // Filter transactions based on search query
-  const filteredTransactions = clientData?.transactions?.filter((transaction) => {
-    return (
-      transaction.description
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  const filteredTransactions = clientData?.transactions?.filter(
+    (transaction) => {
+      return (
+        transaction.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        transaction.date1?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    },
+  );
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">

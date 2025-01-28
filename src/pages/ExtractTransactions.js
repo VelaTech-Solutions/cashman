@@ -58,7 +58,6 @@ function ExtractTransactions() {
   const [newLine, setNewLine] = useState(""); // To manage the input for new lines
   const [successMessage, setSuccessMessage] = useState(""); // To display success messages
 
-
   const [viewRemovedLinesOpen, setViewRemovedLinesOpen] = useState(false);
 
   const [removalDropdownOpen, setRemovalDropdownOpen] = useState(false); // Initialize dropdown state
@@ -66,20 +65,21 @@ function ExtractTransactions() {
   const [removalLines, setRemovalLines] = useState([]);
   const [removalSidebarOpen, setRemovalSidebarOpen] = useState(false);
   const [removeLineDropdownOpen, setRemoveLineDropdownOpen] = useState(false);
-  
+
   // Auto extraction Settings
   const [autosidebarOpen, setAutoSidebarOpen] = useState(false);
   const [autofilteredSidebarOpen, setAutoFilteredSidebarOpen] = useState(false);
 
   // Manual extraction Settings
   const [manualSidebarOpen, setManualSidebarOpen] = useState(false);
-  const [manualFilteredSidebarOpen, setManualFilteredSidebarOpen] = useState(false);
-  const [manualRemoveLineDropdownOpen, setManualRemoveLineDropdownOpen] = useState(false);
+  const [manualFilteredSidebarOpen, setManualFilteredSidebarOpen] =
+    useState(false);
+  const [manualRemoveLineDropdownOpen, setManualRemoveLineDropdownOpen] =
+    useState(false);
   const [editRawDataOpen, setEditRawDataOpen] = useState(false);
-  const [isProcessingtransactions, setisProcessingtransactions] = useState(false);
+  const [isProcessingtransactions, setisProcessingtransactions] =
+    useState(false);
   const [ProcessingTransactions, setProcessingtransactions] = useState(false);
-
-
 
   // Fetch client data
   useEffect(() => {
@@ -125,13 +125,13 @@ function ExtractTransactions() {
             // linesToDelete: linesToDelete, push removed list to backend
             // linesToDelete: removedLines,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`
+          `Request failed with status ${response.status}: ${errorText}`,
         );
       }
 
@@ -143,7 +143,7 @@ function ExtractTransactions() {
     } catch (error) {
       console.error("Error extracting data:", error);
       setErrorMessage(
-        "An error occurred while extracting data. Please try again."
+        "An error occurred while extracting data. Please try again.",
       );
     } finally {
       setIsProcessing(false);
@@ -158,7 +158,7 @@ function ExtractTransactions() {
     }
 
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete all extracted data? This action cannot be undone."
+      "Are you sure you want to delete all extracted data? This action cannot be undone.",
     );
 
     if (!confirmDelete) return;
@@ -270,7 +270,6 @@ function ExtractTransactions() {
     setFilteredSidebarOpen(!autofilteredSidebarOpen);
   };
 
-
   // Handle data extraction Manually
   const handleExtractDataManual = async () => {
     if (!id) {
@@ -294,13 +293,13 @@ function ExtractTransactions() {
             bankName: clientData.bankName,
             method: processingMethod === "pdfparser" ? "Parser" : "OCR",
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`
+          `Request failed with status ${response.status}: ${errorText}`,
         );
       }
 
@@ -312,7 +311,7 @@ function ExtractTransactions() {
     } catch (error) {
       console.error("Error extracting data:", error);
       setErrorMessage(
-        "An error occurred while extracting data. Please try again."
+        "An error occurred while extracting data. Please try again.",
       );
     } finally {
       setProcessing(false);
@@ -341,9 +340,8 @@ function ExtractTransactions() {
           body: JSON.stringify({
             clientId: id,
             bankName: clientData.bankName,
-
           }),
-        }
+        },
       );
       // console log method and bankname
       console.log("Method: ", processingMethod);
@@ -352,14 +350,16 @@ function ExtractTransactions() {
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`
+          `Request failed with status ${response.status}: ${errorText}`,
         );
       }
 
       const result = await response.json();
 
       // Show success message if the request succeeded
-      setSuccessMessage(result.message || "Transactions extracted successfully!");
+      setSuccessMessage(
+        result.message || "Transactions extracted successfully!",
+      );
       // Refresh the page by reloading
       window.location.reload();
 
@@ -373,7 +373,7 @@ function ExtractTransactions() {
     } catch (error) {
       console.error("Error extracting transactions:", error);
       setErrorMessage(
-        error.message || "Failed to extract transactions. Please try again."
+        error.message || "Failed to extract transactions. Please try again.",
       );
     } finally {
       setProcessingtransactions(false); // Stop processing
@@ -385,19 +385,19 @@ function ExtractTransactions() {
     updatedRawData.splice(index, 1); // Remove the line at the given index
     setClientData({ ...clientData, rawData: updatedRawData }); // Update state
   };
-  
+
   const handleSaveFilteredData = async () => {
     try {
       if (!clientData?.filteredData || clientData.filteredData.length === 0) {
         setErrorMessage("No data to save.");
         return;
       }
-  
+
       // Save filteredData to Firestore using db
       await updateDoc(doc(db, "clients", clientData.idNumber), {
         filteredData: clientData.filteredData,
       });
-  
+
       console.log("Filtered data saved successfully!");
       // setSuccessMessage("Filtered data saved!");
     } catch (error) {
@@ -405,10 +405,8 @@ function ExtractTransactions() {
       setErrorMessage("Failed to save filtered data. Please try again.");
     }
   };
-  
 
   return (
-
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       {/* Sidebar */}
       <Sidebar title="Extract Transaction" links={links} />
@@ -455,8 +453,6 @@ function ExtractTransactions() {
             </div>
           </div>
         </section>
-
-
 
         {/* Extract Transactions Section Manual */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
@@ -518,28 +514,24 @@ function ExtractTransactions() {
               <div className="relative">
                 <Button
                   onClick={() => setManualSidebarOpen(!manualSidebarOpen)}
-                  text={
-                    manualSidebarOpen
-                      ? "Hide Raw Data"
-                      : "View Raw Data"
-                  }
+                  text={manualSidebarOpen ? "Hide Raw Data" : "View Raw Data"}
                   className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
                 />
 
                 {/* Data Display */}
                 {manualSidebarOpen && (
-                <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
-                <h2 className="text-xl font-semibold text-blue-400 mb-4">
-                  Raw Extracted Data
-                </h2>
-                {clientData?.rawData ? (
-                  <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
-                    {(clientData.rawData)}
-                  </pre>
-                ) : (
-                  <p className="text-gray-400">No raw data available.</p>
-                )}
-              </div>
+                  <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
+                    <h2 className="text-xl font-semibold text-blue-400 mb-4">
+                      Raw Extracted Data
+                    </h2>
+                    {clientData?.rawData ? (
+                      <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
+                        {clientData.rawData}
+                      </pre>
+                    ) : (
+                      <p className="text-gray-400">No raw data available.</p>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -575,7 +567,9 @@ function ExtractTransactions() {
                         setClientData({
                           ...clientData,
                           rawData: updatedRawData, // Update rawData
-                          filteredData: updatedRawData.filter(line => line.trim() !== ""), // Update filteredData dynamically
+                          filteredData: updatedRawData.filter(
+                            (line) => line.trim() !== "",
+                          ), // Update filteredData dynamically
                         });
                       }}
                       className="w-full h-80 bg-gray-800 text-white p-3 rounded-lg resize-none"
@@ -585,7 +579,9 @@ function ExtractTransactions() {
                     {/* Save Button */}
                     <div className="flex justify-end mt-4">
                       <Button
-                        onClick={() => handleSaveFilteredData(clientData.idNumber)}
+                        onClick={() =>
+                          handleSaveFilteredData(clientData.idNumber)
+                        }
                         text="Save Filtered Data"
                         className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-medium"
                       />
@@ -597,32 +593,42 @@ function ExtractTransactions() {
               {/* View Filtered Data */}
               <div className="relative">
                 <Button
-                  onClick={() => setManualFilteredSidebarOpen(!manualFilteredSidebarOpen)}
+                  onClick={() =>
+                    setManualFilteredSidebarOpen(!manualFilteredSidebarOpen)
+                  }
                   text="View Filtered Data"
                   className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
                 />
                 {/* Data Display */}
                 {manualFilteredSidebarOpen && (
                   <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
-                    <h2 className="text-xl font-semibold text-white mb-2">Filtered Data</h2>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      Filtered Data
+                    </h2>
                     {clientData?.filteredData ? (
                       <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
                         {Array.isArray(clientData.filteredData)
                           ? clientData.filteredData.join("\n") // Convert array to a newline-separated string
-                          : clientData.filteredData} {/* Directly render if already a string */}
+                          : clientData.filteredData}{" "}
+                        {/* Directly render if already a string */}
                       </pre>
                     ) : (
-                      <p className="text-gray-400">No filtered data available.</p>
+                      <p className="text-gray-400">
+                        No filtered data available.
+                      </p>
                     )}
                   </div>
                 )}
               </div>
 
-
               {/* Button 4: Extract Transactions */}
               <Button
                 onClick={handleExtractTransactions}
-                text={ProcessingTransactions ? "Processing..." : "Extract Transactions"}
+                text={
+                  ProcessingTransactions
+                    ? "Processing..."
+                    : "Extract Transactions"
+                }
                 className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
                 disabled={ProcessingTransactions}
               />
@@ -639,7 +645,9 @@ function ExtractTransactions() {
                   <h2 className="text-xl font-semibold text-blue-400 mb-4">
                     Extracted Transactions
                   </h2>
-                  <p className="text-gray-400">Placeholder for displaying extracted transactions.</p>
+                  <p className="text-gray-400">
+                    Placeholder for displaying extracted transactions.
+                  </p>
                 </div>
               )}
 
@@ -653,12 +661,7 @@ function ExtractTransactions() {
           </div>
         </div>
 
-
         {/* ################################################ */}
-
-
-
-
 
         {/* Extract Transactions Section auto */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
@@ -761,7 +764,6 @@ function ExtractTransactions() {
                 </div>
               )}
 
-
               {/* View Lines Removed Button with Dropdown */}
               <div className="relative">
                 <Button
@@ -776,11 +778,15 @@ function ExtractTransactions() {
 
                 {viewRemovedLinesOpen && (
                   <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-white mb-2">Removed Lines</h2>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      Removed Lines
+                    </h2>
                     {removalLines.length > 0 ? (
                       <ul className="list-disc pl-6 text-gray-400">
                         {removalLines.map((line, index) => (
-                          <li key={index} className="mb-2">{line}</li>
+                          <li key={index} className="mb-2">
+                            {line}
+                          </li>
                         ))}
                       </ul>
                     ) : (
@@ -792,19 +798,30 @@ function ExtractTransactions() {
 
               {/* Remove Lines for removal */}
               <div className="relative">
-              <Button
-                onClick={() => setRemoveLineDropdownOpen(!removeLineDropdownOpen)}
-                text={removeLineDropdownOpen ? "Close Remove Lines" : "Remove Lines"}
-                className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-              />
-              {/* Data Display */}
-              {removeLineDropdownOpen && (
-                <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
-                  <h2 className="text-lg font-semibold text-white mb-4">Remove Lines</h2>
+                <Button
+                  onClick={() =>
+                    setRemoveLineDropdownOpen(!removeLineDropdownOpen)
+                  }
+                  text={
+                    removeLineDropdownOpen
+                      ? "Close Remove Lines"
+                      : "Remove Lines"
+                  }
+                  className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
+                />
+                {/* Data Display */}
+                {removeLineDropdownOpen && (
+                  <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
+                    <h2 className="text-lg font-semibold text-white mb-4">
+                      Remove Lines
+                    </h2>
                     {removalLines.length > 0 ? (
                       <ul className="list-disc pl-6 text-gray-400">
                         {removalLines.map((line, index) => (
-                          <li key={index} className="flex justify-between items-center mb-2">
+                          <li
+                            key={index}
+                            className="flex justify-between items-center mb-2"
+                          >
                             <span>{line}</span>
                             <Button
                               onClick={() => handleRemoveLine(index)}
@@ -820,64 +837,68 @@ function ExtractTransactions() {
                   </div>
                 )}
               </div>
-                
+
               {/* View Filtered Data */}
               <div className="relative">
-              <Button
-                onClick={() => setAutoFilteredSidebarOpen(!autofilteredSidebarOpen)}
-                text="View Filtered Data"
-                className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-              />
-              {/* Data Display */}
-              {autofilteredSidebarOpen && (
-                <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
-                  <h2 className="text-xl font-semibold text-white mb-2">Filtered Data</h2>
-                  {clientData.filteredData ? (
-                    <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
-                      {(clientData.filteredData)}
-                    </pre>
-                  ) : (
-                    <p className="text-gray-400">No filtered data available.</p>
-                  )}
-                </div>
-              )}
+                <Button
+                  onClick={() =>
+                    setAutoFilteredSidebarOpen(!autofilteredSidebarOpen)
+                  }
+                  text="View Filtered Data"
+                  className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
+                />
+                {/* Data Display */}
+                {autofilteredSidebarOpen && (
+                  <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      Filtered Data
+                    </h2>
+                    {clientData.filteredData ? (
+                      <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
+                        {clientData.filteredData}
+                      </pre>
+                    ) : (
+                      <p className="text-gray-400">
+                        No filtered data available.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* View Raw Data */}
               <div className="relative">
-              <Button
-                onClick={() => setAutoSidebarOpen(!autosidebarOpen)}
-                text={
-                  autosidebarOpen 
-                  ? "Hide Raw Extracted Data" 
-                  : "View Raw Extracted Data"
-                }
-                className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-              />
+                <Button
+                  onClick={() => setAutoSidebarOpen(!autosidebarOpen)}
+                  text={
+                    autosidebarOpen
+                      ? "Hide Raw Extracted Data"
+                      : "View Raw Extracted Data"
+                  }
+                  className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
+                />
 
-              {/* Data Display */}
-              {autosidebarOpen && (
-                <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
-                  <h2 className="text-xl font-semibold text-blue-400 mb-4">
-                    Raw Extracted Data
-                  </h2>
-                  {clientData?.rawData ? (
-                    <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
-                      {(clientData.rawData)}
-                    </pre>
-                  ) : (
-                    <p className="text-gray-400">No raw data available.</p>
-                  )}
-                </div>
-              )}
+                {/* Data Display */}
+                {autosidebarOpen && (
+                  <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
+                    <h2 className="text-xl font-semibold text-blue-400 mb-4">
+                      Raw Extracted Data
+                    </h2>
+                    {clientData?.rawData ? (
+                      <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
+                        {clientData.rawData}
+                      </pre>
+                    ) : (
+                      <p className="text-gray-400">No raw data available.</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-      
-
   );
 }
 export default ExtractTransactions;

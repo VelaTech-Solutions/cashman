@@ -154,7 +154,9 @@ const ViewEditClient = () => {
 
         {clientData && (
           <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold text-white">Client Details</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              Client Details
+            </h2>
             <p className="text-lg text-gray-400 mt-2">
               <strong className="text-white">Captured By:</strong>{" "}
               {clientData.userEmail || "N/A"}
