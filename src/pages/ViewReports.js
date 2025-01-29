@@ -269,8 +269,8 @@ const ViewReports = () => {
                   </p>
                 </div>
 
-                {/* Total Housing */}
-                <div className="bg-red-600 p-3 rounded-lg shadow-md">
+                {/* Total Housing */} 
+                <div className="bg-purple-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Housing</p>
                   <p className="text-lg font-bold">
                     R {transactions
@@ -292,7 +292,7 @@ const ViewReports = () => {
                 </div>
 
                 {/* Total Expenses */}
-                <div className="bg-purple-600 p-3 rounded-lg shadow-md">
+                <div className="bg-red-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Expenses</p>
                   <p className="text-lg font-bold">
                     R {transactions
@@ -443,13 +443,13 @@ const ViewReports = () => {
           >
             Housing Transactions
             <span className="text-gray-500">{showHousing ? "▲" : "▼"}</span>
-            <span className="ml-4 bg-red-500 text-white px-2 py-1 rounded text-sm">
+            <span className="ml-4 bg-purple-500 text-white px-2 py-1 rounded text-sm">
               {transactions.filter((txn) => txn.debit_amount && txn.category === "Housing").length} Housing
             </span>
           </h2>
 
           {/* Display Total Housing */}
-          <div className="bg-gray-900 p-3 text-red-400 font-semibold rounded-md">
+          <div className="bg-gray-900 p-3 text-purple-400 font-semibold rounded-md">
             Total Housing: R{" "}
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Housing")
@@ -501,13 +501,13 @@ const ViewReports = () => {
           >
             Transportation Transactions
             <span className="text-gray-500">{showTransportation ? "▲" : "▼"}</span>
-            <span className="ml-4 bg-red-500 text-white px-2 py-1 rounded text-sm">
+            <span className="ml-4 bg-yellow-500 text-white px-2 py-1 rounded text-sm">
               {transactions.filter((txn) => txn.debit_amount && txn.category === "Transportation").length} Transport
             </span>
           </h2>
 
           {/* Display Total Transportation */}
-          <div className="bg-gray-900 p-3 text-red-400 font-semibold rounded-md">
+          <div className="bg-gray-900 p-3 text-yellow-400 font-semibold rounded-md">
             Total Transport: R{" "}
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Transportation")
@@ -559,13 +559,13 @@ const ViewReports = () => {
           >
             Debt Transactions
             <span className="text-gray-500">{showDebt ? "▲" : "▼"}</span>
-            <span className="ml-4 bg-red-500 text-white px-2 py-1 rounded text-sm">
+            <span className="ml-4 bg-gray-500 text-white px-2 py-1 rounded text-sm">
               {transactions.filter((txn) => txn.debit_amount && txn.category === "Debt").length} Debts
             </span>
           </h2>
           
           {/* Display Total Debt */}
-          <div className="bg-gray-900 p-3 text-red-400 font-semibold rounded-md">
+          <div className="bg-gray-900 p-3 text-gray-400 font-semibold rounded-md">
             Total Debt: R{" "}
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Debt")
