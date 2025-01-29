@@ -13,6 +13,7 @@ import Sidebar from "../components/Sidebar";
 import LoadClientData from "../components/LoadClientData"; // Import the fetch function
 const CategorizeTransactions = () => {
   const { id } = useParams(); // Client ID or folder number
+  const [ bankName, setbankName ] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [selectedTransactions, setSelectedTransactions] = useState([]);
@@ -43,51 +44,62 @@ const CategorizeTransactions = () => {
       icon: "ph-file-text",
     },
   ];
-  // Fetch client data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Load client data using the reusable function
-        const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
-        console.log("Fetched client data:", clientData);
 
-        // Extract transactions and bank name from the client document
-        const fetchedTransactions = clientData.transactions || [];
-        const bankName = clientData.bankName;
 
-        setTransactions(fetchedTransactions);
-        setFilteredTransactions(fetchedTransactions);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      console.log("Fetching client data...");
 
-        // Fetch categories
-        console.log("Fetching categories...");
-        const categoriesSnapshot = await getDocs(collection(db, "categories"));
-        const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setCategories(fetchedCategories);
+      // Load client data
+      const clientData = await LoadClientData(id);
+      console.log("Fetched client data:", clientData);
 
-        // Process subcategories
-        const organizedSubcategories = fetchedCategories.flatMap((category) =>
-          category.subcategories
-            ? category.subcategories.map((sub) => ({
-                id: sub.id,
-                name: sub.name,
-                parentCategory: category.name,
-              }))
-            : [],
-        );
-        setSubcategories(organizedSubcategories);
-      } catch (err) {
-        console.error("Error fetching data:", err.message);
-        setError("Failed to fetch transactions or categories.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Extract transactions and bank name
+      const fetchedTransactions = clientData.transactions.map((txn) => ({
+        ...txn,
+        bankName: clientData.bankName || "Unknown Bank", // Add bankName to each transaction
+      }));
+      console.log("bankName:", clientData.bankName);
 
-    fetchData();
-  }, [id]);
+      // Update state
+      setbankName(clientData.bankName || "Unknown Bank");
+      setTransactions(fetchedTransactions);
+      setFilteredTransactions(fetchedTransactions);
+
+      // Fetch categories
+      console.log("Fetching categories...");
+      const categoriesSnapshot = await getDocs(collection(db, "categories"));
+      const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(fetchedCategories);
+
+      // Process subcategories
+      const organizedSubcategories = fetchedCategories.flatMap((category) =>
+        category.subcategories
+          ? category.subcategories.map((sub) => ({
+              id: sub.id,
+              name: sub.name,
+              parentCategory: category.name,
+            }))
+          : []
+      );
+      setSubcategories(organizedSubcategories);
+
+      console.log("Fetched and processed categories and subcategories.");
+    } catch (err) {
+      console.error("Error fetching data:", err.message);
+      setError("Failed to fetch transactions or categories.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [id]);
+
 
   // Filter subcategories based on the selected category
   useEffect(() => {
@@ -144,31 +156,31 @@ const CategorizeTransactions = () => {
         alert("Please select both a category and a subcategory.");
         return;
       }
-
+  
       if (selectedTransactions.length === 0) {
         alert("No transactions selected for categorization.");
         return;
       }
-
+  
       console.log("Starting categorization...");
       console.log("Selected Transactions Indices:", selectedTransactions);
-
+  
       const updatedTransactions = [...transactions];
-
+  
       selectedTransactions.forEach((transactionIndex) => {
         const originalIndex = transactions.findIndex(
           (txn) => txn === filteredTransactions[transactionIndex],
         );
-
+  
         if (originalIndex !== -1) {
           updatedTransactions[originalIndex] = {
             ...updatedTransactions[originalIndex],
             category,
             subcategory,
           };
-
+  
           saveToTransactionDatabase(
-            updatedTransactions[originalIndex].bankName,
+            updatedTransactions[originalIndex].bankName, // Pass bankName from transaction
             updatedTransactions[originalIndex].description,
             category,
             subcategory,
@@ -179,13 +191,13 @@ const CategorizeTransactions = () => {
           );
         }
       });
-
+  
       const clientDocRef = doc(db, "clients", id);
       await updateDoc(clientDocRef, { transactions: updatedTransactions });
-
+  
       console.log("Transactions updated successfully:", updatedTransactions);
       alert("Transactions categorized successfully!");
-
+  
       setTransactions(updatedTransactions);
       setSelectedTransactions([]);
     } catch (err) {
@@ -195,6 +207,7 @@ const CategorizeTransactions = () => {
       );
     }
   };
+  
 
   const saveToTransactionDatabase = async (
     bankName,
@@ -206,34 +219,36 @@ const CategorizeTransactions = () => {
       if (!bankName) {
         throw new Error("Bank name is undefined or missing.");
       }
-
+  
       console.log(
         `Saving transaction for bank: ${bankName}, description: ${description}`,
       );
+  
+      // Dynamically pass the bankName variable into the collection path
       const bankCollectionRef = collection(
         db,
         "transaction_database",
-        bankName,
+        bankName, // Now dynamically passing the bank name
         "transactions",
       );
-
+  
       const querySnapshot = await getDocs(bankCollectionRef);
       const existingTransaction = querySnapshot.docs.find(
         (doc) => doc.data().description === description,
       );
-
+  
       if (existingTransaction) {
         console.log("Transaction already exists. Skipping:", description);
         return;
       }
-
+  
       await addDoc(bankCollectionRef, {
         description,
         category,
         subcategory,
         createdAt: new Date().toISOString(),
       });
-
+  
       console.log("Transaction added to database:", {
         description,
         category,
@@ -243,6 +258,7 @@ const CategorizeTransactions = () => {
       console.error("Error saving to transaction database:", err.message);
     }
   };
+  
 
   const clearAllCategories = async () => {
     try {
@@ -273,6 +289,60 @@ const CategorizeTransactions = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  const matchAllTransactions = async () => {
+    try {
+      if (!bankName) {
+        alert("Bank name is missing. Unable to match transactions.");
+        return;
+      }
+  
+      console.log("Starting Match-All...");
+  
+      // Reference to the transaction database for the specific bank
+      const bankCollectionRef = collection(db, "transaction_database", bankName, "transactions");
+  
+      // Fetch existing transactions from Firestore
+      const querySnapshot = await getDocs(bankCollectionRef);
+      const transactionDatabase = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (transactionDatabase.length === 0) {
+        alert("No transactions found in the database.");
+        return;
+      }
+  
+      console.log("Fetched transaction database:", transactionDatabase);
+  
+      // Update local transactions based on matched descriptions
+      const updatedTransactions = transactions.map((txn) => {
+        const matchingTxn = transactionDatabase.find(
+          (dbTxn) => dbTxn.description === txn.description
+        );
+  
+        if (matchingTxn) {
+          console.log(`Matched: ${txn.description} -> ${matchingTxn.category}, ${matchingTxn.subcategory}`);
+          return {
+            ...txn,
+            category: matchingTxn.category,
+            subcategory: matchingTxn.subcategory,
+          };
+        }
+        return txn;
+      });
+  
+      // Update transactions in Firestore
+      const clientDocRef = doc(db, "clients", id);
+      await updateDoc(clientDocRef, { transactions: updatedTransactions });
+  
+      console.log("Match-All complete. Transactions updated.");
+      setTransactions(updatedTransactions);
+      alert("All matching transactions have been categorized.");
+    } catch (err) {
+      console.error("Error in Match-All:", err.message);
+      alert("Failed to match transactions.");
+    }
+  };
+  
+  
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
       <Sidebar title="Categorize Transactions" links={links} />
@@ -315,6 +385,13 @@ const CategorizeTransactions = () => {
               </option>
             ))}
           </select>
+
+          <button
+            onClick={matchAllTransactions}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Match All Transactions
+          </button>
 
           <button
             onClick={categorize}
@@ -378,3 +455,5 @@ const CategorizeTransactions = () => {
 };
 
 export default CategorizeTransactions;
+
+
