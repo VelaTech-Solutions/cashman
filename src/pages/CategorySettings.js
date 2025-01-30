@@ -239,6 +239,8 @@ const CategorySettings = () => {
             </div>
           ))}
         </div>
+
+        
       </div>
     </div>
   );

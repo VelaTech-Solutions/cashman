@@ -18,7 +18,6 @@ const links = [
 
 const AddClient = () => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState("");
   const [clientDetails, setClientDetails] = useState({
     idNumber: "",
     clientName: "",

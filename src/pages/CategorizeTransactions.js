@@ -26,6 +26,8 @@ const CategorizeTransactions = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+   const [showSummary, setShowSummary] = useState(true);
+
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     {
@@ -349,6 +351,92 @@ useEffect(() => {
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
 
+
+
+
+          {/* Financial Summary Section */}
+          <section className="space-y-4">
+          <h2
+            onClick={() => setShowSummary(!showSummary)}
+            className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
+          >
+            Financial Summary
+            <span className="text-gray-500">{showSummary ? "▲" : "▼"}</span>
+          </h2>
+
+          {showSummary && (
+            <div className="bg-gray-900 p-4 rounded-lg shadow-md text-white">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                {/* Total Income */}
+                <div className="bg-green-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Income</p>
+                  <p className="text-lg font-bold">
+                    R {transactions
+                      .filter((txn) => txn.credit_amount && (txn.category === "Income" || !txn.category))
+                      .reduce((acc, txn) => acc + txn.credit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+
+                {/* Total Savings */}
+                <div className="bg-blue-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Savings</p>
+                  <p className="text-lg font-bold">
+                    R {transactions
+                      .filter((txn) => txn.debit_amount && txn.category === "Savings")
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+
+                {/* Total Housing */} 
+                <div className="bg-purple-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Housing</p>
+                  <p className="text-lg font-bold">
+                    R {transactions
+                      .filter((txn) => txn.debit_amount && txn.category === "Housing")
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+
+                {/* Total Transport */}
+                <div className="bg-yellow-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Transport</p>
+                  <p className="text-lg font-bold">
+                    R {transactions
+                      .filter((txn) => txn.debit_amount && txn.category === "Transportation")
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+
+                {/* Total Expenses */}
+                <div className="bg-red-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Expenses</p>
+                  <p className="text-lg font-bold">
+                    R {transactions
+                      .filter((txn) => txn.debit_amount && txn.category === "Expenses")
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+
+                {/* Total Debt */}
+                <div className="bg-gray-700 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Debt</p>
+                  <p className="text-lg font-bold">
+                    R {transactions
+                      .filter((txn) => txn.debit_amount && txn.category === "Debt")
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* Search Bar */}
         <input
           type="text"
@@ -449,6 +537,8 @@ useEffect(() => {
             ))}
           </tbody>
         </table>
+
+        
       </div>
     </div>
   );
