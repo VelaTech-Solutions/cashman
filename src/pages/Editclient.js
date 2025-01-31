@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import "../styles/tailwind.css";
 
@@ -19,9 +18,9 @@ const EditClient = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clients, setClients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Track user authentication
   useEffect(() => {
@@ -56,22 +55,8 @@ const EditClient = () => {
     fetchClients();
   }, []);
 
-  // Loading or error states
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-gray-400">Loading clients...</p>
-      </div>
-    );
-  }
+  if (error) return <div>Error: {error}</div>;
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-red-500">{error}</p>
-      </div>
-    );
-  }
 
   // Main UI
   return (

@@ -1,5 +1,5 @@
 // src/pages/Profile.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import "../styles/tailwind.css";
@@ -10,6 +10,11 @@ const links = [
 ];
 
 const Profile = () => {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       {/* Sidebar */}

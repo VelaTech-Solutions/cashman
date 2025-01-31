@@ -2,11 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 
-// firebase imports
+
+// Firebase imports
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 const Developernotes = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const auth = getAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -18,6 +24,8 @@ const Developernotes = () => {
     });
     return () => unsubscribe();
   }, [auth]);
+
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="app">

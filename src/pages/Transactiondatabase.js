@@ -4,7 +4,6 @@ import { db } from "../firebase/firebase"; // Ensure firebase.js exports 'db'
 import { doc, getDocs, collection, deleteDoc } from "firebase/firestore";
 import LoadClientData from "../components/LoadClientData"; // Reusable client data loader
 import Sidebar from "../components/Sidebar";
-import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
 const links = [
@@ -100,6 +99,7 @@ const TransactionDatabase = () => {
     }
   };
   
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
@@ -108,12 +108,6 @@ const TransactionDatabase = () => {
 
       {/* Main content */}
       <div className="flex-1 p-8">
-        <motion.div
-          className="space-y-8"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
               Transaction Database - {clientData?.bankName || "Unknown Bank"}
@@ -122,7 +116,6 @@ const TransactionDatabase = () => {
               Below is the list of all transactions fetched from the database.
             </p>
           </section>
-        </motion.div>
 
         {/* Transaction Table */}
         <div className="overflow-x-auto">

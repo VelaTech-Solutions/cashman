@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
 // firebase imports
@@ -24,6 +23,8 @@ const Login = () => {
       setError("Failed to log in. Please check your credentials.");
     }
   };
+
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500">

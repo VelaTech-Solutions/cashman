@@ -17,6 +17,7 @@ const ViewReports = () => {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showUncategorized, setShowUncategorized] = useState(true);
 
   const [showIncome, setShowIncome] = useState(false);
@@ -65,9 +66,8 @@ const ViewReports = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-center text-white">Loading client data...</div>;
-  }
+  if (error) return <div>Error: {error}</div>;
+
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
@@ -549,63 +549,7 @@ const ViewReports = () => {
             )
           )}
         </section>
-
-        {/* Debt Block */}
-        {/* Debt Transactions Block */}
-        <section className="space-y-4">
-          <h2
-            onClick={() => setShowDebt(!showDebt)}
-            className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
-          >
-            Debt Transactions
-            <span className="text-gray-500">{showDebt ? "▲" : "▼"}</span>
-            <span className="ml-4 bg-gray-500 text-white px-2 py-1 rounded text-sm">
-              {transactions.filter((txn) => txn.debit_amount && txn.category === "Debt").length} Debts
-            </span>
-          </h2>
-          
-          {/* Display Total Debt */}
-          <div className="bg-gray-900 p-3 text-gray-400 font-semibold rounded-md">
-            Total Debt: R{" "}
-            {transactions
-              .filter((txn) => txn.debit_amount && txn.category === "Debt")
-              .reduce((acc, txn) => acc + txn.debit_amount, 0)
-              .toFixed(2)}
-          </div>
-
-          {/* Scrollable Transactions List */}
-          {showDebt && transactions.filter((txn) => txn.debit_amount && txn.category === "Debt").length > 0 ? (
-            <div className="overflow-y-auto max-h-64 bg-gray-800 rounded-md shadow-lg">
-              <table className="min-w-full table-auto text-left text-white">
-                <thead className="bg-gray-700">
-                  <tr>
-                    <th className="px-4 py-2">Date</th>
-                    <th className="px-4 py-2">Description</th>
-                    <th className="px-4 py-2">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions
-                    .filter((txn) => txn.category === "Debt")
-                    .map((txn, index) => (
-                      <tr key={index} className="hover:bg-gray-700">
-                        <td className="px-4 py-2">{txn.date1}</td>
-                        <td className="px-4 py-2">{txn.description}</td>
-                        <td className="px-4 py-2">{txn.category}</td>
-                        <td className="px-4 py-2">{txn.subcategory || "Not Available"}</td>
-                        <td className="px-4 py-2">R {txn.debit_amount.toFixed(2)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            showDebt && (
-            <p className="text-center text-lg text-gray-500">No debt transactions found.</p>
-            )
-          )}
-        </section>
-
+        
         {/* Expenses Block */}
         {/* Expenses Transactions Block */}
         <section className="space-y-4">
@@ -664,13 +608,62 @@ const ViewReports = () => {
           )}
         </section>
 
+        {/* Debt Block */}
+        {/* Debt Transactions Block */}
+        <section className="space-y-4">
+          <h2
+            onClick={() => setShowDebt(!showDebt)}
+            className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
+          >
+            Debt Transactions
+            <span className="text-gray-500">{showDebt ? "▲" : "▼"}</span>
+            <span className="ml-4 bg-gray-500 text-white px-2 py-1 rounded text-sm">
+              {transactions.filter((txn) => txn.debit_amount && txn.category === "Debt").length} Debts
+            </span>
+          </h2>
+          
+          {/* Display Total Debt */}
+          <div className="bg-gray-900 p-3 text-gray-400 font-semibold rounded-md">
+            Total Debt: R{" "}
+            {transactions
+              .filter((txn) => txn.debit_amount && txn.category === "Debt")
+              .reduce((acc, txn) => acc + txn.debit_amount, 0)
+              .toFixed(2)}
+          </div>
 
-        <motion.div
-          className="space-y-8"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+          {/* Scrollable Transactions List */}
+          {showDebt && transactions.filter((txn) => txn.debit_amount && txn.category === "Debt").length > 0 ? (
+            <div className="overflow-y-auto max-h-64 bg-gray-800 rounded-md shadow-lg">
+              <table className="min-w-full table-auto text-left text-white">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-2">Date</th>
+                    <th className="px-4 py-2">Description</th>
+                    <th className="px-4 py-2">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions
+                    .filter((txn) => txn.category === "Debt")
+                    .map((txn, index) => (
+                      <tr key={index} className="hover:bg-gray-700">
+                        <td className="px-4 py-2">{txn.date1}</td>
+                        <td className="px-4 py-2">{txn.description}</td>
+                        <td className="px-4 py-2">{txn.category}</td>
+                        <td className="px-4 py-2">{txn.subcategory || "Not Available"}</td>
+                        <td className="px-4 py-2">R {txn.debit_amount.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            showDebt && (
+            <p className="text-center text-lg text-gray-500">No debt transactions found.</p>
+            )
+          )}
+        </section>
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
               View Reports
@@ -685,7 +678,7 @@ const ViewReports = () => {
 
 
           {/* a place to view all reports generated */}
-        </motion.div>
+
       </div>
     </div>
   );

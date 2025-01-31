@@ -1,7 +1,5 @@
-// src/App.js
-
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -32,56 +30,42 @@ import Testdash from "./testpages/Testdash";
 import Testviewclient from "./testpages/Testviewclient";
 import Testclientprofile from "./testpages/Testclientprofile";
 
-import ProtectedRoute from "./components/ProtectedRoute"; // Import the component
+import ProtectedRoute from "./components/ProtectedRoute"; 
+import Loader from "./components/Loader";
 
-function App() {
+const App = () => {
+  const [loading, setLoading] = useState(false);
+  const location = useLocation(); // Detect route changes
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 500); // Simulate loading delay
+    return () => clearTimeout(timer);
+  }, [location.pathname]); // Trigger on every route change
+
   return (
-    <Router>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {loading && <Loader />}
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/instructions" element={<Instructions />} />
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route path="/addclient" element={<Addclient />} />
-
         <Route path="/editclient" element={<Editclient />} />
         <Route path="/vieweditclient/:id" element={<ViewEditclient />} />
-
         <Route path="/viewclient" element={<Viewclient />} />
         <Route path="/client/:id" element={<Clientprofile />} />
         <Route path="/client/:id/profile" element={<Profile />} />
         <Route path="/client/:id/transactions" element={<ViewTransactions />} />
-        <Route
-          path="/client/:id/edit-transactions"
-          element={<EditTransactions />}
-        />
-        <Route
-          path="/client/:id/categorize"
-          element={<CategorizeTransactions />}
-        />
+        <Route path="/client/:id/edit-transactions" element={<EditTransactions />} />
+        <Route path="/client/:id/categorize" element={<CategorizeTransactions />} />
         <Route path="/client/:id/reports" element={<ViewReports />} />
-
-        <Route
-          path="/transactiondatabase/:id"
-          element={<Transactiondatabase />}
-        />
-        <Route
-          path="/ExtractTransactions/:id"
-          element={<ExtractTransactions />}
-        />
-
+        <Route path="/transactiondatabase/:id" element={<Transactiondatabase />} />
+        <Route path="/ExtractTransactions/:id" element={<ExtractTransactions />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/categorysettings" element={<CategorySettings />} />
         <Route path="/developernotes" element={<Developernotes />} />
-
+        
         {/* TEST PAGES */}
         <Route path="/testpage" element={<Testpage />} />
         <Route path="/teststorage" element={<Teststorage />} />
@@ -91,8 +75,14 @@ function App() {
         <Route path="/testviewclient" element={<Testviewclient />} />
         <Route path="/testclientprofile/:id" element={<Testclientprofile />} />
       </Routes>
-    </Router>
+    </div>
   );
-}
+};
 
-export default App;
+const WrappedApp = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default WrappedApp;

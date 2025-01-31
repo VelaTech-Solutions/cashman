@@ -1,13 +1,15 @@
 // src/pages/ViewTransactions.js
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { db } from "../firebase/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { motion } from "framer-motion";
-
-// Component Imports
 import "../styles/tailwind.css";
 import Sidebar from "../components/Sidebar";
+
+
+
+// Firebase imports
+import { db } from "../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
+
 
 const ViewTransactions = () => {
   const { id } = useParams();
@@ -57,21 +59,7 @@ const ViewTransactions = () => {
     },
   );
   
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-gray-400">Loading transactions...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-red-500">{error}</p>
-      </div>
-    );
-  }
+  if (error) return <div>Error: {error}</div>;
 
 
   return (

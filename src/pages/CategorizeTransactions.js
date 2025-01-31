@@ -210,7 +210,7 @@ useEffect(() => {
     }
   };
   
-
+  // save transaction
   const saveToTransactionDatabase = async (
     bankName,
     description,
@@ -261,6 +261,25 @@ useEffect(() => {
     }
   };
   
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case "Income":
+        return "bg-green-600"; // Green for income
+      case "Savings":
+        return "bg-blue-600"; // Blue for savings
+      case "Housing":
+        return "bg-purple-600"; // Purple for housing
+      case "Transport":
+        return "bg-yellow-600"; // Yellow for transport
+      case "Expenses":
+        return "bg-red-600"; // Red for expenses
+      case "Debt":
+        return "bg-gray-700"; // Dark gray for debt
+      default:
+        return "bg-gray-800"; // Default gray if category is unknown
+    }
+  };
+  
 
   const clearAllCategories = async () => {
     try {
@@ -287,9 +306,6 @@ useEffect(() => {
       alert("Failed to clear categories.");
     }
   };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   const matchAllTransactions = async () => {
     try {
@@ -343,6 +359,10 @@ useEffect(() => {
       alert("Failed to match transactions.");
     }
   };
+
+  if (error) return <div>Error: {error}</div>;
+
+
   
   
   return (
@@ -350,91 +370,106 @@ useEffect(() => {
       <Sidebar title="Categorize Transactions" links={links} />
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
+        
+        {/* Financial Summary Section */}
+        <section className="space-y-4">
+        <h2
+          onClick={() => setShowSummary(!showSummary)}
+          className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
+        >
+          Financial Summary
+          <span className="text-gray-500">{showSummary ? "▲" : "▼"}</span>
+        </h2>
 
+        {showSummary && (
+          <div className="bg-gray-900 p-4 rounded-lg shadow-md text-white">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              {/* Total Income */}
+              <div className="bg-green-600 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Income</p>
+                <p className="text-lg font-bold">
+                  R {transactions
+                    .filter((txn) => txn.credit_amount && (txn.category === "Income" || !txn.category))
+                    .reduce((acc, txn) => acc + txn.credit_amount, 0)
+                    .toFixed(2)}
+                </p>
+              </div>
 
+              {/* Total Savings */}
+              <div className="bg-blue-600 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Savings</p>
+                <p className="text-lg font-bold">
+                  R {transactions
+                    .filter((txn) => txn.debit_amount && txn.category === "Savings")
+                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                    .toFixed(2)}
+                </p>
+              </div>
 
+              {/* Total Housing */} 
+              <div className="bg-purple-600 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Housing</p>
+                <p className="text-lg font-bold">
+                  R {transactions
+                    .filter((txn) => txn.debit_amount && txn.category === "Housing")
+                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                    .toFixed(2)}
+                </p>
+              </div>
 
-          {/* Financial Summary Section */}
-          <section className="space-y-4">
-          <h2
-            onClick={() => setShowSummary(!showSummary)}
-            className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
-          >
-            Financial Summary
-            <span className="text-gray-500">{showSummary ? "▲" : "▼"}</span>
-          </h2>
+              {/* Total Transport */}
+              <div className="bg-yellow-600 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Transport</p>
+                <p className="text-lg font-bold">
+                  R {transactions
+                    .filter((txn) => txn.debit_amount && txn.category === "Transportation")
+                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                    .toFixed(2)}
+                </p>
+              </div>
 
-          {showSummary && (
-            <div className="bg-gray-900 p-4 rounded-lg shadow-md text-white">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                {/* Total Income */}
-                <div className="bg-green-600 p-3 rounded-lg shadow-md">
-                  <p className="text-sm">Total Income</p>
-                  <p className="text-lg font-bold">
-                    R {transactions
-                      .filter((txn) => txn.credit_amount && (txn.category === "Income" || !txn.category))
-                      .reduce((acc, txn) => acc + txn.credit_amount, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
+              {/* Total Expenses */}
+              <div className="bg-red-600 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Expenses</p>
+                <p className="text-lg font-bold">
+                  R {transactions
+                    .filter((txn) => txn.debit_amount && txn.category === "Expenses")
+                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                    .toFixed(2)}
+                </p>
+              </div>
 
-                {/* Total Savings */}
-                <div className="bg-blue-600 p-3 rounded-lg shadow-md">
-                  <p className="text-sm">Total Savings</p>
-                  <p className="text-lg font-bold">
-                    R {transactions
-                      .filter((txn) => txn.debit_amount && txn.category === "Savings")
-                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
+              {/* Total Debt */}
+              <div className="bg-gray-700 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Debt</p>
+                <p className="text-lg font-bold">
+                  R {transactions
+                    .filter((txn) => txn.debit_amount && txn.category === "Debt")
+                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                    .toFixed(2)}
+                </p>
+              </div>
 
-                {/* Total Housing */} 
-                <div className="bg-purple-600 p-3 rounded-lg shadow-md">
-                  <p className="text-sm">Total Housing</p>
-                  <p className="text-lg font-bold">
-                    R {transactions
-                      .filter((txn) => txn.debit_amount && txn.category === "Housing")
-                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
+              {/* 🔹 Total Transactions */}
+              <div className="bg-gray-500 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Transactions</p>
+                <p className="text-lg font-bold">
+                  {transactions.length}
+                </p>
+              </div>
 
-                {/* Total Transport */}
-                <div className="bg-yellow-600 p-3 rounded-lg shadow-md">
-                  <p className="text-sm">Total Transport</p>
-                  <p className="text-lg font-bold">
-                    R {transactions
-                      .filter((txn) => txn.debit_amount && txn.category === "Transportation")
-                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
-
-                {/* Total Expenses */}
-                <div className="bg-red-600 p-3 rounded-lg shadow-md">
-                  <p className="text-sm">Total Expenses</p>
-                  <p className="text-lg font-bold">
-                    R {transactions
-                      .filter((txn) => txn.debit_amount && txn.category === "Expenses")
-                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
-
-                {/* Total Debt */}
-                <div className="bg-gray-700 p-3 rounded-lg shadow-md">
-                  <p className="text-sm">Total Debt</p>
-                  <p className="text-lg font-bold">
-                    R {transactions
-                      .filter((txn) => txn.debit_amount && txn.category === "Debt")
-                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
+              {/* 🔹 Total Uncategorized */}
+              <div className="bg-gray-500 p-3 rounded-lg shadow-md">
+                <p className="text-sm">Total Uncategorized</p>
+                <p className="text-lg font-bold">
+                  {transactions
+                    .filter((txn) => !txn.category || txn.category === "Uncategorized")
+                    .length}
+                </p>
               </div>
             </div>
-          )}
+          </div>
+        )}
         </section>
 
         {/* Search Bar */}
@@ -445,6 +480,13 @@ useEffect(() => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full p-4 mb-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
+        <p className="text-sm text-gray-400 mb-2">
+          This is a short description for the user. Select one transaction and run the 
+          <strong> Match All</strong> function or use the <strong>Match All Transactions </strong> 
+          button for the best results. Try matching one transaction first, then match all transactions.
+        </p>
+
 
         {/* Category and Subcategory Select */}
         <div className="flex gap-4 mb-4">
@@ -495,50 +537,150 @@ useEffect(() => {
             Clear All Categories
           </button>
         </div>
-
+        
         {/* Transactions Table */}
-        <table className="w-full table-auto bg-gray-800 rounded shadow-md">
-          <thead>
-            <tr>
-              <th className="p-2">
-                <input
-                  type="checkbox"
-                  checked={isAllSelected}
-                  onChange={handleSelectAll}
-                />
-              </th>
-              <th className="p-2">Date</th>
-              <th className="p-2">Description</th>
-              <th className="p-2">Debit</th>
-              <th className="p-2">Credit</th>
-              <th className="p-2">Balance</th>
-              <th className="p-2">Category</th>
-              <th className="p-2">Subcategory</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTransactions.map((transaction, index) => (
-              <tr key={index} className="border-b border-gray-700">
-                <td className="p-2">
+        <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
+          <table className="w-full bg-gray-800">
+          <thead className="sticky top-0 bg-gray-900 z-10">
+              <tr>
+                <th className="p-2">
                   <input
                     type="checkbox"
-                    checked={selectedTransactions.includes(index)}
-                    onChange={() => handleCheckboxChange(index)}
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
                   />
-                </td>
-                <td className="p-2">{transaction.date1 || "-"}</td>
-                <td className="p-2">{transaction.description || "-"}</td>
-                <td className="p-2">{transaction.debit_amount || "-"}</td>
-                <td className="p-2">{transaction.credit_amount || "-"}</td>
-                <td className="p-2">{transaction.balance_amount || "-"}</td>
-                <td className="p-2">{transaction.category || "-"}</td>
-                <td className="p-2">{transaction.subcategory || "-"}</td>
+                </th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Description</th>
+                <th className="p-2">Debit</th>
+                <th className="p-2">Credit</th>
+                <th className="p-2">Balance</th>
+                <th className="p-2">Category</th>
+                <th className="p-2">Subcategory</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((transaction, index) => (
+                <tr key={index} className="border-b border-gray-700">
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTransactions.includes(index)}
+                      onChange={() => handleCheckboxChange(index)}
+                    />
+                  </td>
+                  <td className="p-2">{transaction.date1 || "-"}</td>
+                  <td className="p-2">{transaction.description || "-"}</td>
+                  <td className="p-2">{transaction.debit_amount || "-"}</td>
+                  <td className="p-2">{transaction.credit_amount || "-"}</td>
+                  <td className="p-2">{transaction.balance_amount || "-"}</td>
+                  <td className="p-2">{transaction.category || "-"}</td>
+                  <td className="p-2">{transaction.subcategory || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-        
+        {/* Transactions Table with Scrollable Body */}
+        <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
+          <table className="w-full bg-gray-800">
+            <thead className="sticky top-0 bg-gray-900 z-10">
+              <tr>
+                <th className="p-2">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Description</th>
+                <th className="p-2">Debit</th>
+                <th className="p-2">Credit</th>
+                <th className="p-2">Balance</th>
+                <th className="p-2">Category</th>
+                <th className="p-2">Subcategory</th>
+              </tr>
+            </thead>
+            <tbody className="overflow-y-auto">
+              {filteredTransactions.map((transaction, index) => (
+                <tr
+                  key={index}
+                  className={`border-b border-gray-700 text-white ${getCategoryColor(transaction.category)}`}
+                >
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTransactions.includes(index)}
+                      onChange={() => handleCheckboxChange(index)}
+                    />
+                  </td>
+                  <td className="p-2">{transaction.date1 || "-"}</td>
+                  <td className="p-2">{transaction.description || "-"}</td>
+                  <td className="p-2">{transaction.debit_amount || "-"}</td>
+                  <td className="p-2">{transaction.credit_amount || "-"}</td>
+                  <td className="p-2">{transaction.balance_amount || "-"}</td>
+                  <td className={`p-2 text-white ${getCategoryColor(transaction.category)}`}>
+                    {transaction.category || "-"}
+                  </td>
+                  <td className="p-2">{transaction.subcategory || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Colored Transactions Table */}
+        <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
+          <table className="w-full bg-gray-800">
+          <thead className="sticky top-0 bg-gray-900 z-10">
+              <tr>
+              <th className="p-2">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Description</th>
+                <th className="p-2">Debit</th>
+                <th className="p-2">Credit</th>
+                <th className="p-2">Balance</th>
+                <th className="p-2">Category</th>
+                <th className="p-2">Subcategory</th>
+              </tr>
+            </thead>
+            <tbody className="overflow-y-auto">
+              {filteredTransactions.map((transaction, index) => (
+                <tr
+                  key={index}
+                  className={`border-b border-gray-700 text-white`}
+                >
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTransactions.includes(index)}
+                      onChange={() => handleCheckboxChange(index)}
+                    />
+                  </td>
+
+                  <td className="p-2">{transaction.date1 || "-"}</td>
+                  <td className="p-2">{transaction.description || "-"}</td>
+                  <td className="p-2">{transaction.debit_amount || "-"}</td>
+                  <td className="p-2">{transaction.credit_amount || "-"}</td>
+                  <td className="p-2">{transaction.balance_amount || "-"}</td>
+                  <td className={`p-2 ${getCategoryColor(transaction.category)}`}>
+                    {transaction.category || "-"}
+                  </td>
+                  <td className="p-2">{transaction.subcategory || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </div>
   );

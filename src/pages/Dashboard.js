@@ -1,7 +1,6 @@
 // src/pages/Dashboard.js
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import "../styles/tailwind.css";
 
@@ -23,6 +22,8 @@ const links = [
 const Dashboard = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Check if user is logged in
   useEffect(() => {
@@ -35,6 +36,8 @@ const Dashboard = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">

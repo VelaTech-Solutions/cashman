@@ -20,6 +20,7 @@ import Sidebar from "../components/Sidebar";
 
 const CategorySettings = () => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [newSubcategory, setNewSubcategory] = useState("");
@@ -138,13 +139,9 @@ const CategorySettings = () => {
     fetchCategories();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-gray-400">Loading categories...</p>
-      </div>
-    );
-  }
+  if (error) return <div>Error: {error}</div>;
+
+
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">

@@ -30,7 +30,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
-import { filter } from "framer-motion/client";
 
 const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-home" }];
 
@@ -39,13 +38,12 @@ const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-home" }];
 function ExtractTransactions() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [isProcessing, setIsProcessing] = useState(false); // handleExtractTransactions
   const [processing, setProcessing] = useState(false); // handleExtractDataManual
 
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [rawData, setRawData] = useState("");
   const navigate = useNavigate(); // Initialize the navigate function
 
@@ -80,6 +78,7 @@ function ExtractTransactions() {
   const [isProcessingtransactions, setisProcessingtransactions] =
     useState(false);
   const [ProcessingTransactions, setProcessingtransactions] = useState(false);
+  
 
   // Fetch client data
   useEffect(() => {
@@ -405,6 +404,8 @@ function ExtractTransactions() {
       setErrorMessage("Failed to save filtered data. Please try again.");
     }
   };
+
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">

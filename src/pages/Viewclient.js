@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 import Sidebar from "../components/Sidebar";
 
@@ -59,29 +58,14 @@ const Viewclient = () => {
     fetchClients();
   }, []);
 
-  // Loading or error states
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-gray-400">Loading clients...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg text-red-500">{error}</p>
-      </div>
-    );
-  }
-
   // Filter clients based on search query
   const filteredClients = clients.filter((client) =>
     `${client.clientName} ${client.clientSurname} ${client.id} ${client.bankName}`
       .toLowerCase()
       .includes(searchQuery),
   );
+
+  if (error) return <div>Error: {error}</div>;
 
   // Main UI
   return (

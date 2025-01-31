@@ -1,7 +1,6 @@
 // src/pages/ViewReports.js
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
 import LoadClientData from "../components/LoadClientData";
 import Sidebar from "../components/Sidebar";
 import "../styles/tailwind.css";
@@ -38,6 +37,7 @@ const EditTransactions = () => {
 
     fetchData();
   }, [id]);
+
   // Filter transactions based on search query
   const filteredTransactions = clientData?.transactions?.filter(
     (transaction) => {
@@ -69,6 +69,8 @@ const EditTransactions = () => {
     setIsEditing(null);
   };
 
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       {/* Sidebar */}
@@ -76,12 +78,6 @@ const EditTransactions = () => {
 
       {/* Main content */}
       <div className="flex-1 p-8">
-        <motion.div
-          className="space-y-8"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
               Edit Transactions
@@ -91,7 +87,6 @@ const EditTransactions = () => {
               This is the placeholder for report rendering functionality.
             </p>
           </section>
-        </motion.div>
 
         {/* Transactions Table */}
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">

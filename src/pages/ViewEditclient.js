@@ -94,8 +94,7 @@ const ViewEditClient = () => {
     }
   };
 
-  if (loading) return <p className="text-gray-400">Loading client data...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">

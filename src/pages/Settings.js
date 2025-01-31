@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import "../styles/tailwind.css";
 
 // firebase imports
@@ -21,7 +20,8 @@ const Settings = () => {
   const [newSubcategory, setNewSubcategory] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showSettings, setShowSettings] = useState(false); // Toggle for both sections
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const fetchCategoriesAndSubcategories = async () => {
     try {
       const categoryCollection = collection(db, "categories");
@@ -119,6 +119,8 @@ const Settings = () => {
       }
     }
   };
+
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="p-8 bg-gray-900 text-white min-h-screen">

@@ -10,6 +10,11 @@ const links = [
 ];
 
 function Instructions() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
       {/* Sidebar */}
