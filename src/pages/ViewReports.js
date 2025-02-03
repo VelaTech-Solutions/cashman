@@ -6,6 +6,7 @@ import "../styles/tailwind.css";
 
 import LoadClientData from "../components/LoadClientData";
 import generateReport from "../components/generateReport";
+import { getAuth } from "firebase/auth";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -29,6 +30,7 @@ const ViewReports = () => {
 
   const [showSummary, setShowSummary] = useState(true);
 
+  const [reportURL, setReportURL] = useState("");
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -46,23 +48,23 @@ const ViewReports = () => {
     fetchClientData();
   }, [id]);
 
-  const handleGenerateReport = async () => {
-    if (!clientData) {
-      alert("Client data not loaded. Please try again.");
-      return;
-    }
 
+  const handleGenerateReport = async (clientId) => {
     try {
-      const result = await generateReport(id);
-      if (result.success) {
-        alert("Report generated successfully!");
-        console.log("Report Path:", result.reportPath);
-      } else {
-        alert(`Failed to generate report: ${result.message}`);
+      const auth = getAuth();
+      const user = auth.currentUser;
+  
+      if (!user) {
+        console.error("User is not authenticated.");
+        return;
       }
+  
+      const authToken = await user.getIdToken(); // Fetch token
+      const result = await generateReport(clientId, authToken);
+  
+      console.log(result.message);
     } catch (error) {
-      console.error("Error during report generation:", error);
-      alert("An unexpected error occurred while generating the report.");
+      console.error("Error handling report generation:", error);
     }
   };
 
@@ -678,6 +680,30 @@ const ViewReports = () => {
 
 
           {/* a place to view all reports generated */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
+              View Reports
+            </h2>
+            <button
+              onClick={() => generateReport(setReportURL)}
+              className="w-full py-3 bg-green-600 hover:bg-green-700 rounded text-white font-semibold shadow-md"
+            >
+              Generate Report
+            </button>
+            {reportURL && (
+              <div className="mt-4">
+                <a
+                  href={reportURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  Download Report
+                </a>
+              </div>
+            )}
+          </section>
+
 
       </div>
     </div>

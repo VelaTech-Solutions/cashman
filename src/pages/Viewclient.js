@@ -12,7 +12,7 @@ import { collection, getDocs } from "firebase/firestore";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-  { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
+  // { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
 ];
 
 const Viewclient = () => {

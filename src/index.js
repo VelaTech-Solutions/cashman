@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { auth, db } from "./firebase/firebase"; // Import initialized services
+// import { auth, db } from "./firebase/firebase"; // Import initialized services
 
 // console.log("Auth service initialized:", auth);
 // console.log("Firestore service initialized:", db);

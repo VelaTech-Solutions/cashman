@@ -13,10 +13,10 @@ const links = [
   { path: "/editclient", label: "Edit Client", icon: "ph-swap" },
   { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
   { path: "/settings", label: "Settings", icon: "ph-globe" },
-  { path: "/developernotes", label: "Developer Notes", icon: "ph-gear" },
+  // { path: "/developernotes", label: "Developer Notes", icon: "ph-gear" },
   { path: "/instructions", label: "Instructions", icon: "ph-file-text" },
   // testing pages
-  { path: "/teststorage", label: "Test Storage", icon: "ph-file-text" },
+  // { path: "/teststorage", label: "Test Storage", icon: "ph-file-text" },
 ];
 
 const Dashboard = () => {

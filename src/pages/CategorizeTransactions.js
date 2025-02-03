@@ -1,5 +1,9 @@
+// src/pages/CategorizeTransactions.js
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
+// Firebase Imports
 import { db } from "../firebase/firebase";
 import {
   doc,
@@ -9,8 +13,12 @@ import {
   getDocs,
   addDoc,
 } from "firebase/firestore";
+
+// Components imports 
 import Sidebar from "../components/Sidebar";
-import LoadClientData from "../components/LoadClientData"; // Import the fetch function
+import LoadClientData from "../components/LoadClientData";
+
+
 const CategorizeTransactions = () => {
   const { id } = useParams(); // Client ID or folder number
   const [ bankName, setbankName ] = useState([]);
@@ -28,6 +36,7 @@ const CategorizeTransactions = () => {
 
    const [showSummary, setShowSummary] = useState(true);
 
+  // Sidebar Links
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     {
@@ -47,61 +56,60 @@ const CategorizeTransactions = () => {
     },
   ];
 
+  // Load Client Data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("Fetching client data...");
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      console.log("Fetching client data...");
+        // Load client data
+        const clientData = await LoadClientData(id);
+        console.log("Fetched client data:", clientData);
 
-      // Load client data
-      const clientData = await LoadClientData(id);
-      console.log("Fetched client data:", clientData);
+        // Extract transactions and bank name
+        const fetchedTransactions = clientData.transactions.map((txn) => ({
+          ...txn,
+          bankName: clientData.bankName || "Unknown Bank", // Add bankName to each transaction
+        }));
+        console.log("bankName:", clientData.bankName);
 
-      // Extract transactions and bank name
-      const fetchedTransactions = clientData.transactions.map((txn) => ({
-        ...txn,
-        bankName: clientData.bankName || "Unknown Bank", // Add bankName to each transaction
-      }));
-      console.log("bankName:", clientData.bankName);
+        // Update state
+        setbankName(clientData.bankName || "Unknown Bank");
+        setTransactions(fetchedTransactions);
+        setFilteredTransactions(fetchedTransactions);
 
-      // Update state
-      setbankName(clientData.bankName || "Unknown Bank");
-      setTransactions(fetchedTransactions);
-      setFilteredTransactions(fetchedTransactions);
+        // Fetch categories
+        console.log("Fetching categories...");
+        const categoriesSnapshot = await getDocs(collection(db, "categories"));
+        const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCategories(fetchedCategories);
 
-      // Fetch categories
-      console.log("Fetching categories...");
-      const categoriesSnapshot = await getDocs(collection(db, "categories"));
-      const fetchedCategories = categoriesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCategories(fetchedCategories);
+        // Process subcategories
+        const organizedSubcategories = fetchedCategories.flatMap((category) =>
+          category.subcategories
+            ? category.subcategories.map((sub) => ({
+                id: sub.id,
+                name: sub.name,
+                parentCategory: category.name,
+              }))
+            : []
+        );
+        setSubcategories(organizedSubcategories);
 
-      // Process subcategories
-      const organizedSubcategories = fetchedCategories.flatMap((category) =>
-        category.subcategories
-          ? category.subcategories.map((sub) => ({
-              id: sub.id,
-              name: sub.name,
-              parentCategory: category.name,
-            }))
-          : []
-      );
-      setSubcategories(organizedSubcategories);
+        console.log("Fetched and processed categories and subcategories.");
+      } catch (err) {
+        console.error("Error fetching data:", err.message);
+        setError("Failed to fetch transactions or categories.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      console.log("Fetched and processed categories and subcategories.");
-    } catch (err) {
-      console.error("Error fetching data:", err.message);
-      setError("Failed to fetch transactions or categories.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, [id]);
-
+    fetchData();
+  }, [id]);
 
   // Filter subcategories based on the selected category
   useEffect(() => {
@@ -261,6 +269,7 @@ useEffect(() => {
     }
   };
   
+  // Color Category
   const getCategoryColor = (category) => {
     switch (category) {
       case "Income":
@@ -280,7 +289,7 @@ useEffect(() => {
     }
   };
   
-
+  // Clear All Category
   const clearAllCategories = async () => {
     try {
       console.log("Clearing all categories and subcategories...");
@@ -307,6 +316,7 @@ useEffect(() => {
     }
   };
 
+  // Match all Transactions
   const matchAllTransactions = async () => {
     try {
       if (!bankName) {

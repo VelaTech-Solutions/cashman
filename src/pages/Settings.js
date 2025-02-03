@@ -22,6 +22,16 @@ const Settings = () => {
   const [showSettings, setShowSettings] = useState(false); // Toggle for both sections
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+
+  // 
+  /**
+   * Fetches categories and subcategories from the Firestore database and updates the state.
+   * 
+   * This function retrieves documents from the "categories" and "subcategories" collections
+   * in the Firestore database. It then maps the documents to an array of objects containing
+   * the document ID and data, and updates the state with these arrays.
+   */
   const fetchCategoriesAndSubcategories = async () => {
     try {
       const categoryCollection = collection(db, "categories");
