@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../styles/tailwind.css";
-import Sidebar from "../components/Sidebar";
+
+// Component Imports
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";

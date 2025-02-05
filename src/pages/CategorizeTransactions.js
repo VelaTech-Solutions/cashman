@@ -3,6 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+// Components imports
+import Sidebar from "components/Sidebar";
+import LoadClientData from "components/LoadClientData";
+
 // Firebase Imports
 import { db } from "../firebase/firebase";
 import {
@@ -14,14 +18,9 @@ import {
   addDoc,
 } from "firebase/firestore";
 
-// Components imports 
-import Sidebar from "../components/Sidebar";
-import LoadClientData from "../components/LoadClientData";
-
-
 const CategorizeTransactions = () => {
   const { id } = useParams(); // Client ID or folder number
-  const [ bankName, setbankName ] = useState([]);
+  const [bankName, setbankName] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [selectedTransactions, setSelectedTransactions] = useState([]);
@@ -34,7 +33,7 @@ const CategorizeTransactions = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-   const [showSummary, setShowSummary] = useState(true);
+  const [showSummary, setShowSummary] = useState(true);
 
   // Sidebar Links
   const links = [
@@ -95,7 +94,7 @@ const CategorizeTransactions = () => {
                 name: sub.name,
                 parentCategory: category.name,
               }))
-            : []
+            : [],
         );
         setSubcategories(organizedSubcategories);
 
@@ -166,29 +165,29 @@ const CategorizeTransactions = () => {
         alert("Please select both a category and a subcategory.");
         return;
       }
-  
+
       if (selectedTransactions.length === 0) {
         alert("No transactions selected for categorization.");
         return;
       }
-  
+
       console.log("Starting categorization...");
       console.log("Selected Transactions Indices:", selectedTransactions);
-  
+
       const updatedTransactions = [...transactions];
-  
+
       selectedTransactions.forEach((transactionIndex) => {
         const originalIndex = transactions.findIndex(
           (txn) => txn === filteredTransactions[transactionIndex],
         );
-  
+
         if (originalIndex !== -1) {
           updatedTransactions[originalIndex] = {
             ...updatedTransactions[originalIndex],
             category,
             subcategory,
           };
-  
+
           saveToTransactionDatabase(
             updatedTransactions[originalIndex].bankName, // Pass bankName from transaction
             updatedTransactions[originalIndex].description,
@@ -201,13 +200,13 @@ const CategorizeTransactions = () => {
           );
         }
       });
-  
+
       const clientDocRef = doc(db, "clients", id);
       await updateDoc(clientDocRef, { transactions: updatedTransactions });
-  
+
       console.log("Transactions updated successfully:", updatedTransactions);
       alert("Transactions categorized successfully!");
-  
+
       setTransactions(updatedTransactions);
       setSelectedTransactions([]);
     } catch (err) {
@@ -217,7 +216,7 @@ const CategorizeTransactions = () => {
       );
     }
   };
-  
+
   // save transaction
   const saveToTransactionDatabase = async (
     bankName,
@@ -229,11 +228,11 @@ const CategorizeTransactions = () => {
       if (!bankName) {
         throw new Error("Bank name is undefined or missing.");
       }
-  
+
       console.log(
         `Saving transaction for bank: ${bankName}, description: ${description}`,
       );
-  
+
       // Dynamically pass the bankName variable into the collection path
       const bankCollectionRef = collection(
         db,
@@ -241,24 +240,24 @@ const CategorizeTransactions = () => {
         bankName, // Now dynamically passing the bank name
         "transactions",
       );
-  
+
       const querySnapshot = await getDocs(bankCollectionRef);
       const existingTransaction = querySnapshot.docs.find(
         (doc) => doc.data().description === description,
       );
-  
+
       if (existingTransaction) {
         console.log("Transaction already exists. Skipping:", description);
         return;
       }
-  
+
       await addDoc(bankCollectionRef, {
         description,
         category,
         subcategory,
         createdAt: new Date().toISOString(),
       });
-  
+
       console.log("Transaction added to database:", {
         description,
         category,
@@ -268,7 +267,7 @@ const CategorizeTransactions = () => {
       console.error("Error saving to transaction database:", err.message);
     }
   };
-  
+
   // Color Category
   const getCategoryColor = (category) => {
     switch (category) {
@@ -288,7 +287,7 @@ const CategorizeTransactions = () => {
         return "bg-gray-800"; // Default gray if category is unknown
     }
   };
-  
+
   // Clear All Category
   const clearAllCategories = async () => {
     try {
@@ -323,31 +322,38 @@ const CategorizeTransactions = () => {
         alert("Bank name is missing. Unable to match transactions.");
         return;
       }
-  
+
       console.log("Starting Match-All...");
-  
+
       // Reference to the transaction database for the specific bank
-      const bankCollectionRef = collection(db, "transaction_database", bankName, "transactions");
-  
+      const bankCollectionRef = collection(
+        db,
+        "transaction_database",
+        bankName,
+        "transactions",
+      );
+
       // Fetch existing transactions from Firestore
       const querySnapshot = await getDocs(bankCollectionRef);
       const transactionDatabase = querySnapshot.docs.map((doc) => doc.data());
-  
+
       if (transactionDatabase.length === 0) {
         alert("No transactions found in the database.");
         return;
       }
-  
+
       console.log("Fetched transaction database:", transactionDatabase);
-  
+
       // Update local transactions based on matched descriptions
       const updatedTransactions = transactions.map((txn) => {
         const matchingTxn = transactionDatabase.find(
-          (dbTxn) => dbTxn.description === txn.description
+          (dbTxn) => dbTxn.description === txn.description,
         );
-  
+
         if (matchingTxn) {
-          console.log(`Matched: ${txn.description} -> ${matchingTxn.category}, ${matchingTxn.subcategory}`);
+          console.log(
+            `Matched: ${txn.description} -> ${matchingTxn.category}, ${matchingTxn.subcategory}`,
+          );
           return {
             ...txn,
             category: matchingTxn.category,
@@ -356,11 +362,11 @@ const CategorizeTransactions = () => {
         }
         return txn;
       });
-  
+
       // Update transactions in Firestore
       const clientDocRef = doc(db, "clients", id);
       await updateDoc(clientDocRef, { transactions: updatedTransactions });
-  
+
       console.log("Match-All complete. Transactions updated.");
       setTransactions(updatedTransactions);
       alert("All matching transactions have been categorized.");
@@ -372,114 +378,134 @@ const CategorizeTransactions = () => {
 
   if (error) return <div>Error: {error}</div>;
 
-
-  
-  
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
       <Sidebar title="Categorize Transactions" links={links} />
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
-        
+
         {/* Financial Summary Section */}
         <section className="space-y-4">
-        <h2
-          onClick={() => setShowSummary(!showSummary)}
-          className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
-        >
-          Financial Summary
-          <span className="text-gray-500">{showSummary ? "▲" : "▼"}</span>
-        </h2>
+          <h2
+            onClick={() => setShowSummary(!showSummary)}
+            className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
+          >
+            Financial Summary
+            <span className="text-gray-500">{showSummary ? "▲" : "▼"}</span>
+          </h2>
 
-        {showSummary && (
-          <div className="bg-gray-900 p-4 rounded-lg shadow-md text-white">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              {/* Total Income */}
-              <div className="bg-green-600 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Income</p>
-                <p className="text-lg font-bold">
-                  R {transactions
-                    .filter((txn) => txn.credit_amount && (txn.category === "Income" || !txn.category))
-                    .reduce((acc, txn) => acc + txn.credit_amount, 0)
-                    .toFixed(2)}
-                </p>
-              </div>
+          {showSummary && (
+            <div className="bg-gray-900 p-4 rounded-lg shadow-md text-white">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                {/* Total Income */}
+                <div className="bg-green-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Income</p>
+                  <p className="text-lg font-bold">
+                    R{" "}
+                    {transactions
+                      .filter(
+                        (txn) =>
+                          txn.credit_amount &&
+                          (txn.category === "Income" || !txn.category),
+                      )
+                      .reduce((acc, txn) => acc + txn.credit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
 
-              {/* Total Savings */}
-              <div className="bg-blue-600 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Savings</p>
-                <p className="text-lg font-bold">
-                  R {transactions
-                    .filter((txn) => txn.debit_amount && txn.category === "Savings")
-                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                    .toFixed(2)}
-                </p>
-              </div>
+                {/* Total Savings */}
+                <div className="bg-blue-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Savings</p>
+                  <p className="text-lg font-bold">
+                    R{" "}
+                    {transactions
+                      .filter(
+                        (txn) => txn.debit_amount && txn.category === "Savings",
+                      )
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
 
-              {/* Total Housing */} 
-              <div className="bg-purple-600 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Housing</p>
-                <p className="text-lg font-bold">
-                  R {transactions
-                    .filter((txn) => txn.debit_amount && txn.category === "Housing")
-                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                    .toFixed(2)}
-                </p>
-              </div>
+                {/* Total Housing */}
+                <div className="bg-purple-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Housing</p>
+                  <p className="text-lg font-bold">
+                    R{" "}
+                    {transactions
+                      .filter(
+                        (txn) => txn.debit_amount && txn.category === "Housing",
+                      )
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
 
-              {/* Total Transport */}
-              <div className="bg-yellow-600 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Transport</p>
-                <p className="text-lg font-bold">
-                  R {transactions
-                    .filter((txn) => txn.debit_amount && txn.category === "Transportation")
-                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                    .toFixed(2)}
-                </p>
-              </div>
+                {/* Total Transport */}
+                <div className="bg-yellow-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Transport</p>
+                  <p className="text-lg font-bold">
+                    R{" "}
+                    {transactions
+                      .filter(
+                        (txn) =>
+                          txn.debit_amount && txn.category === "Transportation",
+                      )
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
 
-              {/* Total Expenses */}
-              <div className="bg-red-600 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Expenses</p>
-                <p className="text-lg font-bold">
-                  R {transactions
-                    .filter((txn) => txn.debit_amount && txn.category === "Expenses")
-                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                    .toFixed(2)}
-                </p>
-              </div>
+                {/* Total Expenses */}
+                <div className="bg-red-600 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Expenses</p>
+                  <p className="text-lg font-bold">
+                    R{" "}
+                    {transactions
+                      .filter(
+                        (txn) =>
+                          txn.debit_amount && txn.category === "Expenses",
+                      )
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
 
-              {/* Total Debt */}
-              <div className="bg-gray-700 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Debt</p>
-                <p className="text-lg font-bold">
-                  R {transactions
-                    .filter((txn) => txn.debit_amount && txn.category === "Debt")
-                    .reduce((acc, txn) => acc + txn.debit_amount, 0)
-                    .toFixed(2)}
-                </p>
-              </div>
+                {/* Total Debt */}
+                <div className="bg-gray-700 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Debt</p>
+                  <p className="text-lg font-bold">
+                    R{" "}
+                    {transactions
+                      .filter(
+                        (txn) => txn.debit_amount && txn.category === "Debt",
+                      )
+                      .reduce((acc, txn) => acc + txn.debit_amount, 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
 
-              {/* 🔹 Total Transactions */}
-              <div className="bg-gray-500 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Transactions</p>
-                <p className="text-lg font-bold">
-                  {transactions.length}
-                </p>
-              </div>
+                {/* 🔹 Total Transactions */}
+                <div className="bg-gray-500 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Transactions</p>
+                  <p className="text-lg font-bold">{transactions.length}</p>
+                </div>
 
-              {/* 🔹 Total Uncategorized */}
-              <div className="bg-gray-500 p-3 rounded-lg shadow-md">
-                <p className="text-sm">Total Uncategorized</p>
-                <p className="text-lg font-bold">
-                  {transactions
-                    .filter((txn) => !txn.category || txn.category === "Uncategorized")
-                    .length}
-                </p>
+                {/* 🔹 Total Uncategorized */}
+                <div className="bg-gray-500 p-3 rounded-lg shadow-md">
+                  <p className="text-sm">Total Uncategorized</p>
+                  <p className="text-lg font-bold">
+                    {
+                      transactions.filter(
+                        (txn) =>
+                          !txn.category || txn.category === "Uncategorized",
+                      ).length
+                    }
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         </section>
 
         {/* Search Bar */}
@@ -492,11 +518,13 @@ const CategorizeTransactions = () => {
         />
 
         <p className="text-sm text-gray-400 mb-2">
-          This is a short description for the user. Select one transaction and run the 
-          <strong> Match All</strong> function or use the <strong>Match All Transactions </strong> 
-          button for the best results. Try matching one transaction first, then match all transactions.
+          This is a short description for the user. Select one transaction and
+          run the
+          <strong> Match All</strong> function or use the{" "}
+          <strong>Match All Transactions </strong>
+          button for the best results. Try matching one transaction first, then
+          match all transactions.
         </p>
-
 
         {/* Category and Subcategory Select */}
         <div className="flex gap-4 mb-4">
@@ -547,11 +575,11 @@ const CategorizeTransactions = () => {
             Clear All Categories
           </button>
         </div>
-        
+
         {/* Transactions Table */}
         <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
           <table className="w-full bg-gray-800">
-          <thead className="sticky top-0 bg-gray-900 z-10">
+            <thead className="sticky top-0 bg-gray-900 z-10">
               <tr>
                 <th className="p-2">
                   <input
@@ -631,7 +659,9 @@ const CategorizeTransactions = () => {
                   <td className="p-2">{transaction.debit_amount || "-"}</td>
                   <td className="p-2">{transaction.credit_amount || "-"}</td>
                   <td className="p-2">{transaction.balance_amount || "-"}</td>
-                  <td className={`p-2 text-white ${getCategoryColor(transaction.category)}`}>
+                  <td
+                    className={`p-2 text-white ${getCategoryColor(transaction.category)}`}
+                  >
                     {transaction.category || "-"}
                   </td>
                   <td className="p-2">{transaction.subcategory || "-"}</td>
@@ -644,9 +674,9 @@ const CategorizeTransactions = () => {
         {/* Colored Transactions Table */}
         <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
           <table className="w-full bg-gray-800">
-          <thead className="sticky top-0 bg-gray-900 z-10">
+            <thead className="sticky top-0 bg-gray-900 z-10">
               <tr>
-              <th className="p-2">
+                <th className="p-2">
                   <input
                     type="checkbox"
                     checked={isAllSelected}
@@ -681,7 +711,9 @@ const CategorizeTransactions = () => {
                   <td className="p-2">{transaction.debit_amount || "-"}</td>
                   <td className="p-2">{transaction.credit_amount || "-"}</td>
                   <td className="p-2">{transaction.balance_amount || "-"}</td>
-                  <td className={`p-2 ${getCategoryColor(transaction.category)}`}>
+                  <td
+                    className={`p-2 ${getCategoryColor(transaction.category)}`}
+                  >
                     {transaction.category || "-"}
                   </td>
                   <td className="p-2">{transaction.subcategory || "-"}</td>
@@ -690,12 +722,9 @@ const CategorizeTransactions = () => {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );
 };
 
 export default CategorizeTransactions;
-
-

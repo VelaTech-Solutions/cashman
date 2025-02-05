@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import "../styles/tailwind.css";
+
+// Component Imports
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
@@ -56,7 +58,6 @@ const EditClient = () => {
   }, []);
 
   if (error) return <div>Error: {error}</div>;
-
 
   // Main UI
   return (
@@ -141,8 +142,6 @@ const EditClient = () => {
             </div>
           )}
         </section>
-
-        
       </div>
     </div>
   );

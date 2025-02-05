@@ -1,8 +1,10 @@
 // src/pages/Profile.js
 import React, { useEffect, useState } from "react";
+
+// Component Imports
 import { motion } from "framer-motion";
-import Sidebar from "../components/Sidebar";
-import "../styles/tailwind.css";
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -10,8 +12,8 @@ const links = [
 ];
 
 const Profile = () => {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   if (error) return <div>Error: {error}</div>;
 

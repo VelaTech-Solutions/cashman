@@ -27,13 +27,6 @@ import Developernotes from "./pages/Developernotes";
 import HelpExtract from "./help/HelpExtract";
 import HelpBudget from "./help/HelpBudget";
 
-// import Testpage from "./testpages/Testpage";
-// import Teststorage from "./testpages/Teststorage";
-// import Testfirestore from './testpages/Testfirestore';
-// import Testfunctions from "./testpages/Testfunctions";
-// import Testdash from "./testpages/Testdash";
-// import Testviewclient from "./testpages/Testviewclient";
-// import Testclientprofile from "./testpages/Testclientprofile";
 
 import ProtectedRoute from "./components/ProtectedRoute"; 
 import Loader from "./components/Loader";
@@ -78,14 +71,6 @@ const App = () => {
         <Route path="/categorysettings" element={<CategorySettings />} />
         {/* <Route path="/developernotes" element={<Developernotes />} /> */}
         
-        {/* TEST PAGES */}
-        {/* <Route path="/testpage" element={<Testpage />} />
-        <Route path="/teststorage" element={<Teststorage />} />
-        <Route path="/testfirestore" element={<Testfirestore />} />
-        <Route path="/testfunctions" element={<Testfunctions />} />
-        <Route path="/testdash" element={<Testdash />} />
-        <Route path="/testviewclient" element={<Testviewclient />} />
-        <Route path="/testclientprofile/:id" element={<Testclientprofile />} /> */}
       </Routes>
     </div>
   );

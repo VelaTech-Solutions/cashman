@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  useParams,
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 
-import { motion } from "framer-motion";
-import "../styles/tailwind.css";
-import Sidebar from "../components/Sidebar";
+// Components imports
+import "styles/tailwind.css";
+import Sidebar from "components/Sidebar";
 
-// firebase imports
+// Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { httpsCallable } from "firebase/functions";
@@ -26,7 +19,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
-import { filter } from "framer-motion/client";
 
 const Clientprofile = () => {
   const { id } = useParams();
@@ -340,7 +332,7 @@ const Clientprofile = () => {
               >
                 Budget
               </Link>
-              
+
               {/* View Transactions */}
               <Link
                 to={`/client/${id}/transactions`}
@@ -372,7 +364,6 @@ const Clientprofile = () => {
               >
                 Extract Transactions
               </Link>
-
 
               {/* View Reports */}
               <Link
@@ -475,7 +466,6 @@ const Clientprofile = () => {
             {error && <p className="text-red-500">{error}</p>}
           </div>
         </div>
-      
       </div>
     </div>
   );

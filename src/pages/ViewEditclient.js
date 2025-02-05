@@ -3,15 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 
+// Component Imports
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
+
 // Firebase imports
 import { auth } from "../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
-
-// Component imports
-import Sidebar from "../components/Sidebar";
-import "../styles/tailwind.css";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -143,7 +143,7 @@ const ViewEditClient = () => {
               />
             </div>
           </div>
-          
+
           <button
             onClick={handleUpdateClient}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-4 w-full"

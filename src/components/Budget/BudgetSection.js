@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import moment from "moment";
-import LoadClientData from "../components/LoadClientData";
+
+// Components Imports
+import LoadClientData from "components/LoadClientData";
+
+// Firebase Imports
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

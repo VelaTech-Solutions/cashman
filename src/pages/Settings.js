@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "../styles/tailwind.css";
+
+// Component Imports
+import "styles/tailwind.css";
 
 // firebase imports
 import { db } from "../firebase/firebase";
@@ -23,11 +25,10 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-
-  // 
+  //
   /**
    * Fetches categories and subcategories from the Firestore database and updates the state.
-   * 
+   *
    * This function retrieves documents from the "categories" and "subcategories" collections
    * in the Firestore database. It then maps the documents to an array of objects containing
    * the document ID and data, and updates the state with these arrays.

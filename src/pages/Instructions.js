@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import Sidebar from "../components/Sidebar";
-import "../styles/tailwind.css";
+// Component Imports
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
 
 const links = [
   { path: "/dashboard", label: "Back To Dashboard", icon: "ph-check-square" },
@@ -12,7 +13,7 @@ const links = [
 function Instructions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   if (error) return <div>Error: {error}</div>;
 
   return (

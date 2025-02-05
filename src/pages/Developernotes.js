@@ -2,7 +2,6 @@
 
 // import React, { useEffect, useState } from "react";
 
-
 // // Firebase imports
 // import { onAuthStateChanged } from "firebase/auth";
 // import { auth, db } from "../firebase/firebase";

@@ -1,26 +1,17 @@
 // src/components/ExtractAutomatically.js
 import React, { useEffect, useState } from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  useParams,
-  Link,
-  useNavigate,
-} from "react-router-dom";
-import { motion } from "framer-motion";
-import "../styles/tailwind.css";
+import { useParams, useNavigate } from "react-router-dom";
 
-// components imports
-import Button from "../components/Button";
-import Sidebar from "../components/Sidebar";
-import LoadClientData from "../components/LoadClientData";
+// Components Imports
+import Button from "../Button";
+import LoadClientData from "components/LoadClientData";
+import "styles/tailwind.css";
 
-// firebase imports
+// Firebase Imports
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { auth } from "../../firebase/firebase";
 import { httpsCallable } from "firebase/functions";
-import { functions, db, storage } from "../firebase/firebase";
+import { functions, db, storage } from "../../firebase/firebase";
 import {
   doc,
   getDoc,
@@ -30,6 +21,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
+
 
 
 function ExtractAutomatically() {

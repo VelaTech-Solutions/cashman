@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "components/*": ["components/*"],
+      "pages/*": ["pages/*"],
+      "styles/*": ["styles/*"],
+      "firebase/*": ["firebase/*"]
+    }
+  },
+  "exclude": ["node_modules", "build"]
+}

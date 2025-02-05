@@ -1,9 +1,11 @@
 // src/pages/ViewReports.js
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import LoadClientData from "../components/LoadClientData";
-import Sidebar from "../components/Sidebar";
-import "../styles/tailwind.css";
+
+// Component Imports
+import LoadClientData from "components/LoadClientData";
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -78,15 +80,15 @@ const EditTransactions = () => {
 
       {/* Main content */}
       <div className="flex-1 p-8">
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
-              Edit Transactions
-            </h2>
-            {/* Add your report rendering logic here */}
-            <p className="text-lg text-gray-400">
-              This is the placeholder for report rendering functionality.
-            </p>
-          </section>
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
+            Edit Transactions
+          </h2>
+          {/* Add your report rendering logic here */}
+          <p className="text-lg text-gray-400">
+            This is the placeholder for report rendering functionality.
+          </p>
+        </section>
 
         {/* Transactions Table */}
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">

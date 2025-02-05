@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/tailwind.css";
+
+// Components Imports
+import "styles/tailwind.css";
 
 // firebase imports
 import { signInWithEmailAndPassword } from "firebase/auth";

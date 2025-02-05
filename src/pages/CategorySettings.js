@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
+// Component Imports
+import Sidebar from "components/Sidebar";
 
 // Firebase imports
 import { db } from "../firebase/firebase";
@@ -15,9 +17,6 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-// Component Imports
-import Sidebar from "../components/Sidebar";
-
 const CategorySettings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,7 +26,7 @@ const CategorySettings = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
 
   const links = [
-    { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left"},
+    { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left" },
   ];
 
   // Fetch categories from Firestore
@@ -136,8 +135,6 @@ const CategorySettings = () => {
 
   if (error) return <div>Error: {error}</div>;
 
-
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Category Settings" links={links} />
@@ -231,8 +228,6 @@ const CategorySettings = () => {
             </div>
           ))}
         </div>
-
-        
       </div>
     </div>
   );

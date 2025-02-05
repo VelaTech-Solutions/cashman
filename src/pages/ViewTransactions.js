@@ -1,15 +1,14 @@
 // src/pages/ViewTransactions.js
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import "../styles/tailwind.css";
-import Sidebar from "../components/Sidebar";
 
-
+// Component Imports
+import "styles/tailwind.css";
+import Sidebar from "components/Sidebar";
 
 // Firebase imports
 import { db } from "../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
-
 
 const ViewTransactions = () => {
   const { id } = useParams();
@@ -58,9 +57,8 @@ const ViewTransactions = () => {
       );
     },
   );
-  
-  if (error) return <div>Error: {error}</div>;
 
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
@@ -178,7 +176,6 @@ const ViewTransactions = () => {
             </p>
           )}
         </section>
-        
       </div>
     </div>
   );

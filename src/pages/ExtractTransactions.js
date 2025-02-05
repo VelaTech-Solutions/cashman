@@ -1,38 +1,45 @@
 // src/pages/extraction-page.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import "../styles/tailwind.css";
 
-// components imports
-import Button from "../components/Button";
-import Sidebar from "../components/Sidebar";
-import LoadClientData from "../components/LoadClientData";
-import ExtractAutomatically from "../components/ExtractAutomatically";
-import ExtractManually from "../components/ExtractManually";
+// Components Imports
+import LoadClientData from "components/LoadClientData";
+import Sidebar from "components/Sidebar";
+import ExtractAutomatically from "components/Extract/ExtractAutomatically";
+import ExtractManually from "components/Extract/ExtractManually";
+import "styles/tailwind.css";
 
-//Help
-import HelpExtract from "../help/HelpExtract";
-
-// ExtractTransactions component definition here auto and manual extraction
+// Help Imports
+// import HelpExtract from "../help/HelpExtract";
 
 function ExtractTransactions() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
 
-  
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
-    { type: "divider" },  // Divider line
-    { path: `/client/${id}/edit-transactions`, label: "Edit Transactions", icon: "ph-arrow-left" },
-    { path: `/client/${id}/categorize`, label: "Categorize Transactions", icon: "ph-arrow-left" },
-    { path: "/ExtractSettings", label: "Extract Settings ❌", icon: "ph-arrow-left" }, 
-    { path: "/HelpExtract", label: "Extract Help", icon: "ph-arrow-left" }, 
-];
+    { type: "divider" }, // Divider line
+    {
+      path: `/client/${id}/edit-transactions`,
+      label: "Edit Transactions",
+      icon: "ph-arrow-left",
+    },
+    {
+      path: `/client/${id}/categorize`,
+      label: "Categorize Transactions",
+      icon: "ph-arrow-left",
+    },
+    {
+      path: "/ExtractSettings",
+      label: "Extract Settings ❌",
+      icon: "ph-arrow-left",
+    },
+    { path: "/HelpExtract", label: "Extract Help", icon: "ph-arrow-left" },
+  ];
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("");
-  
 
   // Fetch client data
   useEffect(() => {
@@ -62,7 +69,9 @@ function ExtractTransactions() {
         <div className="space-x-4 mb-6">
           <button
             className={`px-4 py-2 rounded ${
-              activeSection === "ExtractAutomatically" ? "bg-green-600" : "bg-gray-700"
+              activeSection === "ExtractAutomatically"
+                ? "bg-green-600"
+                : "bg-gray-700"
             }`}
             onClick={() => setActiveSection("ExtractAutomatically")}
           >
@@ -70,7 +79,9 @@ function ExtractTransactions() {
           </button>
           <button
             className={`px-4 py-2 rounded ${
-              activeSection === "ExtractManually" ? "bg-green-600" : "bg-gray-700"
+              activeSection === "ExtractManually"
+                ? "bg-green-600"
+                : "bg-gray-700"
             }`}
             onClick={() => setActiveSection("ExtractManually")}
           >
@@ -80,11 +91,10 @@ function ExtractTransactions() {
 
         {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
 
-
         {activeSection === "ExtractManually" && <ExtractManually />}
 
-      {/* Main Content */}
-      {/* <div className="flex-1 p-8"> */}
+        {/* Main Content */}
+        {/* <div className="flex-1 p-8"> */}
         {/* Header Section */}
         {/* <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-blue-400">
@@ -124,12 +134,8 @@ function ExtractTransactions() {
             </div>
           </div>
         </section> */}
-
-
-
-
-        </div>  
       </div>
+    </div>
   );
 }
 export default ExtractTransactions;

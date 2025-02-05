@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/tailwind.css";
-import Sidebar from "../components/Sidebar";
+
+// Components Imports
+import Sidebar from "components/Sidebar";
+import "styles/tailwind.css";
 
 // Firebase imports
 import { db, storage } from "../firebase/firebase";
