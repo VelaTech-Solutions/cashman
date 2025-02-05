@@ -27,12 +27,7 @@ const CategorySettings = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
 
   const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    {
-      path: "javascript:void(0)",
-      label: "Back to Previous Page",
-      icon: "ph-arrow-left",
-    },
+    { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left"},
   ];
 
   // Fetch categories from Firestore

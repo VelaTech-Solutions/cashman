@@ -17,10 +17,15 @@ import CategorizeTransactions from "./pages/CategorizeTransactions";
 import Transactiondatabase from "./pages/Transactiondatabase";
 import ExtractTransactions from "./pages/ExtractTransactions";
 import ViewReports from "./pages/ViewReports";
+import Budget from "./pages/Budget"
 
 import Settings from "./pages/Settings";
 import CategorySettings from "./pages/CategorySettings";
 import Developernotes from "./pages/Developernotes";
+
+// Help
+import HelpExtract from "./help/HelpExtract";
+import HelpBudget from "./help/HelpBudget";
 
 // import Testpage from "./testpages/Testpage";
 // import Teststorage from "./testpages/Teststorage";
@@ -57,6 +62,7 @@ const App = () => {
         <Route path="/viewclient" element={<Viewclient />} />
         <Route path="/client/:id" element={<Clientprofile />} />
         <Route path="/client/:id/profile" element={<Profile />} />
+        <Route path="/budget/:id" element={<Budget/>}/>
         <Route path="/client/:id/transactions" element={<ViewTransactions />} />
         <Route path="/client/:id/edit-transactions" element={<EditTransactions />} />
         <Route path="/client/:id/categorize" element={<CategorizeTransactions />} />
@@ -64,6 +70,10 @@ const App = () => {
 
         <Route path="/transactiondatabase/:id" element={<Transactiondatabase />} />
         <Route path="/ExtractTransactions/:id" element={<ExtractTransactions />} />
+        
+        <Route path="/HelpExtract" element={<HelpExtract />} />
+        <Route path="/HelpBudget" element={<HelpBudget />} />
+
         <Route path="/settings" element={<Settings />} />
         <Route path="/categorysettings" element={<CategorySettings />} />
         {/* <Route path="/developernotes" element={<Developernotes />} /> */}

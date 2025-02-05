@@ -7,7 +7,6 @@ import Sidebar from "../components/Sidebar";
 import "../styles/tailwind.css";
 
 const links = [
-  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
   { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
 ];
 

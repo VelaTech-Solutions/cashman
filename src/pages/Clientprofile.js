@@ -64,17 +64,7 @@ const Clientprofile = () => {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
-    {
-      path: `/ExtractTransactions/${id}`,
-      label: "Extract Transactions",
-      icon: "ph-home",
-    },
-    {
-      path: `/transactiondatabase/${id}`,
-      label: "Transaction Database",
-      icon: "ph-file-text",
-    },
+    { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
   ];
 
   useEffect(() => {
@@ -343,6 +333,14 @@ const Clientprofile = () => {
                 Profile
               </Link>
 
+              {/* Budget */}
+              <Link
+                to={`/budget/${id}`}
+                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+              >
+                Budget
+              </Link>
+              
               {/* View Transactions */}
               <Link
                 to={`/client/${id}/transactions`}
@@ -366,6 +364,15 @@ const Clientprofile = () => {
               >
                 Categorize Transactions
               </Link>
+
+              {/* Extract Transactions */}
+              <Link
+                to={`/ExtractTransactions/${id}`}
+                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
+              >
+                Extract Transactions
+              </Link>
+
 
               {/* View Reports */}
               <Link
