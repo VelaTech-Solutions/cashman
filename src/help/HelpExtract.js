@@ -29,6 +29,14 @@ const HelpExtract = () => {
             <strong>Manual Extraction</strong>: Explanation goes here.
           </li>
         </ul>
+
+        <p className="text-sm text-white p-6 ">
+              <strong>Choose a method to process your file:</strong>
+              <br />- Use <strong>PDF Parser</strong> for selectable text.
+              <br />- Use <strong>OCR</strong> for scanned or image-based files.
+              Not Working for now
+            </p>
+
       </div>
     </div>
   );

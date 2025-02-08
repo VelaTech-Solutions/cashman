@@ -14,9 +14,13 @@ import Profile from "./pages/Profile";
 import ViewTransactions from "./pages/ViewTransactions";
 import EditTransactions from "./pages/EditTransactions";
 import CategorizeTransactions from "./pages/CategorizeTransactions";
+
 import Transactiondatabase from "./pages/Transactiondatabase";
 import ExtractTransactions from "./pages/ExtractTransactions";
+import ExtractSettings from "./pages/ExtractSettings"
+
 import ViewReports from "./pages/ViewReports";
+
 import Budget from "./pages/Budget"
 
 import Settings from "./pages/Settings";
@@ -28,8 +32,8 @@ import HelpExtract from "./help/HelpExtract";
 import HelpBudget from "./help/HelpBudget";
 
 
-import ProtectedRoute from "./components/ProtectedRoute"; 
-import Loader from "./components/Loader";
+import ProtectedRoute from "components/ProtectedRoute"; 
+import Loader from "components/Loader";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -47,7 +51,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/instructions" element={<Instructions />} />
+
 
         <Route path="/addclient" element={<Addclient />} />
         <Route path="/editclient" element={<Editclient />} />
@@ -63,13 +67,17 @@ const App = () => {
 
         <Route path="/transactiondatabase/:id" element={<Transactiondatabase />} />
         <Route path="/ExtractTransactions/:id" element={<ExtractTransactions />} />
-        
-        <Route path="/HelpExtract" element={<HelpExtract />} />
-        <Route path="/HelpBudget" element={<HelpBudget />} />
+        <Route path="/ExtractSettings/:id" element={<ExtractSettings />} />
+
 
         <Route path="/settings" element={<Settings />} />
         <Route path="/categorysettings" element={<CategorySettings />} />
         {/* <Route path="/developernotes" element={<Developernotes />} /> */}
+
+
+        <Route path="/instructions" element={<Instructions />} />
+        <Route path="/HelpExtract" element={<HelpExtract />} />
+        <Route path="/HelpBudget" element={<HelpBudget />} />
         
       </Routes>
     </div>

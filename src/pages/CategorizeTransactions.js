@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 // Components imports
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
-
+import Table from "components/Table"; 
 // Firebase Imports
 import { db } from "../firebase/firebase";
 import {
@@ -578,7 +578,7 @@ const CategorizeTransactions = () => {
 
         {/* Transactions Table */}
         <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
-          <table className="w-full bg-gray-800">
+          <Table className="w-full bg-gray-800">
             <thead className="sticky top-0 bg-gray-900 z-10">
               <tr>
                 <th className="p-2">
@@ -617,7 +617,7 @@ const CategorizeTransactions = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
 
         {/* Transactions Table with Scrollable Body */}
@@ -673,7 +673,7 @@ const CategorizeTransactions = () => {
 
         {/* Colored Transactions Table */}
         <div className="overflow-y-auto max-h-[500px] gap-4 mb-4 shadow-md border border-gray-700 rounded-lg">
-          <table className="w-full bg-gray-800">
+          <Table className="w-full bg-gray-800">
             <thead className="sticky top-0 bg-gray-900 z-10">
               <tr>
                 <th className="p-2">
@@ -720,7 +720,7 @@ const CategorizeTransactions = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       </div>
     </div>

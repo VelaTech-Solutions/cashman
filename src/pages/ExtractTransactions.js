@@ -1,4 +1,4 @@
-// src/pages/extraction-page.js
+// src/pages/ExtractTransactions.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -18,8 +18,8 @@ function ExtractTransactions() {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
-    { type: "divider" }, // Divider line
+    { path: "/viewclient", label: "Back to View Clients", icon: "ph-file-text" },
+
     {
       path: `/client/${id}/edit-transactions`,
       label: "Edit Transactions",
@@ -30,14 +30,15 @@ function ExtractTransactions() {
       label: "Categorize Transactions",
       icon: "ph-arrow-left",
     },
+    { type: "divider" }, // Divider line
     {
-      path: "/ExtractSettings",
-      label: "Extract Settings ❌",
+      path: `/ExtractSettings/${id}`,
+      label: "Extract Settings",
       icon: "ph-arrow-left",
     },
     { path: "/HelpExtract", label: "Extract Help", icon: "ph-arrow-left" },
   ];
-  const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("");
 
@@ -51,8 +52,6 @@ function ExtractTransactions() {
       } catch (err) {
         console.error("Error fetching data:", err.message);
         setError("Failed to fetch Client Data.");
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -67,31 +66,34 @@ function ExtractTransactions() {
 
       <div className="flex-1 p-8">
         <div className="space-x-4 mb-6">
-          <button
-            className={`px-4 py-2 rounded ${
+        <button
+            className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
               activeSection === "ExtractAutomatically"
-                ? "bg-green-600"
-                : "bg-gray-700"
+                ? "bg-green-600 shadow-lg shadow-green-600/50"
+                : "bg-gray-700 hover:bg-gray-600"
             }`}
             onClick={() => setActiveSection("ExtractAutomatically")}
           >
-            Extract Automatic
+            🚀 Extract Automatically
           </button>
+
           <button
-            className={`px-4 py-2 rounded ${
+            className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
               activeSection === "ExtractManually"
-                ? "bg-green-600"
-                : "bg-gray-700"
+                ? "bg-green-600 shadow-lg shadow-green-600/50"
+                : "bg-gray-700 hover:bg-gray-600"
             }`}
             onClick={() => setActiveSection("ExtractManually")}
           >
-            Extract Manual
+            ✍️ Extract Manually
           </button>
         </div>
 
-        {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
-
-        {activeSection === "ExtractManually" && <ExtractManually />}
+        {/* Section Content */}
+        {/* <div className="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700"> */}
+          {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
+          {activeSection === "ExtractManually" && <ExtractManually />}
+        {/* </div> */}
 
         {/* Main Content */}
         {/* <div className="flex-1 p-8"> */}

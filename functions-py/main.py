@@ -110,6 +110,23 @@ def handleExtractTransactions(req: https_fn.Request) -> https_fn.Response:
         print(f"ERROR: {e}")
         return error_response(response, f"An error occurred: {str(e)}", 500)
 
+
+# def clean_amounts_in_string(extracted_text):
+#     # Fix spaces in numbers like "1 000.00" → "1000.00"
+#     return re.sub(r'(?<=\d)\s(?=\d{3,}\.\d{2}\b)', '', extracted_text)
+def clean_amounts_in_string(extracted_text):
+    # Match all transaction groups (amounts with decimal places)
+    matches = re.findall(r'\d[\d ]*\.\d{2}', extracted_text)  
+
+    # Clean each matched amount (remove spaces inside numbers)
+    cleaned_amounts = [re.sub(r'\s+', '', match) for match in matches]
+
+    # Replace old amounts with cleaned amounts in original text
+    for old, new in zip(matches, cleaned_amounts):
+        extracted_text = extracted_text.replace(old, new)
+
+    return extracted_text
+
 @https_fn.on_request()
 def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
     response = https_fn.Response()
@@ -157,6 +174,27 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
             response.status = 400
             response.headers["Content-Type"] = "application/json"
             return response
+        
+        # Clean statement based on bank name
+        clean_amounts = {
+            "Absa Bank": clean_amounts_in_string,
+            "Capitec Bank": clean_amounts_in_string,
+            "Fnb Bank": None,  # Skip cleaning
+            "Ned Bank": None,  # Skip cleaning
+            "Standard Bank": clean_amounts_in_string,
+            "Tyme Bank": clean_amounts_in_string,
+        }
+
+        # Skip cleaning if bank is not in the dictionary OR if its function is None
+        if bank_name not in clean_amounts or clean_amounts[bank_name] is None:
+            print(f"Skipping amount cleaning: Bank '{bank_name}' not found or has no cleaning function.")
+        else:
+            # Clean extracted text only if there's a function for this bank
+            extracted_text = clean_amounts[bank_name](extracted_text)
+
+        # Apply additional cleaning (remove "," and "*")
+        extracted_text = extracted_text.replace(",", "").replace("*", "").strip()
+
 
         # Convert rawData to Array
         raw_data_array = extracted_text.split("\n")  # Convert the string into an array of lines
@@ -167,7 +205,7 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
             doc_ref = db.collection("clients").document(client_id)
             doc_ref.set({
                 "rawData": raw_data_array,       # Save as array
-                "filteredData": None
+                "filteredData": raw_data_array
 
             }, merge=True)
             print(f"DEBUG: Successfully saved rawData for client {client_id}.")
