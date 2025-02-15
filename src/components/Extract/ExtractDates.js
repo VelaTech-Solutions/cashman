@@ -1,204 +1,151 @@
-// src/components/Extract/Extract/ExtractDates.js
+// src/components/Extract/ExtractDates.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 // Components Imports
 import Button from "../Button";
-import LoadClientData from "components/LoadClientData";
-import "styles/tailwind.css";
+import BankDatesRules from "./BankDatesRules";
 import Table from "components/Table"; 
+import LoadClientData from "components/LoadClientData";
 
 // Firebase Imports
-import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
-function ExtractDates() {
+const ExtractDates = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
+  const [bankName, setBankName] = useState("Unknown Bank");
   const [transactions, setTransactions] = useState([]);
-  const [originalTransactions, setOriginalTransactions] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [columnTypes, setColumnTypes] = useState({});
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [selectedColumn, setSelectedColumn] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [success, setSuccess] = useState(null);
 
-  const regex = /\s+/;
 
   useEffect(() => {
-    
-
-  const fetchData = async () => {
-        try {
-        const clientData = await LoadClientData(id);
-        setClientData(clientData);
-
-        const cleanedData = (clientData.filteredData || []).map((line) =>
-            line.replace(/[,*]/g, "")
-        );
-
-        setTransactions(cleanedData);
-        setOriginalTransactions(cleanedData); // Store original data for reset
-        } catch (err) {
+    const fetchData = async () => {
+      try {
+        const data = await LoadClientData(id);
+        if (!data) {
+          setError("No client data found.");
+          return;
+        }
+        setBankName(data.bankName || "Unknown Bank");
+        setClientData(data);
+        setTransactions(data.transactions || []);
+      } catch (err) {
         console.error("Error fetching data:", err.message);
         setError("Failed to fetch Client Data.");
-        } finally {
-        setLoading(false);
-        }
-    };
-
-    fetchData();
-    }, [id]);
-
-    const handleExtractDates = async () => {
-      if (!clientData?.bankName) {
-        setError("Bank name is missing. Cannot proceed.");
-        return;
       }
-    
-      const updatedTransactions = transactions.map((line) => {
-        if (typeof line !== "string") return { date1: "", date2: "" };
-    
-        const segments = line.split(regex); // Split transaction line into words/numbers
-        let newData = { date1: "", date2: "" };
-    
-        Object.entries(columnTypes).forEach(([colIndex, type]) => {
-          if (type === "date1" || type === "date2") {
-            newData[type] = segments[colIndex] || "";
-          }
-        });
-    
-        return {
-          original: line, // Preserve original transaction line
-          ...newData, // Add extracted dates
-        };
-      });
-    
-      try {
-        // ✅ Store `date1` and `date2` properly without breaking transaction structure
-        await updateDoc(doc(db, "clients", id), { transactions: updatedTransactions });
-    
-        // ✅ Clean `filteredData` by removing extracted date columns
-        const cleanedTransactions = transactions.map(line => {
-          if (typeof line !== "string") return line;
-          const segments = line.split(regex);
-          return segments
-            .filter((_, colIndex) => !Object.keys(columnTypes).includes(colIndex.toString()))
-            .join(" ")
-            .trim();
-        });
-    
-        await updateDoc(doc(db, "clients", id), { filteredData: cleanedTransactions });
-    
-        setTransactions(cleanedTransactions);
-        alert("Dates extracted and saved successfully!");
-        
-        // Force table refresh
-        setRefreshKey((prevKey) => prevKey + 1);
-      } catch (error) {
-        console.error("Error updating transactions:", error);
-        alert("Failed to save dates.");
-      }
-    };
-    
-    
-
-    const handleColumnTypeChange = (colIndex, type) => {
-        setColumnTypes((prev) => ({ ...prev, [colIndex]: type }));
-        setSelectedColumn(type ? colIndex : null);
-    };
-
-    const handleDeleteSegment = async (index, colIndex) => {
-            const updatedTransactions = [...transactions];
-            const segments = updatedTransactions[index].split(regex);
-            
-            if (segments.length > colIndex) {
-            segments.splice(colIndex, 1); // Remove only the specific value
-            updatedTransactions[index] = segments.join(" "); // Rejoin remaining values
-        
-            try {
-                await updateDoc(doc(db, "clients", id), { filteredData: updatedTransactions });
-                setTransactions(updatedTransactions); // Update state after Firestore update
-            } catch (err) {
-                console.error("Error updating transactions:", err);
-                setError("Failed to update transactions.");
-            }
-        }
     };
   
-    const handleReset = async () => {
-        try {
-        // Reset to original data
-        setTransactions(originalTransactions);
-        setColumnTypes({});
-        setSelectedRow(null);
-        
-        await updateDoc(doc(db, "clients", id), { filteredData: originalTransactions });
-        alert("Reset successful!");
-        } catch (error) {
-        console.error("Error resetting transactions:", error);
-        alert("Failed to reset data.");
-        }
-    };
+    fetchData();
+  }, [id]);
 
+  // Extract dates using BankDatesRules
+  const extractDates = (text) => {
+    if (!bankName || !BankDatesRules[bankName]) return [];
+    return BankDatesRules[bankName](text);
+  };
+
+ 
+
+  const handleExtractDates = async () => {
+    const updatedTransactions = transactions.map(txn => {
+      const extractedDates = extractDates(txn.original || "");
+      // console.log(`Original: ${txn.original}`);
+      // console.log(`Extracted Dates: ${extractedDates}`);
+      let strippedData = txn.original || "";
+
+      extractedDates.forEach(date => {
+        strippedData = strippedData.replace(date, "").trim();
+      });
+  
+      return {
+        ...txn,
+        date1: extractedDates[0] || null,
+        date2: extractedDates[1] || null,
+        extractedOriginal: strippedData,
+      };
+    });
+  
+    console.log("Final Transactions with Dates:", updatedTransactions);
+  
+    try {
+      await updateDoc(doc(db, "clients", id), {
+        transactions: updatedTransactions,
+      });
+  
+      setTransactions(updatedTransactions);
+      alert("Dates stored!");
+    } catch (err) {
+      console.error("Failed to update:", err);
+    }
+  };
+   
+  
   return (
-    <div className="max-h-[800px] overflow-y-auto overflow-x-auto bg-gray-900 p-4 rounded-lg shadow-md relative">
+    <div className="max-h-[800px] overflow-y-auto overflow-x-auto bg-gray-900 p-4 rounded-lg shadow-md">
       <div className="sticky top-0 bg-gray-900 p-4 z-10 flex justify-between border-b border-gray-700">
         <h2 className="text-lg font-semibold text-white">Extract Dates</h2>
         <div>
-          <Button text="Extract Dates" small onClick={handleExtractDates} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" />
-          <Button text="Reset" small onClick={handleReset} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded ml-2" />
+          <Button 
+            text="Extract Dates" 
+            small 
+            onClick={handleExtractDates} 
+            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" 
+          />
+          <Button 
+            text="Reset" 
+            small 
+            //onClick={handleReset} 
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded ml-2" 
+          />
         </div>
       </div>
 
-      <Table key={refreshKey}>
+      {error && <p className="text-red-500">{error}</p>}
+      {success && <p className="text-green-500">{success}</p>}
+
+      <Table>
         <thead>
           <tr className="bg-gray-800 text-white">
-          <th className="px-2 py-1 w-[10px] border border-gray-600 text-left whitespace-nowrap">#</th> {/* Index Column */}
-            {transactions.length > 0 &&
-              Array.from({ length: transactions[0].split(regex).length }).map((_, colIndex) => (
-                <th key={colIndex} className="p-2 border border-gray-600">
-                  <select
-                    className="bg-gray-700 text-white p-1 rounded"
-                    onChange={(e) => handleColumnTypeChange(colIndex, e.target.value)}
-                  >
-                    <option value="">Select Type</option>
-                    <option value="date1">Date1</option>
-                    <option value="date2">Date2</option>
-                  </select>
-                </th>
-              ))}
+            <th className="px-4 py-2 border border-gray-600">#</th>
+            <th className="px-4 py-2 border border-gray-600">Date 1 Found</th>
+            <th className="px-4 py-2 border border-gray-600">Date 2 Found</th>
+            <th className="px-4 py-2 border border-gray-600">Original Data</th>
+            <th className="px-4 py-2 border border-gray-600">Strip Data</th>
           </tr>
         </thead>
         <tbody>
-          {transactions.map((transaction, index) => {
-            const segments = typeof transaction === "string" ? transaction.split(regex) : [];
-            return (
-              <tr key={index} className="border-b border-gray-700">
-                <td className="p-2">{index + 1}</td> {/* Display Index */}
-                {segments.map((segment, colIndex) => (
-                  <td
-                    key={colIndex}
-                    className={`p-2 border border-gray-600 relative group transition-colors 
-                    ${selectedColumn === colIndex ? "bg-green-900" : ""}`}
-                  >
-                    {segment}
-                    <button
-                      className="absolute top-1 right-1 text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleDeleteSegment(index, colIndex)}
-                    >
-                      ✖
-                    </button>
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
+          {transactions.length > 0 ? (
+            transactions.map((txn, index) => {
+              const extractedDates = extractDates(txn.original || "");
+
+              return (
+                <tr key={index} className="border-b border-gray-700">
+                  <td className="p-2 text-gray-400">{index + 1}</td>
+                  <td className="p-2 border border-gray-600 text-green-400">{extractedDates[0] || "-"}</td>
+                  <td className="p-2 border border-gray-600 text-green-400">{extractedDates[1] || "-"}</td>
+                  <td className="p-2">{txn.original}</td>
+                  <td className="p-2">{txn.extractedOriginal || "No extracted data"}</td>
+
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td colSpan="4" className="p-4 text-center text-gray-400">
+                No transactions found.              
+                </td>
+            </tr>
+          )}
         </tbody>
       </Table>
     </div>
   );
-}
+};
 
 export default ExtractDates;
+
+
+

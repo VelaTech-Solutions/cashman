@@ -19,9 +19,9 @@ const links = [
 
 const Viewclient = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
+  
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -52,9 +52,7 @@ const Viewclient = () => {
         setClients(clientsList);
       } catch (err) {
         setError("Failed to fetch clients. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     fetchClients();
@@ -165,35 +163,35 @@ const Viewclient = () => {
                         <span className="font-bold">ID:</span> {client.id}
                       </p>
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Bank:</span>{" "}
+                        <span className="font-bold">Bank:</span>
                         {client.bankName}
                       </p>
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Status:</span>{" "}
+                        <span className="font-bold">Status:</span>
                         {client.status}
                       </p>
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Date Created:</span>{" "}
+                        <span className="font-bold">Date Created:</span>
                         {client.dateCreated}
                       </p>
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Date Updated:</span>{" "}
+                        <span className="font-bold">Date Updated:</span>
                         {client.dateUpdated}
                       </p>
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Date Closed:</span>{" "}
+                        <span className="font-bold">Date Closed:</span>
                         {client.dateClosed}
                       </p>
                       {/* if no transactions say no Extract Transactions */}
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Transactions:</span>{" "}
+                        <span className="font-bold">Transactions:</span>
                         {client.number_of_transactions &&
                         client.number_of_transactions > 0
                           ? client.number_of_transactions
                           : "Extract Transactions"}
                       </p>
                       <p className="text-sm text-gray-400">
-                        <span className="font-bold">Captured By:</span>{" "}
+                        <span className="font-bold">Captured By:</span>
                         {client.userEmail}
                       </p>
                       <Link

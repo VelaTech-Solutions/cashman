@@ -4,6 +4,7 @@ import moment from "moment";
 
 // Components Imports
 import LoadClientData from "components/LoadClientData";
+import Table from "components/Table";
 
 // Firebase Imports
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
@@ -85,7 +86,7 @@ const BudgetSection = () => {
                         </button>
 
                         {isOpen && (
-                        <table className="w-full table-fixed border-collapse mt-2">
+                        <Table className="w-full table-fixed border-collapse mt-2">
                             <thead>
                                 <tr className="bg-gray-700 text-white">
                                     <th className="p-3 border border-gray-600 w-1/6">Subcategory</th>
@@ -139,7 +140,7 @@ const BudgetSection = () => {
                                     <td className="p-3 text-green-400 font-bold border border-gray-600">-</td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </Table>
                         )}
                     </div>
                 );

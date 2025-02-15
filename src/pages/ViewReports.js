@@ -71,7 +71,7 @@ const ViewReports = () => {
                 <div className="bg-green-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Income</p>
                   <p className="text-lg font-bold">
-                    R{" "}
+                    R
                     {transactions
                       .filter(
                         (txn) =>
@@ -87,7 +87,7 @@ const ViewReports = () => {
                 <div className="bg-blue-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Savings</p>
                   <p className="text-lg font-bold">
-                    R{" "}
+                    R
                     {transactions
                       .filter(
                         (txn) => txn.debit_amount && txn.category === "Savings",
@@ -101,7 +101,7 @@ const ViewReports = () => {
                 <div className="bg-purple-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Housing</p>
                   <p className="text-lg font-bold">
-                    R{" "}
+                    R
                     {transactions
                       .filter(
                         (txn) => txn.debit_amount && txn.category === "Housing",
@@ -115,7 +115,7 @@ const ViewReports = () => {
                 <div className="bg-yellow-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Transport</p>
                   <p className="text-lg font-bold">
-                    R{" "}
+                    R
                     {transactions
                       .filter(
                         (txn) =>
@@ -130,7 +130,7 @@ const ViewReports = () => {
                 <div className="bg-red-600 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Expenses</p>
                   <p className="text-lg font-bold">
-                    R{" "}
+                    R
                     {transactions
                       .filter(
                         (txn) =>
@@ -145,7 +145,7 @@ const ViewReports = () => {
                 <div className="bg-gray-700 p-3 rounded-lg shadow-md">
                   <p className="text-sm">Total Debt</p>
                   <p className="text-lg font-bold">
-                    R{" "}
+                    R
                     {transactions
                       .filter(
                         (txn) => txn.debit_amount && txn.category === "Debt",
@@ -175,14 +175,14 @@ const ViewReports = () => {
                     txn.credit_amount &&
                     (txn.category === "Income" || !txn.category),
                 ).length
-              }{" "}
+              }
               incomes
             </span>
           </h2>
 
           {/* Display Total Income */}
           <div className="bg-gray-900 p-3 text-green-400 font-semibold rounded-md">
-            Total Income: R{" "}
+            Total Income: R
             {transactions
               .filter(
                 (txn) =>
@@ -258,14 +258,14 @@ const ViewReports = () => {
                 transactions.filter(
                   (txn) => txn.debit_amount && txn.category === "Savings",
                 ).length
-              }{" "}
+              }
               savings
             </span>
           </h2>
 
           {/* Display Total Savings */}
           <div className="bg-gray-900 p-3 text-blue-400 font-semibold rounded-md">
-            Total Savings: R{" "}
+            Total Savings: R
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Savings")
               .reduce((acc, txn) => acc + txn.debit_amount, 0)
@@ -332,14 +332,14 @@ const ViewReports = () => {
                 transactions.filter(
                   (txn) => txn.debit_amount && txn.category === "Housing",
                 ).length
-              }{" "}
+              }
               Housing
             </span>
           </h2>
 
           {/* Display Total Housing */}
           <div className="bg-gray-900 p-3 text-purple-400 font-semibold rounded-md">
-            Total Housing: R{" "}
+            Total Housing: R
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Housing")
               .reduce((acc, txn) => acc + txn.debit_amount, 0)
@@ -409,14 +409,14 @@ const ViewReports = () => {
                   (txn) =>
                     txn.debit_amount && txn.category === "Transportation",
                 ).length
-              }{" "}
+              }
               Transport
             </span>
           </h2>
 
           {/* Display Total Transportation */}
           <div className="bg-gray-900 p-3 text-yellow-400 font-semibold rounded-md">
-            Total Transport: R{" "}
+            Total Transport: R
             {transactions
               .filter(
                 (txn) => txn.debit_amount && txn.category === "Transportation",
@@ -486,14 +486,14 @@ const ViewReports = () => {
                 transactions.filter(
                   (txn) => txn.debit_amount && txn.category === "Expenses",
                 ).length
-              }{" "}
+              }
               Expenses
             </span>
           </h2>
 
           {/* Display Total Expenses */}
           <div className="bg-gray-900 p-3 text-red-400 font-semibold rounded-md">
-            Total Expenses: R{" "}
+            Total Expenses: R
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Expenses")
               .reduce((acc, txn) => acc + txn.debit_amount, 0)
@@ -560,14 +560,14 @@ const ViewReports = () => {
                 transactions.filter(
                   (txn) => txn.debit_amount && txn.category === "Debt",
                 ).length
-              }{" "}
+              }
               Debts
             </span>
           </h2>
 
           {/* Display Total Debt */}
           <div className="bg-gray-900 p-3 text-gray-400 font-semibold rounded-md">
-            Total Debt: R{" "}
+            Total Debt: R
             {transactions
               .filter((txn) => txn.debit_amount && txn.category === "Debt")
               .reduce((acc, txn) => acc + txn.debit_amount, 0)

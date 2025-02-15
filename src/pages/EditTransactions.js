@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 
 // Component Imports
 import LoadClientData from "components/LoadClientData";
+import Table from "components/Table"; 
 import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
@@ -16,7 +17,6 @@ const EditTransactions = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(null); // Track editing row
   const [editedTransactions, setEditedTransactions] = useState([]);
@@ -27,14 +27,11 @@ const EditTransactions = () => {
       try {
         // Load client data using the reusable function
         const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
-        console.log(clientData);
         setClientData(clientData);
       } catch (err) {
         console.error("Error fetching data:", err.message);
         setError("Failed to fetch Client Data.");
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     fetchData();
@@ -94,7 +91,7 @@ const EditTransactions = () => {
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
           {filteredTransactions?.length > 0 ? (
             <div className="overflow-y-auto h-96">
-              <table className="table-auto w-full text-left">
+              <Table className="table-auto w-full text-left">
                 <thead>
                   <tr className="border-b border-gray-700">
                     <th className="px-4 py-2 text-sm">Date1</th>
@@ -109,6 +106,7 @@ const EditTransactions = () => {
                 </thead>
                 <tbody>
                   {filteredTransactions.map((transaction, index) => (
+
                     <tr key={index} className="border-b border-gray-700">
                       <td className="px-4 py-2 text-sm">{transaction.date1}</td>
                       <td className="px-4 py-2 text-sm">{transaction.date2}</td>
@@ -119,29 +117,29 @@ const EditTransactions = () => {
                         {transaction.fee_type}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {transaction.fee_amount
+                        {(transaction.fee_amount ?? 0) && typeof transaction.fee_amount === 'number'
                           ? `R ${transaction.fee_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_amount
+                     <td className="px-4 py-2 text-sm">
+                      {(transaction.credit_amount ?? 0) && typeof transaction.credit_amount === 'number'
                           ? `R ${transaction.credit_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.debit_amount
+                       <td className="px-4 py-2 text-sm">
+                          {(transaction.debit_amount ?? 0) && typeof transaction.debit_amount === 'number'
                           ? `R ${transaction.debit_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {transaction.balance_amount
+                        {(transaction.balance_amount ?? 0) && typeof transaction.balance_amount === 'number'
                           ? `R ${transaction.balance_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             </div>
           ) : (
             <p className="text-center text-lg text-gray-500">
@@ -154,7 +152,7 @@ const EditTransactions = () => {
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
           {filteredTransactions?.length > 0 ? (
             <div className="overflow-y-auto h-96">
-              <table className="table-auto w-full text-left">
+              <Table className="table-auto w-full text-left">
                 <thead>
                   <tr className="border-b border-gray-700">
                     <th className="px-4 py-2 text-sm">Date1</th>
@@ -279,24 +277,24 @@ const EditTransactions = () => {
                             {transaction.fee_type}
                           </td>
                           <td className="px-4 py-2 text-sm">
-                            {transaction.fee_amount
-                              ? `R ${transaction.fee_amount.toFixed(2)}`
-                              : "-"}
+                          {(transaction.fee_amount ?? 0) && typeof transaction.fee_amount === 'number'
+                          ? `R ${transaction.fee_amount.toFixed(2)}`
+                          : "0.00"}
                           </td>
                           <td className="px-4 py-2 text-sm">
-                            {transaction.credit_amount
-                              ? `R ${transaction.credit_amount.toFixed(2)}`
-                              : "-"}
+                          {(transaction.credit_amount ?? 0) && typeof transaction.credit_amount === 'number'
+                          ? `R ${transaction.credit_amount.toFixed(2)}`
+                          : "0.00"}
                           </td>
                           <td className="px-4 py-2 text-sm">
-                            {transaction.debit_amount
-                              ? `R ${transaction.debit_amount.toFixed(2)}`
-                              : "-"}
+                          {(transaction.debit_amount ?? 0) && typeof transaction.debit_amount === 'number'
+                          ? `R ${transaction.debit_amount.toFixed(2)}`
+                          : "0.00"}
                           </td>
                           <td className="px-4 py-2 text-sm">
-                            {transaction.balance_amount
-                              ? `R ${transaction.balance_amount.toFixed(2)}`
-                              : "-"}
+                          {(transaction.balance_amount ?? 0) && typeof transaction.balance_amount === 'number'
+                          ? `R ${transaction.balance_amount.toFixed(2)}`
+                          : "0.00"}
                           </td>
                           <td className="px-4 py-2 text-sm">
                             <button
@@ -311,7 +309,7 @@ const EditTransactions = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             </div>
           ) : (
             <p className="text-center text-lg text-gray-500">

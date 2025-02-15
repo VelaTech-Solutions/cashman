@@ -1,6 +1,6 @@
 // src/pages/Dashboard.js
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Component Imports
 import Sidebar from "components/Sidebar";
@@ -9,22 +9,12 @@ import "styles/tailwind.css";
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
+import { signOut } from "firebase/auth";
 
-const links = [
-  { path: "/addclient", label: "Add Client", icon: "ph-check-square" },
-  { path: "/editclient", label: "Edit Client", icon: "ph-swap" },
-  { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
-  { path: "/settings", label: "Settings", icon: "ph-globe" },
-  // { path: "/developernotes", label: "Developer Notes", icon: "ph-gear" },
-  { path: "/instructions", label: "Instructions", icon: "ph-file-text" },
-  // testing pages
-  // { path: "/teststorage", label: "Test Storage", icon: "ph-file-text" },
-];
 
 const Dashboard = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [error, setError] = useState(null);
 
   // Check if user is logged in
@@ -39,43 +29,55 @@ const Dashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  if (error) return <div>Error: {error}</div>;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/"); // Redirect to login after logout
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    }
+  };
 
+  if (error) return <div>Error: {error}</div>;
+  
+  const links = [
+    { path: "/addclient", label: "Add Client", icon: "ph-check-square" },
+    { path: "/editclient", label: "Edit Client", icon: "ph-swap" },
+    { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
+    { path: "/settings", label: "Settings", icon: "ph-globe" },
+    { path: "/instructions", label: "Instructions", icon: "ph-file-text" },
+  ];
+  
   return (
+
     <div className="min-h-screen flex bg-gray-900 text-white">
       {/* Sidebar */}
       <Sidebar title="Dashboard" links={links} />
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
-        {/* Header */}
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          {/* Sidebar toggle button */}
-          <button
-            className="lg:hidden text-gray-400"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <i className="ph-list text-2xl"></i>
-          </button>
-
-          {/* Spacer for alignment */}
-          <div className="flex-1"></div>
-
-          {/* User Email Display */}
-          <div className="text-right">
-            <p className="text-sm text-gray-400">Welcome,</p>
-            <p className="text-lg font-bold text-blue-400">{userEmail}</p>
+      <div className="flex-1 p-6 text-gray-300">
+        {/* Header Section */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Dashboard Overview</h1>
+          </div>
+          <div className="text-right space-y-2">
+            <p className="text-xl text-gray-400">Welcome</p>
+            <p className="text-lg font-bold text-blue-500">{userEmail}</p>
+            <button 
+              onClick={handleLogout} 
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-lg hover:shadow-xl"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
-        {/* Add your dashboard content here */}
-        <div className="text-gray-300">
-          <h1 className="text-3xl font-semibold mb-4">Dashboard Overview</h1>
-          <p className="text-lg">This is the main dashboard page content.</p>
-        </div>
+        {/* Dashboard Content */}
+        <p className="text-lg">This is the main dashboard page content.</p>
       </div>
     </div>
+
   );
 };
 

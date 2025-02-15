@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 // Component Imports
+// import LoadClientData from "components/LoadClientData";
 import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
 // Firebase imports
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../firebase/firebase";
+import { db } from "../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 const links = [
@@ -17,24 +17,11 @@ const links = [
 ];
 
 const EditClient = () => {
-  const [userEmail, setUserEmail] = useState("Not logged in");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clients, setClients] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  // Track user authentication
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserEmail(user.email);
-      } else {
-        setUserEmail("Not logged in");
-      }
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Fetch client data
   useEffect(() => {
@@ -142,6 +129,8 @@ const EditClient = () => {
             </div>
           )}
         </section>
+
+        
       </div>
     </div>
   );

@@ -47,15 +47,16 @@ function ExtractManually() {
     OCR: "ocr",
   };
 
-  const [activeTab, setActiveTab] = useState("rawData"); // Default tab
+  const [activeTab, setActiveTab] = useState("editData"); // Default tab
 
   const tabs = [
+
+    { key: "editData", label: "Edit Transaction Data Step 1" },
+    { key: "extractDates", label: "Extract Transaction Dates Step 2" },
+    { key: "extractAmounts", label: "Extract Transaction Amounts Step 3" },
+    { key: "extractDescription", label: "Extract Transaction Description Step 4" },
+    { key: "verifyTransactions", label: "Verify Transaction Step 5" },
     { key: "rawData", label: "View Raw Data" },
-    { key: "editData", label: "Edit Transaction Data" },
-    { key: "extractDates", label: "Extract Transaction Dates" },
-    { key: "extractAmounts", label: "Extract Transaction Amounts" },
-    { key: "verifyTransactions", label: "Verify Transaction" },
-    { key: "extractDescription", label: "Extract Transaction Description" },
     { key: "debugData", label: "Debug Transaction Data" },
     { key: "viewTransactions", label: "View Structured Transactions" },
   ];
@@ -217,12 +218,12 @@ function ExtractManually() {
         </div>
 
         {/* Right group: Compact Summary Bar */}
-        <div className="bg-gray-900 p-3 rounded-lg border border-gray-700 text-white shadow  flex justify-start items-center gap-4 text-sm">
+        {/* <div className="bg-gray-900 p-3 rounded-lg border border-gray-700 text-white shadow  flex justify-start items-center gap-4 text-sm">
           <h3 className="text-lg font-semibold">Summary:</h3>
           <p>Total Transactions: {transactions.length}</p>
           <p>Placeholder 1: Coming soon</p>
           <p>Placeholder 2: Coming soon</p>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -236,7 +237,6 @@ function ExtractManually() {
           />
         ))}
       </div>
-        
       {activeTab === "rawData" && <ShowRawData />}
       {activeTab === "editData" && <EditTransactions />}
       {activeTab === "extractDates" && <ExtractDates />}
@@ -245,6 +245,7 @@ function ExtractManually() {
       {activeTab === "verifyTransactions" && <VerifyTransactions />}
       {activeTab === "debugData" && <ShowFilteredData />}
       {activeTab === "viewTransactions" && <ViewTransactions />}
+
 
     </div>
   );

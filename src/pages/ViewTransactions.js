@@ -4,6 +4,8 @@ import { Link, useParams } from "react-router-dom";
 
 // Component Imports
 import "styles/tailwind.css";
+import LoadClientData from "components/LoadClientData";
+import Table from "components/Table"; 
 import Sidebar from "components/Sidebar";
 
 // Firebase imports
@@ -13,7 +15,7 @@ import { doc, getDoc } from "firebase/firestore";
 const ViewTransactions = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -25,26 +27,19 @@ const ViewTransactions = () => {
 
   // Fetch client data
   useEffect(() => {
-    const fetchClientData = async () => {
-      try {
-        const docRef = doc(db, "clients", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setClientData(docSnap.data());
-        } else {
-          setError("Client not found.");
-        }
-      } catch (err) {
-        console.error("Error fetching client data:", err);
-        setError("Failed to fetch client data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClientData();
-  }, [id]);
+    const fetchData = async () => {
+          try {
+          const clientData = await LoadClientData(id);
+          setClientData(clientData);
+          setTransactions(clientData);
+          } catch (err) {
+          console.error("Error fetching data:", err.message);
+          setError("Failed to fetch Client Data.");
+          }
+      };
+  
+      fetchData();
+      }, [id]);
 
   // Filter transactions based on search query
   const filteredTransactions = clientData?.transactions?.filter(
@@ -121,7 +116,7 @@ const ViewTransactions = () => {
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
           {filteredTransactions?.length > 0 ? (
             <div className="overflow-y-auto h-96">
-              <table className="table-auto w-full text-left">
+              <Table className="table-auto w-full text-left">
                 <thead>
                   <tr className="border-b border-gray-700">
                     <th className="px-4 py-2 text-sm">Date1</th>
@@ -146,29 +141,29 @@ const ViewTransactions = () => {
                         {transaction.fee_type}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {transaction.fee_amount
+                        {(transaction.fee_amount ?? 0) && typeof transaction.fee_amount === 'number'
                           ? `R ${transaction.fee_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_amount
+                     <td className="px-4 py-2 text-sm">
+                      {(transaction.credit_amount ?? 0) && typeof transaction.credit_amount === 'number'
                           ? `R ${transaction.credit_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.debit_amount
+                       <td className="px-4 py-2 text-sm">
+                          {(transaction.debit_amount ?? 0) && typeof transaction.debit_amount === 'number'
                           ? `R ${transaction.debit_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {transaction.balance_amount
+                        {(transaction.balance_amount ?? 0) && typeof transaction.balance_amount === 'number'
                           ? `R ${transaction.balance_amount.toFixed(2)}`
-                          : "-"}
+                          : "0.00"}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             </div>
           ) : (
             <p className="text-center text-lg text-gray-500">

@@ -8,7 +8,7 @@ import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
 import Table from "components/Table"; 
 // Firebase Imports
-import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, setDoc, or } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 function EditTransactions() {
@@ -208,6 +208,41 @@ function EditTransactions() {
     }
   };
   
+  // handle save to fielsd transactions save the line as original
+  const handlesavetransactions = async () => {
+    if (!clientData?.bankName) {
+      setError("Bank name is missing. Cannot proceed.");
+      return;
+    }
+  
+    try {
+      const transformedTransactions = transactions.map((transactionStr) => ({
+        original: transactionStr,
+        date1: null,
+        date2: null,
+        description: "",
+        debit_amount: null,
+        credit_amount: null,
+        balance_amount: null,
+        fees_amount: null,
+        fees_type: null,
+        category: "",
+        subcategory: "",
+        verified: "❌",
+        credit_debit_amount: null,
+      }));
+  
+      await updateDoc(doc(db, "clients", id), {
+        transactions: transformedTransactions,
+      });
+  
+      setSuccessMessage("Transactions saved successfully!");
+    } catch (err) {
+      console.error("Error updating transaction:", err);
+      setError("Failed to save transactions.");
+    }
+  };
+  
   
 
   return (
@@ -227,6 +262,23 @@ function EditTransactions() {
             disabled={selectedRows.size === 0} 
           />
 
+          {/* Save and create field transactions */}
+          <Button 
+            text="Save Transactions" 
+            small 
+            onClick={handlesavetransactions} 
+            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded" 
+          />
+
+          {/* Align Transactions */}
+          <Button 
+            text="Align Transactions" 
+            small 
+            onClick={handleAlignTransactions} 
+            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" 
+          />
+
+
           {/* Fuzzy Toggle */}
           <div className="flex items-center gap-2">
             <span className="text-white text-sm">Normal</span>
@@ -243,14 +295,6 @@ function EditTransactions() {
             </label>
             <span className="text-white text-sm">Fuzzy</span>
           </div>
-
-          {/* Align Transactions */}
-          <Button 
-            text="Align Transactions" 
-            small 
-            onClick={handleAlignTransactions} 
-            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" 
-          />
 
           {/* Remove Ignored Lines */}
           <Button
@@ -271,10 +315,9 @@ function EditTransactions() {
       <Table>
         <thead>
           <tr className="bg-gray-800 text-white">
-            <th className="px-2 py-1 w-[10px] border border-gray-600 text-left whitespace-nowrap">#</th> {/* Index Column */}
+            <th className="px-2 py-1 w-[10px] border border-gray-600 text-left whitespace-nowrap">#</th>
             <th className="px-2 py-1 w-[10px] border border-gray-600 text-left whitespace-nowrap">Select</th>
-
-              <th className="p-2 border border-gray-600 text-left">Transaction</th>
+            <th className="p-2 border border-gray-600 text-left">Transaction</th>
           </tr>
         </thead>
         <tbody>
@@ -336,3 +379,5 @@ function EditTransactions() {
 }
 
 export default EditTransactions;
+
+

@@ -158,15 +158,15 @@ const ViewEditClient = () => {
               Client Details
             </h2>
             <p className="text-lg text-gray-400 mt-2">
-              <strong className="text-white">Captured By:</strong>{" "}
+              <strong className="text-white">Captured By:</strong>
               {clientData.userEmail || "N/A"}
             </p>
             <p className="text-lg text-gray-400">
-              <strong className="text-white">Date Captured:</strong>{" "}
+              <strong className="text-white">Date Captured:</strong>
               {clientData.dateCaptured || "N/A"}
             </p>
             <p className="text-lg text-gray-400">
-              <strong className="text-white">Last Updated:</strong>{" "}
+              <strong className="text-white">Last Updated:</strong>
               {clientData.lastUpdated || "N/A"}
             </p>
           </div>

@@ -15,7 +15,8 @@ import "styles/tailwind.css";
 function ExtractTransactions() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-
+  const [error, setError] = useState(null);
+  const [activeSection, setActiveSection] = useState("");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "/viewclient", label: "Back to View Clients", icon: "ph-file-text" },
@@ -38,9 +39,6 @@ function ExtractTransactions() {
     },
     { path: "/HelpExtract", label: "Extract Help", icon: "ph-arrow-left" },
   ];
-
-  const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState("");
 
   // Fetch client data
   useEffect(() => {
@@ -84,58 +82,11 @@ function ExtractTransactions() {
                 : "bg-gray-700 hover:bg-gray-600"
             }`}
             onClick={() => setActiveSection("ExtractManually")}
-          >
-            ✍️ Extract Manually
+          >✍️ Extract Manually
           </button>
-        </div>
-
-        {/* Section Content */}
-        {/* <div className="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700"> */}
           {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
           {activeSection === "ExtractManually" && <ExtractManually />}
-        {/* </div> */}
-
-        {/* Main Content */}
-        {/* <div className="flex-1 p-8"> */}
-        {/* Header Section */}
-        {/* <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">
-            Extract Transactions
-          </h1>
-        </header> */}
-
-        {/* Overview Section */}
-        {/* <section className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">
-            Transactions Overview
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Total Transactions
-              </p>
-              <p className="text-3xl font-bold text-white">
-                {clientData?.transactions?.length ?? 0}
-              </p>
-            </div>
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Transactions Needing Review
-              </p>
-              <p className="text-3xl font-bold text-white">
-                0
-              </p>
-            </div>
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Corrected Transactions
-              </p>
-              <p className="text-3xl font-bold text-white">
-                0
-              </p>
-            </div>
-          </div>
-        </section> */}
+        </div>
       </div>
     </div>
   );

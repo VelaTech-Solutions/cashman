@@ -1,6 +1,5 @@
+// src/pages/AddClient.js
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 
 // Components Imports
 import Sidebar from "components/Sidebar";
@@ -143,17 +142,12 @@ const AddClient = () => {
 
       {/* Main content */}
       <div className="flex-1 p-8">
-        <motion.div
-          className="space-y-8"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="space-y-8">
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
               Capture Clients
             </h2>
-            <motion.input
+            <input
               type="text"
               name="idNumber"
               placeholder="ID Number"
@@ -161,7 +155,7 @@ const AddClient = () => {
               onChange={handleInputChange}
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
-            <motion.input
+            <input
               type="text"
               name="clientName"
               placeholder="Client Name"
@@ -169,7 +163,7 @@ const AddClient = () => {
               onChange={handleInputChange}
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
-            <motion.input
+            <input
               type="text"
               name="clientSurname"
               placeholder="Client Surname"
@@ -195,7 +189,7 @@ const AddClient = () => {
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
               Upload Bank Statements
             </h2>
-            <motion.input
+            <input
               type="file"
               name="bankStatement"
               accept=".pdf, .jpg, .jpeg, .png"
@@ -203,7 +197,7 @@ const AddClient = () => {
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
 
-            <motion.button
+            <button
               onClick={handleSubmit}
               className={`w-full p-2 rounded ${
                 isSubmitting
@@ -211,30 +205,29 @@ const AddClient = () => {
                   : "bg-green-600 hover:bg-green-700"
               }`}
               disabled={isSubmitting}
-              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
             >
               {isSubmitting ? "Saving..." : "Submit"}
-            </motion.button>
+            </button>
 
             {submitSuccess && (
-              <motion.p
+              <p
                 className="text-green-400 text-lg mt-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
               >
                 🎉 Client details saved successfully!
-              </motion.p>
+              </p>
             )}
             <p className="text-sm text-gray-400 italic mt-2">
               Note: This feature currently supports processing a single PDF file
               at a time.
             </p>
           </section>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default AddClient;
+
+
+

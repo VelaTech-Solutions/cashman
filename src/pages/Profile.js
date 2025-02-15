@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 
 // Component Imports
-import { motion } from "framer-motion";
 import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
@@ -12,7 +11,6 @@ const links = [
 ];
 
 const Profile = () => {
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   if (error) return <div>Error: {error}</div>;
@@ -24,11 +22,8 @@ const Profile = () => {
 
       {/* Main content */}
       <div className="flex-1 p-8">
-        <motion.div
+        <div
           className="space-y-8"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
         >
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
@@ -39,7 +34,7 @@ const Profile = () => {
               This is the placeholder for report rendering functionality.
             </p>
           </section>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

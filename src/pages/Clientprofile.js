@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 // Components imports
 import "styles/tailwind.css";
 import Sidebar from "components/Sidebar";
+import LoadClientData from "components/LoadClientData";
+import Button from "components/Button";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
@@ -23,111 +25,37 @@ import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 const Clientprofile = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-  const [fileLinks, setFileLinks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
   const [note, setNote] = useState(""); // State for the new note
   const [notes, setNotes] = useState([]); // State for notes history
-  const [userEmail, setUserEmail] = useState("Not logged in");
-  const [processing, setProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [rawData, setRawData] = useState("");
-  const navigate = useNavigate(); // Initialize the navigate function
 
-  const [processingMethod, setProcessingMethod] = useState("pdfparser"); // Default to PDF Parser
-  const PROCESS_METHODS = {
-    PDF_PARSER: "pdfparser",
-    OCR: "ocr",
-  };
-
-  const [newLine, setNewLine] = useState(""); // To manage the input for new lines
-  const [removalLines, setRemovalLines] = useState([]);
-
-  const [viewRemovedLinesOpen, setViewRemovedLinesOpen] = useState(false);
-
-  const [removalDropdownOpen, setRemovalDropdownOpen] = useState(false); // Initialize dropdown state
-  const [addLineDropdownOpen, setAddLineDropdownOpen] = useState(false);
-  const [removalSidebarOpen, setRemovalSidebarOpen] = useState(false);
-  const [removeLineDropdownOpen, setRemoveLineDropdownOpen] = useState(false);
-  const [filteredSidebarOpen, setFilteredSidebarOpen] = useState(false);
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
+    {},
   ];
 
+  // Fetch client data, Fetch client notes
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
-        const clientDoc = doc(db, "clients", id);
-        const clientSnapshot = await getDoc(clientDoc);
+        const clientData = await LoadClientData(id);
+        
+        setClientData(clientData);
+        setNotes(clientData.notes || []); 
 
-        if (clientSnapshot.exists()) {
-          const data = clientSnapshot.data();
-          setClientData(data); // Set client data including all fields
-          setRawData(data.rawData || "No raw data available"); // Set rawData or default message
-
-          const folderRef = ref(storage, `bank_statements/${id}/`);
-          const fileList = await listAll(folderRef);
-          const urls = await Promise.all(
-            fileList.items.map((item) => getDownloadURL(item)),
-          );
-          setFileLinks(urls);
-        } else {
-          setError("Client not found.");
-        }
+  
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load client data.");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching data:", err.message);
+        setError("Failed to fetch Client Data.");
       }
     };
-
+  
     fetchData();
   }, [id]);
 
-  // Fetch user email
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserEmail(user.email);
-      } else {
-        setUserEmail("Not logged in");
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch client data with notes
-  useEffect(() => {
-    const fetchClientNotes = async () => {
-      try {
-        const clientRef = doc(db, "clients", id);
-        const clientSnapshot = await getDoc(clientRef);
-
-        if (clientSnapshot.exists()) {
-          const clientData = clientSnapshot.data();
-          setNotes(clientData.notes || []); // Set notes or empty array
-        } else {
-          setError("Client not found.");
-        }
-      } catch (err) {
-        console.error("Error fetching client notes:", err);
-        setError("Failed to load notes.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClientNotes();
-  }, [id]);
-
-  // Handle adding a new note
+  // Handle add client notes
   const handleAddNote = async () => {
     if (!note.trim()) {
       alert("Note cannot be empty.");
@@ -143,7 +71,7 @@ const Clientprofile = () => {
         const updatedNotes = [
           ...existingNotes,
           {
-            User: userEmail,
+            // User: userEmail,
             content: note,
             timestamp: new Date().toISOString(),
           }, // Add new note
@@ -182,224 +110,120 @@ const Clientprofile = () => {
   // Function to delete all notes
   const deleteAllNotes = async () => {
     try {
-      // Reference to the specific client document
       const clientRef = doc(db, "clients", id);
-      const clientSnapshot = await getDoc(clientRef);
-
-      if (clientSnapshot.exists()) {
-        // Get the existing notes from the client's document
-        const existingNotes = clientSnapshot.data().notes || [];
-
-        // Remove all notes (empty array)
-        const updatedNotes = [];
-
-        // Update the Firestore document with an empty notes array
-        await updateDoc(clientRef, { notes: updatedNotes });
-
-        // Optionally update local state
-        setNotes(updatedNotes); // Clear the local state
-        alert("All notes deleted successfully!");
-      }
+      await updateDoc(clientRef, { notes: [] });
+      setNotes([]);
+      alert("All notes deleted successfully!");
     } catch (error) {
       console.error("Error deleting all notes:", error);
       alert("Failed to delete all notes.");
     }
   };
 
-  // Function to handle deletion of client data
-  const handleDeleteClient = async () => {
-    try {
-      // Delete client document from Firestore
-      await deleteDoc(doc(db, "clients", id));
-
-      // Delete associated files from Storage
-      const folderRef = ref(storage, `bank_statements/${id}/`);
-      const files = await listAll(folderRef);
-      for (const file of files.items) {
-        await deleteObject(ref(storage, file.fullPath));
-      }
-
-      alert("Client and associated data successfully deleted.");
-      navigate("/viewclient"); // Redirect to dashboard
-    } catch (err) {
-      console.error("Error deleting client data:", err);
-      alert("Failed to delete client data. Please try again.");
-    }
+  // Define links at the top
+  const actionLinks = id
+  ? [
+      { label: "Profile", path: `/client/${id}/profile` },
+      { label: "Budget", path: `/budget/${id}` },
+      { label: "View Transactions", path: `/client/${id}/transactions` },
+      { label: "Edit Transactions", path: `/client/${id}/edit-transactions` },
+      { label: "Categorize Transactions", path: `/client/${id}/categorize` },
+      { label: "Extract Transactions", path: `/ExtractTransactions/${id}` },
+      { label: "View Reports", path: `/client/${id}/reports` },
+    ]
+  : [];
+  const Button = ({ to, onClick, children, className }) => {
+    return to ? (
+      <Link to={to} className={`btn ${className}`}>
+        {children}
+      </Link>
+    ) : (
+      <button onClick={onClick} className={`btn  ${className}`}>
+        {children}
+      </button>
+    );
   };
-
-  // Fetch client data
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const clientDoc = doc(db, "clients", id);
-        const clientSnapshot = await getDoc(clientDoc);
-
-        if (clientSnapshot.exists()) {
-          setClientData(clientSnapshot.data());
-          const folderRef = ref(storage, `bank_statements/${id}/`);
-          const fileList = await listAll(folderRef);
-          const urls = await Promise.all(
-            fileList.items.map((item) => getDownloadURL(item)),
-          );
-          setFileLinks(urls);
-        } else {
-          setError("Client not found.");
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load client data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  if (loading) return <p>Loading client data and files...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
-      <Sidebar title="Client Profile" links={links} />
+        {/* Sidebar */}
+        <Sidebar title="Client Profile" links={links} />
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        {/* Header Section */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">Client Profile</h1>
-        </header>
+        {/* Main Content */}
+        <div className="flex-1 p-8">
+          {/* Header Section */}
+          <header className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-blue-400">Client Profile</h1>
+          </header>
 
         {/* Client Profile */}
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-          <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
-            <h2 className="text-4xl font-bold mb-4 text-blue-400">
-              {clientData.clientName} {clientData.clientSurname}
-            </h2>
-            {/* Line */}
-            <div className="w-full h-1 bg-gray-700 mb-4"></div>
-            <p className="text-lg text-gray-400 mt-2">
-              <span className="font-bold text-white">ID:</span> {id}
-            </p>
-            <p className="text-lg text-gray-400 mt-1">
-              <span className="font-bold text-white">Bank:</span>{" "}
-              {clientData.bankName}
-            </p>
-            <p className="text-lg text-gray-400 mt-1">
-              <span className="font-bold text-white">Captured by:</span>{" "}
-              {clientData.userEmail}
-            </p>
-            <p className="text-lg text-gray-400 mt-1">
-              <span className="font-bold text-white">Date Captured:</span>{" "}
-              {clientData.dateCaptured}
-            </p>
-            <p className="text-lg text-gray-400 mt-1">
-              <span className="font-bold text-white">Last Updated:</span>{" "}
-              {clientData.lastUpdated}
-            </p>
-            <p className="text-lg text-gray-400 mt-1">
-              <span className="font-bold text-white">Total Transactions:</span>{" "}
-              {clientData.number_of_transactions || 0}
-            </p>
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-8 text-left border border-gray-700">
+          <div className="grid grid-cols-1 gap-3 justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+
+              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+                <p><span className="font-bold text-white">ID:</span> {clientData?.idNumber || 'N/A'}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+                <p><span className="font-bold text-white">Bank:</span> {clientData?.bankName || 'N/A'}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+                <p><span className="font-bold text-white">Captured By:</span> {clientData?.userEmail || 'No notes available'}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+                <p><span className="font-bold text-white">Date Captured:</span> {clientData?.dateCaptured || 'Unknown'}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+                <p><span className="font-bold text-white">Last Updated:</span> {clientData?.lastUpdated || 'Never'}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+                <p><span className="font-bold text-white">Total Transactions:</span> {clientData?.number_of_transactions || 0}</p>
+              </div>
+
+            </div>
           </div>
         </div>
 
-        {/* Buttons Stacked Vertically */}
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-          {/* Section Header */}
-          <h1 className="text-4xl font-bold mb-4 text-blue-400">Actions</h1>
 
-          <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
-            {/* <h2 className="text-2xl font-semibold text-white mb-4">
-            Manage Extracted Data
-          </h2> */}
 
-            <div className="flex flex-col gap-4 mt-4">
-              {/* Profile */}
-              <Link
-                to={`/client/${id}/profile`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                Profile
-              </Link>
-
-              {/* Budget */}
-              <Link
-                to={`/budget/${id}`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                Budget
-              </Link>
-
-              {/* View Transactions */}
-              <Link
-                to={`/client/${id}/transactions`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                View Transactions
-              </Link>
-
-              {/* Edit Transactions */}
-              <Link
-                to={`/client/${id}/edit-transactions`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                Edit Transactions
-              </Link>
-
-              {/* Categorize Transactions */}
-              <Link
-                to={`/client/${id}/categorize`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                Categorize Transactions
-              </Link>
-
-              {/* Extract Transactions */}
-              <Link
-                to={`/ExtractTransactions/${id}`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                Extract Transactions
-              </Link>
-
-              {/* View Reports */}
-              <Link
-                to={`/client/${id}/reports`}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm w-60 text-center"
-              >
-                View Reports
-              </Link>
-
-              {/* Delete Client Data */}
-              <div>
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded text-sm w-60"
+        {/* Buttons*/}
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-8 text-center border border-gray-700">
+          {/* <h3 className="text-2xl font-bold text-white mb-4">Actions</h3> */}
+          <div className="grid grid-cols-1 gap-3 justify-center">
+            <div className="flex flex-wrap gap-2 mb-4">
+              {actionLinks.map(({ label, path }) => (
+                <Button 
+                  key={path} 
+                  to={path} 
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg hover:shadow-xl"
+                >
+                  {label}
+                </Button>
+                ))}
+                <Button
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-lg hover:shadow-xl"
                   onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this client?",
-                      )
-                    ) {
+                    if (window.confirm("Are you sure you want to delete this client?")) {
                       handleDeleteClient();
                     }
                   }}
                 >
                   Delete Client Data
-                </button>
-              </div>
+                </Button>
             </div>
           </div>
         </div>
 
+
         {/* Client notes section A box here the user can add note about the client, linked with clients data*/}
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-          <h1 className="text-4xl font-bold mb-4 text-blue-400">
-            Client Notes
-          </h1>
-          <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-8 text-left border border-gray-700">
+          {/* <h1 className="text-4xl font-bold mb-4 text-blue-400"> Client Notes </h1> */}
+          {/* <div className="bg-gray-900 p-4 rounded-lg shadow-sm"> */}
             <h2 className="text-2xl font-semibold text-white">Add a Note</h2>
             <p className="text-lg text-gray-400 mt-2">
               Write notes about the client here:
@@ -436,10 +260,8 @@ const Clientprofile = () => {
             <h2 className="text-2xl font-semibold text-white mt-4 border-t border-gray-700 pt-2">
               Notes History
             </h2>
-            {loading ? (
-              <p className="text-lg text-gray-400">Loading notes...</p>
-            ) : notes.length > 0 ? (
-              <ul className="list-disc pl-6">
+            {notes.length > 0 ? (
+              <ul className="bg-gray-800 p-6 rounded-xl shadow-lg mt-8 text-left border border-gray-700">
                 {notes.map((note, index) => (
                   <li key={index} className="text-lg text-gray-400 mt-2">
                     <p>
@@ -447,13 +269,13 @@ const Clientprofile = () => {
                     </p>
                     {note.content} <br />
                     <span className="text-sm text-gray-500">
-                      Added: {new Date(note.timestamp).toLocaleString()}{" "}
-                    </span>
+                      Added: {new Date(note.timestamp).toLocaleString()}
+                     </span>
                     <button
                       onClick={() => deleteNote(index)}
-                      className="text-red-500"
+                      className="text-red-500 ml-2"
                     >
-                      Delete
+                       Delete 
                     </button>
                   </li>
                 ))}
@@ -464,8 +286,12 @@ const Clientprofile = () => {
 
             {/* Error Message */}
             {error && <p className="text-red-500">{error}</p>}
-          </div>
+
+          {/* </div> */}
         </div>
+
+
+
       </div>
     </div>
   );

@@ -213,7 +213,7 @@ const CategorySettings = () => {
               <ul className="mt-4 space-y-2">
                 {(category.subcategories || []).map((subcategory) => (
                   <li key={subcategory.id} className="text-gray-400">
-                    {subcategory.name}{" "}
+                    {subcategory.name}
                     <button
                       onClick={() =>
                         handleDeleteSubcategory(category.id, subcategory)
