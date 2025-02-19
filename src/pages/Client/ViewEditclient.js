@@ -8,10 +8,10 @@ import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
 // Firebase imports
-import { auth } from "../firebase/firebase";
+import { auth } from "../../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },

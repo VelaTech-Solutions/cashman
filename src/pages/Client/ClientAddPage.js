@@ -6,18 +6,18 @@ import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
 // Firebase imports
-import { db, storage } from "../firebase/firebase";
+import { db, storage } from "../../firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { auth } from "../../firebase/firebase";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
   { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
 ];
 
-const AddClient = () => {
+const ClientAddPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [clientDetails, setClientDetails] = useState({
@@ -227,7 +227,7 @@ const AddClient = () => {
   );
 };
 
-export default AddClient;
+export default ClientAddPage;
 
 
 

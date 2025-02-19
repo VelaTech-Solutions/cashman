@@ -9,7 +9,7 @@ import "styles/tailwind.css";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../firebase/firebase"; // Ensure this is the correct path
+import { auth, db } from "../../firebase/firebase"; // Ensure this is the correct path
 import { collection, getDocs } from "firebase/firestore";
 
 const links = [

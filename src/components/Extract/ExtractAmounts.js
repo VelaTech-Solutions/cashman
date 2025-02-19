@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import Button from "../Button";
 import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
-import bankAmountsRules from "./bankAmountsRules"; // Import the bank rules
+import bankAmountsRules from "../Rules/bankAmountsRules"; // Import the bank rules
 import Table from "components/Table"; 
 
 // Firebase Imports

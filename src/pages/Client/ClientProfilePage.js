@@ -9,9 +9,9 @@ import Button from "components/Button";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { auth } from "../../firebase/firebase";
 import { httpsCallable } from "firebase/functions";
-import { functions, db, storage } from "../firebase/firebase";
+import { functions, db, storage } from "../../firebase/firebase";
 import {
   doc,
   getDoc,
@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 
-const Clientprofile = () => {
+const ClientProfilePage = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState("");
@@ -161,27 +161,27 @@ const Clientprofile = () => {
           <div className="grid grid-cols-1 gap-3 justify-center">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
 
-              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+              <div className="bg-black p-4 rounded-lg shadow-md mt-2">
                 <p><span className="font-bold text-white">ID:</span> {clientData?.idNumber || 'N/A'}</p>
               </div>
 
-              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+              <div className="bg-black p-4 rounded-lg shadow-md mt-2">
                 <p><span className="font-bold text-white">Bank:</span> {clientData?.bankName || 'N/A'}</p>
               </div>
 
-              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+              <div className="bg-black p-4 rounded-lg shadow-md mt-2">
                 <p><span className="font-bold text-white">Captured By:</span> {clientData?.userEmail || 'No notes available'}</p>
               </div>
 
-              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+              <div className="bg-black p-4 rounded-lg shadow-md mt-2">
                 <p><span className="font-bold text-white">Date Captured:</span> {clientData?.dateCaptured || 'Unknown'}</p>
               </div>
 
-              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+              <div className="bg-black p-4 rounded-lg shadow-md mt-2">
                 <p><span className="font-bold text-white">Last Updated:</span> {clientData?.lastUpdated || 'Never'}</p>
               </div>
 
-              <div className="bg-white p-4 rounded-lg shadow-md mt-2">
+              <div className="bg-black p-4 rounded-lg shadow-md mt-2">
                 <p><span className="font-bold text-white">Total Transactions:</span> {clientData?.number_of_transactions || 0}</p>
               </div>
 
@@ -296,4 +296,4 @@ const Clientprofile = () => {
     </div>
   );
 };
-export default Clientprofile;
+export default ClientProfilePage;

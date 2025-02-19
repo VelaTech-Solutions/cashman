@@ -9,7 +9,7 @@ import Table from "components/Table";
 import Sidebar from "components/Sidebar";
 
 // Firebase imports
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 const ViewTransactions = () => {

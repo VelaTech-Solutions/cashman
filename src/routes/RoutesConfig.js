@@ -4,26 +4,36 @@ import ProtectedRoute from "components/ProtectedRoute";
 // Pages
 import Login from "pages/Login";
 import Dashboard from "pages/Dashboard";
-import Instructions from "pages/Instructions";
+import Instructions from "pages/Help/Instructions";
 
-import AddClient from "pages/AddClient";
-import EditClient from "pages/EditClient";
-import ViewEditclient from "pages/ViewEditclient";
-import Viewclient from "pages/Viewclient";
-import Clientprofile from "pages/Clientprofile";
-import Profile from "pages/Profile";
-import ViewTransactions from "pages/ViewTransactions";
-import EditTransactions from "pages/EditTransactions";
-import CategorizeTransactions from "pages/CategorizeTransactions";
-import Transactiondatabase from "pages/Transactiondatabase";
-import ExtractTransactions from "pages/ExtractTransactions";
-import ExtractSettings from "pages/ExtractSettings";
-import ViewReports from "pages/ViewReports";
+// Client Pages
+import AddClient from "pages/Client/ClientAddPage";
+import EditClient from "pages/Client/ClientEditPage";
+import ViewEditclient from "pages/Client/ViewEditclient";
+import Viewclient from "pages/Client/Viewclient";
+import Clientprofile from "pages/Client/ClientProfilePage";
+
+
+
+// Transaction Pages
+import ViewTransactions from "pages/Transactions/ViewTransactions";
+import EditTransactions from "pages/Transactions/EditTransactions";
+import Transactiondatabase from "pages/Transactions/Transactiondatabase";
+
+// Categorize Pages
+import CategorizeTransactions from "pages/Categorize/CategorizeTransactions";
+import CategorySettings from "pages/Categorize/CategorySettings";
+
+import ExtractTransactions from "pages/Extract/ExtractTransactions";
+import ExtractSettings from "pages/Extract/ExtractSettings";
+
+import ViewReports from "pages/Reports/ViewReports";
+
 import Budget from "pages/Budget";
 import Settings from "pages/Settings";
-import CategorySettings from "pages/CategorySettings";
-import Developernotes from "pages/Developernotes";
 
+import Developernotes from "pages/Developernotes";
+import Profile from "pages/Profile";
 // Help Pages
 import HelpExtract from "help/HelpExtract";
 import HelpBudget from "help/HelpBudget";

@@ -10,7 +10,7 @@ import CategorizeTables from "components/CategorizeTables";
 import Button from "components/Button";
 
 // Firebase Imports
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import {
   doc,
   updateDoc,

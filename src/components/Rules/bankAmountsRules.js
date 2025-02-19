@@ -26,7 +26,9 @@ const bankAmountsRules = {
     },
 
     "Standard Bank": (amounts) => {
-      return amounts; // TODO: Adjust zero placements
+      if (amounts.length === 1) return ["0.00", "0.00", ...amounts]; // Balance only case
+      if (amounts.length === 2) return ["0.00", ...amounts]; // Debit/Credit + Balance case
+      return amounts; // Already correct if 3
     },
   
     "Tyme Bank": (amounts) => {

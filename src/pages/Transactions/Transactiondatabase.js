@@ -7,7 +7,7 @@ import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
 // Firebase Imports
-import { db } from "../firebase/firebase"; // Ensure firebase.js exports 'db'
+import { db } from "../../firebase/firebase"; // Ensure firebase.js exports 'db'
 import { doc, getDocs, collection, deleteDoc } from "firebase/firestore";
 
 const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-home" }];

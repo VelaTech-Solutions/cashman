@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "components/Sidebar";
 
 // Firebase imports
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import {
   collection,
   doc,

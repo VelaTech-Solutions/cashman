@@ -45,7 +45,7 @@ const Dashboard = () => {
     { path: "/editclient", label: "Edit Client", icon: "ph-swap" },
     { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
     { path: "/settings", label: "Settings", icon: "ph-globe" },
-    { path: "/instructions", label: "Instructions", icon: "ph-file-text" },
+    { path: "/Help/Instructions", label: "Instructions", icon: "ph-file-text" },
   ];
   
   return (

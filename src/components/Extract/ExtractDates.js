@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 
 // Components Imports
 import Button from "../Button";
-import BankDatesRules from "./BankDatesRules";
+import BankDatesRules from "../Rules/BankDatesRules";
 import Table from "components/Table"; 
 import LoadClientData from "components/LoadClientData";
 

@@ -10,7 +10,7 @@ import "styles/tailwind.css";
 
 // Firebase Imports
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 
 function ExtractSettings() {
   const { id } = useParams();

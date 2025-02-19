@@ -9,14 +9,14 @@ import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
 // Firebase imports
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
 ];
 
-const EditClient = () => {
+const ClientEditPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clients, setClients] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -136,4 +136,4 @@ const EditClient = () => {
   );
 };
 
-export default EditClient;
+export default ClientEditPage;

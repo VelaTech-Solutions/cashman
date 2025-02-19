@@ -92,7 +92,7 @@ const BankDatesRules = {
 
   "Standard Bank": (text) => {
     // console.log("Standard Bank rule used on text:", text);
-    return text.match(/\b\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{2}\b/g) || [];
+    return text.match(/\b\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{2}|\d{1,2} (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/g) || [];
   },
 
   "Tyme Bank": (text) => {
