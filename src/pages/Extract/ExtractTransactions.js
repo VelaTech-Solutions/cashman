@@ -16,7 +16,7 @@ function ExtractTransactions() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState("");
+  const [activeSection, setActiveSection] = useState("ExtractManually");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "/viewclient", label: "Back to View Clients", icon: "ph-file-text" },
@@ -64,7 +64,7 @@ function ExtractTransactions() {
 
       <div className="flex-1 p-8">
         <div className="space-x-4 mb-6">
-        <button
+        {/* <button
             className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
               activeSection === "ExtractAutomatically"
                 ? "bg-green-600 shadow-lg shadow-green-600/50"
@@ -73,7 +73,7 @@ function ExtractTransactions() {
             onClick={() => setActiveSection("ExtractAutomatically")}
           >
             🚀 Extract Automatically
-          </button>
+          </button> */}
 
           <button
             className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
@@ -84,7 +84,7 @@ function ExtractTransactions() {
             onClick={() => setActiveSection("ExtractManually")}
           >✍️ Extract Manually
           </button>
-          {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
+          {/* {activeSection === "ExtractAutomatically" && <ExtractAutomatically />} */}
           {activeSection === "ExtractManually" && <ExtractManually />}
         </div>
       </div>

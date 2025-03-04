@@ -423,3 +423,32 @@ def filter_extracted_text(raw_data_chunks, removal_lines):
 
     print(f"DEBUG: Filtered lines count: {len(filtered_lines)}")
     return filtered_lines
+
+
+@https_fn.on_request()
+def getBudgetTemplate(req: https_fn.Request) -> https_fn.Response:
+    response = https_fn.Response()
+
+    # Handle CORS
+    response = handle_cors(req, response)
+    if req.method == "OPTIONS":
+        return response
+
+    try:
+        bucket = storage.bucket()
+        template_path = "template/template_budget.xlsx"
+        template_blob = bucket.blob(template_path)
+
+        # Download template file into memory
+        template_data = template_blob.download_as_bytes()
+
+        # Set response headers for XLSX file download
+        response.set_data(template_data)
+        response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response.headers["Content-Disposition"] = f'attachment; filename="template_budget.xlsx"'
+
+        return response
+
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return error_response(response, f"Failed to fetch template: {str(e)}", 500)

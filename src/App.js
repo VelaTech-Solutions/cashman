@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import RoutesConfig from "./routes/RoutesConfig"; // Import new routes config
 import Loader from "components/Loader";
+import { TemplateProvider } from "components/TemplateContext";  // Import the provider
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -22,10 +23,13 @@ const App = () => {
   );
 };
 
+// ✅ Wrap `App` inside `TemplateProvider`
 const WrappedApp = () => (
-  <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-    <App />
-  </Router>
+  <TemplateProvider>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <App />
+    </Router>
+  </TemplateProvider>
 );
 
 export default WrappedApp;

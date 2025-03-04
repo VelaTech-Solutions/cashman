@@ -56,8 +56,8 @@ function ExtractManually() {
     { key: "extractAmounts", label: "Extract Transaction Amounts Step 3" },
     { key: "extractDescription", label: "Extract Transaction Description Step 4" },
     { key: "verifyTransactions", label: "Verify Transaction Step 5" },
-    { key: "rawData", label: "View Raw Data" },
-    { key: "debugData", label: "Debug Transaction Data" },
+    // { key: "rawData", label: "View Raw Data" },
+    // { key: "debugData", label: "Debug Transaction Data" },
     { key: "viewTransactions", label: "View Structured Transactions" },
   ];
   
@@ -94,10 +94,10 @@ function ExtractManually() {
       alert("Client ID is not provided.");
       return;
     }
-
+  
     setProcessing(true);
     setErrorMessage("");
-
+  
     try {
       const response = await fetch(
         "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractDataManual",
@@ -108,34 +108,37 @@ function ExtractManually() {
           },
           body: JSON.stringify({
             clientId: id,
-            bankName: clientData.bankName,
+            bankName: clientData.bankName || "Unknown",
             method: processingMethod === "pdfparser" ? "Parser" : "OCR",
           }),
-        },
+        }
       );
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`,
+          `Request failed with status ${response.status}: ${errorText}`
         );
       }
-
+  
       const result = await response.json();
       alert(result.message || "Data extracted successfully!");
-
-      // Refresh the page by reloading
-      window.location.reload();
+  
+      // Refresh data or reload
+      if (typeof fetchClientData === "function") {
+        await fetchClientData();
+      } else {
+        window.location.reload();
+      }
     } catch (error) {
       console.error("Error extracting data:", error);
       setErrorMessage(
-        "An error occurred while extracting data. Please try again.",
+        `An error occurred while extracting data: ${error.message}. Please try again.`
       );
     } finally {
       setProcessing(false);
     }
   };
-
   // Function to handle deletion of extracted data
   const handleDeleteExtractedData = async () => {
     if (!id) {
@@ -177,13 +180,18 @@ function ExtractManually() {
         {/* <div className="flex items-center justify-between mb-4 w-full"> */}
         {/* Left group: Manual Extract, Delete Extracted Data, and toggles */}
         <div className="flex items-center gap-4">
+
+
           {/* Buttons */}
+          {/* Manual Extract if rawData exists disable the button */}
+          {/* Button - Disable if data is extracted */}
           <Button
             onClick={handleExtractDataManual}
             text={processing ? "Processing..." : "Manual Extract"}
             className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center"
-            disabled={processing}
+            disabled={processing || (rawData && rawData.length > 0)} // Assuming rawData is an array
           />
+
           <Button
             onClick={handleDeleteExtractedData}
             text="Delete Extracted Data"

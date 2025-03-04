@@ -13,8 +13,6 @@ import ViewEditclient from "pages/Client/ViewEditclient";
 import Viewclient from "pages/Client/Viewclient";
 import Clientprofile from "pages/Client/ClientProfilePage";
 
-
-
 // Transaction Pages
 import ViewTransactions from "pages/Transactions/ViewTransactions";
 import EditTransactions from "pages/Transactions/EditTransactions";

@@ -123,13 +123,13 @@ const ClientProfilePage = () => {
   // Define links at the top
   const actionLinks = id
   ? [
-      { label: "Profile", path: `/client/${id}/profile` },
+      // { label: "Profile", path: `/client/${id}/profile` },
       { label: "Budget", path: `/budget/${id}` },
-      { label: "View Transactions", path: `/client/${id}/transactions` },
-      { label: "Edit Transactions", path: `/client/${id}/edit-transactions` },
+      // { label: "View Transactions", path: `/client/${id}/transactions` },
+      // { label: "Edit Transactions", path: `/client/${id}/edit-transactions` },
       { label: "Categorize Transactions", path: `/client/${id}/categorize` },
       { label: "Extract Transactions", path: `/ExtractTransactions/${id}` },
-      { label: "View Reports", path: `/client/${id}/reports` },
+      // { label: "View Reports", path: `/client/${id}/reports` },
     ]
   : [];
   const Button = ({ to, onClick, children, className }) => {

@@ -7,6 +7,8 @@ import Button from "../Button";
 import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
 import Table from "components/Table"; 
+import BankCleanRules from "../Rules/BankCleanRules";
+
 // Firebase Imports
 import { doc, getDoc, updateDoc, setDoc, or } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
@@ -244,7 +246,74 @@ function EditTransactions() {
   };
   
   
+  // Handle transaction reset to reset the transaction to original rawData user to confirm reset i want to add this
+  const handleTransactionReset = async () => {
+    if (!id) {
+      setError("Client ID is missing.");
+      return;
+    }
+  
+    try {
+      const clientRef = doc(db, "clients", id);
+      const clientSnapshot = await getDoc(clientRef);
+  
+      if (clientSnapshot.exists()) {
+        const clientData = clientSnapshot.data();
+        const rawData = clientData.rawData || []; // Assuming 'rawData' is the original array of lines
+  
+        if (!rawData.length) {
+          setError("No original raw data available to reset.");
+          return;
+        }
 
+        // confirm with user before reset
+        const confirmReset = window.confirm(
+          "Are you sure you want to reset transactions to the original raw data? This action cannot be undone."
+        );
+  
+        await updateDoc(clientRef, { filteredData: rawData });
+  
+        setTransactions(rawData);
+        setSuccessMessage("Transactions reset to original raw data.");
+      } else {
+        setError("Client data not found.");
+      }
+    } catch (err) {
+      console.error("Error resetting transactions:", err);
+      setError("Failed to reset transactions.");
+    }
+  };
+  
+
+
+  // Handle Auto Clean Transactions use bank name to identify which bank to clean using /BankCleanRules.js
+  const handleAutoCleanTransactions = async () => {
+    if (!clientData?.bankName) {
+      setError("Bank name is missing. Cannot proceed.");
+      return;
+    }
+  
+    const bankName = clientData.bankName;
+    const cleanFunction = BankCleanRules[bankName];
+  
+    if (!cleanFunction) {
+      setError(`No cleaning rules found for ${bankName}`);
+      return;
+    }
+  
+    try {
+      const cleanedTransactions = cleanFunction(transactions);
+      await updateDoc(doc(db, "clients", id), { filteredData: cleanedTransactions });
+  
+      setTransactions(cleanedTransactions);
+      setSuccessMessage(`Transactions auto-cleaned successfully for ${bankName}`);
+    } catch (err) {
+      console.error("Error auto-cleaning transactions:", err);
+      setError("Failed to auto-clean transactions.");
+    }
+  };
+  
+  
   return (
     <div className="max-h-[800px] overflow-y-auto overflow-x-auto bg-gray-900 p-4 rounded-lg shadow-md">
       <div className="sticky top-0 bg-gray-900 p-2 z-10 flex justify-between border-b border-gray-700">
@@ -252,6 +321,7 @@ function EditTransactions() {
         
         {/* Button Row */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
+          {/* Extract Description */}
 
           {/* Delete Selected */}
           <Button 
@@ -260,6 +330,22 @@ function EditTransactions() {
             onClick={handleDeleteSelected} 
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" 
             disabled={selectedRows.size === 0} 
+          />
+
+          {/* Reset Transactions */}
+          <Button 
+            text="Reset" 
+            small 
+           onClick={handleTransactionReset} 
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+          />
+
+          {/* Auto Clean Transactions  Auto clean links with BankCleanRules.js and the bank name */}
+          <Button 
+            text="Auto Clean" 
+            small 
+            onClick={handleAutoCleanTransactions} 
+            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" 
           />
 
           {/* Save and create field transactions */}

@@ -94,9 +94,9 @@ const Budget = () => {
 
           <button
             className={`px-4 py-2 rounded ${
-              activeSection === "SummaryBudget" ? "bg-green-600" : "bg-gray-700"
+              activeSection === "BudgetSummary" ? "bg-green-600" : "bg-gray-700"
             }`}
-            onClick={() => setActiveSection("SummaryBudget")}
+            onClick={() => setActiveSection("BudgetSummary")}
           >
             Summary
           </button>
