@@ -106,43 +106,8 @@ const Budget = () => {
         {activeSection === "personalBudget" && <BudgetSection />}
 
         {/* Insurance Breakdown */}
-        {activeSection === "insuranceBreakdown" && (
-          <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-            {/* Current Insurance Section */}
-            <h2 className="text-xl font-bold mb-4">Current Insurance</h2>
-            <InsuranceBreakdown
-              title="Funeral & Life Cover"
-              data={ciflcData || []}
-            />
-            <InsuranceBreakdown
-              title="Savings & Investments"
-              data={cisisData || []}
-            />
-            <InsuranceBreakdown
-              title="Short-Term Insurance"
-              data={cistiData || []}
-            />
-
-            {/* Restructure Section */}
-            <h2 className="text-xl font-bold mt-6">Restructure</h2>
-            <InsuranceBreakdown
-              title="Funeral & Life Cover"
-              data={rflcData || []}
-            />
-            <InsuranceBreakdown
-              title="Savings & Investments"
-              data={rsiData || []}
-            />
-            <InsuranceBreakdown
-              title="Short-Term Insurance"
-              data={rstiData || []}
-            />
-            <InsuranceBreakdown title="Notes" data={rnotesData || []} />
-
-            <p>Insurance data will be displayed here...</p>
-          </div>
-        )}
-
+        {activeSection === "insuranceBreakdown" && <InsuranceBreakdown />}
+        
         {/* Budget Summary */}
         {activeSection === "BudgetSummary" && <BudgetSummary />}
       </div>

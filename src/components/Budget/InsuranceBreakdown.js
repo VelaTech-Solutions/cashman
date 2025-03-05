@@ -1,96 +1,78 @@
-// src/pages/InsuranceBreakdown.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import LoadClientData from "components/LoadClientData";
 
-  // 📌 Insurance Breakdown Data Constants
+import CFuneralLifeCoverDataTable from "./InsuranceBreakdown/cFuneralLifeCoverDataTable"; // Current Insurance - Funeral & Life Cover (Risk)
+import CSavingsInvestmentsDataTable from "./InsuranceBreakdown/cSavingsInvestmentsDataTable"; // Current Insurance - Savings & Investments
+import CShortTermInsuranceDataTable from "./InsuranceBreakdown/cShortTermInsuranceDataTable"; // Current Insurance - Short-Term Insurance
 
-const ciflcData = [  // Current Insurance - Funeral & Life Cover (Risk)
-  { name: "Institution" },
-  { name: "Type" },
-  { name: "Amount" }
-];
+import RFuneralLifeCoverDataTable from "./InsuranceBreakdown/rFuneralLifeCoverDataTable"; // Restructure - Funeral & Life Cover (Risk)
+import RSavingsInvestmentsDataTable from "./InsuranceBreakdown/rSavingsInvestmentsDataTable"; // Restructure - Savings & Investments
+import RShortTermInsuranceDataTable from "./InsuranceBreakdown/rShortTermInsuranceDataTable"; // Restructure - Short-Term Insurance
 
-const cisisData = [  // Current Insurance - Savings & Investments
-  { name: "Institution" },
-  { name: "Type" },
-  { name: "Amount" }
-];
+import { getFirestore } from "firebase/firestore";
 
-const cistiData = [  // Current Insurance - Short-Term Insurance
-  { name: "Institution" },
-  { name: "Type" },
-  { name: "Amount" }
-];
+const InsuranceBreakdown = () => {
+  const { id } = useParams();
+  const [clientData, setClientData] = useState(null);
+  const db = getFirestore();
 
-// 📌 Restructure Data Constants
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await LoadClientData(id);
+        setClientData(data);
+      } catch (err) {
+        console.error("Error fetching data:", err.message);
+      }
+    };
+    fetchData();
+  }, [id]);
 
-const rflcData = [  // Restructure - Funeral & Life Cover (Risk)
-  { name: "Institution" },
-  { name: "Type" },
-  { name: "Amount" }
-];
-
-const rsiData = [  // Restructure - Savings & Investments
-  { name: "Institution" },
-  { name: "Type" },
-  { name: "Amount" }
-];
-
-const rstiData = [  // Restructure - Short-Term Insurance
-  { name: "Institution" },
-  { name: "Type" },
-  { name: "Amount" }
-];
-
-const rnotesData = [  // Restructure - Notes
-  { name: "Free Text / Description" }
-];
-  
-
-const InsuranceBreakdown = ({ title, data = [], months = [] }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  if (!clientData) return <div className="text-center py-10 text-gray-400">Loading client data...</div>;
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md mb-4">
-      <button
-        className="w-full text-left text-lg font-semibold py-2 px-4 bg-gray-700 text-white rounded"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {title} {isOpen ? "▼" : "▶"}
-      </button>
+    <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+      
+      <h2 className="text-xl text-white font-bold mb-4">Current Insurance</h2>
+      {/* Grid Layout for Tables */}
+      <div className="grid grid-cols-3 gap-4 border border-gray-700 p-2 rounded-lg">
+        {/* Funeral & Life Cover */}
+        <div className="w-1/18">
+          <CFuneralLifeCoverDataTable transactions={clientData.transactions} />
+        </div>
+        {/* Savings & Investments */}
+        <div className="w-1/18">
+          <CSavingsInvestmentsDataTable transactions={clientData.transactions} />
+        </div>
+        {/* Short-Term Insurance */}
+        <div className="w-1/18">
+          <CShortTermInsuranceDataTable transactions={clientData.transactions} />
+        </div>
+      </div>
+      
+      <h2 className="text-xl text-white font-bold mb-4 mt-6">Restructure Insurance</h2>
+      {/* Grid Layout for Tables */}
+      <div className="grid grid-cols-3 gap-4 border border-gray-700 p-2 rounded-lg">
+        {/* Funeral & Life Cover */}
+        <div className="w-1/18">
+          <RFuneralLifeCoverDataTable transactions={clientData.transactions} />
+        </div>
+        {/* Savings & Investments */}
+        <div className="w-1/18">
+          <RSavingsInvestmentsDataTable transactions={clientData.transactions} />
+        </div>
+        {/* Short-Term Insurance */}
+        <div className="w-1/18">
+          <RShortTermInsuranceDataTable transactions={clientData.transactions} />
+        </div>
+        
+      </div>
 
-      {isOpen && (
-        <table className="w-full text-left border-collapse mt-2">
-          <thead>
-            <tr className="bg-gray-700 text-white">
-              <th className="p-2 border">Category</th>
-              {months.map((month, index) => (
-                <th key={index} className="p-2 border">{month}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? (
-              data.map((item, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-2 font-semibold text-white">{item.name}</td>
-                  {months.map((_, monthIndex) => (
-                    <td key={monthIndex} className="p-2">R -</td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={months.length + 1} className="p-2 text-center text-gray-400">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 };
 
-export { ciflcData, cisisData, cistiData, rflcData, rsiData, rstiData, rnotesData };
 export default InsuranceBreakdown;
+
+
