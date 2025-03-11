@@ -12,7 +12,7 @@ import Debt from "./categories/Debt"; // Debt
 import PersonalBudgetView1 from "components/Budget/BudgetView/PersonalBudgetView1";
 import PersonalBudgetView2 from "components/Budget/BudgetView/PersonalBudgetView2";
 import PersonalBudgetView3 from "components/Budget/BudgetView/PersonalBudgetView3";
-// import PersonalBudgetView4 from "components/Budget/BudgetView/PersonalBudgetView4";
+import PersonalBudgetView4 from "components/Budget/BudgetView/PersonalBudgetView4";
 
 import { getFirestore } from "firebase/firestore";
 

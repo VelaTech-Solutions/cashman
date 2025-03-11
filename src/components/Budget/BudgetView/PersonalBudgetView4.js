@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import moment from "moment";
 
-const PersonalBudgetView3 = ({ transactions }) => {
+const PersonalBudgetView4 = ({ transactions }) => {
   if (!transactions || transactions.length === 0) {
     return <div className="text-center py-6">No transactions available</div>;
   }
@@ -18,15 +18,16 @@ const PersonalBudgetView3 = ({ transactions }) => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-xl">
+    <div className="p-4">
       {categories.map(({ name, filter, key }) => {
+        const [isExpanded, setIsExpanded] = useState(false);
         const filteredTransactions = transactions.filter(filter);
         const groupedData = filteredTransactions.reduce((acc, txn) => {
           const month = moment(txn.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM");
           const subcategory = txn.subcategory || "Uncategorized";
           
           if (!acc[subcategory]) {
-            acc[subcategory] = { total: 0, count: 0 };
+            acc[subcategory] = { total: 0 };
           }
           
           if (!acc[subcategory][month]) {
@@ -35,7 +36,6 @@ const PersonalBudgetView3 = ({ transactions }) => {
           
           acc[subcategory][month] += txn[key] || 0;
           acc[subcategory].total += txn[key] || 0;
-          acc[subcategory].count += txn[key] ? 1 : 0;
           return acc;
         }, {});
 
@@ -44,68 +44,68 @@ const PersonalBudgetView3 = ({ transactions }) => {
           return acc;
         }, {});
 
-        const avgByMonth = months.reduce((acc, month) => {
-          const values = Object.values(groupedData).map(subcat => subcat[month] || 0).filter(val => val !== 0);
-          const count = values.length;
-          acc[month] = count > 0 ? (values.reduce((sum, val) => sum + val, 0) / count).toFixed(2) : "-";
-          return acc;
-        }, {});
-
-        const grandTotal = Object.values(groupedData).reduce((sum, subcat) => sum + subcat.total, 0);
         const validMonthValues = Object.values(totalByMonth).filter(value => value !== 0);
-        const grandAverage = validMonthValues.length > 0 
-          ? (validMonthValues.reduce((sum, val) => sum + val, 0) / validMonthValues.length).toFixed(2) 
+        const grandTotal = validMonthValues.reduce((sum, val) => sum + val, 0).toFixed(2);
+        const grandAverage = validMonthValues.length > 0
+          ? (grandTotal / validMonthValues.length).toFixed(2)
           : "0.00";
 
         return (
-          <div key={name} className="mb-8 p-6 bg-gradient-to-r from-blue-100 to-blue-300 rounded-lg shadow-xl">
-            <h3 className="text-xl font-semibold text-gray-800 border-b pb-3 mb-3 uppercase">{name}</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse shadow-md rounded-md bg-white">
-                <thead className="bg-blue-500 text-white text-sm">
-                  <tr>
-                    <th className="p-3 border border-blue-700">Subcategory</th>
-                    {months.map((month) => (
-                      <th key={month} className="p-3 border border-blue-700 text-center">{month}</th>
-                    ))}
-                    <th className="p-3 border border-blue-700 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(groupedData).map(([subcategory, monthData], idx) => (
-                    <tr key={subcategory} className={`border-b ${idx % 2 === 0 ? "bg-blue-50" : "bg-blue-100"}`}>
-                      <td className="p-3 border border-blue-300 font-semibold">{subcategory}</td>
+          <div key={name} className="mb-4 p-2 border border-gray-300 rounded-md text-xs">
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)} 
+              className="w-full text-left font-semibold py-2 px-3 bg-gray-200 text-gray-700 rounded-md focus:outline-none"
+            >
+              {isExpanded ? `▼ ${name} (Total: R ${grandTotal} | Avg: R ${grandAverage})` : `▶ ${name} (Total: R ${grandTotal} | Avg: R ${grandAverage})`}
+            </button>
+            {isExpanded && (
+              <div className="overflow-x-auto mt-2">
+                <table className="w-full border-collapse text-xs">
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="p-2 border border-gray-400 text-left min-w-[80px]">Subcategory</th>
                       {months.map((month) => (
-                        <td key={month} className="p-3 text-right border border-blue-300">
-                          {monthData[month] ? `R ${parseFloat(monthData[month]).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "-"}
+                        <th key={month} className="p-2 border border-gray-400 text-center min-w-[50px]">{month}</th>
+                      ))}
+                      <th className="p-2 border border-gray-400 text-right min-w-[80px]">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(groupedData).map(([subcategory, monthData]) => (
+                      <tr key={subcategory} className="border-b border-gray-300">
+                        <td className="p-2 border border-gray-400 font-semibold whitespace-nowrap">{subcategory}</td>
+                        {months.map((month) => (
+                          <td key={month} className="p-2 text-right border border-gray-400">
+                            {monthData[month] ? `R ${parseFloat(monthData[month]).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "-"}
+                          </td>
+                        ))}
+                        <td className="p-2 text-right font-bold border border-gray-500">R {parseFloat(monthData.total).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td className="p-2 border border-gray-400 font-bold">TOTAL</td>
+                      {months.map((month) => (
+                        <td key={month} className="p-2 text-right border border-gray-400 font-bold">
+                          {totalByMonth[month] ? `R ${parseFloat(totalByMonth[month]).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "-"}
                         </td>
                       ))}
-                      <td className="p-3 text-right font-bold border border-blue-500">R {parseFloat(monthData.total).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
+                      <td className="p-2 text-right border border-gray-600 font-bold">R {grandTotal}</td>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot className="bg-blue-200 text-gray-800 font-bold">
-                  <tr>
-                    <td className="p-3 border border-blue-400">TOTAL</td>
-                    {months.map((month) => (
-                      <td key={month} className="p-3 text-right border border-blue-400">
-                        {totalByMonth[month] ? `R ${parseFloat(totalByMonth[month]).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "-"}
-                      </td>
-                    ))}
-                    <td className="p-3 text-right border border-blue-600">R {parseFloat(grandTotal).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 border border-blue-400">AVERAGE</td>
-                    {months.map((month) => (
-                      <td key={month} className="p-3 text-right border border-blue-400">
-                        {avgByMonth[month] !== "-" ? `R ${parseFloat(avgByMonth[month]).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "-"}
-                      </td>
-                    ))}
-                    <td className="p-3 text-right border border-blue-600">R {parseFloat(grandAverage).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                    <tr>
+                      <td className="p-2 border border-gray-400 font-bold">AVERAGE</td>
+                      {months.map((month) => (
+                        <td key={month} className="p-2 text-right border border-gray-400 font-bold">
+                          {totalByMonth[month] > 0 ? `R ${parseFloat((totalByMonth[month] / validMonthValues.length).toFixed(2)).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}` : "-"}
+                        </td>
+                      ))}
+                      <td className="p-2 text-right border border-gray-600 font-bold">R {grandAverage}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
           </div>
         );
       })}
@@ -113,4 +113,4 @@ const PersonalBudgetView3 = ({ transactions }) => {
   );
 };
 
-export default PersonalBudgetView3;
+export default PersonalBudgetView4;
