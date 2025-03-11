@@ -16,6 +16,13 @@ const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
 ];
 
+import ClientOverview from "components/ClientView/ClientOverview";
+import ClientViewTable1 from "components/ClientView/ClientViewTable1";
+import ClientViewTable2 from "components/ClientView/ClientViewTable2";
+import ClientViewTable3 from "components/ClientView/ClientViewTable3";
+import ClientViewTable4 from "components/ClientView/ClientViewTable4";
+
+
 const Viewclient = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,11 +30,13 @@ const Viewclient = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const clientsPerPage = 6; // Number of clients per page
 
   // ---- ADDED SORTING STATE ----
   const [sortField, setSortField] = useState("clientName");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // State for toggling view mode (1 = Grid View, 2 = List View)
+  const [viewMode, setViewMode] = useState(1);
 
   // Track user authentication
   useEffect(() => {
@@ -104,12 +113,6 @@ const Viewclient = () => {
     return clientsCopy;
   }, [filteredClients, sortField, sortOrder]);
 
-  // Slice sorted clients for pagination
-  const displayedClients = sortedClients.slice(
-    currentPage * clientsPerPage,
-    (currentPage + 1) * clientsPerPage
-  );
-
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -128,176 +131,92 @@ const Viewclient = () => {
           </button>
         </header>
 
-        {/* Client Overview Section */}
-        <section>
-          <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold text-blue-400 mb-4">
-              Client Overview
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-              {/* Total Clients */}
-              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-                <p className="text-lg font-bold text-blue-400">Total Clients</p>
-                <p className="text-3xl font-bold text-white">
-                  {clients.length}
-                </p>
-              </div>
-              {/* Reports Completed */}
-              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-                <p className="text-lg font-bold text-blue-400">
-                  Reports Completed
-                </p>
-                <p className="text-3xl font-bold text-white">
-                  {
-                    clients.filter((client) => client.status === "Completed")
-                      .length
-                  }
-                </p>
-              </div>
-              {/* Reports Pending */}
-              <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-                <p className="text-lg font-bold text-blue-400">
-                  Reports Pending
-                </p>
-                <p className="text-3xl font-bold text-white">
-                  {
-                    clients.filter((client) => client.status === "Pending")
-                      .length
-                  }
-                </p>
-              </div>
+
+        {/* <div>
+          <ClientOverview clients={clients} />
+        </div> */}
+
+        <section className="mt-6 flex items-center space-x-4">
+          {/* Search Bar */}
+          <div className="relative w-full max-w-xs">
+            <input
+              type="text"
+              placeholder="Search clients..."
+              onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+              value={searchQuery}
+              className="w-full pl-10 pr-4 py-2 rounded-md bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 shadow-md border border-gray-700 hover:border-cyan-500 outline-none"
+            />
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400">
+              🔍
             </div>
+          </div>
+          
+          {/* Sort Dropdown */}
+          <div className="flex items-center space-x-2">
+            <label className="text-gray-300 text-xs font-semibold" htmlFor="sortField">Sort:</label>
+            <select
+              id="sortField"
+              value={sortField}
+              onChange={(e) => setSortField(e.target.value)}
+              className="bg-gray-800 text-white px-2 py-1 text-xs rounded-md shadow-sm focus:ring-2 focus:ring-cyan-500 border border-gray-700 transition-all duration-300"
+            >
+              {[
+                { value: "clientName", label: "Name" },
+                { value: "bankName", label: "Bank" },
+                { value: "id", label: "ID" },
+                { value: "dateCreated", label: "Date" },
+              ].map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <button
+              className="px-3 py-1 text-xs rounded-md shadow-sm transition-all duration-300 bg-gray-800 text-white hover:bg-cyan-600 hover:shadow-md"
+              onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+            >
+              {sortOrder === "asc" ? "⬆" : "⬇"}
+            </button>
+          </div>
+          
+          {/* View Mode Toggle */}
+          <div className="flex space-x-1">
+            {[
+              { mode: 1, label: "📊" },
+              { mode: 2, label: "📋" },
+              { mode: 3, label: "🎛️" },
+              { mode: 4, label: "🚀" },
+            ].map(({ mode, label }) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`px-3 py-1 text-xs rounded-md transition-all duration-300 shadow-sm ${
+                  viewMode === mode
+                    ? mode === 4
+                      ? "bg-cyan-500 animate-pulse shadow-md" // Cyberpunk pulses
+                      : "bg-blue-500 shadow-md"
+                    : "bg-gray-800 hover:bg-gray-700 hover:shadow-sm"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </section>
 
-        {/* Search Bar */}
-        <section className="mt-8">
-          <input
-            type="text"
-            placeholder="Search clients by name, ID, or bank..."
-            onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-            value={searchQuery} // To bind the search query state
-            className="w-full p-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </section>
 
-        {/* ---- SORT CONTROLS ---- */}
-        <section className="mt-4 flex justify-end mb-4 space-x-2">
-          <label className="text-gray-300" htmlFor="sortField">
-            Sort by:
-          </label>
-          <select
-            id="sortField"
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value)}
-            className="bg-gray-700 text-white px-2 py-1 rounded"
-          >
-            <option value="clientName">Client Name</option>
-            <option value="bankName">Bank</option>
-            <option value="id">ID</option>
-            <option value="dateCreated">Date Created</option>
-          </select>
-
-          <button
-            className="bg-gray-700 text-white px-2 py-1 rounded"
-            onClick={() =>
-              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-            }
-          >
-            {sortOrder === "asc" ? "Ascending" : "Descending"}
-          </button>
-        </section>
-
-        {/* Client Listing + Pagination */}
-        <section className="mt-8">
-          {sortedClients.length === 0 ? (
-            <p className="text-center text-lg text-gray-500">
-              No clients found.
-            </p>
+        {/* Render the Selected Table */}
+        <div className="mt-6">
+          {viewMode === 1 ? 
+          (
+            <ClientViewTable1 sortedClients={sortedClients} />
+          ) : viewMode === 2 ? (
+            <ClientViewTable2 sortedClients={sortedClients} />
+          ) : viewMode === 3 ? (
+            <ClientViewTable3 sortedClients={sortedClients} />
           ) : (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayedClients.map((client) => (
-                  <div
-                    key={client.id}
-                    className="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-2xl transition-shadow"
-                  >
-                    <h3 className="text-xl font-bold text-blue-400">
-                      {client.clientName} {client.clientSurname}
-                    </h3>
-                    <p className="text-sm text-gray-400 mt-2">
-                      <span className="font-bold">ID:</span> {client.id}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Bank:</span> {client.bankName}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Status:</span> {client.status}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Date Created:</span>{" "}
-                      {client.dateCreated}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Date Updated:</span>{" "}
-                      {client.dateUpdated}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Date Closed:</span>{" "}
-                      {client.dateClosed}
-                    </p>
-                    {/* if no transactions say no Extract Transactions */}
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Transactions:</span>{" "}
-                      {client.number_of_transactions &&
-                      client.number_of_transactions > 0
-                        ? client.number_of_transactions
-                        : "Extract Transactions"}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <span className="font-bold">Captured By:</span>{" "}
-                      {client.userEmail}
-                    </p>
-                    <Link
-                      to={`/client/${client.id}`}
-                      className="mt-4 inline-block text-blue-400 hover:underline text-sm font-semibold"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination Controls */}
-              <div className="flex justify-center mt-6 space-x-4">
-                <button
-                  className="bg-gray-700 text-white py-2 px-4 rounded disabled:opacity-50"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-                  disabled={currentPage === 0}
-                >
-                  Previous
-                </button>
-                <button
-                  className="bg-gray-700 text-white py-2 px-4 rounded disabled:opacity-50"
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(
-                        prev + 1,
-                        Math.ceil(sortedClients.length / clientsPerPage) - 1
-                      )
-                    )
-                  }
-                  disabled={
-                    currentPage ===
-                    Math.ceil(sortedClients.length / clientsPerPage) - 1
-                  }
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+            <ClientViewTable4 sortedClients={sortedClients} />
           )}
-        </section>
+        </div>
+
       </div>
     </div>
   );

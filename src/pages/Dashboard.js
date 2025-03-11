@@ -57,9 +57,11 @@ const ClientsCarousel = ({ clients }) => {
 
   if (!clients || clients.length === 0) {
     return (
-      <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-        <h2 className="text-xl font-bold text-white mb-4">Clients</h2>
-        <p className="text-gray-400">No clients found.</p>
+      <div className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 p-6 rounded-lg shadow-lg border border-gray-600 text-center mt-6">
+        <h2 className="text-3xl font-extrabold text-white tracking-wide drop-shadow-md mb-4">
+          Clients
+        </h2>
+        <p className="text-gray-300">No clients found.</p>
       </div>
     );
   }
@@ -67,30 +69,31 @@ const ClientsCarousel = ({ clients }) => {
   const currentClient = clients[currentIndex];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2">
-    <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h2 className="text-xl font-bold text-white mb-4">Clients</h2>
-      <div className="p-4 bg-gray-700 rounded-lg shadow-md transition-all duration-500 ease-in-out">
-        <p className="text-white font-semibold">Name: {currentClient.clientName || "Client Name"}</p>
-        <p className="text-gray-400 text-left">Surname: {currentClient.clientSurname || "Client Surname"}</p>
-        <p className="text-gray-400">Bank Name: {currentClient.bankName || "Bank Name"}</p>
-        <p className="text-gray-400 text-sm">ID: {currentClient.id}</p>
-
-        {/* Display Client Metrics */}
-        {/* <div className="mt-4">
-          {currentClient.metrics && currentClient.metrics.length > 0 ? (
-            currentClient.metrics.map((metric, index) => (
-              <p key={index} className="text-gray-300">{metric}</p>
-            ))
-          ) : (
-            <p className="text-gray-400">No metrics available</p>
-          )}
-        </div> */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2 mt-6">
+      <div className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 p-6 rounded-lg shadow-lg border border-gray-600 relative overflow-hidden">
+        <h2 className="text-3xl font-extrabold text-white tracking-wide drop-shadow-md mb-4">
+          Clients
+        </h2>
+        <div className="p-4 bg-gray-700 rounded-lg shadow-md transition-all duration-500 ease-in-out">
+          <p className="text-white font-semibold">
+            Name: {currentClient.clientName || "Client Name"}
+          </p>
+          <p className="text-gray-300">
+            Surname: {currentClient.clientSurname || "Client Surname"}
+          </p>
+          <p className="text-gray-300">
+            Bank Name: {currentClient.bankName || "Bank Name"}
+          </p>
+          <p className="text-gray-400 text-sm">ID: {currentClient.id}</p>
+        </div>
       </div>
     </div>
-  </div>
   );
 };
+
+
+
+{/* Dashboard Content similar look to DashboardHeader */}
 
 
 const Dashboard = () => {
@@ -153,21 +156,42 @@ const Dashboard = () => {
         {/* Header */}
         <DashboardHeader userEmail={userEmail} handleLogout={handleLogout} />
 
-        {/* Dashboard Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2">
-          <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold">Total Clients</h2>
-            <p className="text-2xl font-semibold">{clients.length}</p>
+      {/* Dashboard Content */}
+      <div className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 p-6 rounded-lg shadow-lg border border-gray-600 relative overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1 */}
+          <div className="p-4">
+            <h2 className="text-2xl font-extrabold text-white tracking-wide drop-shadow-md">
+              Total Clients
+            </h2>
+            <p className="text-3xl font-semibold text-blue-400 drop-shadow-sm">
+              {clients.length}
+            </p>
           </div>
-          <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold">Pending Transactions</h2>
-            <p className="text-2xl font-semibold">17</p>
+
+          {/* Card 2 */}
+          <div className="p-4">
+            <h2 className="text-2xl font-extrabold text-white tracking-wide drop-shadow-md">
+              Pending Transactions
+            </h2>
+            <p className="text-3xl font-semibold text-blue-400 drop-shadow-sm">
+              17
+            </p>
           </div>
-          <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold">Uncategorized Entries</h2>
-            <p className="text-2xl font-semibold">8</p>
+
+          {/* Card 3 */}
+          <div className="p-4">
+            <h2 className="text-2xl font-extrabold text-white tracking-wide drop-shadow-md">
+              Uncategorized Entries
+            </h2>
+            <p className="text-3xl font-semibold text-blue-400 drop-shadow-sm">
+              8
+            </p>
           </div>
         </div>
+      </div>
+
+
 
         {/* Clients Carousel */}
         <ClientsCarousel clients={clients} />
