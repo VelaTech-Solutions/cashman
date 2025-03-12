@@ -19,7 +19,8 @@ function ExtractTransactions() {
   const [activeSection, setActiveSection] = useState("ExtractManually");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
+    { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
+    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" }, // Divider line
     {
       path: `/ExtractSettings/${id}`,

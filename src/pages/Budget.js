@@ -29,8 +29,8 @@ const Budget = () => {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    // { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left" },
-    { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
+    // { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
+    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" }, // Divider line
     {
       path: `/client/${id}/categorize`,

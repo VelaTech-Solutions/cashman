@@ -129,11 +129,8 @@ const ClientProfilePage = () => {
   // Define links at the top
   const actionLinks = id
   ? [
-      // { label: "Profile", path: `/client/${id}/profile` },
       { label: "Budget", path: `/budget/${id}` },
       { label: "Transactions", path: `/client/${id}/transactionspage` },
-
-
     ]
   : [];
 
@@ -146,12 +143,11 @@ const ClientProfilePage = () => {
         {/* Main Content */}
         <div className="flex-1 p-8">
           {/* Header Section */}
-          {/* <header className="flex justify-between items-center mb-8">
+          <header className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-blue-400">Client Profile</h1>
-          </header> */}
+          </header>
 
           {/* Client Profile Overview */}
-          {/* <ClientProfileOverview clients={clients} /> */}
           <ClientProfileOverview clientData={clientData} />
           
           {/* View Mode Toggle */}
@@ -178,17 +174,6 @@ const ClientProfilePage = () => {
             ))}
           </div>
 
-          {/* Client Actions */}
-          {/* <ClientActions1
-            actionLinks={actionLinks}
-            notes={notes}
-            setNote={setNote}
-            note={note}
-            handleAddNote={handleAddNote}
-            deleteNote={deleteNote}
-            deleteAllNotes={deleteAllNotes}
-            handleDeleteClient={handleDeleteClient}
-          /> */}
         {/* Client Actions bars*/}
           {viewMode === 1 ? 
           (

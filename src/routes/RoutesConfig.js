@@ -21,10 +21,6 @@ import ExtractTransactions from "pages/Transactions/ExtractTransactions";
 import CategorizeTransactions from "pages/Transactions/CategorizeTransactions";
 import Transactiondatabase from "pages/Transactions/Transactiondatabase";
 
-// Categorize Pages
-
-
-
 import ViewReports from "pages/Reports/ViewReports";
 
 // Settings Pages
@@ -32,12 +28,16 @@ import Budget from "pages/Budget";
 import Settings from "pages/Settings";
 // import ViewSettings from "settings/ViewSettings"
 // import EditSettings from "settings/EditSettings"
-import CategorySettings from "settings/CategorySettings";
 import ExtractSettings from "settings/ExtractSettings";
+import CategorySettings from "settings/CategorySettings";
+
 
 import Developernotes from "pages/Developernotes";
 import Profile from "pages/Profile";
+
 // Help Pages
+// import HelpView from "help/HelpView";
+// import HelpEdit from "help/HelpEdit";
 import HelpExtract from "help/HelpExtract";
 import HelpCategory from "help/HelpCategory"
 import HelpBudget from "help/HelpBudget";
