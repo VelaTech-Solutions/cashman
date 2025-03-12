@@ -13,7 +13,9 @@ import PersonalBudgetView1 from "components/Budget/BudgetView/PersonalBudgetView
 import PersonalBudgetView2 from "components/Budget/BudgetView/PersonalBudgetView2";
 import PersonalBudgetView3 from "components/Budget/BudgetView/PersonalBudgetView3";
 import PersonalBudgetView4 from "components/Budget/BudgetView/PersonalBudgetView4";
-
+import PersonalBudgetView5 from "components/Budget/BudgetView/PersonalBudgetView5";
+import PersonalBudgetView6 from "components/Budget/BudgetView/PersonalBudgetView6";
+import PersonalBudgetView7 from "components/Budget/BudgetView/PersonalBudgetView7";
 import { getFirestore } from "firebase/firestore";
 
 const BudgetSection = () => {
@@ -56,6 +58,10 @@ const BudgetSection = () => {
             { mode: 2, label: "📋" },
             { mode: 3, label: "🎛️" },
             { mode: 4, label: "🚀" },
+            { mode: 5, label: "📈" },
+            { mode: 6, label: "📉" },
+            { mode: 7, label: "📊" },
+
           ].map(({ mode, label }) => (
             <button
               key={mode}
@@ -75,18 +81,24 @@ const BudgetSection = () => {
 
         {/* Render the Selected Table */}
         <div className="mt-6">
-          {viewMode === 1 ? 
-          (
+          {
+              viewMode === 1 ? (
             <PersonalBudgetView1 transactions={clientData.transactions} />
           ) : viewMode === 2 ? (
             <PersonalBudgetView2 transactions={clientData.transactions} />
           ) : viewMode === 3 ? (
             <PersonalBudgetView3 transactions={clientData.transactions} />
-          ) : (
+          ) : viewMode === 4 ? (
             <PersonalBudgetView4 transactions={clientData.transactions} />
-          )}
+          ) : viewMode === 5 ? (
+            <PersonalBudgetView5 transactions={clientData.transactions} />
+          ) : viewMode === 6 ? (
+            <PersonalBudgetView6 transactions={clientData.transactions} />
+          ) : viewMode === 7 ? (
+            <PersonalBudgetView7 transactions={clientData.transactions} />
+          ) : null
+          }
         </div>
-
     </div>
   );
 };
