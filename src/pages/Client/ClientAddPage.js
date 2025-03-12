@@ -151,6 +151,7 @@ const ClientAddPage = () => {
           bankStatementURL: fileURL,
           userEmail,
           timestamp: new Date(),
+          dateCreated: new Date(),
         },
         { merge: true }
       );

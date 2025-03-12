@@ -23,6 +23,17 @@ const ViewTransactions = () => {
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
+    { type: "divider" }, // Divider line
+    {
+      path: `/viewSettings/${id}`,
+      label: "View Settings",
+      icon: "ph-arrow-left",
+    },
+    { 
+      path: "/HelpView", 
+      label: "View Help", 
+      icon: "ph-arrow-left" 
+    },
   ];
 
   // Fetch client data

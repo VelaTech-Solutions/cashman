@@ -28,7 +28,9 @@ function ClientViewTable4({ sortedClients = [] }) {
             </p>
             <p className="text-sm text-gray-400">
               <span className="font-bold">Date Created:</span>{" "}
-              {client.dateCreated}
+              {client.dateCreated?.seconds
+                ? new Date(client.dateCreated.seconds * 1000).toLocaleDateString("en-GB")
+                : "Unknown"}
             </p>
             <p className="text-sm text-gray-400">
               <span className="font-bold">Transactions:</span>{" "}

@@ -1,17 +1,17 @@
 import React from "react";
 
 const BudgetSummaryView1 = ({ 
-  incomeAvg = 0, 
-  savingsAvg = 0, 
-  housingAvg = 0, 
-  transportationAvg = 0, 
-  expensesAvg = 0, 
-  debtAvg = 0 
+  incomeTotal = 0, 
+  savingsTotal = 0, 
+  housingTotal = 0, 
+  transportationTotal = 0, 
+  expensesTotal = 0, 
+  debtTotal = 0 
 }) => {
-  const totalExpenses = savingsAvg + housingAvg + transportationAvg + expensesAvg + debtAvg;
-  const disposableIncome = incomeAvg - totalExpenses;
+  const totalExpenses = savingsTotal + housingTotal + transportationTotal + expensesTotal + debtTotal;
+  const disposableIncome = incomeTotal - totalExpenses;
 
-  const getRangePercentage = (amount) => (incomeAvg > 0 ? ((amount / incomeAvg) * 100).toFixed(2) : "0.00");
+  const getRangePercentage = (amount) => (incomeTotal > 0 ? ((amount / incomeTotal) * 100).toFixed(2) : "0.00");
   const isOutOfRange = (amount, allowed) => (amount > allowed ? "YES" : "NO");
 
   return (
@@ -40,13 +40,13 @@ const BudgetSummaryView1 = ({
           </thead>
           <tbody>
             {[
-              { name: "SAVINGS", range: 10, amount: savingsAvg },
-              { name: "HOUSING", range: 30, amount: housingAvg },
-              { name: "TRANSPORTATION", range: 10, amount: transportationAvg },
-              { name: "EXPENSES", range: 20, amount: expensesAvg },
-              { name: "DEBT", range: 10, amount: debtAvg },
+              { name: "SAVINGS", range: 10, amount: savingsTotal },
+              { name: "HOUSING", range: 30, amount: housingTotal },
+              { name: "TRANSPORTATION", range: 10, amount: transportationTotal },
+              { name: "EXPENSES", range: 20, amount: expensesTotal },
+              { name: "DEBT", range: 10, amount: debtTotal },
             ].map((item, index) => {
-              const allowedAmount = (incomeAvg * (item.range / 100)).toFixed(2);
+              const allowedAmount = (incomeTotal * (item.range / 100)).toFixed(2);
               const yourRange = getRangePercentage(item.amount);
 
               return (
@@ -70,17 +70,17 @@ const BudgetSummaryView1 = ({
         <h3 className="mb-2">INCOME</h3>
         <div className="bg-gray-700 p-2 rounded flex justify-between">
           <span>Income</span>
-          <span className="font-semibold text-green-400">R {incomeAvg.toFixed(2)}</span>
+          <span className="font-semibold text-green-400">R {incomeTotal.toFixed(2)}</span>
         </div>
 
         <h3 className="mt-4">Minus:</h3>
         <div className="space-y-2">
           {[
-            { name: "SAVINGS", amount: savingsAvg },
-            { name: "HOUSING", amount: housingAvg },
-            { name: "TRANSPORTATION", amount: transportationAvg },
-            { name: "EXPENSES", amount: expensesAvg },
-            { name: "DEBT", amount: debtAvg },
+            { name: "SAVINGS", amount: savingsTotal },
+            { name: "HOUSING", amount: housingTotal },
+            { name: "TRANSPORTATION", amount: transportationTotal },
+            { name: "EXPENSES", amount: expensesTotal },
+            { name: "DEBT", amount: debtTotal },
           ].map((item, index) => (
             <div key={index} className="flex justify-between bg-gray-700 p-2 rounded">
               <span>{item.name}</span>

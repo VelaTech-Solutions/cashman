@@ -1,0 +1,116 @@
+//   transactions
+//   (array)
+  
+  
+  
+//   0
+//   (map)
+  
+  
+//   balance_amount
+//   null
+//   (null)
+  
+  
+//   category
+//   ""
+//   (string)
+  
+  
+//   credit_amount
+//   null
+//   (null)
+  
+  
+//   credit_debit_amount
+//   null
+//   (null)
+  
+  
+//   date1
+//   null
+//   (null)
+  
+  
+//   date2
+//   null
+//   (null)
+  
+  
+//   debit_amount
+//   null
+//   (null)
+  
+  
+//   description
+//   ""
+//   (string)
+  
+  
+//   fees_amount
+//   null
+//   (null)
+  
+  
+//   fees_type
+//   null
+//   (null)
+  
+  
+//   original
+//   "Oneof theGlobal Onemoneymanagementproductsorservices"
+//   (string)
+  
+  
+//   subcategory
+//   ""
+//   (string)
+  
+  
+//   verified
+//   "❌"
+
+// bankName
+// "Ned Bank"
+// (string)
+
+
+// bankStatementURL
+// "https://firebasestorage.googleapis.com/v0/b/cashman-790ad.firebasestorage.app/o/bank_statements%2F9103190141088%2F001_Statement-%20April%202024.pdf?alt=media&token=b51e0db8-4e49-43b6-a4b0-23d4ee27cc7b"
+// (string)
+
+
+// clientName
+// "Sheron"
+// (string)
+
+
+// clientSurname
+// "Miu"
+// (string)
+
+
+// (array)
+
+
+// idNumber
+// "9103190141088"
+// (string)
+
+
+// (array)
+
+
+// (map)
+
+
+// timestamp
+// January 26, 2025 at 11:18:32 AM UTC+2
+// (timestamp)
+
+
+// (array)
+
+
+// userEmail
+// "admin@velatech.co.za"

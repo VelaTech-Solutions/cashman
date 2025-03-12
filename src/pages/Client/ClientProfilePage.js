@@ -131,11 +131,9 @@ const ClientProfilePage = () => {
   ? [
       // { label: "Profile", path: `/client/${id}/profile` },
       { label: "Budget", path: `/budget/${id}` },
-      // { label: "View Transactions", path: `/client/${id}/transactions` },
-      // { label: "Edit Transactions", path: `/client/${id}/edit-transactions` },
-      { label: "Categorize Transactions", path: `/client/${id}/categorize` },
-      { label: "Extract Transactions", path: `/ExtractTransactions/${id}` },
-      // { label: "View Reports", path: `/client/${id}/reports` },
+      { label: "Transactions", path: `/client/${id}/transactionspage` },
+
+
     ]
   : [];
 
