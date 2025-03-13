@@ -7,6 +7,20 @@ import Button from "../Button";
 import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
 
+// Extract Components Imports
+import ExtractDates from "components/Extract/ExtractAutomatic/ExtractDates";
+import ExtractDescription from "components/Extract/ExtractAutomatic/ExtractDescription";
+import ExtractAmounts from "components/Extract/ExtractAutomatic/ExtractAmounts"; 
+import VerifyTransactions from "components/Extract/ExtractAutomatic/VerifyTransactions"; 
+import {
+  handleExtractData,
+  handleDeleteExtractedData,
+  handleAddLine,
+  handleRemoveLine
+} from "components/Extract/ExtractAutomatic/ExtractAutomaticActions";
+
+
+
 // Firebase Imports
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
@@ -57,16 +71,6 @@ function ExtractAutomatically() {
   const [autosidebarOpen, setAutoSidebarOpen] = useState(false);
   const [autofilteredSidebarOpen, setAutoFilteredSidebarOpen] = useState(false);
 
-  // Manual extraction Settings
-  const [manualSidebarOpen, setManualSidebarOpen] = useState(false);
-  const [manualFilteredSidebarOpen, setManualFilteredSidebarOpen] =
-    useState(false);
-  const [manualRemoveLineDropdownOpen, setManualRemoveLineDropdownOpen] =
-    useState(false);
-  const [editRawDataOpen, setEditRawDataOpen] = useState(false);
-  const [isProcessingtransactions, setisProcessingtransactions] =
-    useState(false);
-  const [ProcessingTransactions, setProcessingtransactions] = useState(false);
   
 
   // Fetch client data
@@ -397,246 +401,54 @@ function ExtractAutomatically() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
+    <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
+      <h1 className="text-2xl font-bold mb-4 text-blue-400">
+        Extract Automatically
+        </h1>
 
-
-        {/* Extract Transactions Section auto */}
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-          {/* Section Header */}
-          <h1 className="text-4xl font-bold mb-4 text-blue-400">
-            Extract Transactions
-          </h1>
-
-          {/* Parser Options */}
-          <div className="bg-gray-900 p-4 rounded-lg shadow-sm mb-6">
-            <h2 className="text-2xl font-semibold text-white mb-4">
-              Parser Options
-            </h2>
-            <p className="text-sm text-white">
-              <strong>Choose a method to process your file:</strong>
-              <br />- Use <strong>PDF Parser</strong> for selectable text.
-              <br />- Use <strong>OCR</strong> for scanned or image-based files.
-              Not Working for now
-            </p>
-
-            {/* Dropdown for Processing Method */}
-            <div className="mt-4">
-              <label
-                htmlFor="processing-method"
-                className="text-white text-sm font-medium mb-2 block"
-              >
-                Choose File Processing Method:
-              </label>
-              <select
-                id="processing-method"
-                className="bg-gray-800 text-white py-2 px-3 rounded text-sm "
-                value={processingMethod}
-                onChange={(e) => setProcessingMethod(e.target.value)}
-              >
-                <option value={PROCESS_METHODS.PDF_PARSER}>PDF Parser</option>
-                <option value={PROCESS_METHODS.OCR}>
-                  OCR Not Supported yet.
-                </option>
-              </select>
-            </div>
+        <div className="flex gap-2 mb-4">
+          <div className="flex items-center gap-4">
           </div>
 
-          {/* Extract and Manage Options */}
-          <div className="bg-gray-900 p-4 rounded-lg shadow-sm">
-            <h2 className="text-2xl font-semibold text-white mb-4">
-              Automatically Extract Data
-            </h2>
+          <Button
+            onClick={() => handleExtractData(id, clientData.bankName, processingMethod, setIsProcessing, setErrorMessage)}
+            text={isProcessing ? "Processing..." : "Automatic Extract"}
+            className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center"
+            disabled={isProcessing}
+          />
 
-            {/* Extract Data Button */}
-            <div className="flex flex-col gap-4">
-              <Button
-                onClick={handleExtractData}
-                text={isProcessing ? "Processing..." : "Automatic Extract"}
-                className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                disabled={isProcessing}
-              />
+          <Button
+            onClick={() => handleDeleteExtractedData(id)}
+            text="Delete Extracted Data"
+            className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center"
+          />
 
-              {/* Error Message */}
-              {errorMessage && (
-                <p className="text-red-500 mt-4 text-center" role="alert">
-                  {errorMessage}
-                </p>
-              )}
+          <Button
+            onClick={() => handleAddLine(clientData.bankName, newLine, setRemovalLines, setNewLine)}
+            text="Add Line"
+            className="bg-green-500 hover:bg-green-600 text-white"
+          />
 
-              {/* Delete Extracted Data Button */}
-              <Button
-                onClick={handleDeleteExtractedData}
-                text="Delete Extracted Data"
-                className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-              />
+          <Button
+            onClick={() => handleRemoveLine(index, removalLines, setRemovalLines, clientData.bankName)}
+            text="Remove Line"
+            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium"
+          />
 
-              {/* Add Removal Line Dropdown */}
-              <Button
-                onClick={() => setRemovalDropdownOpen(!removalDropdownOpen)}
-                text={
-                  removalDropdownOpen
-                    ? "Close Add Removal Line"
-                    : "Add Removal Line"
-                }
-                className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-              />
+          {/* ✅ Extracting raw data...
+          ✅ Cleaning raw data (removing headers, footers)
+          🔄 Extracting transaction dates...
+          🔲 Extracting transaction amounts...
+          🔲 Extracting transaction descriptions... */}
 
-              {removalDropdownOpen && (
-                <div className="bg-gray-800 mt-2 p-4 rounded-lg shadow-md">
-                  <h2 className="text-lg font-semibold text-white mb-4">
-                    Add Line to Remove
-                  </h2>
-                  <input
-                    type="text"
-                    placeholder="Enter a line to remove"
-                    value={newLine}
-                    onChange={(e) => setNewLine(e.target.value)}
-                    className="bg-gray-700 text-white py-2 px-3 rounded mb-4"
-                  />
-                  <Button
-                    onClick={() => handleAddLine(clientData.bankName, newLine)}
-                    text="Add Line"
-                    className="bg-green-500 hover:bg-green-600 text-white"
-                  />
-                </div>
-              )}
+          {/* Show the extraction progress */}
+          {/* ExtractDates 
+          ExtractDescription 
+          ExtractAmounts 
+          VerifyTransactions  */}
 
-              {/* View Lines Removed Button with Dropdown */}
-              <div className="relative">
-                <Button
-                  onClick={() => setViewRemovedLinesOpen(!viewRemovedLinesOpen)}
-                  text={
-                    viewRemovedLinesOpen
-                      ? "Hide List of Removed Lines"
-                      : "View List of Removed Lines"
-                  }
-                  className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                />
-
-                {viewRemovedLinesOpen && (
-                  <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-white mb-2">
-                      Removed Lines
-                    </h2>
-                    {removalLines.length > 0 ? (
-                      <ul className="list-disc pl-6 text-gray-400">
-                        {removalLines.map((line, index) => (
-                          <li key={index} className="mb-2">
-                            {line}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-gray-400">No lines removed yet.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Remove Lines for removal */}
-              <div className="relative">
-                <Button
-                  onClick={() =>
-                    setRemoveLineDropdownOpen(!removeLineDropdownOpen)
-                  }
-                  text={
-                    removeLineDropdownOpen
-                      ? "Close Remove Lines"
-                      : "Remove Lines"
-                  }
-                  className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                />
-                {/* Data Display */}
-                {removeLineDropdownOpen && (
-                  <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
-                    <h2 className="text-lg font-semibold text-white mb-4">
-                      Remove Lines
-                    </h2>
-                    {removalLines.length > 0 ? (
-                      <ul className="list-disc pl-6 text-gray-400">
-                        {removalLines.map((line, index) => (
-                          <li
-                            key={index}
-                            className="flex justify-between items-center mb-2"
-                          >
-                            <span>{line}</span>
-                            <Button
-                              onClick={() => handleRemoveLine(index)}
-                              text="Remove"
-                              className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium"
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-gray-400">No lines to remove.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* View Filtered Data */}
-              <div className="relative">
-                <Button
-                  onClick={() =>
-                    setAutoFilteredSidebarOpen(!autofilteredSidebarOpen)
-                  }
-                  text="View Filtered Data"
-                  className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                />
-                {/* Data Display */}
-                {autofilteredSidebarOpen && (
-                  <div className="bg-gray-900 mt-2 p-4 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-white mb-2">
-                      Filtered Data
-                    </h2>
-                    {clientData.filteredData ? (
-                      <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
-                        {clientData.filteredData}
-                      </pre>
-                    ) : (
-                      <p className="text-gray-400">
-                        No filtered data available.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* View Raw Data */}
-              <div className="relative">
-                <Button
-                  onClick={() => setAutoSidebarOpen(!autosidebarOpen)}
-                  text={
-                    autosidebarOpen
-                      ? "Hide Raw Extracted Data"
-                      : "View Raw Extracted Data"
-                  }
-                  className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center w-[220px]"
-                />
-
-                {/* Data Display */}
-                {autosidebarOpen && (
-                  <div className="mt-4 bg-gray-900 text-white p-4 rounded-lg shadow-md max-h-80 overflow-y-auto">
-                    <h2 className="text-xl font-semibold text-blue-400 mb-4">
-                      Raw Extracted Data
-                    </h2>
-                    {clientData?.rawData ? (
-                      <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded-lg">
-                        {clientData.rawData}
-                      </pre>
-                    ) : (
-                      <p className="text-gray-400">No raw data available.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
   );
 }
 export default ExtractAutomatically;
-
-// can we make the different ways of extraction placed in the sidebar? the render if  manual or auto extraction?

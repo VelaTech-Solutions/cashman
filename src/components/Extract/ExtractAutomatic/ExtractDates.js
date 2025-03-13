@@ -3,14 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 // Components Imports
-import Button from "../Button";
-import BankDatesRules from "../Rules/BankDatesRules";
-import Table from "components/Table"; 
+import Button from "../../Button";
 import LoadClientData from "components/LoadClientData";
+import "styles/tailwind.css";
+import Table from "components/Table"; 
+import BankCleanRules from "../../Rules/BankCleanRules";
 
 // Firebase Imports
-import { db } from "../../firebase/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, setDoc, or } from "firebase/firestore";
+import { db } from "../../../firebase/firebase";
+
 
 const ExtractDates = () => {
   const { id } = useParams();

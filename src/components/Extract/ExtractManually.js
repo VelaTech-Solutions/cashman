@@ -8,14 +8,14 @@ import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
 
 // Extract Components Imports
-import ShowRawData from "components/Extract/ShowRawData"; 
-import EditTransactions from "components/Extract/EditTransactions"; 
-import ShowFilteredData from "components/Extract/ShowFilteredData"; 
-import ExtractDates from "components/Extract/ExtractDates";
-import ExtractDescription from "components/Extract/ExtractDescription";
-import ExtractAmounts from "components/Extract/ExtractAmounts"; 
-import VerifyTransactions from "components/Extract/VerifyTransactions"; 
-import ViewTransactions from "components/Extract/ViewTransactions"; 
+import ShowRawData from "components/Extract/ExtractManual/ShowRawData"; 
+import EditTransactions from "components/Extract/ExtractManual/EditTransactions"; 
+import ShowFilteredData from "components/Extract/ExtractManual/ShowFilteredData"; 
+import ExtractDates from "components/Extract/ExtractManual/ExtractDates";
+import ExtractDescription from "components/Extract/ExtractManual/ExtractDescription";
+import ExtractAmounts from "components/Extract/ExtractManual/ExtractAmounts"; 
+import VerifyTransactions from "components/Extract/ExtractManual/VerifyTransactions"; 
+import ViewTransactions from "components/Extract/ExtractManual/ViewTransactions"; 
 
 
 // Firebase Imports 
@@ -174,88 +174,82 @@ function ExtractManually() {
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-      <h1 className="text-2xl font-bold mb-4 text-blue-400">Extract Transactions Manually</h1>
+      <h1 className="text-2xl font-bold mb-4 text-blue-400">
+        Extract Manually
+        </h1>
       
         <div className="flex gap-2 mb-4">
-        {/* <div className="flex items-center justify-between mb-4 w-full"> */}
-        {/* Left group: Manual Extract, Delete Extracted Data, and toggles */}
-        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
 
+            <Button
+              onClick={handleExtractDataManual}
+              text={processing ? "Processing..." : "Manual Extract"}
+              className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center"
+              disabled={processing || (rawData && rawData.length > 0)} // Assuming rawData is an array
+            />
 
-          {/* Buttons */}
-          {/* Manual Extract if rawData exists disable the button */}
-          {/* Button - Disable if data is extracted */}
-          <Button
-            onClick={handleExtractDataManual}
-            text={processing ? "Processing..." : "Manual Extract"}
-            className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center"
-            disabled={processing || (rawData && rawData.length > 0)} // Assuming rawData is an array
-          />
+            <Button
+              onClick={handleDeleteExtractedData}
+              text="Delete Extracted Data"
+              className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center"
+            />
 
-          <Button
-            onClick={handleDeleteExtractedData}
-            text="Delete Extracted Data"
-            className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center"
-          />
+            {/* OCR Toggle */}
+            <div className="flex items-center gap-2">
+              <span className="text-white text-sm">PDF Parser</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={processingMethod === PROCESS_METHODS.OCR}
+                  onChange={(e) =>
+                    setProcessingMethod(
+                      e.target.checked ? PROCESS_METHODS.OCR : PROCESS_METHODS.PDF_PARSER
+                    )
+                  }
+                />
+                <div className="w-10 h-5 bg-gray-400 rounded-full peer-checked:bg-blue-600 transition relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+              </label>
+              <span className="text-white text-sm">OCR</span>
+            </div>
 
-          {/* OCR Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-white text-sm">PDF Parser</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={processingMethod === PROCESS_METHODS.OCR}
-                onChange={(e) =>
-                  setProcessingMethod(
-                    e.target.checked ? PROCESS_METHODS.OCR : PROCESS_METHODS.PDF_PARSER
-                  )
-                }
-              />
-              <div className="w-10 h-5 bg-gray-400 rounded-full peer-checked:bg-blue-600 transition relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
-            </label>
-            <span className="text-white text-sm">OCR</span>
+            {/* Bank Name Display */}
+            {clientData?.bankName && (
+              <span className="bg-gray-700 text-white text-sm font-medium px-3 py-1 rounded-lg border border-gray-600">
+                Bank: {clientData.bankName}
+              </span>
+            )}
           </div>
 
-          {/* Bank Name Display */}
-          {clientData?.bankName && (
-            <span className="bg-gray-700 text-white text-sm font-medium px-3 py-1 rounded-lg border border-gray-600">
-              Bank: {clientData.bankName}
-            </span>
-          )}
+          {/* Right group: Compact Summary Bar */}
+          {/* <div className="bg-gray-900 p-3 rounded-lg border border-gray-700 text-white shadow  flex justify-start items-center gap-4 text-sm">
+            <h3 className="text-lg font-semibold">Summary:</h3>
+            <p>Total Transactions: {transactions.length}</p>
+            <p>Placeholder 1: Coming soon</p>
+            <p>Placeholder 2: Coming soon</p>
+          </div> */}
         </div>
 
-        {/* Right group: Compact Summary Bar */}
-        {/* <div className="bg-gray-900 p-3 rounded-lg border border-gray-700 text-white shadow  flex justify-start items-center gap-4 text-sm">
-          <h3 className="text-lg font-semibold">Summary:</h3>
-          <p>Total Transactions: {transactions.length}</p>
-          <p>Placeholder 1: Coming soon</p>
-          <p>Placeholder 2: Coming soon</p>
-        </div> */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {tabs.map((tab) => (
+            <Button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              text={tab.label}
+              small
+              className={activeTab === tab.key ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300"}
+            />
+          ))}
+        </div>
+        {activeTab === "rawData" && <ShowRawData />}
+        {activeTab === "editData" && <EditTransactions />}
+        {activeTab === "extractDates" && <ExtractDates />}
+        {activeTab === "extractAmounts" && <ExtractAmounts />}
+        {activeTab === "extractDescription" && <ExtractDescription />}
+        {activeTab === "verifyTransactions" && <VerifyTransactions />}
+        {activeTab === "debugData" && <ShowFilteredData />}
+        {activeTab === "viewTransactions" && <ViewTransactions />}
       </div>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {tabs.map((tab) => (
-          <Button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            text={tab.label}
-            small
-            className={activeTab === tab.key ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300"}
-          />
-        ))}
-      </div>
-      {activeTab === "rawData" && <ShowRawData />}
-      {activeTab === "editData" && <EditTransactions />}
-      {activeTab === "extractDates" && <ExtractDates />}
-      {activeTab === "extractAmounts" && <ExtractAmounts />}
-      {activeTab === "extractDescription" && <ExtractDescription />}
-      {activeTab === "verifyTransactions" && <VerifyTransactions />}
-      {activeTab === "debugData" && <ShowFilteredData />}
-      {activeTab === "viewTransactions" && <ViewTransactions />}
-
-
-    </div>
   );
 }
 

@@ -16,7 +16,7 @@ function ExtractTransactions() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState("ExtractManually");
+  const [activeSection, setActiveSection] = useState("ExtractAutomatically");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
@@ -53,17 +53,24 @@ function ExtractTransactions() {
       <Sidebar title="Extract Transactions" links={links} />
 
       <div className="flex-1 p-8">
+        {/* Header Section */}
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-400">
+            Extract Transactions
+          </h1>
+        </header>
+
+
         <div className="space-x-4 mb-6">
-        {/* <button
+          <button
             className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
               activeSection === "ExtractAutomatically"
                 ? "bg-green-600 shadow-lg shadow-green-600/50"
                 : "bg-gray-700 hover:bg-gray-600"
             }`}
             onClick={() => setActiveSection("ExtractAutomatically")}
-          >
-            🚀 Extract Automatically
-          </button> */}
+          >🚀 Extract Automatically
+          </button>
 
           <button
             className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
@@ -74,11 +81,13 @@ function ExtractTransactions() {
             onClick={() => setActiveSection("ExtractManually")}
           >✍️ Extract Manually
           </button>
-          {/* {activeSection === "ExtractAutomatically" && <ExtractAutomatically />} */}
+        </div>
+
+          {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
           {activeSection === "ExtractManually" && <ExtractManually />}
+
         </div>
       </div>
-    </div>
   );
 }
 export default ExtractTransactions;

@@ -3,14 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 // Components Imports
-import Button from "../Button";
+import Button from "../../Button";
 import LoadClientData from "components/LoadClientData";
-import Table from "components/Table";
 import "styles/tailwind.css";
+import Table from "components/Table"; 
+import BankCleanRules from "../../Rules/BankCleanRules";
 
 // Firebase Imports
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { doc, getDoc, updateDoc, setDoc, or } from "firebase/firestore";
+import { db } from "../../../firebase/firebase";
+
 
 function ExtractDescription() {
   const { id } = useParams();
