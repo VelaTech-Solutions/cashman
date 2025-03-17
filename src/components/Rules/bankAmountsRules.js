@@ -1,40 +1,44 @@
 const bankAmountsRules = {
+  // ✅ Extracts amounts using regex and ensures it's always an array
+  extractAmountsFromText: (text) => {
+    const regex = /(\s?\-?\d*\.\d{2})/g;
+    const extracted = [...text.matchAll(regex)].map(match => match[0].trim());
 
-    "Absa Bank": (amounts) => {
-      if (amounts.length === 1) return ["0.00", "0.00", ...amounts]; 
-      if (amounts.length === 2) return ["0.00", ...amounts]; 
-      return amounts;
-    },
-
-    "Capitec Bank": (amounts) => {
-      if (amounts.length === 1) return ["0.00", "0.00", ...amounts]; 
-      if (amounts.length === 2) return ["0.00", ...amounts]; 
-      return amounts;
-    },
-
-    "Fnb Bank": (amounts) => {
-      if (!amounts || amounts.length === 0) return amounts; 
-      if (amounts.length === 1) return [...amounts, "0.00", "0.00"]; // If only one amount, add two "0.00"
-      if (amounts.length === 2) return [...amounts, "0.00"]; // If two amounts, add one "0.00"
-      return amounts; // If already three amounts, return as is
-    },
-  
-    "Ned Bank": (amounts) => {
-      if (amounts.length === 1) return ["0.00", "0.00", ...amounts]; // Balance only case
-      if (amounts.length === 2) return ["0.00", ...amounts]; // Debit/Credit + Balance case
-      return amounts; // Already correct if 3
-    },
-
-    "Standard Bank": (amounts) => {
-      if (amounts.length === 1) return ["0.00", "0.00", ...amounts]; // Balance only case
-      if (amounts.length === 2) return ["0.00", ...amounts]; // Debit/Credit + Balance case
-      return amounts; // Already correct if 3
-    },
-  
-    "Tyme Bank": (amounts) => {
-      return amounts; // TODO: Adjust zero placements
+    // Ensure at least three values (fees, debit/credit, balance)
+    while (extracted.length < 3) {
+      extracted.push("0.00");
     }
-  };
-  
-  export default bankAmountsRules;
-  
+    return extracted;
+  },
+
+  "Absa Bank": (text) => {
+    let amounts = bankAmountsRules.extractAmountsFromText(text);
+    return [amounts[2], amounts[0], amounts[1]]; // Fees, Debit/Credit, Balance
+  },
+
+  "Capitec Bank": (text) => {
+    let amounts = bankAmountsRules.extractAmountsFromText(text);
+    return [amounts[2], amounts[0], amounts[1]]; // Fees, Debit/Credit, Balance
+  },
+
+  "Standard Bank": (text) => {
+    let amounts = bankAmountsRules.extractAmountsFromText(text);
+    return [amounts[2], amounts[1], amounts[0]]; // Balance, Debit/Credit
+  },
+
+  "Ned Bank": (text) => {
+    let amounts = bankAmountsRules.extractAmountsFromText(text);
+    return [amounts[2], amounts[1], amounts[0]]; // Balance, Debit/Credit
+  },
+
+  "Fnb Bank": (text) => {
+    let amounts = bankAmountsRules.extractAmountsFromText(text);
+    return [amounts[1], amounts[2], amounts[0]]; // Debit/Credit, Balance, Fees
+  },
+
+  "Tyme Bank": (text) => {
+    return bankAmountsRules.extractAmountsFromText(text); // No reordering needed
+  }
+};
+
+export default bankAmountsRules;

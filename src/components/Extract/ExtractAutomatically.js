@@ -1,454 +1,226 @@
 // src/components/ExtractAutomatically.js
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 // Components Imports
 import Button from "../Button";
 import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
-
-// Extract Components Imports
-import ExtractDates from "components/Extract/ExtractAutomatic/ExtractDates";
-import ExtractDescription from "components/Extract/ExtractAutomatic/ExtractDescription";
-import ExtractAmounts from "components/Extract/ExtractAutomatic/ExtractAmounts"; 
-import VerifyTransactions from "components/Extract/ExtractAutomatic/VerifyTransactions"; 
-import {
-  handleExtractData,
-  handleDeleteExtractedData,
-  handleAddLine,
-  handleRemoveLine
-} from "components/Extract/ExtractAutomatic/ExtractAutomaticActions";
-
-
+import ExtractAutomaticActions from "components/Extract/ExtractAutomatic/ExtractAutomaticActions"; // ✅ Linking
 
 // Firebase Imports
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
-import { httpsCallable } from "firebase/functions";
-import { functions, db, storage } from "../../firebase/firebase";
-import {
-  doc,
-  getDoc,
-  deleteDoc,
-  updateDoc,
-  deleteField,
-  setDoc,
-} from "firebase/firestore";
-import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
-
-
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 function ExtractAutomatically() {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false); // handleExtractTransactions
-  const [processing, setProcessing] = useState(false); // handleExtractDataManual
-
-  const [errorMessage, setErrorMessage] = useState("");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [rawData, setRawData] = useState("");
-  const navigate = useNavigate(); // Initialize the navigate function
 
+  // Define state for extraction status
+  const [extractionStatus, setExtractionStatus] = useState({});
+  const [progressData, setProgressData] = useState({}); // ✅ Extract Progress
+  const [showDebug, setShowDebug] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [processingMethod, setProcessingMethod] = useState("pdfparser"); // Default to PDF Parser
-  const PROCESS_METHODS = {
-    PDF_PARSER: "pdfparser",
-    OCR: "ocr",
-  };
-
-  const [newLine, setNewLine] = useState(""); // To manage the input for new lines
-  const [successMessage, setSuccessMessage] = useState(""); // To display success messages
-
-  const [viewRemovedLinesOpen, setViewRemovedLinesOpen] = useState(false);
-
-  const [removalDropdownOpen, setRemovalDropdownOpen] = useState(false); // Initialize dropdown state
-  const [addLineDropdownOpen, setAddLineDropdownOpen] = useState(false);
-  const [removalLines, setRemovalLines] = useState([]);
-  const [removalSidebarOpen, setRemovalSidebarOpen] = useState(false);
-  const [removeLineDropdownOpen, setRemoveLineDropdownOpen] = useState(false);
-
-  // Auto extraction Settings
-  const [autosidebarOpen, setAutoSidebarOpen] = useState(false);
-  const [autofilteredSidebarOpen, setAutoFilteredSidebarOpen] = useState(false);
-
-  
+  const PROCESS_METHODS = { PDF_PARSER: "pdfparser", OCR: "ocr" };
 
   // Fetch client data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Load client data using the reusable function
-        const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
+        const clientData = await LoadClientData(id);
         setClientData(clientData);
       } catch (err) {
-        console.error("Error fetching data:", err.message);
+        console.error("🔥 Error fetching client data:", err.message);
         setError("Failed to fetch Client Data.");
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [id]);
 
-  // Handle data extraction Automatically
-  const handleExtractData = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
+  // Fetch `extractProgress` from Firestore
+  useEffect(() => {
+    if (!id) return;
 
-    setIsProcessing(true);
-    setErrorMessage("");
+    const fetchProgress = async () => {
+      try {
+        const clientRef = doc(db, "clients", id);
+        const clientSnap = await getDoc(clientRef);
 
-    try {
-      const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractData",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: id,
-            bankName: clientData.bankName,
-            method: processingMethod === "pdfparser" ? "Parser" : "OCR",
-            // lines to be deleted
-            // linesToDelete: linesToDelete, push removed list to backend
-            // linesToDelete: removedLines,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`,
-        );
+        if (clientSnap.exists()) {
+          const data = clientSnap.data();
+          const progress = data.extractProgress || {}; // ✅ Fetch `extractProgress`
+          setProgressData(progress);
+        }
+      } catch (error) {
+        console.error("🔥 Error fetching progress:", error);
       }
+    };
 
-      const result = await response.json();
-      alert(result.message || "Data extracted successfully!");
+    fetchProgress();
+  }, [id]);
 
-      // Refresh the page by reloading
-      window.location.reload();
-    } catch (error) {
-      console.error("Error extracting data:", error);
-      setErrorMessage(
-        "An error occurred while extracting data. Please try again.",
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Function to handle deletion of extracted data
-  const handleDeleteExtractedData = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete all extracted data? This action cannot be undone.",
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      // Reference the Firestore document for this client using the ID
-      const clientRef = doc(db, "clients", id);
-
-      // Remove the specific fields from the document
-      await updateDoc(clientRef, {
-        rawData: deleteField(),
-        transactions: deleteField(),
-        number_of_transactions: deleteField(),
-      });
-
-      alert("Extracted data deleted successfully!");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting extracted data:", error);
-      alert("Failed to delete extracted data. Please try again.");
-    }
-  };
-
-  // Handle list for lines to be deleted by bank name
-  const handleAddLine = async (bankName, line) => {
-    if (!line.trim()) {
-      alert("Please enter a valid line.");
-      return;
-    }
-
-    try {
-      const bankRef = doc(db, "banks", bankName); // Reference the bank document
-      const bankSnapshot = await getDoc(bankRef);
-
-      let currentLines = [];
-      if (bankSnapshot.exists()) {
-        currentLines = bankSnapshot.data().removalLines || [];
-      } else {
-        console.log("Creating new bank document:", bankName);
-      }
-
-      const updatedLines = [...currentLines, line]; // Add the new line
-
-      // Create or update the document with the new removalLines
-      await setDoc(bankRef, { removalLines: updatedLines }, { merge: true });
-
-      setRemovalLines(updatedLines); // Update state for UI
-      setNewLine(""); // Clear input field
-      alert("Line added successfully!");
-    } catch (error) {
-      console.error("Error adding line:", error);
-      alert("Failed to add line. Please try again.");
-    }
-  };
-
-  // Handle view removal lines
-  const handleViewRemovedLines = () => {
-    if (!viewRemovedLinesOpen) {
-      fetchRemovalLines(clientData.bankName); // Fetch lines only when opening the dropdown
-    }
-    setViewRemovedLinesOpen(!viewRemovedLinesOpen); // Toggle the dropdown state
-  };
-  // Fetch removal lines
-  const fetchRemovalLines = async (bankName) => {
-    try {
-      const bankRef = doc(db, "banks", bankName); // Reference the bank document
-      const bankSnapshot = await getDoc(bankRef);
-
-      if (bankSnapshot.exists()) {
-        const lines = bankSnapshot.data().removalLines || []; // Fetch removalLines or set default to []
-        setRemovalLines(lines); // Update the state with fetched lines
-      } else {
-        console.log("No bank document found for:", bankName);
-        setRemovalLines([]); // Clear the state if no document exists
-      }
-    } catch (error) {
-      console.error("Error fetching removal lines:", error);
-      alert("Failed to load removal lines. Please try again.");
-    }
-  };
-
-  const handleRemoveLine = async (index) => {
-    if (index < 0 || index >= removalLines.length) {
-      alert("Invalid line index.");
-      return;
-    }
-
-    try {
-      // Create a copy of the current lines and remove the selected line
-      const updatedLines = [...removalLines];
-      updatedLines.splice(index, 1); // Remove the line at the given index
-
-      // Update Firestore with the updated list
-      const bankRef = doc(db, "banks", clientData.bankName); // Reference the Firestore document
-      await updateDoc(bankRef, { removalLines: updatedLines }); // Save the new list
-
-      // Update local state
-      setRemovalLines(updatedLines);
-
-      alert("Line removed successfully!");
-    } catch (error) {
-      console.error("Error removing line:", error);
-      alert("Failed to remove line. Please try again.");
-    }
-  };
-
-  // handle view filtered data
-  const handleViewFilteredData = () => {
-    setFilteredSidebarOpen(!autofilteredSidebarOpen);
-  };
-
-  // Handle data extraction Manually
-  const handleExtractDataManual = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
-
-    setProcessing(true);
-    setErrorMessage("");
-
-    try {
-      const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractDataManual",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: id,
-            bankName: clientData.bankName,
-            method: processingMethod === "pdfparser" ? "Parser" : "OCR",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`,
-        );
-      }
-
-      const result = await response.json();
-      alert(result.message || "Data extracted successfully!");
-
-      // Refresh the page by reloading
-      window.location.reload();
-    } catch (error) {
-      console.error("Error extracting data:", error);
-      setErrorMessage(
-        "An error occurred while extracting data. Please try again.",
-      );
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  // Handle Transactions Extraction Manually
-  const handleExtractTransactions = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
-
-    setProcessingtransactions(true); // Start processing
-    setErrorMessage(""); // Clear error messages
-    setSuccessMessage(""); // Clear success messages
-
-    try {
-      const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractTransactions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: id,
-            bankName: clientData.bankName,
-          }),
-        },
-      );
-      // console log method and bankname
-      console.log("Method: ", processingMethod);
-      console.log("Bank Name: ", clientData.bankName);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`,
-        );
-      }
-
-      const result = await response.json();
-
-      // Show success message if the request succeeded
-      setSuccessMessage(
-        result.message || "Transactions extracted successfully!",
-      );
-      // Refresh the page by reloading
-      window.location.reload();
-
-      // Optionally refresh or update UI with new transactions
-      if (result.transactions) {
-        setClientData((prevData) => ({
-          ...prevData,
-          transactions: result.transactions,
-        }));
-      }
-    } catch (error) {
-      console.error("Error extracting transactions:", error);
-      setErrorMessage(
-        error.message || "Failed to extract transactions. Please try again.",
-      );
-    } finally {
-      setProcessingtransactions(false); // Stop processing
-    }
-  };
-
-  const handleDeleteLine = (index) => {
-    const updatedRawData = [...clientData.rawData];
-    updatedRawData.splice(index, 1); // Remove the line at the given index
-    setClientData({ ...clientData, rawData: updatedRawData }); // Update state
-  };
-
-  const handleSaveFilteredData = async () => {
-    try {
-      if (!clientData?.filteredData || clientData.filteredData.length === 0) {
-        setErrorMessage("No data to save.");
-        return;
-      }
-
-      // Save filteredData to Firestore using db
-      await updateDoc(doc(db, "clients", clientData.idNumber), {
-        filteredData: clientData.filteredData,
-      });
-
-      console.log("Filtered data saved successfully!");
-      // setSuccessMessage("Filtered data saved!");
-    } catch (error) {
-      console.error("Error saving filtered data:", error.message);
-      setErrorMessage("Failed to save filtered data. Please try again.");
-    }
-  };
+  // Merge Firestore `extractProgress` with `extractionStatus`
+  const combinedStatus = { ...progressData, ...extractionStatus };
 
   if (error) return <div>Error: {error}</div>;
 
+  // Debugging Checklist - Checks if data exists
+  const debugChecklist = [
+    { label: "Raw Data Exists", value: clientData?.rawData?.length > 0 },
+    { label: "Transactions Extracted", value: clientData?.transactions?.length > 0 },
+    { label: "Transaction Date 1 Extracted", value: clientData?.transactions?.some(tx => tx.date1) },
+    { label: "Transaction Date 2 Extracted", value: clientData?.transactions?.some(tx => tx.date2) },
+    { label: "Transaction Descriptions Extracted", value: clientData?.transactions?.some(tx => tx.description) },
+    { label: "Transaction Amount Credit Extracted", value: clientData?.transactions?.some(tx => tx.credit_amount) },
+    { label: "Transaction Amount Debit Extracted", value: clientData?.transactions?.some(tx => tx.debit_amount) },
+    { label: "Transaction Amount Balance Extracted", value: clientData?.transactions?.some(tx => tx.balance_amount) },
+    { label: "Transaction Amount Credit or Debit Extracted", value: clientData?.transactions?.some(tx => tx.credit_debit_amount) },
+  ];
+
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
-      <h1 className="text-2xl font-bold mb-4 text-blue-400">
-        Extract Automatically
-        </h1>
+      <h1 className="text-2xl font-bold mb-4 text-blue-400">Extract Automatically</h1>
 
-        <div className="flex gap-2 mb-4">
-          <div className="flex items-center gap-4">
-          </div>
+      {/* Bank Name Display */}
+      <div className="flex gap-2 mb-4">
+        <p className="text-lg font-medium">
+          Processing Bank: {clientData?.bankName || "N/A"}
+        </p>
+      </div>
 
-          <Button
-            onClick={() => handleExtractData(id, clientData.bankName, processingMethod, setIsProcessing, setErrorMessage)}
-            text={isProcessing ? "Processing..." : "Automatic Extract"}
-            className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium text-center"
-            disabled={isProcessing}
+      {/* OCR Toggle */}
+      <div className="flex items-center gap-2">
+        <span className="text-white text-sm">PDF Parser</span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={processingMethod === PROCESS_METHODS.OCR}
+            onChange={(e) =>
+              setProcessingMethod(
+                e.target.checked ? PROCESS_METHODS.OCR : PROCESS_METHODS.PDF_PARSER
+              )
+            }
           />
+          <div className="w-10 h-5 bg-gray-400 rounded-full peer-checked:bg-blue-600 transition relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+        </label>
+        <span className="text-white text-sm">OCR</span>
+      </div>
 
-          <Button
-            onClick={() => handleDeleteExtractedData(id)}
-            text="Delete Extracted Data"
-            className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center"
-          />
+      {/* Extraction Actions */}
+      <div className="flex items-center gap-4">
+        <ExtractAutomaticActions
+          id={clientData?.idNumber}  // ✅ Ensuring correct client ID
+          bankName={clientData?.bankName}  // ✅ Ensuring correct Bank Name
+          clientData={clientData}
+          setClientData={setClientData}
+          setIsProcessing={setIsProcessing}
+          setExtractionStatus={setExtractionStatus}
+          processingMethod={processingMethod} // ✅ Properly passed
+        />
+      </div>
 
-          <Button
-            onClick={() => handleAddLine(clientData.bankName, newLine, setRemovalLines, setNewLine)}
-            text="Add Line"
-            className="bg-green-500 hover:bg-green-600 text-white"
-          />
+      {/* Debug Toggle */}
+      <button 
+        onClick={() => setShowDebug(!showDebug)}
+        className="bg-blue-500 text-white px-3 py-2 rounded-md mb-2"
+      >
+        {showDebug ? "Hide Debug" : "Show Debug"}
+      </button>
 
-          <Button
-            onClick={() => handleRemoveLine(index, removalLines, setRemovalLines, clientData.bankName)}
-            text="Remove Line"
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium"
-          />
-
-          {/* ✅ Extracting raw data...
-          ✅ Cleaning raw data (removing headers, footers)
-          🔄 Extracting transaction dates...
-          🔲 Extracting transaction amounts...
-          🔲 Extracting transaction descriptions... */}
-
-          {/* Show the extraction progress */}
-          {/* ExtractDates 
-          ExtractDescription 
-          ExtractAmounts 
-          VerifyTransactions  */}
-
+      {/* Debugging Checklist */}
+      {showDebug && (
+        <div className="bg-gray-900 p-3 rounded-md shadow mb-3 text-white text-sm">
+          <h2 className="text-md font-semibold mb-2">Debugging Checklist</h2>
+          <ul className="grid grid-cols-2 gap-2">
+            {debugChecklist.map((item, index) => (
+              <li key={index} className="flex items-center gap-1">
+                <input type="checkbox" checked={item.value} readOnly className="h-4 w-4 text-green-500" />
+                {item.label}
+              </li>
+            ))}
+          </ul>
         </div>
+      )}
+
+      {/* Extraction Progress UI */}
+      <div className="bg-gray-900 p-3 rounded-md shadow mb-3 text-white text-sm">
+        <h2 className="text-md font-semibold mb-2">Extraction Progress</h2>
+        <ul className="list-none">
+          {Object.entries(combinedStatus).map(([step, status], index) => (
+            <li key={index} className="flex items-center gap-1">
+              <span className={
+                status === "success" ? "text-green-400" :
+                status === "processing" ? "text-yellow-400" : "text-red-400"
+              }>
+                {status === "success" ? "✅" : status === "processing" ? "⏳" : "❌"}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+
+      {/* display transaction for debuging */}
+{/* Transactions Table */}  
+<section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+  {clientData?.transactions?.length > 0 ? (
+    <div className="overflow-y-auto h-96">
+      <table className="table-auto w-full text-left">
+        <thead>
+          <tr className="border-b border-gray-700">
+            <th className="px-4 py-2 text-sm">Date1</th>
+            <th className="px-4 py-2 text-sm">Date2</th>
+            <th className="px-4 py-2 text-sm">Description</th>
+            <th className="px-4 py-2 text-sm">Fee Type</th>
+            <th className="px-4 py-2 text-sm">Fee Amount</th>
+            <th className="px-4 py-2 text-sm">Credit Amount</th>
+            <th className="px-4 py-2 text-sm">Debit Amount</th>
+            <th className="px-4 py-2 text-sm">Balance Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clientData.transactions.map((transaction, index) => (
+            <tr key={index} className="border-b border-gray-700">
+              <td className="px-4 py-2 text-sm">{transaction.date1 || "N/A"}</td>
+              <td className="px-4 py-2 text-sm">{transaction.date2 || "N/A"}</td>
+              <td className="px-4 py-2 text-sm">{transaction.description || "N/A"}</td>
+              <td className="px-4 py-2 text-sm">{transaction.fees_type || "N/A"}</td>
+              <td className="px-4 py-2 text-sm">
+                {typeof transaction.fees_amount}
+              </td>
+              <td className="px-4 py-2 text-sm">
+                {typeof transaction.credit_amount === "number"
+                  ? `R ${transaction.credit_amount.toFixed(2)}`
+                  : "R 0.00"}
+              </td>
+              <td className="px-4 py-2 text-sm">
+                {typeof transaction.debit_amount === "number"
+                  ? `R ${transaction.debit_amount.toFixed(2)}`
+                  : "R 0.00"}
+              </td>
+              <td className="px-4 py-2 text-sm">
+                {typeof transaction.balance_amount === "number"
+                  ? `R ${transaction.balance_amount.toFixed(2)}`
+                  : "R 0.00"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p className="text-center text-lg text-gray-500">No transactions found.</p>
+  )}
+</section>
+
+
     </div>
   );
 }
+
 export default ExtractAutomatically;

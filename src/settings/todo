@@ -1,0 +1,11 @@
+1️⃣ General Extraction Options
+Extraction Method:
+Select OCR or Parser (dropdown)
+Enable Fuzzy Matching:
+Toggle ON/OFF (helps with bank variations)
+Enable Auto-Removal of Bank Headers & Footers:
+Toggle ON/OFF (removes unwanted lines from extraction)
+Enable Auto-Categorization:
+Toggle ON/OFF (automatically categorizes transactions)
+Force Re-Extract Data:
+Toggle ON/OFF (prevents skipping already extracted data)

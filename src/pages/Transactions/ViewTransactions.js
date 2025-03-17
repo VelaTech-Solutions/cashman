@@ -136,6 +136,7 @@ const ViewTransactions = () => {
                     <th className="px-4 py-2 text-sm">Description</th>
                     <th className="px-4 py-2 text-sm">Fee Type</th>
                     <th className="px-4 py-2 text-sm">Fee Amount</th>
+                    <th className="px-4 py-2 text-sm">Credit/Debit</th>
                     <th className="px-4 py-2 text-sm">Credit Amount</th>
                     <th className="px-4 py-2 text-sm">Debit Amount</th>
                     <th className="px-4 py-2 text-sm">Balance Amount</th>
@@ -144,34 +145,43 @@ const ViewTransactions = () => {
                 <tbody>
                   {filteredTransactions.map((transaction, index) => (
                     <tr key={index} className="border-b border-gray-700">
-                      <td className="px-4 py-2 text-sm">{transaction.date1}</td>
-                      <td className="px-4 py-2 text-sm">{transaction.date2}</td>
+                      
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.date1}
+                        </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.date2}
+                        </td>
+                      
                       <td className="px-4 py-2 text-sm">
                         {transaction.description}
                       </td>
+
                       <td className="px-4 py-2 text-sm">
                         {transaction.fee_type}
                       </td>
+
                       <td className="px-4 py-2 text-sm">
-                        {(transaction.fee_amount ?? 0) && typeof transaction.fee_amount === 'number'
-                          ? `R ${transaction.fee_amount.toFixed(2)}`
-                          : "0.00"}
+                        {transaction.fee_amount}
                       </td>
-                     <td className="px-4 py-2 text-sm">
-                      {(transaction.credit_amount ?? 0) && typeof transaction.credit_amount === 'number'
-                          ? `R ${transaction.credit_amount.toFixed(2)}`
-                          : "0.00"}
-                      </td>
-                       <td className="px-4 py-2 text-sm">
-                          {(transaction.debit_amount ?? 0) && typeof transaction.debit_amount === 'number'
-                          ? `R ${transaction.debit_amount.toFixed(2)}`
-                          : "0.00"}
-                      </td>
+                     
                       <td className="px-4 py-2 text-sm">
-                        {(transaction.balance_amount ?? 0) && typeof transaction.balance_amount === 'number'
-                          ? `R ${transaction.balance_amount.toFixed(2)}`
-                          : "0.00"}
+                        {transaction.credit_debit_amount}
                       </td>
+                     
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.credit_amount}
+                      </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.debit_amount}
+                      </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.balance_amount}
+                      </td>
+
                     </tr>
                   ))}
                 </tbody>
