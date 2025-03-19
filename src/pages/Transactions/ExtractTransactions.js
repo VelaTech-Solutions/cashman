@@ -17,10 +17,18 @@ function ExtractTransactions() {
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("ExtractAutomatically");
+  const unverifiedCount = clientData?.transactions?.filter(tx => tx.verified === "✗").length || 0;
+
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
+    { type: "divider" }, // Divider line
+    {
+      path: `/client/${id}/edit-transactions`,
+      label: `Edit Transactions (${unverifiedCount})`,  // ✅ Display count dynamically
+      icon: "ph-file-text",
+    },// how to get the button to show the number of transactions that needs editing, the unverifed transactions the ones
     { type: "divider" }, // Divider line
     {
       path: `/ExtractSettings/${id}`,

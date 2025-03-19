@@ -1,7 +1,7 @@
 const bankAmountsRules = {
   // ✅ Extracts amounts using regex and ensures it's always an array
   extractAmountsFromText: (text) => {
-    const regex = /(\s?\-?\d*\.\d{2})/g;
+    const regex = /(\-?\d*\.\d{2})/g;
     const amounts = text.match(regex) || [];
     return amounts;
 

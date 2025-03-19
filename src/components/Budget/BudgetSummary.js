@@ -119,39 +119,33 @@ const disposableIncome = incomeAvg - totalExpenses;
         ))}
       </div>
 
-{/* Render the Selected View */}
-<div className="mt-6">
-  {viewMode === 1 ? (
-    <BudgetSummaryView1
-      incomeAvg={incomeAvg}
-      savingsAvg={savingsAvg}
-      housingAvg={housingAvg}
-      transportationAvg={transportationAvg}
-      expensesAvg={expensesAvg}
-      debtAvg={debtAvg}
-    />
-  ) : viewMode === 2 ? (
-    <BudgetSummaryView2
-      incomeAvg={incomeAvg}
-      savingsAvg={savingsAvg}
-      housingAvg={housingAvg}
-      transportationAvg={transportationAvg}
-      expensesAvg={expensesAvg}
-      debtAvg={debtAvg}
-    />
-  ) : viewMode === 3 ? (
-    <BudgetSummaryView3
-      incomeAvg={incomeAvg}
-      savingsAvg={savingsAvg}
-      housingAvg={housingAvg}
-      transportationAvg={transportationAvg}
-      expensesAvg={expensesAvg}
-      debtAvg={debtAvg}
-    />
-  ) : (
-    <BudgetSummaryView4 insurance={clientData.insurance} />
-  )}
-</div>
+      {/* Render the Selected View */}
+      <div className="mt-6">
+        {viewMode === 1 ? (
+          <BudgetSummaryView1 budgetData={clientData.budgetData} />
+
+        ) : viewMode === 2 ? (
+          <BudgetSummaryView2
+            incomeAvg={incomeAvg}
+            savingsAvg={savingsAvg}
+            housingAvg={housingAvg}
+            transportationAvg={transportationAvg}
+            expensesAvg={expensesAvg}
+            debtAvg={debtAvg}
+          />
+        ) : viewMode === 3 ? (
+          <BudgetSummaryView3
+            incomeAvg={incomeAvg}
+            savingsAvg={savingsAvg}
+            housingAvg={housingAvg}
+            transportationAvg={transportationAvg}
+            expensesAvg={expensesAvg}
+            debtAvg={debtAvg}
+          />
+        ) : (
+          <BudgetSummaryView4 insurance={clientData.insurance} />
+        )}
+      </div>
 
 
       {/* Button Bar - More Subtle */}

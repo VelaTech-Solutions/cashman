@@ -10,7 +10,7 @@ import extractDates from "./extractDates"; // 🚧 Commented out for now
 import extractAmounts from "./extractAmounts"; // 🚧 Commented out for now
 import extractDescription from "./extractDescription"; // 🚧 Commented out for now
 import VerifyTransactions from "./VerifyTransactions"; // 🚧 Commented out for now
-
+import VerifyTransactions2 from "./VerifyTransactions2"; // 🚧 Commented out for now
 export const ExtractAutomaticActions = ({
   id,
   bankName, // ✅ Ensure bankName is correctly passed
@@ -150,7 +150,16 @@ export const ExtractAutomaticActions = ({
         setExtractionStatus((prev) => ({ ...prev, "Verifing amounts": "failed" }));
       }
  
-  
+        // Step 7: Verify amounts again
+        setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "processing" }));
+        try {
+          await VerifyTransactions2(id);
+          setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "success" }));
+        } catch (error) {
+          console.error("⚠️ Verifing amounts failed, continuing...");
+          setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "failed" }));
+        }
+   
 
       // ✅ Final Success Message
       alert("✅ Data extraction completed!");

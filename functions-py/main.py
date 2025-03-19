@@ -133,7 +133,7 @@ def clean_description(extracted_text):
         return ""
 
     # Regex: Find long numbers (8+ digits) that are touching letters (before or after)
-    pattern = r'(?<=\D)(\d{8,})(?=\D)'
+    pattern = r'(?<=\D)(\d{6,})(?=\D)'
 
     # Wrap identified numbers in brackets
     extracted_text = re.sub(pattern, r'[\1]', extracted_text)

@@ -23,6 +23,20 @@ function ExtractAutomatically() {
   const [processingMethod, setProcessingMethod] = useState("pdfparser"); // Default to PDF Parser
   const PROCESS_METHODS = { PDF_PARSER: "pdfparser", OCR: "ocr" };
 
+
+  const totalDebit = clientData?.transactions?.reduce(
+    (sum, txn) => sum + (txn.debit_amount ? parseFloat(txn.debit_amount) : 0),
+    0
+  ).toFixed(2);
+  
+  const totalCredit = clientData?.transactions?.reduce(
+    (sum, txn) => sum + (txn.credit_amount ? parseFloat(txn.credit_amount) : 0),
+    0
+  ).toFixed(2);
+  const verifiedTransactions = clientData?.transactions?.filter(txn => txn.verified === "✓").length || 0;
+const unverifiedTransactions = clientData?.transactions?.filter(txn => txn.verified === "✗").length || 0;
+
+  
   // Fetch client data
   useEffect(() => {
     const fetchData = async () => {
@@ -125,129 +139,28 @@ function ExtractAutomatically() {
           ))}
         </ul>
       </div>
-      {/* display transaction with 0.00 only for debuging */}
-      {/* <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
-        {clientData?.transactions?.length > 0 ? (
-            <div className="overflow-y-auto h-96">
-              <table className="table-auto w-full border-collapse">
-                <thead>
-                </thead>
-                  <tbody>
-                    {clientData.transactions.map((transaction, index) => (
-                      <tr key={index} className="border-b border-gray-700 text-white">
-                        <td className="px-6 py-3">{index + 1}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-              </table>
-              </div>
-              ) : (
-              <p className="text-center text-lg text-gray-500">No error on transactions found.</p>
-              )}
-        </section> */}
 
-
-{/* Debugging: Transactions where balance, credit, and debit are all 0.00 */}
-<section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
-  <h2 className="text-lg font-semibold text-white mb-2">Edit Transactions</h2>
-
-  {clientData?.transactions?.length > 0 ? (
-    <div className="overflow-y-auto h-96">
-      <table className="table-auto w-full border-collapse text-white">
-        <thead>
-          <tr className="bg-gray-900">
-            <th className="px-6 py-3 text-left">Index</th>
-            <th className="px-6 py-3 text-left">verified</th>
-            <th className="px-6 py-3 text-left">Credit/Debit</th>
-            <th className="px-6 py-3 text-left">Credit</th>
-            <th className="px-6 py-3 text-left">Debit</th>
-            <th className="px-6 py-3 text-right">Balance Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clientData.transactions
-            .filter((tx) => {
-              const creditdebit = parseFloat(tx.credit_debit_amount || "0").toFixed(2);
-              const credit = parseFloat(tx.credit_amount || "0").toFixed(2);
-              const debit = parseFloat(tx.debit_amount || "0").toFixed(2);
-              return credit === "0.00" && debit === "0.00";
-            })
-            .map((transaction, index) => (
-              <tr key={index} className="border-b border-gray-700">
-                <td className="px-6 py-3">{index + 1}</td>
-                <td className="px-6 py-3 text-left">{transaction.verified}</td>
-                <td className="px-6 py-3 text-right">R {parseFloat(transaction.credit_debit_amount || "0").toFixed(2)}</td>
-                <td className="px-6 py-3 text-right">R {parseFloat(transaction.credit_amount || "0").toFixed(2)}</td>
-                <td className="px-6 py-3 text-right">R {parseFloat(transaction.debit_amount || "0").toFixed(2)}</td>
-                <td className="px-6 py-3 text-right">R {parseFloat(transaction.balance_amount || "0").toFixed(2)}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+{/* Small Debugging Box for Totals */}
+<section className="bg-gray-800 p-3 rounded-md shadow-md mb-4">
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+    <div className="bg-gray-900 p-3 rounded-md shadow">
+      <p className="text-sm font-bold text-blue-400">Total Credits</p>
+      <p className="text-xl font-bold text-white">R {totalCredit}</p>
     </div>
-  ) : (
-    <p className="text-center text-lg text-gray-500">No transactions with 0.00 found.</p>
-  )}
+    <div className="bg-gray-900 p-3 rounded-md shadow">
+      <p className="text-sm font-bold text-blue-400">Total Debits</p>
+      <p className="text-xl font-bold text-white">R {totalDebit}</p>
+    </div>
+    <div className="bg-gray-900 p-3 rounded-md shadow">
+      <p className="text-sm font-bold text-blue-400">Verified</p>
+      <p className="text-xl font-bold text-white">{verifiedTransactions}</p>
+    </div>
+    <div className="bg-gray-900 p-3 rounded-md shadow">
+      <p className="text-sm font-bold text-blue-400">Unverified</p>
+      <p className="text-xl font-bold text-white">{unverifiedTransactions}</p>
+    </div>
+  </div>
 </section>
-      {/* display transaction for debuging */}
-      {/* Transactions Table for debugging remove later */}
-      <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
-        {clientData?.transactions?.length > 0 ? (
-          <div className="overflow-y-auto h-96">
-            <table className="table-auto w-full border-collapse">
-              <thead>
-                <tr className="border-b border-gray-700 bg-gray-900 text-white">
-                  <th className="px-6 py-3 text-left">Index</th>
-                  <th className="px-6 py-3 text-left">verified</th>
-                  <th className="px-6 py-3 text-left">Fee Type</th>
-                  <th className="px-6 py-3 text-right">Fee Amount</th>
-                  <th className="px-6 py-3 text-right">Credit/Debit</th>
-                  <th className="px-6 py-3 text-right">Credit Amount</th>
-                  <th className="px-6 py-3 text-right">Debit Amount</th>
-                  <th className="px-6 py-3 text-right">Balance Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clientData.transactions.map((transaction, index) => (
-                  <tr key={index} className="border-b border-gray-700 text-white">
-                    <td className="px-6 py-3">{index + 1}</td>
-                    <td className="px-6 py-3 text-left">{transaction.verified}</td>
-                    <td className="px-6 py-3">{transaction.fees_type || "N/A"}</td>
-                    <td className="px-6 py-3 text-right">
-                    {transaction.fees_amount && !isNaN(transaction.fees_amount)
-                        ? `R ${parseFloat(transaction.fees_amount).toFixed(2)}`
-                        : "R 0.00"}
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                    {transaction.credit_debit_amount && !isNaN(transaction.credit_debit_amount)
-                        ? `R ${parseFloat(transaction.credit_debit_amount).toFixed(2)}`
-                        : "R 0.00"}
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                    {transaction.credit_amount && !isNaN(transaction.credit_amount)
-                        ? `R ${parseFloat(transaction.credit_amount).toFixed(2)}`
-                        : "R 0.00"}
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                    {transaction.debit_amount && !isNaN(transaction.debit_amount)
-                        ? `R ${parseFloat(transaction.debit_amount).toFixed(2)}`
-                        : "R 0.00"}
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                      {transaction.balance_amount && !isNaN(transaction.balance_amount)
-                        ? `R ${parseFloat(transaction.balance_amount).toFixed(2)}`
-                        : "R 0.00"}
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-center text-lg text-gray-500">No transactions found.</p>
-        )}
-      </section>
 
 
 

@@ -123,6 +123,70 @@ const ViewTransactions = () => {
             className="w-full p-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </section>
+                {/* Transactions Table */}
+                <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+          {filteredTransactions?.length > 0 ? (
+            <div className="overflow-y-auto h-96">
+              <Table className="table-auto w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="px-4 py-2 text-sm">Date1</th>
+                    <th className="px-4 py-2 text-sm">Date2</th>
+                    <th className="px-4 py-2 text-sm">Description</th>
+                    <th className="px-4 py-2 text-sm">Fee Type</th>
+                    <th className="px-4 py-2 text-sm">Fee Amount</th>
+                    <th className="px-4 py-2 text-sm">Credit/Debit</th>
+                    <th className="px-4 py-2 text-sm">Credit Amount</th>
+                    <th className="px-4 py-2 text-sm">Balance Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTransactions.map((transaction, index) => (
+                    <tr key={index} className="border-b border-gray-700">
+                      
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.date1}
+                        </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.date2}
+                        </td>
+                      
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.description}
+                      </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.fee_type}
+                      </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.fee_amount}
+                      </td>
+                     
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.credit_debit_amount}
+                      </td>
+                     
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.credit_amount}
+                      </td>
+
+                      <td className="px-4 py-2 text-sm">
+                        {transaction.balance_amount}
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          ) : (
+            <p className="text-center text-lg text-gray-500">
+              No transactions found.
+            </p>
+          )}
+        </section>
 
         {/* Transactions Table */}
         <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">

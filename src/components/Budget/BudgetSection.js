@@ -83,7 +83,7 @@ const BudgetSection = () => {
         <div className="mt-6">
           {
               viewMode === 1 ? (
-            <PersonalBudgetView1 transactions={clientData.transactions} />
+                <PersonalBudgetView1 transactions={clientData.transactions} clientId={id} />
           ) : viewMode === 2 ? (
             <PersonalBudgetView2 transactions={clientData.transactions} />
           ) : viewMode === 3 ? (
