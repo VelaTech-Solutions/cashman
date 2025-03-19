@@ -11,6 +11,7 @@ import ViewTransactions from "./ViewTransactions";
 import TransactionsOverview1 from "components/Transactions/TransactionsOverview1";
 import TransactionsOverview2 from "components/Transactions/TransactionsOverview2";
 import TransactionsOverview3 from "components/Transactions/TransactionsOverview3";
+import TransactionsOverview4 from "components/Transactions/TransactionsOverview4";
 import Button from "components/Button";
 
 // Firebase imports
@@ -112,6 +113,14 @@ const TransactionsPage = () => {
           >
             Overview 3 🚀
           </button>
+          <button
+            onClick={() => setViewMode(4)}
+            className={`px-4 py-2 rounded-md text-sm ${
+              viewMode === 4 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Overview 4 📊
+          </button>
         </div>
 
         {/* Render the selected Overview */}
@@ -119,8 +128,10 @@ const TransactionsPage = () => {
           <TransactionsOverview1 transactions={clientData?.transactions || []} />
         ) : viewMode === 2 ? (
           <TransactionsOverview2 transactions={clientData?.transactions || []} />
-        ) : (
+        ) : viewMode === 3 ? (
           <TransactionsOverview3 transactions={clientData?.transactions || []} />
+        ) : (
+          <TransactionsOverview4 transactions={clientData?.transactions || []} />
         )}
 
         {/* Additional UI for toggles, modes, etc. */}

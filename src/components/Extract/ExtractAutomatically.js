@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 // Components Imports
-import Button from "../Button";
 import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
 import ExtractAutomaticActions from "components/Extract/ExtractAutomatic/ExtractAutomaticActions"; // ✅ Linking
@@ -20,7 +19,6 @@ function ExtractAutomatically() {
   // Define state for extraction status
   const [extractionStatus, setExtractionStatus] = useState({});
   const [progressData, setProgressData] = useState({}); // ✅ Extract Progress
-  const [showDebug, setShowDebug] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMethod, setProcessingMethod] = useState("pdfparser"); // Default to PDF Parser
   const PROCESS_METHODS = { PDF_PARSER: "pdfparser", OCR: "ocr" };
@@ -67,19 +65,6 @@ function ExtractAutomatically() {
 
   if (error) return <div>Error: {error}</div>;
 
-  // Debugging Checklist - Checks if data exists
-  const debugChecklist = [
-    { label: "Raw Data Exists", value: clientData?.rawData?.length > 0 },
-    { label: "Transactions Extracted", value: clientData?.transactions?.length > 0 },
-    { label: "Transaction Date 1 Extracted", value: clientData?.transactions?.some(tx => tx.date1) },
-    { label: "Transaction Date 2 Extracted", value: clientData?.transactions?.some(tx => tx.date2) },
-    { label: "Transaction Descriptions Extracted", value: clientData?.transactions?.some(tx => tx.description) },
-    { label: "Transaction Amount Credit Extracted", value: clientData?.transactions?.some(tx => tx.credit_amount) },
-    { label: "Transaction Amount Debit Extracted", value: clientData?.transactions?.some(tx => tx.debit_amount) },
-    { label: "Transaction Amount Balance Extracted", value: clientData?.transactions?.some(tx => tx.balance_amount) },
-    { label: "Transaction Amount Credit or Debit Extracted", value: clientData?.transactions?.some(tx => tx.credit_debit_amount) },
-  ];
-
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mt-8">
       <h1 className="text-2xl font-bold mb-4 text-blue-400">Extract Automatically</h1>
@@ -123,29 +108,6 @@ function ExtractAutomatically() {
         />
       </div>
 
-      {/* Debug Toggle */}
-      <button 
-        onClick={() => setShowDebug(!showDebug)}
-        className="bg-blue-500 text-white px-3 py-2 rounded-md mb-2"
-      >
-        {showDebug ? "Hide Debug" : "Show Debug"}
-      </button>
-
-      {/* Debugging Checklist */}
-      {showDebug && (
-        <div className="bg-gray-900 p-3 rounded-md shadow mb-3 text-white text-sm">
-          <h2 className="text-md font-semibold mb-2">Debugging Checklist</h2>
-          <ul className="grid grid-cols-2 gap-2">
-            {debugChecklist.map((item, index) => (
-              <li key={index} className="flex items-center gap-1">
-                <input type="checkbox" checked={item.value} readOnly className="h-4 w-4 text-green-500" />
-                {item.label}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* Extraction Progress UI */}
       <div className="bg-gray-900 p-3 rounded-md shadow mb-3 text-white text-sm">
         <h2 className="text-md font-semibold mb-2">Extraction Progress</h2>
@@ -163,60 +125,130 @@ function ExtractAutomatically() {
           ))}
         </ul>
       </div>
+      {/* display transaction with 0.00 only for debuging */}
+      {/* <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+        {clientData?.transactions?.length > 0 ? (
+            <div className="overflow-y-auto h-96">
+              <table className="table-auto w-full border-collapse">
+                <thead>
+                </thead>
+                  <tbody>
+                    {clientData.transactions.map((transaction, index) => (
+                      <tr key={index} className="border-b border-gray-700 text-white">
+                        <td className="px-6 py-3">{index + 1}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+              </table>
+              </div>
+              ) : (
+              <p className="text-center text-lg text-gray-500">No error on transactions found.</p>
+              )}
+        </section> */}
 
 
-      {/* display transaction for debuging */}
-{/* Transactions Table */}  
+{/* Debugging: Transactions where balance, credit, and debit are all 0.00 */}
 <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+  <h2 className="text-lg font-semibold text-white mb-2">Edit Transactions</h2>
+
   {clientData?.transactions?.length > 0 ? (
     <div className="overflow-y-auto h-96">
-      <table className="table-auto w-full text-left">
+      <table className="table-auto w-full border-collapse text-white">
         <thead>
-          <tr className="border-b border-gray-700">
-            <th className="px-4 py-2 text-sm">Date1</th>
-            <th className="px-4 py-2 text-sm">Date2</th>
-            <th className="px-4 py-2 text-sm">Description</th>
-            <th className="px-4 py-2 text-sm">Fee Type</th>
-            <th className="px-4 py-2 text-sm">Fee Amount</th>
-            <th className="px-4 py-2 text-sm">Credit Amount</th>
-            <th className="px-4 py-2 text-sm">Debit Amount</th>
-            <th className="px-4 py-2 text-sm">Balance Amount</th>
+          <tr className="bg-gray-900">
+            <th className="px-6 py-3 text-left">Index</th>
+            <th className="px-6 py-3 text-left">verified</th>
+            <th className="px-6 py-3 text-left">Credit/Debit</th>
+            <th className="px-6 py-3 text-left">Credit</th>
+            <th className="px-6 py-3 text-left">Debit</th>
+            <th className="px-6 py-3 text-right">Balance Amount</th>
           </tr>
         </thead>
         <tbody>
-          {clientData.transactions.map((transaction, index) => (
-            <tr key={index} className="border-b border-gray-700">
-              <td className="px-4 py-2 text-sm">{transaction.date1 || "N/A"}</td>
-              <td className="px-4 py-2 text-sm">{transaction.date2 || "N/A"}</td>
-              <td className="px-4 py-2 text-sm">{transaction.description || "N/A"}</td>
-              <td className="px-4 py-2 text-sm">{transaction.fees_type || "N/A"}</td>
-              <td className="px-4 py-2 text-sm">
-                {typeof transaction.fees_amount}
-              </td>
-              <td className="px-4 py-2 text-sm">
-                {typeof transaction.credit_amount === "number"
-                  ? `R ${transaction.credit_amount.toFixed(2)}`
-                  : "R 0.00"}
-              </td>
-              <td className="px-4 py-2 text-sm">
-                {typeof transaction.debit_amount === "number"
-                  ? `R ${transaction.debit_amount.toFixed(2)}`
-                  : "R 0.00"}
-              </td>
-              <td className="px-4 py-2 text-sm">
-                {typeof transaction.balance_amount === "number"
-                  ? `R ${transaction.balance_amount.toFixed(2)}`
-                  : "R 0.00"}
-              </td>
-            </tr>
-          ))}
+          {clientData.transactions
+            .filter((tx) => {
+              const creditdebit = parseFloat(tx.credit_debit_amount || "0").toFixed(2);
+              const credit = parseFloat(tx.credit_amount || "0").toFixed(2);
+              const debit = parseFloat(tx.debit_amount || "0").toFixed(2);
+              return credit === "0.00" && debit === "0.00";
+            })
+            .map((transaction, index) => (
+              <tr key={index} className="border-b border-gray-700">
+                <td className="px-6 py-3">{index + 1}</td>
+                <td className="px-6 py-3 text-left">{transaction.verified}</td>
+                <td className="px-6 py-3 text-right">R {parseFloat(transaction.credit_debit_amount || "0").toFixed(2)}</td>
+                <td className="px-6 py-3 text-right">R {parseFloat(transaction.credit_amount || "0").toFixed(2)}</td>
+                <td className="px-6 py-3 text-right">R {parseFloat(transaction.debit_amount || "0").toFixed(2)}</td>
+                <td className="px-6 py-3 text-right">R {parseFloat(transaction.balance_amount || "0").toFixed(2)}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
   ) : (
-    <p className="text-center text-lg text-gray-500">No transactions found.</p>
+    <p className="text-center text-lg text-gray-500">No transactions with 0.00 found.</p>
   )}
 </section>
+      {/* display transaction for debuging */}
+      {/* Transactions Table for debugging remove later */}
+      <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+        {clientData?.transactions?.length > 0 ? (
+          <div className="overflow-y-auto h-96">
+            <table className="table-auto w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-700 bg-gray-900 text-white">
+                  <th className="px-6 py-3 text-left">Index</th>
+                  <th className="px-6 py-3 text-left">verified</th>
+                  <th className="px-6 py-3 text-left">Fee Type</th>
+                  <th className="px-6 py-3 text-right">Fee Amount</th>
+                  <th className="px-6 py-3 text-right">Credit/Debit</th>
+                  <th className="px-6 py-3 text-right">Credit Amount</th>
+                  <th className="px-6 py-3 text-right">Debit Amount</th>
+                  <th className="px-6 py-3 text-right">Balance Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clientData.transactions.map((transaction, index) => (
+                  <tr key={index} className="border-b border-gray-700 text-white">
+                    <td className="px-6 py-3">{index + 1}</td>
+                    <td className="px-6 py-3 text-left">{transaction.verified}</td>
+                    <td className="px-6 py-3">{transaction.fees_type || "N/A"}</td>
+                    <td className="px-6 py-3 text-right">
+                    {transaction.fees_amount && !isNaN(transaction.fees_amount)
+                        ? `R ${parseFloat(transaction.fees_amount).toFixed(2)}`
+                        : "R 0.00"}
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                    {transaction.credit_debit_amount && !isNaN(transaction.credit_debit_amount)
+                        ? `R ${parseFloat(transaction.credit_debit_amount).toFixed(2)}`
+                        : "R 0.00"}
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                    {transaction.credit_amount && !isNaN(transaction.credit_amount)
+                        ? `R ${parseFloat(transaction.credit_amount).toFixed(2)}`
+                        : "R 0.00"}
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                    {transaction.debit_amount && !isNaN(transaction.debit_amount)
+                        ? `R ${parseFloat(transaction.debit_amount).toFixed(2)}`
+                        : "R 0.00"}
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      {transaction.balance_amount && !isNaN(transaction.balance_amount)
+                        ? `R ${parseFloat(transaction.balance_amount).toFixed(2)}`
+                        : "R 0.00"}
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-center text-lg text-gray-500">No transactions found.</p>
+        )}
+      </section>
+
 
 
     </div>

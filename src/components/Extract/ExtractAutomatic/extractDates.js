@@ -37,36 +37,45 @@ const extractDates = async (id, bankName) => {
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
 
+    // Initialize a counter for lines processed (not individual dates)
+    let totalDateLinesProcessed = 0;
+
     filteredData.forEach((line, index) => {
-      if (!line) return;
+        if (!line) return;
 
-      const extractDatesFromText = (text) =>
-        BankDatesRules[bankName] ? BankDatesRules[bankName](text) : [];
+        const extractDatesFromText = (text) =>
+            BankDatesRules[bankName] ? BankDatesRules[bankName](text) : [];
 
-      const extractedDates = extractDatesFromText(line);
+        const extractedDates = extractDatesFromText(line);
 
-      let date1 = extractedDates[0] || null;
-      let date2 = extractedDates[1] || "None";
+        // ✅ Count this line if any date was found
+        if (extractedDates.length > 0) {
+            totalDateLinesProcessed++;
+        }
 
-      let strippedLine = extractedDates.reduce((acc, date) => acc.replace(date, "").trim(), line);
+        let date1 = extractedDates[0] || null;
+        let date2 = extractedDates[1] || "None";
 
-      updatedFilteredData[index] = strippedLine || line;
+        let strippedLine = extractedDates.reduce((acc, date) => acc.replace(date, "").trim(), line);
 
-      // Ensure transactions[index] exists
-      if (!updatedTransactions[index]) {
-        updatedTransactions[index] = { original: line };
-      }
+        updatedFilteredData[index] = strippedLine || line;
 
-      updatedTransactions[index] = {
-        ...updatedTransactions[index], // Keep existing data
-        date1,
-        date2,
-        original: line,
-      };
+        if (!updatedTransactions[index]) {
+            updatedTransactions[index] = { original: line };
+        }
+
+        updatedTransactions[index] = {
+            ...updatedTransactions[index], // Keep existing data
+            date1,
+            date2,
+            original: line,
+        };
     });
 
-    console.log("✅ Extracted Dates & Updated Transactions:", updatedTransactions);
-    // console.log("✅ Updated Filtered Data:", updatedFilteredData);
+    // Log total lines processed for dates
+    console.log(`✅ Total Lines with Dates Processed: ${totalDateLinesProcessed}`);
+    console.log("✅ Extracted Dates & Updated Transactions:");
+
 
     // Step 4: Update Firestore
     await updateDoc(clientRef, {

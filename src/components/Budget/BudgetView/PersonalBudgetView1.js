@@ -45,7 +45,8 @@ const PersonalBudgetView1 = ({ transactions }) => {
         }, {});
 
         const validMonthValues = Object.values(totalByMonth).filter(value => value !== 0);
-        const grandTotal = validMonthValues.reduce((sum, val) => sum + val, 0).toFixed(2);
+        const grandTotal = Number(validMonthValues.reduce((sum, val) => sum + Number(val), 0)).toFixed(2);
+
         const grandAverage = validMonthValues.length > 0
           ? (grandTotal / validMonthValues.length).toFixed(2)
           : "0.00";

@@ -44,31 +44,42 @@ const extractDescription = async (id, bankName) => {
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
 
+    // Initialize a counter for lines where descriptions were extracted
+    let totalDescriptionLinesProcessed = 0;
+
     filteredData.forEach((line, index) => {
-      if (!line) return;
+        if (!line) return;
 
-      // In this case, use the entire line as the description
-      const description = line.trim();
+        // In this case, use the entire line as the description
+        const description = line.trim();
 
-      // Remove the description from the original line (results in an empty string)
-      const strippedLine = "";
+        // ✅ Count the line as processed if it contains a description
+        if (description) {
+            totalDescriptionLinesProcessed++;
+        }
 
-      // Update our local copy of filteredData with the stripped line
-      updatedFilteredData[index] = strippedLine;
+        // Remove the description from the original line (results in an empty string)
+        const strippedLine = "";
 
-      // Ensure transactions[index] exists
-      if (!updatedTransactions[index]) {
-        updatedTransactions[index] = { original: line };
-      }
+        // Update our local copy of filteredData with the stripped line
+        updatedFilteredData[index] = strippedLine;
 
-      // Merge with existing transaction data
-      updatedTransactions[index] = {
-        ...updatedTransactions[index],
-        description,
-      };
+        // Ensure transactions[index] exists
+        if (!updatedTransactions[index]) {
+            updatedTransactions[index] = { original: line };
+        }
+
+        // Merge with existing transaction data
+        updatedTransactions[index] = {
+            ...updatedTransactions[index],
+            description,
+        };
     });
 
-    console.log("✅ Descriptions Extracted:", updatedTransactions);
+    // Log total lines processed for descriptions
+    console.log(`✅ Total Lines with Descriptions Processed: ${totalDescriptionLinesProcessed}`);
+    console.log("✅ Descriptions Extracted:");
+
 
     // Step 4: Update Firestore with the updated transactions and stripped filteredData
     await updateDoc(clientRef, {

@@ -127,6 +127,19 @@ def clean_amounts_in_string(extracted_text):
 
     return extracted_text
 
+
+def clean_description(extracted_text):
+    if not extracted_text:
+        return ""
+
+    # Regex: Find long numbers (8+ digits) that are touching letters (before or after)
+    pattern = r'(?<=\D)(\d{8,})(?=\D)'
+
+    # Wrap identified numbers in brackets
+    extracted_text = re.sub(pattern, r'[\1]', extracted_text)
+
+    return extracted_text
+
 @https_fn.on_request()
 def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
     response = https_fn.Response()
@@ -175,6 +188,9 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
             response.headers["Content-Type"] = "application/json"
             return response
         
+
+
+        extracted_text = clean_description(extracted_text)
         # Clean statement based on bank name
         clean_amounts = {
             "Absa Bank": clean_amounts_in_string,

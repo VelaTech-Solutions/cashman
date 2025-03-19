@@ -24,6 +24,8 @@ const createDatabaseStructure = async (id) => {
       credit_amount: "0.00",
       credit_debit_amount: "0.00",
       balance_amount: "0.00",
+      number_of_transactions: "0",
+      verified: "❌",
       cleaned: false,
     };
 

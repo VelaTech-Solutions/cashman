@@ -10,7 +10,7 @@ import ClientProfileOverview from "components/ClientView/ClientProfileOverview";
 import ClientActions1 from "components/ClientView/ClientActions1";
 import ClientActions2 from "components/ClientView/ClientActions2";
 import ClientActions3 from "components/ClientView/ClientActions3";
-
+import ClientActions4 from "components/ClientView/ClientActions4";
 
 
 // Firebase imports

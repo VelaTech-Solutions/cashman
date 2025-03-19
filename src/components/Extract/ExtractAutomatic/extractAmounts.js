@@ -37,46 +37,56 @@ const extractAmounts = async (id, bankName) => {
       return;
     }
 
+    // Initialize a counter for processed lines
+    let totalLinesProcessed = 0;
+
     // Step 3: Process each line in filteredData
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
 
     filteredData.forEach((line, index) => {
-      if (!line) return;
+        if (!line) return;
 
-      // ✅ Apply bank-specific extraction rule
-      const extractedAmounts =
-        BankAmountsRules[bankName](line) || ["0.00", "0.00", "0.00"];
+        // ✅ Apply bank-specific extraction rule
+        const extractedAmounts =
+            BankAmountsRules[bankName](line) || ["0.00", "0.00", "0.00"];
 
-      // ✅ Ensure all amounts exist (Fallback to "0.00")
-      const [fees_amount, credit_debit_amount, balance_amount] =
-        extractedAmounts.map((amount) => amount || "0.00");
+        // ✅ Ensure all amounts exist (Fallback to "0.00")
+        const [fees_amount, credit_debit_amount, balance_amount] =
+            extractedAmounts.map((amount) => amount || "0.00");
 
-      // ✅ Remove extracted amounts from the original line
-      const strippedLine = extractedAmounts.reduce(
-        (acc, amount) => acc.replace(amount, "").trim(),
-        line
-      );
+        // ✅ Count processed lines
+        totalLinesProcessed++;
 
-      // Update our local copy of filteredData with the stripped line
-      updatedFilteredData[index] = strippedLine;
+        // ✅ Remove extracted amounts from the original line
+        const strippedLine = extractedAmounts.reduce(
+            (acc, amount) => acc.replace(amount, "").trim(),
+            line
+        );
 
-      // Ensure transactions[index] exists
-      if (!updatedTransactions[index]) {
-        updatedTransactions[index] = { original: line };
-      }
+        // Update our local copy of filteredData with the stripped line
+        updatedFilteredData[index] = strippedLine;
 
-      // ✅ Merge with existing transaction data
-      updatedTransactions[index] = {
-        ...updatedTransactions[index], // Keep any existing data
-        fees_amount,
-        credit_debit_amount,
-        balance_amount,
-        original: line,
-      };
+        // Ensure transactions[index] exists
+        if (!updatedTransactions[index]) {
+            updatedTransactions[index] = { original: line };
+        }
+
+        // ✅ Merge with existing transaction data
+        updatedTransactions[index] = {
+            ...updatedTransactions[index], // Keep any existing data
+            fees_amount,
+            credit_debit_amount,
+            balance_amount,
+            original: line,
+        };
     });
 
-    console.log("✅ Amounts Extracted:", updatedTransactions);
+    // Log total lines processed
+    console.log(`✅ Total Lines Processed: ${totalLinesProcessed}`);
+    console.log("✅ Amounts Extracted:");
+
+
 
     // Step 4: Update Firestore with both the updated transactions AND the stripped filteredData
     await updateDoc(clientRef, {

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "big.js": "^6.2.2",
     "chart.js": "^4.4.8",
     "cra-template": "1.2.0",
     "file-saver": "^2.0.5",

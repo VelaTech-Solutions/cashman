@@ -28,7 +28,7 @@ export const ExtractAutomaticActions = ({
     const clientRef = doc(db, "clients", id);
     const unsubscribe = onSnapshot(clientRef, (docSnap) => {
       if (docSnap.exists()) {
-        console.log("🔄 Client Data Updated:", docSnap.data());
+        // console.log("🔄 Client Data Updated:", docSnap.data());
 
         if (typeof setClientData === "function") {
           setClientData(docSnap.data()); // ✅ Prevents error
@@ -194,29 +194,20 @@ export const ExtractAutomaticActions = ({
       return false;
     }
   };
+  // reset deletes the following in the db  transactions filteredData extractProgress
+  const handlereset = () => {
+    const clientRef = doc(db, "clients", id);
+    updateDoc(clientRef, {
+      transactions: [],
+      filteredData: [],
+      extractProgress: {},
+    });
+    // refresh the page wait 2 before reloading
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
 
-//   const cleanStatement = async (id, bankName) => {
-//     if (!id || !bankName) {
-//       console.error("❌ Missing ID or Bank Name");
-//       return;
-//     }
-  
-//     return new Promise((resolve) => setTimeout(resolve, 1000));
-//   };
-  
-
-//   const extractDates = async () => {
-//     return new Promise((resolve) => setTimeout(resolve, 1000));
-//   };
-
-//   const extractAmounts = async () => {
-//     return new Promise((resolve) => setTimeout(resolve, 1000));
-//   };
-
-//   const extractDescriptions = async () => {
-//     return new Promise((resolve) => setTimeout(resolve, 1000));
-//   };
-
+  };
   return (
     <div className="flex flex-wrap gap-3">
       <button
@@ -227,6 +218,13 @@ export const ExtractAutomaticActions = ({
         disabled={processing}
       >
         {processing ? "Processing..." : "Extract"}
+      </button>
+
+      <button
+        onClick={handlereset}
+        className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium"
+      >
+        Reset
       </button>
     </div>
   );
