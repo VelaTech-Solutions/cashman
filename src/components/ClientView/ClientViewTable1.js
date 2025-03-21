@@ -71,15 +71,34 @@ const ClientViewTable1 = ({ sortedClients }) => {
               </div>
 
               {/* Live Status Bar */}
+              {/* Live Status Bar */}
               <div className="mt-6">
-                <div className="text-xs text-gray-300">Reports Progress</div>
-                <div className="w-full bg-gray-700 rounded-full h-2.5 mt-1">
+                <div className="text-xs text-gray-300 mb-1">Reports Progress</div>
+                <div className="w-full bg-gray-700 rounded-full h-2.5">
                   <div
-                    className={`h-2.5 rounded-full ${client.status === "Completed" ? "bg-green-400" : "bg-yellow-400"}`}
-                    style={{ width: `${client.status === "Completed" ? "100%" : "50%"}` }}
+                    className="h-2.5 rounded-full transition-all duration-300 ease-in-out"
+                    style={{
+                      width: `${
+                        client?.progress?.completed
+                          ? "100%"
+                          : client?.progress?.categorized
+                          ? "75%"
+                          : client?.progress?.extracted
+                          ? "50%"
+                          : client?.progress?.captured
+                          ? "25%"
+                          : "0%"
+                      }`,
+                      backgroundColor: `${
+                        client?.progress?.completed
+                          ? "#4ade80" // green
+                          : "#facc15" // yellow
+                      }`,
+                    }}
                   ></div>
                 </div>
               </div>
+
 
               {/* Buttons */}
               <div className="flex justify-between mt-6">

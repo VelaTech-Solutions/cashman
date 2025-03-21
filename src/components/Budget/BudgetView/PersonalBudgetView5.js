@@ -10,7 +10,7 @@ const PersonalBudgetView5 = ({ transactions }) => {
     { name: "Income", filter: (t) => t.category === "Income", key: "credit_amount" },
     { name: "Savings", filter: (t) => t.category === "Savings", key: "debit_amount" },
     { name: "Housing", filter: (t) => t.category === "Housing", key: "debit_amount" },
-    { name: "Transport", filter: (t) => t.category === "Transport", key: "debit_amount" },
+    { name: "Transport", filter: (t) => t.category === "Transportation", key: "debit_amount" },
     { name: "Expenses", filter: (t) => t.category === "Expenses", key: "debit_amount" },
     { name: "Debits", filter: (t) => t.category === "Debits", key: "debit_amount" },
   ];

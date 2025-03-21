@@ -36,6 +36,32 @@ const extractAmounts = async (id, bankName) => {
       });
       return;
     }
+    const stripAmountsFromLine = (line, amounts) => {
+      let strippedLine = line;
+      
+      amounts.forEach((rawAmount) => {
+        if (!rawAmount || rawAmount === "0.00") return;
+    
+        // Build possible variants to remove
+        const clean = rawAmount.replace(/[^\d.-]/g, "");
+        const variations = [
+          clean,
+          parseFloat(clean).toFixed(2),
+          `-${Math.abs(clean)}`,
+          `R ${clean}`,
+          `R${clean}`,
+          clean.replace("-", ""),
+        ];
+    
+        variations.forEach((variant) => {
+          const regex = new RegExp(variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g");
+          strippedLine = strippedLine.replace(regex, "").trim();
+        });
+      });
+    
+      return strippedLine;
+    };
+    
 
     // Initialize a counter for processed lines
     let totalLinesProcessed = 0;
@@ -59,10 +85,9 @@ const extractAmounts = async (id, bankName) => {
         totalLinesProcessed++;
 
         // ✅ Remove extracted amounts from the original line
-        const strippedLine = extractedAmounts.reduce(
-            (acc, amount) => acc.replace(amount, "").trim(),
-            line
-        );
+        const strippedLine = stripAmountsFromLine(line, extractedAmounts);
+
+        
 
         // Update our local copy of filteredData with the stripped line
         updatedFilteredData[index] = strippedLine;

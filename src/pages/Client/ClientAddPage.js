@@ -1,11 +1,7 @@
 // src/pages/AddClient.js
 import React, { useState, useEffect } from "react";
-
-// Components Imports
 import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
-
-// Firebase imports
 import { db, storage, auth } from "../../firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -28,9 +24,8 @@ const ClientAddPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [currentUser, setCurrentUser] = useState(null); // optional
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Fetch authenticated user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -54,14 +49,11 @@ const ClientAddPage = () => {
       return null;
     }
 
-    // BASIC VALIDATIONS
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
-    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const maxFileSize = 5 * 1024 * 1024;
 
     if (!allowedTypes.includes(selectedFile.type)) {
-      setUploadStatus(
-        "Invalid file type. Please upload a PDF, JPEG, or PNG file."
-      );
+      setUploadStatus("Invalid file type. Please upload a PDF, JPEG, or PNG file.");
       return null;
     }
     if (selectedFile.size > maxFileSize) {
@@ -69,21 +61,13 @@ const ClientAddPage = () => {
       return null;
     }
 
-    // SANITIZE/RANDOMIZE THE FILE NAME
     const timestamp = Date.now();
     const fileExt = selectedFile.name.substring(selectedFile.name.lastIndexOf("."));
-    const safeName = `statement_${timestamp}${fileExt}`; 
-      // e.g. "statement_1678231234567.pdf"
-
-    // CREATE A REFERENCE
-    const storageRef = ref(
-      storage,
-      `bank_statements/${clientDetails.idNumber}/${safeName}`
-    );
+    const safeName = `statement_${timestamp}${fileExt}`;
+    const storageRef = ref(storage, `bank_statements/${clientDetails.idNumber}/${safeName}`);
 
     setUploadStatus("Uploading file...");
 
-    // UPLOAD
     try {
       const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
@@ -116,13 +100,11 @@ const ClientAddPage = () => {
   const handleSubmit = async () => {
     const { idNumber, clientName, clientSurname, bankName } = clientDetails;
 
-    // OPTIONAL: CONFIRM USER IS LOGGED IN
     if (!currentUser) {
       alert("You must be logged in to upload.");
       return;
     }
 
-    // REQUIRED FIELDS
     if (!idNumber || !clientName || !clientSurname || !bankName) {
       alert("Please fill in all required fields.");
       return;
@@ -130,15 +112,12 @@ const ClientAddPage = () => {
 
     setIsSubmitting(true);
     try {
-      // 1) UPLOAD THE FILE
       const fileURL = await handleUploadFile();
       if (!fileURL) {
-        // If upload was invalid or canceled, stop
         setIsSubmitting(false);
         return;
       }
 
-      // 2) SAVE DATA TO FIRESTORE
       const clientDocRef = doc(db, "clients", idNumber);
 
       await setDoc(
@@ -152,6 +131,14 @@ const ClientAddPage = () => {
           userEmail,
           timestamp: new Date(),
           dateCreated: new Date(),
+
+          // ✅ Progress field initialized
+          progress: {
+            captured: true,
+            extracted: false,
+            categorized: false,
+            completed: false,
+          },
         },
         { merge: true }
       );
@@ -169,13 +156,11 @@ const ClientAddPage = () => {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Add Client" links={links} />
-
       <div className="flex-1 p-8">
         <div className="space-y-8">
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
-              Capture Clients
-            </h2>
+            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Capture Clients</h2>
+
             <input
               type="text"
               name="idNumber"
@@ -215,9 +200,7 @@ const ClientAddPage = () => {
               <option value="Tyme Bank">Tyme Bank</option>
             </select>
 
-            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">
-              Upload Bank Statements
-            </h2>
+            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Upload Bank Statements</h2>
             <input
               type="file"
               name="bankStatement"
@@ -226,7 +209,6 @@ const ClientAddPage = () => {
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
 
-            {/* Show progress messages (optional) */}
             {uploadStatus && (
               <p className="text-sm text-gray-300 italic mt-1">{uploadStatus}</p>
             )}
@@ -234,9 +216,7 @@ const ClientAddPage = () => {
             <button
               onClick={handleSubmit}
               className={`w-full p-2 rounded ${
-                isSubmitting
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
+                isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
               }`}
               disabled={isSubmitting}
             >
@@ -249,8 +229,7 @@ const ClientAddPage = () => {
               </p>
             )}
             <p className="text-sm text-gray-400 italic mt-2">
-              Note: This feature currently supports processing a single PDF/image file
-              at a time.
+              Note: This feature currently supports processing a single PDF/image file at a time.
             </p>
           </section>
         </div>

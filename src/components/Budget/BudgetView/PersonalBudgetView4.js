@@ -9,7 +9,7 @@ const PersonalBudgetView4 = ({ transactions }) => {
     { name: "Income", filter: (t) => t.category === "Income" },
     { name: "Savings", filter: (t) => t.category === "Savings" },
     { name: "Housing", filter: (t) => t.category === "Housing" },
-    { name: "Transport", filter: (t) => t.category === "Transport" },
+    { name: "Transport", filter: (t) => t.category === "Transportation" },
     { name: "Expenses", filter: (t) => t.category === "Expenses" },
     { name: "Debits", filter: (t) => t.category === "Debits" },
   ];
