@@ -16,7 +16,6 @@ const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
 ];
 
-import ClientOverview from "components/ClientView/ClientOverview";
 import ClientViewTable1 from "components/ClientView/ClientViewTable1";
 import ClientViewTable2 from "components/ClientView/ClientViewTable2";
 import ClientViewTable3 from "components/ClientView/ClientViewTable3";
@@ -29,7 +28,6 @@ const Viewclient = () => {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
 
   // ---- ADDED SORTING STATE ----
   const [sortField, setSortField] = useState("clientName");
@@ -76,6 +74,60 @@ const Viewclient = () => {
       .includes(searchQuery),
   );
 
+  const views = [
+    {
+      key: "view1",
+      label: "View 1",
+      component: (<ClientViewTable1 sortedClients={sortedClients} />
+      ),
+    },
+    {
+      key: "view2",
+      label: "View 2",
+      component: (
+        <ClientActions2
+        actionLinks={actionLinks}
+        notes={notes}
+        setNote={setNote}
+        note={note}
+        handleAddNote={handleAddNote}
+        deleteNote={deleteNote}
+        deleteAllNotes={deleteAllNotes}
+      />
+      ),
+    },
+    {
+      key: "view3",
+      label: "View 3",
+      component: (
+        <ClientActions3 
+        actionLinks={actionLinks}
+        notes={notes}
+        setNote={setNote}
+        note={note}
+        handleAddNote={handleAddNote}
+        deleteNote={deleteNote}
+        deleteAllNotes={deleteAllNotes}
+      />
+      ),
+    },
+      {
+        key: "view4",
+        label: "View 4",
+        component: (
+          <ClientActions4 
+          actionLinks={actionLinks}
+          notes={notes}
+          setNote={setNote}
+          note={note}
+          handleAddNote={handleAddNote}
+          deleteNote={deleteNote}
+          deleteAllNotes={deleteAllNotes}
+        />
+        )
+    },
+  ];
+
   // ---- SORT the filtered list before pagination ----
   const sortedClients = React.useMemo(() => {
     // Copy array so we don't mutate original
@@ -118,7 +170,7 @@ const Viewclient = () => {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       {/* Sidebar */}
-      <Sidebar title="Add Client" links={links} />
+      <Sidebar title="View Clients" links={links} />
 
       {/* Main Content */}
       <div className="flex-1 p-8">
@@ -130,11 +182,6 @@ const Viewclient = () => {
             <i className="ph-list text-2xl"></i>
           </button>
         </header>
-
-
-        {/* <div>
-          <ClientOverview clients={clients} />
-        </div> */}
 
         <section className="mt-6 flex items-center space-x-4">
           {/* Search Bar */}

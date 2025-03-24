@@ -5,7 +5,8 @@ import { useParams, Link } from "react-router-dom";
 import "styles/tailwind.css";
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
-import Button from "components/Button";  
+import ViewSwitcher from "components/Common/ViewSwitcher";
+
 import ClientProfileOverview from "components/ClientView/ClientProfileOverview";
 import ClientActions1 from "components/ClientView/ClientActions1";
 import ClientActions2 from "components/ClientView/ClientActions2";
@@ -26,7 +27,7 @@ import {
   deleteField,
   setDoc,
 } from "firebase/firestore";
-import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
+
 
 const ClientProfilePage = () => {
   const { id } = useParams();
@@ -34,8 +35,7 @@ const ClientProfilePage = () => {
   const [error, setError] = useState("");
   const [note, setNote] = useState(""); // State for the new note
   const [notes, setNotes] = useState([]); // State for notes history
-  const [clients, setClients] = useState([]);
-  const [viewMode, setViewMode] = useState(1);
+  const [activeView, setActiveView] = useState("view1");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
@@ -127,103 +127,90 @@ const ClientProfilePage = () => {
   };
 
   // Define links at the top
-  const actionLinks = id
-  ? [
+  const actionLinks = id ? [
       { label: "Budget", path: `/budget/${id}` },
       { label: "Transactions", path: `/client/${id}/transactionspage` },
     ]
   : [];
 
+  const views = [
+    {
+      key: "view1",
+      label: "View 1",
+      component: (
+        <ClientActions1
+        actionLinks={actionLinks}
+        notes={notes}
+        setNote={setNote}
+        note={note}
+        handleAddNote={handleAddNote}
+        deleteNote={deleteNote}
+        deleteAllNotes={deleteAllNotes}
+      />
+      ),
+    },
+    {
+      key: "view2",
+      label: "View 2",
+      component: (
+        <ClientActions2
+        actionLinks={actionLinks}
+        notes={notes}
+        setNote={setNote}
+        note={note}
+        handleAddNote={handleAddNote}
+        deleteNote={deleteNote}
+        deleteAllNotes={deleteAllNotes}
+      />
+      ),
+    },
+    {
+      key: "view3",
+      label: "View 3",
+      component: (
+        <ClientActions3 
+        actionLinks={actionLinks}
+        notes={notes}
+        setNote={setNote}
+        note={note}
+        handleAddNote={handleAddNote}
+        deleteNote={deleteNote}
+        deleteAllNotes={deleteAllNotes}
+      />
+      ),
+    },
+      {
+        key: "view4",
+        label: "View 4",
+        component: (
+          <ClientActions4 
+          actionLinks={actionLinks}
+          notes={notes}
+          setNote={setNote}
+          note={note}
+          handleAddNote={handleAddNote}
+          deleteNote={deleteNote}
+          deleteAllNotes={deleteAllNotes}
+        />
+        )
+    },
+  ];
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-        {/* Sidebar */}
         <Sidebar title="Client Profile" links={links} />
-
-        {/* Main Content */}
         <div className="flex-1 p-8">
-          {/* Header Section */}
           <header className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-blue-400">Client Profile</h1>
+            <h1 className="text-3xl font-bold text-blue-400">
+            Client Profile
+            </h1>
           </header>
-
-          {/* Client Profile Overview */}
           <ClientProfileOverview clientData={clientData} />
-          
-          {/* View Mode Toggle */}
+          <ViewSwitcher views={views} activeViewKey={activeView} setActiveViewKey={setActiveView} />
           <div className="flex space-x-1">
-            {[
-              { mode: 1, label: "📊" },
-              { mode: 2, label: "📋" },
-              { mode: 3, label: "🎛️" },
-              { mode: 4, label: "🚀" },
-            ].map(({ mode, label }) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 py-1 text-xs rounded-md transition-all duration-300 shadow-sm ${
-                  viewMode === mode
-                    ? mode === 4
-                      ? "bg-cyan-500 animate-pulse shadow-md" // Cyberpunk pulses
-                      : "bg-blue-500 shadow-md"
-                    : "bg-gray-800 hover:bg-gray-700 hover:shadow-sm"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+            {views.find((v) => v.key === activeView)?.component}
           </div>
-
-        {/* Client Actions bars*/}
-          {viewMode === 1 ? 
-          (
-            <ClientActions1 
-              actionLinks={actionLinks}
-              notes={notes}
-              setNote={setNote}
-              note={note}
-              handleAddNote={handleAddNote}
-              deleteNote={deleteNote}
-              deleteAllNotes={deleteAllNotes}
-              //handleDeleteClient={handleDeleteClient}
-            />
-          ) : viewMode === 2 ? (
-            <ClientActions2 
-              actionLinks={actionLinks}
-              notes={notes}
-              setNote={setNote}
-              note={note}
-              handleAddNote={handleAddNote}
-              deleteNote={deleteNote}
-              deleteAllNotes={deleteAllNotes}
-              //handleDeleteClient={handleDeleteClient}
-            />
-          ) : viewMode === 3 ? (
-            <ClientActions3 
-              actionLinks={actionLinks}
-              notes={notes}
-              setNote={setNote}
-              note={note}
-              handleAddNote={handleAddNote}
-              deleteNote={deleteNote}
-              deleteAllNotes={deleteAllNotes}
-              //handleDeleteClient={handleDeleteClient}
-            />
-          ) : (
-            <ClientActions4 
-              actionLinks={actionLinks}
-              notes={notes}
-              setNote={setNote}
-              note={note}
-              handleAddNote={handleAddNote}
-              deleteNote={deleteNote}
-              deleteAllNotes={deleteAllNotes}
-              //handleDeleteClient={handleDeleteClient}
-            />
-          )}
-  
-
-      </div>
+        </div>
     </div>
   );
 };

@@ -6,10 +6,10 @@ import { useParams } from "react-router-dom";
 // Components imports
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
-import CategorizeActions from "components/Transactions/CategorizeActions";
+import CategorizeActions from "../../components/Transactions/CategorizeTransactions/CategorizeActions";
 
-import CategorizeOverviewContainer from "components/Transactions/CategorizeOverviewContainer";
-import CategorizeTablesContainer from "components/Transactions/CategorizeTablesContainer";
+import CategorizeOverviewContainer from "../../components/Transactions/CategorizeTransactions/CategorizeOverviewContainer";
+import CategorizeTablesContainer from "../../components/Transactions/CategorizeTransactions/CategorizeTablesContainer";
 
 
 // Firebase Imports

@@ -5,35 +5,19 @@ import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
-
-import ViewTransactions from "./ViewTransactions";
+import ViewSwitcher from "components/Common/ViewSwitcher";
 
 import TransactionsOverview1 from "components/Transactions/TransactionsOverview1";
 import TransactionsOverview2 from "components/Transactions/TransactionsOverview2";
 import TransactionsOverview3 from "components/Transactions/TransactionsOverview3";
 import TransactionsOverview4 from "components/Transactions/TransactionsOverview4";
-import Button from "components/Button";
 
-// Firebase imports
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
-import { httpsCallable } from "firebase/functions";
-import { functions, db, storage } from "../../firebase/firebase";
-import {
-  doc,
-  getDoc,
-  deleteDoc,
-  updateDoc,
-  deleteField,
-  setDoc,
-} from "firebase/firestore";
-import { ref, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 
 const TransactionsPage = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState("");
-  const [viewMode, setViewMode] = useState(1);
+  const [activeView, setActiveView] = useState("view1");
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -59,6 +43,12 @@ const TransactionsPage = () => {
       label: "Extract Transactions",
       icon: "ph-file-text",
     },
+  ];
+  const views = [
+    { key: "view1", label: "View 1", Component: <TransactionsOverview1 transactions={clientData?.transactions || []} /> },
+    { key: "view2", label: "View 2", Component: <TransactionsOverview2 transactions={clientData?.transactions || []} /> },
+    { key: "view3", label: "View 3", Component: <TransactionsOverview3 transactions={clientData?.transactions || []} /> },
+    { key: "view4", label: "View 4", Component: <TransactionsOverview4 transactions={clientData?.transactions || []} /> },
   ];
 
   // Fetch client data (which contains the transactions array)
@@ -86,58 +76,18 @@ const TransactionsPage = () => {
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
         </header>
+          <ViewSwitcher
+            views={views}
+            activeViewKey={activeView}
+            setActiveViewKey={setActiveView}
+          />
 
-        {/* Toggle View Buttons */}
-        <div className="mb-4 flex space-x-2">
-          <button
-            onClick={() => setViewMode(1)}
-            className={`px-4 py-2 rounded-md text-sm ${
-              viewMode === 1 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"
-            }`}
-          >
-            Overview 1 📄
-          </button>
-          <button
-            onClick={() => setViewMode(2)}
-            className={`px-4 py-2 rounded-md text-sm ${
-              viewMode === 2 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"
-            }`}
-          >
-            Overview 2 📊
-          </button>
-          <button
-            onClick={() => setViewMode(3)}
-            className={`px-4 py-2 rounded-md text-sm ${
-              viewMode === 3 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"
-            }`}
-          >
-            Overview 3 🚀
-          </button>
-          <button
-            onClick={() => setViewMode(4)}
-            className={`px-4 py-2 rounded-md text-sm ${
-              viewMode === 4 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"
-            }`}
-          >
-            Overview 4 📊
-          </button>
+          <div className="mt-6">
+            {views.find((v) => v.key === activeView)?.Component}
+          </div>
         </div>
-
-        {/* Render the selected Overview */}
-        {viewMode === 1 ? (
-          <TransactionsOverview1 transactions={clientData?.transactions || []} />
-        ) : viewMode === 2 ? (
-          <TransactionsOverview2 transactions={clientData?.transactions || []} />
-        ) : viewMode === 3 ? (
-          <TransactionsOverview3 transactions={clientData?.transactions || []} />
-        ) : (
-          <TransactionsOverview4 transactions={clientData?.transactions || []} />
-        )}
-
-        {/* Additional UI for toggles, modes, etc. */}
-        {/* <div> ... </div> */}
       </div>
-    </div>
+
   );
 };
 

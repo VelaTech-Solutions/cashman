@@ -88,7 +88,7 @@ const VerifyTransactions2 = async (id) => {
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
       number_of_transactions: correctedTransactions.length,
-      "extractProgress.extractVerify2Progress": "completed",
+      "extractProgress.extractVerify2Progress": "success",
     });
 
     console.log("✅ Transactions verified successfully.");

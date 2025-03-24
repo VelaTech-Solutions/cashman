@@ -10,7 +10,7 @@ import "styles/tailwind.css";
 
 // Firebase Imports
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 
 function ExtractSettings() {
   const { id } = useParams();
@@ -23,7 +23,7 @@ function ExtractSettings() {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/ExtractTransactions/${id}`, label: "Back to Extract", icon: "ph-arrow-left" },
+    { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left" },
     { path: "/HelpExtract", label: "Extract Help", icon: "ph-question" },
   ];
 
@@ -62,6 +62,34 @@ function ExtractSettings() {
     });
   };
 
+
+  // add ignored line
+  const handleAddIgnoredLine = async () => {
+    const newIgnoredLine = document.querySelector("input[type='text']").value.trim();
+    if (!newIgnoredLine) return;
+    const updatedIgnoredLines = [...ignoredLines, newIgnoredLine];
+    try {
+      await updateDoc(doc(db, "banks", selectedBank), { ignoredLines: updatedIgnoredLines });
+      setIgnoredLines(updatedIgnoredLines);
+    } catch (err) {
+      console.error("Error updating ignored lines:", err.message);
+      setError("Failed to update ignored lines.");
+    }
+  };
+
+  // Add Fuzzy Ignored Line
+  const handleAddFuzzyIgnoredLine = async () => {
+    const newFuzzyIgnoredLine = document.querySelector("input[type='text']").value.trim();
+    if (!newFuzzyIgnoredLine) return;
+    const updatedFuzzyIgnoredLines = [...fuzzyIgnoredLines, newFuzzyIgnoredLine];
+    try {
+      await updateDoc(doc(db, "banks", selectedBank), { fuzzyIgnoredLines: updatedFuzzyIgnoredLines });
+      setFuzzyIgnoredLines(updatedFuzzyIgnoredLines);
+    } catch (err) {
+      console.error("Error updating fuzzy ignored lines:", err.message);
+      setError("Failed to update fuzzy ignored lines.");
+    }
+  };
   // Handle deleting selected ignored lines
   const handleDeleteIgnoredLines = async () => {
     const updatedIgnoredLines = ignoredLines.filter((_, index) => !selectedRows.has(index));
@@ -130,6 +158,51 @@ function ExtractSettings() {
             <option value="Standard Bank">Standard Bank</option>
             <option value="Tyme Bank">Tyme Bank</option>
           </select>
+        </div>
+        {/* input Ignored Line Section */}
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium">Ignored Line</label>
+          <input
+            type="text"
+            className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+            placeholder="Enter the line to ignore"
+          />
+        </div>
+
+
+        {/* input Fuzzy Ignored Line Section */}
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium">Fuzzy Ignored Line</label>
+          <input
+            type="text"
+            className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+            placeholder="Enter the fuzzy line to ignore"
+          />
+        </div>
+
+
+
+
+
+        {/* Add Line Button */}
+        <div className="mb-4">
+          <Button
+            onClick={handleAddIgnoredLine}
+            text="Add Ignored Line"
+            small
+            className="bg-blue-500 hover:bg-blue-600"
+            disabled={!selectedBank}
+          />
+
+          <Button
+            onClick={handleAddFuzzyIgnoredLine}
+            text="Add Fuzzy Ignored Line"
+            small
+            className="bg-blue-500 hover:bg-blue-600"
+            disabled={!selectedBank}
+          />
+
+
         </div>
 
         {/* Delete Selected Button */}

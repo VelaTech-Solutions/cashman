@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Table from "components/Table";
 
-const CategorizeTables1 = ({ transactions, selectedTransactions, setSelectedTransactions, colorMode  }) => {
+const CategorizeTables4 = ({ transactions, selectedTransactions, setSelectedTransactions, colorMode  }) => {
   const [currentTab, setCurrentTab] = useState("default");
   const rowsPerPage = 12;
   const totalPages = Math.ceil(transactions.length / rowsPerPage);
@@ -306,4 +306,4 @@ const CategorizeTables1 = ({ transactions, selectedTransactions, setSelectedTran
   );
 };
 
-export default CategorizeTables1;
+export default CategorizeTables4;

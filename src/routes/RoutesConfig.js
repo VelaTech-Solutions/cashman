@@ -28,8 +28,12 @@ import Budget from "pages/Budget";
 import Settings from "pages/Settings";
 // import ViewSettings from "settings/ViewSettings"
 // import EditSettings from "settings/EditSettings"
-import ExtractSettings from "settings/ExtractSettings";
-import CategorySettings from "settings/CategorySettings";
+import ExtractSettings from "components/settings/ExtractSettings";
+import CategorySettings from "components/settings/CategorySettings";
+
+import CategorySettingsTransactions from "components/settings/CategorySettingsTransactions";
+
+
 
 
 import Developernotes from "pages/Developernotes";
@@ -77,6 +81,7 @@ const RoutesConfig = () => {
         <Route path="/editsettings/:id" element={<EditSettings />} /> */}
         <Route path="/extractsettings/:id" element={<ExtractSettings />} />
         <Route path="/categorysettings/:id" element={<CategorySettings />} />
+        <Route path="/categorysettings/transactiondatabase" element={<CategorySettingsTransactions />} />
         <Route path="/settings" element={<Settings />} />
         {/* <Route path="/developernotes" element={<Developernotes />} /> */}
 
