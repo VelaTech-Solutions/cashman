@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+
+// Component Imports
+import ViewSwitcher from "components/Common/ViewSwitcher";
 import CategorizeOverview1 from "./CategorizeTransactionsOverview1";
 import CategorizeOverview2 from "./CategorizeTransactionsOverview2";
 import CategorizeOverview3 from "./CategorizeTransactionsOverview3";
-
-import ViewSwitcher from "components/Common/ViewSwitcher";
 
 const CategorizeOverviewContainer = ({ transactions }) => {
   const [activeView, setActiveView] = useState("view1");
@@ -15,17 +16,18 @@ const CategorizeOverviewContainer = ({ transactions }) => {
   return (
     <div className="bg-gray-900 p-4 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
-        <div className="space-x-2">
+
+        <div className="flex items-center h-10 space-x-2">
           <ViewSwitcher
             views={views}
             activeViewKey={activeView}
             setActiveViewKey={setActiveView}
           />
         </div>
-      </div>
-      <div className="mt-6">
-        {views.find((v) => v.key === activeView)?.Component}
-      </div>
+        <div className="mt-6">
+          {views.find((v) => v.key === activeView)?.Component}
+        </div>
+      </div>  
     </div>
   );
 };

@@ -2,7 +2,7 @@
 // Instructions to help the user with Help Category
 
 import React from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "components/Sidebar";
 
 // You can adjust the links array according to your actual routes
 const links = [

@@ -1,32 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import "styles/tailwind.css";
 
 // Components imports
-import "styles/tailwind.css";
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
 import ViewSwitcher from "components/Common/ViewSwitcher";
 
-import ClientProfileOverview from "components/ClientView/ClientProfileOverview";
-import ClientActions1 from "components/ClientView/ClientActions1";
-import ClientActions2 from "components/ClientView/ClientActions2";
-import ClientActions3 from "components/ClientView/ClientActions3";
-import ClientActions4 from "components/ClientView/ClientActions4";
+import ClientProfileOverview from "../../components/Client/ClientView/ClientProfileOverview";
+import ClientActions1 from "../../components/Client/ClientView/ClientActions1";
+import ClientActions2 from "../../components/Client/ClientView/ClientActions2";
+import ClientActions3 from "../../components/Client/ClientView/ClientActions3";
+import ClientActions4 from "../../components/Client/ClientView/ClientActions4";
 
 
 // Firebase imports
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
-import { httpsCallable } from "firebase/functions";
-import { functions, db, storage } from "../../firebase/firebase";
-import {
-  doc,
-  getDoc,
-  deleteDoc,
-  updateDoc,
-  deleteField,
-  setDoc,
-} from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { doc, getDoc, updateDoc, } from "firebase/firestore";
 
 
 const ClientProfilePage = () => {
@@ -36,11 +26,7 @@ const ClientProfilePage = () => {
   const [note, setNote] = useState(""); // State for the new note
   const [notes, setNotes] = useState([]); // State for notes history
   const [activeView, setActiveView] = useState("view1");
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
-    {},
-  ];
+
 
   // Fetch client data, Fetch client notes
   useEffect(() => {
@@ -126,13 +112,16 @@ const ClientProfilePage = () => {
     }
   };
 
-  // Define links at the top
+  const links = [
+    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+    { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
+    {},
+  ];
   const actionLinks = id ? [
-      { label: "Budget", path: `/budget/${id}` },
-      { label: "Transactions", path: `/client/${id}/transactionspage` },
-    ]
-  : [];
-
+    { label: "Budget", path: `/budget/${id}` },
+    { label: "Transactions", path: `/client/${id}/transactionspage` },
+  ]
+: [];
   const views = [
     {
       key: "view1",
@@ -195,22 +184,23 @@ const ClientProfilePage = () => {
         )
     },
   ];
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-        <Sidebar title="Client Profile" links={links} />
-        <div className="flex-1 p-8">
-          <header className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-blue-400">
-            Client Profile
-            </h1>
-          </header>
-          <ClientProfileOverview clientData={clientData} />
+      <Sidebar title="Client Profile" links={links} />
+      <div className="flex-1 p-8">
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-400">
+          Client Profile
+          </h1>
+        </header>
+        <ClientProfileOverview clientData={clientData} />
+        <div className="flex items-center h-10 space-x-2">
           <ViewSwitcher views={views} activeViewKey={activeView} setActiveViewKey={setActiveView} />
-          <div className="flex space-x-1">
-            {views.find((v) => v.key === activeView)?.component}
-          </div>
         </div>
+        <div className="mt-6">
+          {views.find((v) => v.key === activeView)?.component}
+        </div>
+      </div>
     </div>
   );
 };

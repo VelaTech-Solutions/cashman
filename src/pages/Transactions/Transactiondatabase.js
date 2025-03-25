@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-
-// Component Imports
-import LoadClientData from "components/LoadClientData"; // Reusable client data loader
-import Sidebar from "components/Sidebar";
+import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
 // Firebase Imports
-import { db } from "../../firebase/firebase"; // Ensure firebase.js exports 'db'
+import { db } from "../../firebase/firebase";
 import { doc, getDocs, collection, deleteDoc } from "firebase/firestore";
+
+// Component Imports
+import Sidebar from "components/Sidebar";
+import LoadClientData from "components/LoadClientData";
+
+
+
+
 
 const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-home" }];
 
 const TransactionDatabase = () => {
   const { id } = useParams();
-  const navigate = useNavigate(); // Use navigate for dynamic "Back" link
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   // Fetch client data
   useEffect(() => {
@@ -56,15 +58,12 @@ const TransactionDatabase = () => {
       } catch (err) {
         console.error("Error fetching transactions:", err);
         setError(err.message);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchTransactions();
   }, [clientData]);
 
-  if (loading) return <p>Loading transactions...</p>;
   if (error) return <p>Error: {error}</p>;
 
   const handleDelete = async (transactionId, bankName) => {

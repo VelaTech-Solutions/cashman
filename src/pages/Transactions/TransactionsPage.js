@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import "styles/tailwind.css";
 
 // Components imports
-import "styles/tailwind.css";
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
 import ViewSwitcher from "components/Common/ViewSwitcher";
-
 import TransactionsOverview1 from "components/Transactions/TransactionsOverview1";
 import TransactionsOverview2 from "components/Transactions/TransactionsOverview2";
 import TransactionsOverview3 from "components/Transactions/TransactionsOverview3";
@@ -18,11 +17,10 @@ const TransactionsPage = () => {
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState("");
   const [activeView, setActiveView] = useState("view1");
-
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" }, // Divider line
+    { type: "divider" },
     {
       path: `/client/${id}/view-transactions`,
       label: "View Transactions",
@@ -51,7 +49,6 @@ const TransactionsPage = () => {
     { key: "view4", label: "View 4", Component: <TransactionsOverview4 transactions={clientData?.transactions || []} /> },
   ];
 
-  // Fetch client data (which contains the transactions array)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,20 +65,18 @@ const TransactionsPage = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
       <Sidebar title="Client Profile" links={links} />
-      {/* Main Content */}
       <div className="flex-1 p-8">
-        {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
         </header>
-          <ViewSwitcher
-            views={views}
-            activeViewKey={activeView}
-            setActiveViewKey={setActiveView}
-          />
-
+          <div className="flex items-center h-10 space-x-2">
+            <ViewSwitcher
+              views={views}
+              activeViewKey={activeView}
+              setActiveViewKey={setActiveView}
+            />
+          </div>
           <div className="mt-6">
             {views.find((v) => v.key === activeView)?.Component}
           </div>

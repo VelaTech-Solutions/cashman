@@ -24,7 +24,7 @@ const ViewTransactions = () => {
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" }, // Divider line
+    { type: "divider" },
     {
       path: `/viewSettings/${id}`,
       label: "View Settings",

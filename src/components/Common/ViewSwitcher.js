@@ -3,7 +3,8 @@ import React from "react";
 
 const ViewSwitcher = ({ views, activeViewKey, setActiveViewKey }) => {
   return (
-    <div className="flex space-x-4 mb-6">
+    <div className="flex space-x-2 h-full">
+
       {views.map((view) => (
         <button
           key={view.key}

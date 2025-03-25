@@ -7,20 +7,12 @@ import { useParams } from "react-router-dom";
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
 import CategorizeActions from "../../components/Transactions/CategorizeTransactions/CategorizeActions";
-
 import CategorizeOverviewContainer from "../../components/Transactions/CategorizeTransactions/CategorizeOverviewContainer";
 import CategorizeTablesContainer from "../../components/Transactions/CategorizeTransactions/CategorizeTablesContainer";
 
-
 // Firebase Imports
 import { db } from "../../firebase/firebase";
-import {
-  doc,
-  updateDoc,
-  collection,
-  getDocs,
-  addDoc,
-} from "firebase/firestore";
+import { doc, updateDoc, collection, getDocs, addDoc, } from "firebase/firestore";
 
 const CategorizeTransactions = () => {
   const { id } = useParams();
@@ -36,9 +28,6 @@ const CategorizeTransactions = () => {
   const [subcategory, setSubcategory] = useState("");
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSummary, setShowSummary] = useState(true);
-  const [viewMode, setViewMode] = useState(1);
-
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
@@ -257,8 +246,6 @@ const CategorizeTransactions = () => {
       <Sidebar title="Categorize Transactions" links={links} />
         <div className="flex-1 p-8">
           <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
-
-          {/* Header */}
           <CategorizeOverviewContainer transactions={transactions} />
 
           <p className="text-sm text-gray-400 mb-2">

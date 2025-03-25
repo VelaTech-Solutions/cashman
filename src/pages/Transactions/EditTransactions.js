@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+
+// Components imports
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
 import ViewSwitcher from "components/Common/ViewSwitcher";
-
-// Import your views
 import EditTransactionView1 from "../../components/Transactions/EditTransactions/EditTransactonsView1";
 import EditTransactionView2 from "../../components/Transactions/EditTransactions/EditTransactonsView2";
 import EditTransactionView3 from "../../components/Transactions/EditTransactions/EditTransactonsView3";
@@ -13,17 +13,31 @@ import EditTransactionView4 from "../../components/Transactions/EditTransactions
 const EditTransactions = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeView, setActiveView] = useState("view1");
-
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}/transactionspage`, label: "Back to Transactions", icon: "ph-file-text" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-user" },
     { type: "divider" },
-  ];
+    {
+      path: `/EditSettings`,
+      label: "Edit Settings",
+      icon: "ph-arrow-left",
+    },
+    { 
+      path: "/HelpEdit", 
+      label: "Edit Help", 
+      icon: "ph-arrow-left" 
+    },
 
+  ];
+  const views = [
+    { key: "view1", label: "View 1", Component: <EditTransactionView1 transactions={clientData?.transactions || []} /> },
+    { key: "view2", label: "View 2", Component: <EditTransactionView2 transactions={clientData?.transactions || []} /> },
+    { key: "view3", label: "View 3", Component: <EditTransactionView3 transactions={clientData?.transactions || []} /> },
+    { key: "view4", label: "View 4", Component: <EditTransactionView4 transactions={clientData?.transactions || []} /> },
+  ];
   useEffect(() => {
     const load = async () => {
       try {
@@ -31,21 +45,11 @@ const EditTransactions = () => {
         setClientData(data);
       } catch (err) {
         setError("Failed to load client data.");
-      } finally {
-        setLoading(false);
       }
     };
     load();
   }, [id]);
 
-  const views = [
-    { key: "view1", label: "View 1", Component: <EditTransactionView1 transactions={clientData?.transactions || []} /> },
-    { key: "view2", label: "View 2", Component: <EditTransactionView2 transactions={clientData?.transactions || []} /> },
-    { key: "view3", label: "View 3", Component: <EditTransactionView3 transactions={clientData?.transactions || []} /> },
-    { key: "view4", label: "View 4", Component: <EditTransactionView4 transactions={clientData?.transactions || []} /> },
-  ];
-
-  if (loading) return <div className="text-white p-8">Loading...</div>;
   if (error) return <div className="text-red-500 p-8">{error}</div>;
 
   return (
@@ -53,13 +57,13 @@ const EditTransactions = () => {
       <Sidebar title="Edit Transactions" links={links} />
       <div className="flex-1 p-8">
         <h2 className="text-2xl font-bold mb-4">Edit Transactions</h2>
-
-        <ViewSwitcher
-          views={views}
-          activeViewKey={activeView}
-          setActiveViewKey={setActiveView}
-        />
-
+        <div className="flex items-center h-10 space-x-2">
+          <ViewSwitcher
+            views={views}
+            activeViewKey={activeView}
+            setActiveViewKey={setActiveView}
+          />
+        </div>
         <div className="mt-6">
           {views.find((v) => v.key === activeView)?.Component}
         </div>

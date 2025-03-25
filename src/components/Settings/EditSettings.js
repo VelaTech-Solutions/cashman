@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "components/Sidebar";
-import CategorySettingsAddCategory from "./CategorySettingsAddCategory"; // rendered directly
-import CategorySettingsAddSubcategory from "./CategorySettingsAddSubcategory";
-import CategorySettingsTransactions from "./CategorySettingsTransactions"; // rendered directly
 
-const CategorySettings = () => {
+// Nested Components
+// import CategorySettingsAddCategory from "./EditSettings/CategorySettingsAddCategory"; 
+// import CategorySettingsAddSubcategory from "./EditSettings/CategorySettingsAddSubcategory";
+// import CategorySettingsTransactions from "./EditSettings/CategorySettingsTransactions"; 
+
+const EditSettings = () => {
   const navigate = useNavigate();
   const [activePage, setActivePage] = useState("none");
 
@@ -52,11 +54,11 @@ const CategorySettings = () => {
       <Sidebar title="Category Settings" links={links} />
 
       <div className="flex-1 p-8">
-        {activePage === "transactions" && <CategorySettingsTransactions />}
+        {/* {activePage === "transactions" && <CategorySettingsTransactions />}
 
         {activePage === "add-category" && <CategorySettingsAddCategory />}
 
-        {activePage === "add-subcategory" && <CategorySettingsAddSubcategory />}
+        {activePage === "add-subcategory" && <CategorySettingsAddSubcategory />} */}
         {activePage === "none" && (
           <p className="text-gray-500">Select an action from the sidebar.</p>
         )}
@@ -65,4 +67,4 @@ const CategorySettings = () => {
   );
 };
 
-export default CategorySettings;
+export default EditSettings;

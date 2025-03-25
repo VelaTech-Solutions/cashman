@@ -1,10 +1,10 @@
 // src/pages/ViewClient.js
 
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 // Component Imports
 import Sidebar from "components/Sidebar";
+import ViewSwitcher from "components/Common/ViewSwitcher";
 import "styles/tailwind.css";
 
 // Firebase imports
@@ -12,14 +12,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase"; // Ensure this is the correct path
 import { collection, getDocs } from "firebase/firestore";
 
-const links = [
-  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-];
-
-import ClientViewTable1 from "components/ClientView/ClientViewTable1";
-import ClientViewTable2 from "components/ClientView/ClientViewTable2";
-import ClientViewTable3 from "components/ClientView/ClientViewTable3";
-import ClientViewTable4 from "components/ClientView/ClientViewTable4";
+import ClientViewTable1 from "components/Client/ClientView/ClientViewTable1";
+import ClientViewTable2 from "components/Client/ClientView/ClientViewTable2";
+import ClientViewTable3 from "components/Client/ClientView/ClientViewTable3";
+import ClientViewTable4 from "components/Client/ClientView/ClientViewTable4";
 
 
 const Viewclient = () => {
@@ -28,14 +24,16 @@ const Viewclient = () => {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [activeView, setActiveView] = useState("view1");
   // ---- ADDED SORTING STATE ----
   const [sortField, setSortField] = useState("clientName");
   const [sortOrder, setSortOrder] = useState("asc");
 
   // State for toggling view mode (1 = Grid View, 2 = List View)
   const [viewMode, setViewMode] = useState(1);
-
+  const links = [
+    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
+  ];
   // Track user authentication
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -74,60 +72,6 @@ const Viewclient = () => {
       .includes(searchQuery),
   );
 
-  const views = [
-    {
-      key: "view1",
-      label: "View 1",
-      component: (<ClientViewTable1 sortedClients={sortedClients} />
-      ),
-    },
-    {
-      key: "view2",
-      label: "View 2",
-      component: (
-        <ClientActions2
-        actionLinks={actionLinks}
-        notes={notes}
-        setNote={setNote}
-        note={note}
-        handleAddNote={handleAddNote}
-        deleteNote={deleteNote}
-        deleteAllNotes={deleteAllNotes}
-      />
-      ),
-    },
-    {
-      key: "view3",
-      label: "View 3",
-      component: (
-        <ClientActions3 
-        actionLinks={actionLinks}
-        notes={notes}
-        setNote={setNote}
-        note={note}
-        handleAddNote={handleAddNote}
-        deleteNote={deleteNote}
-        deleteAllNotes={deleteAllNotes}
-      />
-      ),
-    },
-      {
-        key: "view4",
-        label: "View 4",
-        component: (
-          <ClientActions4 
-          actionLinks={actionLinks}
-          notes={notes}
-          setNote={setNote}
-          note={note}
-          handleAddNote={handleAddNote}
-          deleteNote={deleteNote}
-          deleteAllNotes={deleteAllNotes}
-        />
-        )
-    },
-  ];
-
   // ---- SORT the filtered list before pagination ----
   const sortedClients = React.useMemo(() => {
     // Copy array so we don't mutate original
@@ -164,15 +108,38 @@ const Viewclient = () => {
 
     return clientsCopy;
   }, [filteredClients, sortField, sortOrder]);
-
+  
+  const views = [
+    {
+      key: "view1",
+      label: "View 1",
+      component: (<ClientViewTable1 sortedClients={sortedClients} />
+      ),
+    },
+    {
+      key: "view2",
+      label: "View 2",
+      component: (<ClientViewTable2 sortedClients={sortedClients} />
+      ),
+    },
+    {
+      key: "view3",
+      label: "View 3",
+      component: (<ClientViewTable3 sortedClients={sortedClients} />
+      ),
+    },
+      {
+        key: "view4",
+        label: "View 4",
+        component: (<ClientViewTable4 sortedClients={sortedClients} />
+      )
+    },
+  ];
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
       <Sidebar title="View Clients" links={links} />
-
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <header className="flex justify-between items-center mb-8">
           <button
@@ -183,29 +150,23 @@ const Viewclient = () => {
           </button>
         </header>
 
-        <section className="mt-6 flex items-center space-x-4">
-          {/* Search Bar */}
-          <div className="relative w-full max-w-xs">
+        <section className="mt-6 flex flex-wrap items-center gap-4">
+          <div className="relative">
             <input
               type="text"
               placeholder="Search clients..."
               onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
               value={searchQuery}
-              className="w-full pl-10 pr-4 py-2 rounded-md bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 shadow-md border border-gray-700 hover:border-cyan-500 outline-none"
+              className="pl-10 pr-4 h-10 w-56 rounded-md bg-gray-900 text-white placeholder-gray-400 border border-gray-700 focus:ring-2 focus:ring-cyan-500"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400">
-              🔍
-            </div>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400">🔍</div>
           </div>
-          
-          {/* Sort Dropdown */}
-          <div className="flex items-center space-x-2">
-            <label className="text-gray-300 text-xs font-semibold" htmlFor="sortField">Sort:</label>
+          <div className="flex items-center h-10">
+            <label className="text-gray-300 text-sm mr-2">Sort:</label>
             <select
-              id="sortField"
               value={sortField}
               onChange={(e) => setSortField(e.target.value)}
-              className="bg-gray-800 text-white px-2 py-1 text-xs rounded-md shadow-sm focus:ring-2 focus:ring-cyan-500 border border-gray-700 transition-all duration-300"
+              className="h-full bg-gray-800 text-white px-3 rounded-md border border-gray-700 text-sm"
             >
               {[
                 { value: "clientName", label: "Name" },
@@ -217,55 +178,27 @@ const Viewclient = () => {
               ))}
             </select>
             <button
-              className="px-3 py-1 text-xs rounded-md shadow-sm transition-all duration-300 bg-gray-800 text-white hover:bg-cyan-600 hover:shadow-md"
+              className="h-full ml-2 px-3 rounded-md bg-gray-800 text-white text-sm border border-gray-700 hover:bg-cyan-600"
               onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
             >
               {sortOrder === "asc" ? "⬆" : "⬇"}
             </button>
           </div>
-          
-          {/* View Mode Toggle */}
-          <div className="flex space-x-1">
-            {[
-              { mode: 1, label: "📊" },
-              { mode: 2, label: "📋" },
-              { mode: 3, label: "🎛️" },
-              { mode: 4, label: "🚀" },
-            ].map(({ mode, label }) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 py-1 text-xs rounded-md transition-all duration-300 shadow-sm ${
-                  viewMode === mode
-                    ? mode === 4
-                      ? "bg-cyan-500 animate-pulse shadow-md" // Cyberpunk pulses
-                      : "bg-blue-500 shadow-md"
-                    : "bg-gray-800 hover:bg-gray-700 hover:shadow-sm"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+
+          {/* View Switcher Buttons - Custom local wrapper to control layout */}
+          <div className="flex items-center h-10 space-x-2">
+            <ViewSwitcher
+              views={views}
+              activeViewKey={activeView}
+              setActiveViewKey={setActiveView}
+            />
           </div>
-        </section>
-
-
-        {/* Render the Selected Table */}
-        <div className="mt-6">
-          {viewMode === 1 ? 
-          (
-            <ClientViewTable1 sortedClients={sortedClients} />
-          ) : viewMode === 2 ? (
-            <ClientViewTable2 sortedClients={sortedClients} />
-          ) : viewMode === 3 ? (
-            <ClientViewTable3 sortedClients={sortedClients} />
-          ) : (
-            <ClientViewTable4 sortedClients={sortedClients} />
-          )}
-        </div>
-
-      </div>
+  </section>
+      <section className="mt-6">
+        {views.find((v) => v.key === activeView)?.component}
+      </section>
     </div>
+  </div>
   );
 };
 

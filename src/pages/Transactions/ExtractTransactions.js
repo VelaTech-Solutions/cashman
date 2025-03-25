@@ -1,15 +1,13 @@
-// src/pages/ExtractTransactions.js
+// src/pages/Transactions/ExtractTransactions.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-// Components Imports
-import LoadClientData from "components/LoadClientData";
-import Sidebar from "components/Sidebar";
-import ExtractAutomatically from "components/Extract/ExtractAutomatically";
-import ExtractManually from "components/Extract/ExtractManually";
 import "styles/tailwind.css";
 
-// Help Imports
+// Components Imports
+import Sidebar from "components/Sidebar";
+import LoadClientData from "components/LoadClientData";
+import ExtractAutomatically from "components/Extract/ExtractAutomatically";
+import ExtractManually from "components/Extract/ExtractManually";
 // import HelpExtract from "../help/HelpExtract";
 
 function ExtractTransactions() {
@@ -18,18 +16,17 @@ function ExtractTransactions() {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("ExtractAutomatically");
   const unverifiedCount = clientData?.transactions?.filter(tx => tx.verified === "✗").length || 0;
-
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" }, // Divider line
+    { type: "divider" },
     {
       path: `/client/${id}/edit-transactions`,
-      label: `Edit Transactions (${unverifiedCount})`,  // ✅ Display count dynamically
+      label: `Edit Transactions (${unverifiedCount})`,
       icon: "ph-file-text",
-    },// how to get the button to show the number of transactions that needs editing, the unverifed transactions the ones
-    { type: "divider" }, // Divider line
+    },
+    { type: "divider" }, 
     {
       path: `/ExtractSettings/${id}`,
       label: "Extract Settings",
@@ -59,7 +56,6 @@ function ExtractTransactions() {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Extract Transactions" links={links} />
-
       <div className="flex-1 p-8">
         {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
@@ -67,8 +63,6 @@ function ExtractTransactions() {
             Extract Transactions
           </h1>
         </header>
-
-
         <div className="space-x-4 mb-6">
           <button
             className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
@@ -79,7 +73,6 @@ function ExtractTransactions() {
             onClick={() => setActiveSection("ExtractAutomatically")}
           >🚀 Extract Automatically
           </button>
-
           <button
             className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
               activeSection === "ExtractManually"
@@ -90,14 +83,10 @@ function ExtractTransactions() {
           >✍️ Extract Manually
           </button>
         </div>
-
           {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
           {activeSection === "ExtractManually" && <ExtractManually />}
-
-        </div>
       </div>
+    </div>
   );
 }
 export default ExtractTransactions;
-
-// can we make the different ways of extraction placed in the sidebar? the render if  manual or auto extraction?
