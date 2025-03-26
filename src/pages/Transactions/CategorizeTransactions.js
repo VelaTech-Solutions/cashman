@@ -3,51 +3,83 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// Components imports
+// Components
 import Sidebar from "components/Sidebar";
 import LoadClientData from "components/LoadClientData";
-import CategorizeActions from "../../components/Transactions/CategorizeTransactions/CategorizeActions";
-import CategorizeOverviewContainer from "../../components/Transactions/CategorizeTransactions/CategorizeOverviewContainer";
-import CategorizeTablesContainer from "../../components/Transactions/CategorizeTransactions/CategorizeTablesContainer";
+import NormalCategorizer from "components/Transactions/CategorizeTransactions/NormalCategorizePage";
+import SmartCategorizer from "components/Transactions/CategorizeTransactions/SmartCategorizePage";
+import AICategorizer from "components/Transactions/CategorizeTransactions/AICategorizePage";
 
-// Firebase Imports
+// Firebase
 import { db } from "../../firebase/firebase";
-import { doc, updateDoc, collection, getDocs, addDoc, } from "firebase/firestore";
+import { doc, updateDoc, collection, getDocs, addDoc } from "firebase/firestore";
 
 const CategorizeTransactions = () => {
   const { id } = useParams();
+  const [activePage, setActivePage] = useState("NormalCategorizer");
+
   const [clientData, setClientData] = useState(null);
   const [bankName, setBankName] = useState("Unknown Bank");
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [selectedTransactions, setSelectedTransactions] = useState([]);
+
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
-  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState(null);
+
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
+    { path: `/client/${id}/transactionspage`, label: "Back to Transactions", icon: "ph-file-text" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" }, // Divider line
-    { path: `/categorysettings/${id}`,
-      label: "Category Settings",
-      icon: "ph-file-text",
+    { type: "divider" },
+    {
+      type: "custom",
+      content: (
+        <button
+          onClick={() => setActivePage("NormalCategorizer")}
+          className="w-full text-left px-4 py-2 mb-2 bg-blue-500 hover:bg-blue-600 text-black rounded transition-all"
+        >
+          Normal Categorizer
+        </button>
+      ),
     },
-    { path: "/HelpCategory",
-    label: "Category Help",
-    icon: "ph-file-text",
-  },
+    {
+      type: "custom",
+      content: (
+        <button
+          onClick={() => setActivePage("SmartCategorizer")}
+          className="w-full text-left px-4 py-2 mb-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded transition-all"
+        >
+          Smart Categorizer
+        </button>
+      ),
+    },
+    {
+      type: "custom",
+      content: (
+        <button
+          onClick={() => setActivePage("AICategorizer")}
+          className="w-full text-left px-4 py-2 mb-2 bg-purple-500 hover:bg-purple-600 text-white rounded transition-all"
+        >
+          AI Categorizer
+        </button>
+      ),
+    },
+    { type: "divider" },
+    { path: `/categorysettings/${id}`, label: "Category Settings", icon: "ph-file-text" },
+    { path: "/HelpCategory", label: "Category Help", icon: "ph-file-text" },
   ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const clientData = await LoadClientData(id);
-
         const fetchedTransactions = (clientData.transactions || []).map((txn) => ({
           ...txn,
           bankName: clientData.bankName || "Unknown Bank",
@@ -75,7 +107,6 @@ const CategorizeTransactions = () => {
         );
         setSubcategories(organizedSubcategories);
       } catch (err) {
-        console.error("Error fetching data:", err.message);
         setError("Failed to fetch transactions or categories.");
       }
     };
@@ -84,9 +115,7 @@ const CategorizeTransactions = () => {
 
   useEffect(() => {
     if (category) {
-      const filtered = subcategories.filter(
-        (sub) => sub.parentCategory === category
-      );
+      const filtered = subcategories.filter((sub) => sub.parentCategory === category);
       setFilteredSubcategories(filtered);
     } else {
       setFilteredSubcategories([]);
@@ -137,142 +166,94 @@ const CategorizeTransactions = () => {
       setTransactions(updatedTransactions);
       setSelectedTransactions([]);
     } catch (err) {
-      console.error("Error during categorization:", err.message, err.stack);
-      alert("Failed to categorize transactions. Check the console for details.");
+      alert("Failed to categorize transactions. Check console.");
     }
   };
 
-  const saveToTransactionDatabase = async (
-    bankName,
-    description,
-    category,
-    subcategory
-  ) => {
+  const saveToTransactionDatabase = async (bankName, description, category, subcategory) => {
     try {
-      if (!bankName) {
-        throw new Error("Bank name is undefined or missing.");
-      }
-      const bankCollectionRef = collection(
-        db,
-        "transaction_database",
-        bankName,
-        "transactions"
-      );
-      const querySnapshot = await getDocs(bankCollectionRef);
-      const existingTransaction = querySnapshot.docs.find(
-        (doc) => doc.data().description === description
-      );
+      if (!bankName) throw new Error("Bank name is undefined");
+      const bankRef = collection(db, "transaction_database", bankName, "transactions");
+      const querySnapshot = await getDocs(bankRef);
+      const exists = querySnapshot.docs.find((doc) => doc.data().description === description);
+      if (exists) return;
 
-      if (existingTransaction) return;
-
-      await addDoc(bankCollectionRef, {
+      await addDoc(bankRef, {
         description,
         category,
         subcategory,
         createdAt: new Date().toISOString(),
       });
     } catch (err) {
-      console.error("Error saving to transaction database:", err.message);
+      console.error("Error saving to DB:", err.message);
     }
   };
 
   const clearAllCategories = async () => {
     try {
-      const updatedTransactions = transactions.map((txn) => ({
-        ...txn,
-        category: "",
-        subcategory: "",
-      }));
-
-      const clientDocRef = doc(db, "clients", id);
-      await updateDoc(clientDocRef, { transactions: updatedTransactions });
-      alert("All transactions cleared successfully!");
-      setTransactions(updatedTransactions);
+      const cleared = transactions.map((txn) => ({ ...txn, category: "", subcategory: "" }));
+      await updateDoc(doc(db, "clients", id), { transactions: cleared });
+      setTransactions(cleared);
+      alert("All transactions cleared.");
     } catch (err) {
-      console.error("Error clearing categories:", err.message);
       alert("Failed to clear categories.");
     }
   };
 
   const matchAllTransactions = async () => {
     try {
-      if (!bankName) {
-        alert("Bank name is missing. Unable to match transactions.");
-        return;
-      }
-
-      const bankCollectionRef = collection(
-        db,
-        "transaction_database",
-        bankName,
-        "transactions"
-      );
-      const querySnapshot = await getDocs(bankCollectionRef);
+      const bankRef = collection(db, "transaction_database", bankName, "transactions");
+      const querySnapshot = await getDocs(bankRef);
       const transactionDatabase = querySnapshot.docs.map((doc) => doc.data());
 
-      if (transactionDatabase.length === 0) {
-        alert("No transactions found in the database.");
-        return;
-      }
-
-      const updatedTransactions = transactions.map((txn) => {
-        const matchingTxn = transactionDatabase.find(
-          (dbTxn) => dbTxn.description === txn.description
-        );
-        if (matchingTxn) {
-          return {
-            ...txn,
-            category: matchingTxn.category,
-            subcategory: matchingTxn.subcategory,
-          };
-        }
-        return txn;
+      const updated = transactions.map((txn) => {
+        const match = transactionDatabase.find((dbTxn) => dbTxn.description === txn.description);
+        return match
+          ? { ...txn, category: match.category, subcategory: match.subcategory }
+          : txn;
       });
 
-      const clientDocRef = doc(db, "clients", id);
-      await updateDoc(clientDocRef, { transactions: updatedTransactions });
-      setTransactions(updatedTransactions);
-      alert("All matching transactions have been categorized.");
+      await updateDoc(doc(db, "clients", id), { transactions: updated });
+      setTransactions(updated);
+      alert("Matching transactions categorized.");
     } catch (err) {
-      console.error("Error in Match-All:", err.message);
       alert("Failed to match transactions.");
     }
   };
 
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
       <Sidebar title="Categorize Transactions" links={links} />
-        <div className="flex-1 p-8">
-          <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
-          <CategorizeOverviewContainer transactions={transactions} />
-
-          <p className="text-sm text-gray-400 mb-2">
-            This is a short description for the user. Select one transaction and run the
-            <strong> Match All</strong> function or use the
-            <strong> Match All Transactions </strong>
-            button for the best results.
-          </p>
-
-          <CategorizeActions
-            search={setSearchQuery}
+      <div className="flex-1 p-8">
+        {/* <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1> */}
+        {activePage === "NormalCategorizer" && (
+          <NormalCategorizer
+            transactions={transactions}
+            setTransactions={setTransactions}
+            selectedTransactions={selectedTransactions}
+            setSelectedTransactions={setSelectedTransactions}
+            categories={categories}
+            subcategories={subcategories}
+            filteredSubcategories={filteredSubcategories}
             category={category}
             setCategory={setCategory}
             subcategory={subcategory}
             setSubcategory={setSubcategory}
-            categories={categories}
-            filteredSubcategories={filteredSubcategories}
-            onMatchAll={matchAllTransactions}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             onCategorize={categorize}
+            onMatchAll={matchAllTransactions}
             onClear={clearAllCategories}
           />
-
-          <CategorizeTablesContainer             
-            transactions={transactions}
-            selectedTransactions={selectedTransactions}
-            setSelectedTransactions={setSelectedTransactions}
-          />
+        )}
+        {activePage === "SmartCategorizer" && (
+          <SmartCategorizer transactions={transactions} clientId={id} />
+        )}
+        {activePage === "AICategorizer" && (
+          <AICategorizer transactions={transactions} clientId={id}/>
+        )}
       </div>
     </div>
   );

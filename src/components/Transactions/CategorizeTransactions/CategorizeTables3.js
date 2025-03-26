@@ -1,106 +1,59 @@
 import React, { useState } from "react";
-import CategoryColor from "components/Common/CategoryColor"
+import CategoryColor from "components/Common/CategoryColor";
 
-const CategorizeTables3 = ({ 
-  transactions, 
-  selectedTransactions, 
-  setSelectedTransactions
-}) => {
-  const [currentTab, setCurrentTab] = useState("table3");
+const CategorizeTables3 = ({ transactions, selectedTransactions, setSelectedTransactions }) => {
   const rowsPerPage = 12;
   const totalPages = Math.ceil(transactions.length / rowsPerPage);
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const currentTransactions = transactions.slice(startIndex, startIndex + rowsPerPage);
 
-  const isAllSelected =
-    currentTransactions.length > 0 &&
-    currentTransactions.every((_, idx) =>
-      selectedTransactions.includes(startIndex + idx)
-    );
-
-  const handleSelectAll = () => {
-    const currentIndexes = currentTransactions.map((_, idx) => startIndex + idx);
-    if (isAllSelected) {
-      setSelectedTransactions(
-        selectedTransactions.filter((i) => !currentIndexes.includes(i))
-      );
-    } else {
-      const newSelections = [
-        ...selectedTransactions,
-        ...currentIndexes.filter((i) => !selectedTransactions.includes(i)),
-      ];
-      setSelectedTransactions(newSelections);
-    }
-  };
-
-  const handleCheckboxChange = (localIndex) => {
-    const globalIndex = startIndex + localIndex;
+  const handleCheckboxChange = (index) => {
+    const globalIndex = startIndex + index;
     if (selectedTransactions.includes(globalIndex)) {
-      setSelectedTransactions(
-        selectedTransactions.filter((i) => i !== globalIndex)
-      );
+      setSelectedTransactions(selectedTransactions.filter((i) => i !== globalIndex));
     } else {
       setSelectedTransactions([...selectedTransactions, globalIndex]);
     }
   };
 
-
   return (
     <div className="text-white">
-      {/* Tabs */}
-      <div className="flex space-x-4 mb-4 border-b border-gray-700">
-        <button
-          className={`p-2 ${currentTab === "scrollable" ? "border-b-2 border-white" : ""}`}
-          onClick={() => setCurrentTab("table2")}
-        >
-          Table2
-        </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {currentTransactions.map((transaction, idx) => {
+          const globalIndex = startIndex + idx;
+          const isSelected = selectedTransactions.includes(globalIndex);
+
+          return (
+            <div
+              key={globalIndex}
+              className={`relative border-l-4 ${CategoryColor(transaction.category)} bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-[1.01]`}
+            >
+              <div className="absolute top-2 right-2">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => handleCheckboxChange(idx)}
+                />
+              </div>
+              <p className="text-sm text-gray-400">{transaction.date1 || "-"}</p>
+              <h3 className="text-lg font-bold text-white mt-1">{transaction.description || "-"}</h3>
+              <div className="mt-2 text-sm">
+                <p>Debit: <span className="text-red-400">{transaction.debit_amount || "-"}</span></p>
+                <p>Credit: <span className="text-green-400">{transaction.credit_amount || "-"}</span></p>
+                <p>Balance: {transaction.balance_amount || "-"}</p>
+              </div>
+              <div className="mt-2 text-xs text-gray-400">
+                <span className="font-semibold">Category:</span> {transaction.category || "-"} <br />
+                <span className="font-semibold">Subcategory:</span> {transaction.subcategory || "-"}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {currentTab === "table3" && (
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th className="p-2">
-                  <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
-                </th>
-                <th className="p-2">Date</th>
-                <th className="p-2">Description</th>
-                <th className="p-2">Debit</th>
-                <th className="p-2">Credit</th>
-                <th className="p-2">Balance</th>
-                <th className="p-2">Category</th>
-                <th className="p-2">Subcategory</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentTransactions.map((transaction, idx) => (
-                <tr key={startIndex + idx} className={`${CategoryColor(transaction.category)}`}>
-                  <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedTransactions.includes(startIndex + idx)}
-                      onChange={() => handleCheckboxChange(idx)}
-                    />
-                  </td>
-                  <td className="p-2">{transaction.date1 || "-"}</td>
-                  <td className="p-2">{transaction.description || "-"}</td>
-                  <td className="p-2">{transaction.debit_amount || "-"}</td>
-                  <td className="p-2">{transaction.credit_amount || "-"}</td>
-                  <td className="p-2">{transaction.balance_amount || "-"}</td>
-                  <td className="p-2">{transaction.category || "-"}</td>
-                  <td className="p-2">{transaction.subcategory || "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Pagination Controls */}
-      <div className="flex justify-between items-center p-4">
+      {/* Pagination */}
+      <div className="flex justify-between items-center p-4 mt-4">
         <button
           className="px-4 py-2 bg-gray-700 rounded-lg disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

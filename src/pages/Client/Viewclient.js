@@ -193,10 +193,10 @@ const Viewclient = () => {
               setActiveViewKey={setActiveView}
             />
           </div>
-  </section>
-      <section className="mt-6">
-        {views.find((v) => v.key === activeView)?.component}
-      </section>
+        </section>
+        <section className="mt-6">
+          {views.find((v) => v.key === activeView)?.component}
+        </section>
     </div>
   </div>
   );

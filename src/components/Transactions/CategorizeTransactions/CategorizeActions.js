@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const CategorizeActions = ({
   search,
@@ -12,9 +12,30 @@ const CategorizeActions = ({
   onCategorize,
   onClear,
 }) => {
+  const [loadingMatch, setLoadingMatch] = useState(false);
+  const [loadingCategorize, setLoadingCategorize] = useState(false);
+  const [loadingClear, setLoadingClear] = useState(false);
+
+  const handleMatchAll = async () => {
+    setLoadingMatch(true);
+    await onMatchAll();
+    setLoadingMatch(false);
+  };
+
+  const handleCategorize = async () => {
+    setLoadingCategorize(true);
+    await onCategorize();
+    setLoadingCategorize(false);
+  };
+
+  const handleClear = async () => {
+    setLoadingClear(true);
+    await onClear();
+    setLoadingClear(false);
+  };
+
   return (
     <div className="bg-gray-800 p-3 rounded-lg shadow-md flex flex-wrap items-center justify-between gap-2">
-      {/* Search Bar */}
       <input
         type="text"
         placeholder="🔍 Search..."
@@ -22,7 +43,6 @@ const CategorizeActions = ({
         className="flex-1 min-w-[150px] p-2 text-sm rounded bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
       />
 
-      {/* Dropdowns */}
       <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 text-sm rounded bg-gray-700 text-white">
         <option value="">Category</option>
         {categories.map((cat) => (
@@ -37,15 +57,28 @@ const CategorizeActions = ({
         ))}
       </select>
 
-      {/* Buttons */}
-      <button onClick={onMatchAll} className="bg-green-500 hover:bg-green-600 text-white p-2 text-xs rounded">
-        ✅ Match All
+      <button
+        onClick={handleMatchAll}
+        disabled={loadingMatch}
+        className="bg-green-500 hover:bg-green-600 text-white p-2 text-xs rounded flex items-center justify-center"
+      >
+        {loadingMatch ? <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span> : "✅ Match All"}
       </button>
-      <button onClick={onCategorize} className="bg-blue-500 hover:bg-blue-600 text-white p-2 text-xs rounded">
-        📂 Categorize
+
+      <button
+        onClick={handleCategorize}
+        disabled={loadingCategorize}
+        className="bg-blue-500 hover:bg-blue-600 text-white p-2 text-xs rounded flex items-center justify-center"
+      >
+        {loadingCategorize ? <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span> : "📂 Categorize"}
       </button>
-      <button onClick={onClear} className="bg-red-500 hover:bg-red-600 text-white p-2 text-xs rounded">
-        ❌ Clear
+
+      <button
+        onClick={handleClear}
+        disabled={loadingClear}
+        className="bg-red-500 hover:bg-red-600 text-white p-2 text-xs rounded flex items-center justify-center"
+      >
+        {loadingClear ? <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span> : "❌ Clear"}
       </button>
     </div>
   );
