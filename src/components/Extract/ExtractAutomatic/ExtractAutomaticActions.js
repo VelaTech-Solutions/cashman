@@ -7,10 +7,13 @@ import { db } from "../../../firebase/firebase";
 import cleanStatement from "./cleanStatement"; // 🚧 Commented out for now
 import createDatabaseStructure from "./createDatabaseStructure";
 import extractDates from "./extractDates"; // 🚧 Commented out for now
+// import extractDatesVerify from "./extractDatesVerify"; // 🚧 Commented out for now wip
 import extractAmounts from "./extractAmounts"; // 🚧 Commented out for now
 import extractDescription from "./extractDescription"; // 🚧 Commented out for now
+// import extractDescriptionVerify from "./extractDescriptionVerify"; // 🚧 Commented out for now wip
 import VerifyTransactions from "./VerifyTransactions"; // 🚧 Commented out for now
 import VerifyTransactions2 from "./VerifyTransactions2"; // 🚧 Commented out for now
+
 export const ExtractAutomaticActions = ({
   id,
   bankName, // ✅ Ensure bankName is correctly passed
@@ -67,10 +70,10 @@ export const ExtractAutomaticActions = ({
         const updatedClientSnap = await getDoc(doc(db, "clients", id));
         const updatedClientData = updatedClientSnap.data();
         setClientData(updatedClientData);
-  
         setExtractionStatus((prev) => ({ ...prev, "Checking raw data": "success" }));
         console.log("✅ rawData successfully copied to filteredData.");
-      } else {
+        } 
+      else {
         console.log("❌ No raw data found, extracting...");
         setExtractionStatus((prev) => ({ ...prev, "Extracting raw data": "processing" }));
   
@@ -88,7 +91,6 @@ export const ExtractAutomaticActions = ({
   
       // Step 2: Clean Statement
       setExtractionStatus((prev) => ({ ...prev, "Cleaning statement": "processing" }));
-  
       try {
         await cleanStatement({ id, bankName });
         setExtractionStatus((prev) => ({ ...prev, "Cleaning statement": "success" }));
@@ -118,6 +120,16 @@ export const ExtractAutomaticActions = ({
         console.error("⚠️ Extracting dates failed, continuing...");
         setExtractionStatus((prev) => ({ ...prev, "Extracting dates": "failed" }));
       }
+
+      // Step 3.1: Verify and Clean up Dates uniformity the dates
+      // setExtractionStatus((prev) => ({ ...prev, "Verifing dates": "processing" }));
+      // try {
+      //   await extractDatesVerify(id, bankName);
+      //   setExtractionStatus((prev) => ({ ...prev, "Verifing dates": "success" }));
+      // } catch (error) {
+      //   console.error("⚠️ Verifing dates failed, continuing...");
+      //   setExtractionStatus((prev) => ({ ...prev, "Verifing dates": "failed" }));
+      // }
   
       // Step 4: Extract Amounts
       setExtractionStatus((prev) => ({ ...prev, "Extracting amounts": "processing" }));
@@ -139,6 +151,16 @@ export const ExtractAutomaticActions = ({
         console.error("⚠️ Extracting descriptions failed, continuing...");
         setExtractionStatus((prev) => ({ ...prev, "Extracting descriptions": "failed" }));
       }
+
+      // Step 5.1: Verify and Clean up Descriptions
+      // setExtractionStatus((prev) => ({ ...prev, "Verifing descriptions": "processing" }));
+      // try {
+      //   await extractDescriptionVerify(id, bankName);
+      //   setExtractionStatus((prev) => ({ ...prev, "Verifing descriptions": "success" }));
+      // } catch (error) {
+      //   console.error("⚠️ Verifing descriptions failed, continuing...");
+      //   setExtractionStatus((prev) => ({ ...prev, "Verifing descriptions": "failed" }));
+      // }
 
       // Step 6: Verify amounts
       setExtractionStatus((prev) => ({ ...prev, "Verifing amounts": "processing" }));
