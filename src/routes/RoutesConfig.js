@@ -15,11 +15,12 @@ import Viewclient from "pages/Client/ClientViewPage";
 import Clientprofile from "pages/Client/ClientProfilePage";
 
 // Transaction Pages
-import TransactionsPage from "pages/Transactions/TransactionsPage";
-import ViewTransactions from "pages/Transactions/ViewTransactions";
-import EditTransactions from "pages/Transactions/EditTransactions";
-import ExtractTransactions from "pages/Transactions/ExtractTransactions";
-import CategorizeTransactions from "pages/Transactions/CategorizeTransactions";
+import TransactionsPage from "pages/TransactionsPage"; // main
+
+import ViewTransactions from "components/Transactions/ViewTransactions/ViewTransactions";
+import EditTransactions from "components/Transactions/EditTransactions/EditTransactions";
+import ExtractTransactions from "components/Transactions/ExtractTransactions/ExtractTransactions";
+import CategorizeTransactions from "components/Transactions/CategorizeTransactions/CategorizeTransactions";
 import ViewReports from "pages/Reports/ViewReports";
 
 // Settings Pages
