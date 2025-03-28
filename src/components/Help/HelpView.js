@@ -2,7 +2,10 @@
 // Instructions to help the user with ViewBudget
 
 import React from "react";
-import Sidebar from "components/Sidebar";
+
+// Component Imports
+import { Sidebar } from 'components/Common';
+
 
 // You can adjust the links array according to your actual routes
 const links = [

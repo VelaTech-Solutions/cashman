@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const ClientProfileOverview = ({ clientData }) => {
+const OverviewProfile = ({ clientData }) => {
   if (!clientData) return null;
 
   const dataPoints = [
@@ -36,4 +36,4 @@ const ClientProfileOverview = ({ clientData }) => {
   );
 };
 
-export default ClientProfileOverview;
+export default OverviewProfile;

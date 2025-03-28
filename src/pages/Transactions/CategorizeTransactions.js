@@ -3,16 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// Components
-import Sidebar from "components/Sidebar";
-import LoadClientData from "components/LoadClientData";
-import NormalCategorizer from "components/Transactions/CategorizeTransactions/NormalCategorizePage";
-import SmartCategorizer from "components/Transactions/CategorizeTransactions/SmartCategorizePage";
-import AICategorizer from "components/Transactions/CategorizeTransactions/AICategorizePage";
-
 // Firebase
 import { db } from "../../firebase/firebase";
 import { doc, updateDoc, collection, getDocs, addDoc } from "firebase/firestore";
+
+// Component Imports
+import { Sidebar, LoadClientData } from 'components/Common';
+import NormalCategorizer from "components/Transactions/CategorizeTransactions/NormalCategorizePage";
+import SmartCategorizer from "components/Transactions/CategorizeTransactions/SmartCategorizePage";
+import AICategorizer from "components/Transactions/CategorizeTransactions/AICategorizePage";
 
 const CategorizeTransactions = () => {
   const { id } = useParams();

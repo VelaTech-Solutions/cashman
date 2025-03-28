@@ -1,14 +1,12 @@
+// src/components/Budget/BudgetSection.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import LoadClientData from "components/LoadClientData";
 
-import Income from "./categories/Income"; // Income
-import Savings from "./categories/Savings"; // Savings
-import Housing from "./categories/Housing"; //  Housing
-import Transportation from "./categories/Transportation"; // Transportation
-import Expenses from "./categories/Expenses"; // Expenses
-import Debt from "./categories/Debt"; // Debt
+// Firebase Imports
+import { getFirestore } from "firebase/firestore";
 
+// Component Imports
+import LoadClientData from "components/Common/LoadClientData";
 import PersonalBudgetView1 from "components/Budget/BudgetView/PersonalBudgetView1";
 import PersonalBudgetView2 from "components/Budget/BudgetView/PersonalBudgetView2";
 import PersonalBudgetView3 from "components/Budget/BudgetView/PersonalBudgetView3";
@@ -16,7 +14,7 @@ import PersonalBudgetView4 from "components/Budget/BudgetView/PersonalBudgetView
 import PersonalBudgetView5 from "components/Budget/BudgetView/PersonalBudgetView5";
 import PersonalBudgetView6 from "components/Budget/BudgetView/PersonalBudgetView6";
 import PersonalBudgetView7 from "components/Budget/BudgetView/PersonalBudgetView7";
-import { getFirestore } from "firebase/firestore";
+
 
 const BudgetSection = () => {
   const { id } = useParams();
@@ -43,14 +41,6 @@ const BudgetSection = () => {
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
       <h2 className="text-xl text-white font-bold mb-4">Budget Overview</h2>
-      {/* <Income transactions={clientData.transactions} />
-      <Savings transactions={clientData.transactions} />
-      <Housing transactions={clientData.transactions} />
-      <Transportation transactions={clientData.transactions} />
-      <Expenses transactions={clientData.transactions} />
-      <Debt transactions={clientData.transactions} /> */}
-
-
         {/* View Mode Toggle */}
         <div className="flex space-x-1">
           {[
@@ -83,7 +73,7 @@ const BudgetSection = () => {
         <div className="mt-6">
           {
               viewMode === 1 ? (
-                <PersonalBudgetView1 transactions={clientData.transactions} clientId={id} />
+            <PersonalBudgetView1 transactions={clientData.transactions} clientId={id} />
           ) : viewMode === 2 ? (
             <PersonalBudgetView2 transactions={clientData.transactions} />
           ) : viewMode === 3 ? (

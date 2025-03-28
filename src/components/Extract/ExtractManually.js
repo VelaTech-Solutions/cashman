@@ -1,22 +1,7 @@
 // src/components/Extract/Extract/ExtractManually.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-// Components Imports
-import Button from "../Button";
-import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
-
-// Extract Components Imports
-import ShowRawData from "components/Extract/ExtractManual/ShowRawData"; 
-import EditTransactions from "components/Extract/ExtractManual/EditTransactions"; 
-import ShowFilteredData from "components/Extract/ExtractManual/ShowFilteredData"; 
-import ExtractDates from "components/Extract/ExtractManual/ExtractDates";
-import ExtractDescription from "components/Extract/ExtractManual/ExtractDescription";
-import ExtractAmounts from "components/Extract/ExtractManual/ExtractAmounts"; 
-import VerifyTransactions from "components/Extract/ExtractManual/VerifyTransactions"; 
-import ViewTransactions from "components/Extract/ExtractManual/ViewTransactions"; 
-
 
 // Firebase Imports 
 import { onAuthStateChanged } from "firebase/auth";
@@ -29,6 +14,22 @@ import {
   updateDoc,
   deleteField,
 } from "firebase/firestore";
+
+// Components Imports
+import { LoadClientData, Button, Table } from 'components/Common';
+
+// Extract Components Imports
+import ShowRawData from "components/Extract/ExtractManual/ShowRawData"; 
+import EditTransactions from "components/Extract/ExtractManual/EditTransactions"; 
+import ShowFilteredData from "components/Extract/ExtractManual/ShowFilteredData"; 
+import ExtractDates from "components/Extract/ExtractManual/ExtractDates";
+import ExtractDescription from "components/Extract/ExtractManual/ExtractDescription";
+import ExtractAmounts from "components/Extract/ExtractManual/ExtractAmounts"; 
+import VerifyTransactions from "components/Extract/ExtractManual/VerifyTransactions"; 
+import ViewTransactions from "components/Extract/ExtractManual/ViewTransactions"; 
+
+
+
 
 function ExtractManually() {
 

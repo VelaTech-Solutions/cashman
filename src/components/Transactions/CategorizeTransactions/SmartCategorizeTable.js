@@ -30,8 +30,8 @@ const SmartCategorizeTable = ({ transactions }) => {
           <tbody>
             {data.map((txn, index) => (
               <tr key={index} className="border-t border-gray-700">
-                <td className="p-2 text-left">{index + 1}</td>
-                <td className="p-2 text-left">{txn.matched}</td>
+                <td className="p-2">{index + 1}</td>
+                <td className="p-2">{txn.matched}</td>
                 <td className="p-2 text-left">{txn.date1 || "-"}</td>
                 <td className="p-2 text-left">{txn.description || "-"}</td>
                 <td className="p-2 text-left">{txn.debit_amount || "-"}</td>

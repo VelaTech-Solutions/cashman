@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "components/Sidebar";
+
+// Firebase Imports
 import { db } from "../../../firebase/firebase";
 import {
   getDocs,
@@ -9,6 +10,10 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
+
+// Component Imports
+import { Sidebar } from 'components/Common';
+
 
 const CategorySettingsAddSubcategory = () => {
   const [categories, setCategories] = useState([]);

@@ -1,15 +1,15 @@
-// src/components/ExtractAutomatically.js
+// src/components/Extract/ExtractAutomatically.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-// Components Imports
-import LoadClientData from "components/LoadClientData";
 import "styles/tailwind.css";
-import ExtractAutomaticActions from "components/Extract/ExtractAutomatic/ExtractAutomaticActions";
 
 // Firebase Imports
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+
+// Components Imports
+import LoadClientData from "components/Common/LoadClientData";
+import ExtractAutomaticActions from "components/Extract/ExtractAutomatic/ExtractAutomaticActions";
 
 function ExtractAutomatically() {
   const { id } = useParams();

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "components/Sidebar";
+
+
+// Component Imports
+import { Sidebar } from 'components/Common';
 
 // Nested Components
 // import CategorySettingsAddCategory from "./EditSettings/CategorySettingsAddCategory"; 

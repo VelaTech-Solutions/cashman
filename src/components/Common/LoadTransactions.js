@@ -1,7 +1,7 @@
 // src/components/LoadTransactions.js
 
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase"; // Import your Firestore instance
+import { db } from "../../firebase/firebase"; // Import your Firestore instance
 
 const LoadTransactions = async (id) => {
     try {

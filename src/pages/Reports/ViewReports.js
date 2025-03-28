@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import "styles/tailwind.css";
 
 // Component Imports
-import LoadClientData from "components/LoadClientData";
-import Sidebar from "components/Sidebar";
-import "styles/tailwind.css";
+import { Sidebar, LoadClientData } from 'components/Common';
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },

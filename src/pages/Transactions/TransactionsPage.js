@@ -2,10 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
-// Components imports
-import Sidebar from "components/Sidebar";
-import LoadClientData from "components/LoadClientData";
-import ViewSwitcher from "components/Common/ViewSwitcher";
+// Component Imports
+import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
 import TransactionsOverview1 from "components/Transactions/TransactionsOverview1";
 import TransactionsOverview2 from "components/Transactions/TransactionsOverview2";
 import TransactionsOverview3 from "components/Transactions/TransactionsOverview3";

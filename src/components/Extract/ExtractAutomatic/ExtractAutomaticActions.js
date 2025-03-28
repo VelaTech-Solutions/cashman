@@ -172,29 +172,29 @@ export const ExtractAutomaticActions = ({
         setExtractionStatus((prev) => ({ ...prev, "Verifing amounts": "failed" }));
       }
  
-        // Step 7: Verify amounts again
-        setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "processing" }));
-        try {
-          await VerifyTransactions2(id);
-          setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "success" }));
-        } catch (error) {
-          console.error("⚠️ Verifing amounts failed, continuing...");
-          setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "failed" }));
-        }
+      // Step 7: Verify amounts again
+      setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "processing" }));
+      try {
+        await VerifyTransactions2(id);
+        setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "success" }));
+      } catch (error) {
+        console.error("⚠️ Verifing amounts failed, continuing...");
+        setExtractionStatus((prev) => ({ ...prev, "Verifing amounts2": "failed" }));
+      }
    
 
       // ✅ Final Success Message
       alert("✅ Data extraction completed!");
-    } catch (error) {
-      console.error("🔥 Error in extraction pipeline:", error);
-      setExtractionStatus((prev) => {
-        const failedStep = Object.keys(prev).find((step) => prev[step] === "processing");
-        return { ...prev, [failedStep]: "failed" };
-      });
-    } finally {
-      setProcessing(false);
-      setIsProcessing(false);
-    }
+      } catch (error) {
+        console.error("🔥 Error in extraction pipeline:", error);
+        setExtractionStatus((prev) => {
+          const failedStep = Object.keys(prev).find((step) => prev[step] === "processing");
+          return { ...prev, [failedStep]: "failed" };
+        });
+      } finally {
+        setProcessing(false);
+        setIsProcessing(false);
+      }
   };
   
   // Calls the Cloud Function to extract raw data

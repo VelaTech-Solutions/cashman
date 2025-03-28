@@ -2,21 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
-// Components imports
-import Sidebar from "components/Sidebar";
-import LoadClientData from "components/LoadClientData";
-import ViewSwitcher from "components/Common/ViewSwitcher";
-
-import ClientProfileOverview from "../../components/Client/ClientView/ClientProfileOverview";
-import ClientActions1 from "../../components/Client/ClientView/ClientActions1";
-import ClientActions2 from "../../components/Client/ClientView/ClientActions2";
-import ClientActions3 from "../../components/Client/ClientView/ClientActions3";
-import ClientActions4 from "../../components/Client/ClientView/ClientActions4";
-
-
 // Firebase imports
 import { db } from "../../firebase/firebase";
 import { doc, getDoc, updateDoc, } from "firebase/firestore";
+
+// Component Imports
+import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
+import OverviewProfile from "components/Client/ClientProfile/OverviewProfile";
+import ClientActions1 from "components/Client/ClientProfile/Actions/ClientActions1";
+import ClientActions2 from "components/Client/ClientProfile/Actions/ClientActions2";
+import ClientActions3 from "components/Client/ClientProfile/Actions/ClientActions3";
+import ClientActions4 from "components/Client/ClientProfile/Actions/ClientActions4";
+
+
 
 
 const ClientProfilePage = () => {
@@ -193,7 +191,7 @@ const ClientProfilePage = () => {
           Client Profile
           </h1>
         </header>
-        <ClientProfileOverview clientData={clientData} />
+        <OverviewProfile clientData={clientData} />
         <div className="flex items-center h-10 space-x-2">
           <ViewSwitcher views={views} activeViewKey={activeView} setActiveViewKey={setActiveView} />
         </div>

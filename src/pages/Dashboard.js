@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
+
+// Firebase imports
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
+
+// Component Imports
+import { Sidebar } from 'components/Common';
 
 // Mouse-Tracking Header Component
 const DashboardHeader = ({ userEmail, handleLogout }) => {

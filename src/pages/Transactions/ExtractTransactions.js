@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
-// Components Imports
-import Sidebar from "components/Sidebar";
-import LoadClientData from "components/LoadClientData";
+// Component Imports
+import { Sidebar, LoadClientData } from 'components/Common';
 import ExtractAutomatically from "components/Extract/ExtractAutomatically";
 import ExtractManually from "components/Extract/ExtractManually";
 // import HelpExtract from "../help/HelpExtract";

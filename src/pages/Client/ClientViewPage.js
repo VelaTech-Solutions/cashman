@@ -1,24 +1,22 @@
 // src/pages/ViewClient.js
 
 import React, { useEffect, useState } from "react";
-
-// Component Imports
-import Sidebar from "components/Sidebar";
-import ViewSwitcher from "components/Common/ViewSwitcher";
 import "styles/tailwind.css";
 
 // Firebase imports
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../../firebase/firebase"; // Ensure this is the correct path
+import { auth, db } from "../../firebase/firebase"; 
 import { collection, getDocs } from "firebase/firestore";
 
-import ClientViewTable1 from "components/Client/ClientView/ClientViewTable1";
-import ClientViewTable2 from "components/Client/ClientView/ClientViewTable2";
-import ClientViewTable3 from "components/Client/ClientView/ClientViewTable3";
-import ClientViewTable4 from "components/Client/ClientView/ClientViewTable4";
+// Component Imports
+import { Sidebar, ViewSwitcher } from "components/Common";
+import ClientViewTable1 from "components/Client/ClientView/Tables/ClientViewTable1";
+import ClientViewTable2 from "components/Client/ClientView/Tables/ClientViewTable2";
+import ClientViewTable3 from "components/Client/ClientView/Tables/ClientViewTable3";
+import ClientViewTable4 from "components/Client/ClientView/Tables/ClientViewTable4";
 
 
-const Viewclient = () => {
+const ClientViewPage = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clients, setClients] = useState([]);
@@ -202,4 +200,4 @@ const Viewclient = () => {
   );
 };
 
-export default Viewclient;
+export default ClientViewPage;

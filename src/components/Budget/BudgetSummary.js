@@ -1,16 +1,21 @@
+// src/components/Budget/BudgetSummary.js
 import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import moment from "moment";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-import { TemplateContext } from "components/TemplateContext"; 
-import LoadClientData from "components/LoadClientData";
-import { generateBudgetReport } from "components/Budget/xlsxModule"; 
 import { motion, AnimatePresence } from "framer-motion";
-import BudgetSummaryActions1 from "./BudgetSummaryView/BudgetSummaryActions1";
-import BudgetSummaryView1 from "./BudgetSummaryView/BudgetSummaryView1";
-import BudgetSummaryView2 from "./BudgetSummaryView/BudgetSummaryView2";
-import BudgetSummaryView3 from "./BudgetSummaryView/BudgetSummaryView3";
-// import BudgetSummaryView4 from "./BudgetSummaryView/BudgetSummaryView4";
+import moment from "moment";
+
+// Firebase imports
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+
+// Component Imports
+import LoadClientData from "components/Common/LoadClientData";
+import { TemplateContext } from "components/Common/TemplateContext"; 
+import { generateBudgetReport } from "components/Budget/xlsxModule"; 
+import BudgetSummaryActions1 from "./BudgetSummaryView/Acttions/BudgetSummaryActions1";
+import BudgetSummaryView1 from "./BudgetSummaryView/Views/BudgetSummaryView1";
+import BudgetSummaryView2 from "./BudgetSummaryView/Views/BudgetSummaryView2";
+import BudgetSummaryView3 from "./BudgetSummaryView/Views/BudgetSummaryView3";
+// import BudgetSummaryView4 from "./BudgetSummaryView/Views/BudgetSummaryView4";
 
 const BudgetSummary = () => {
   const { id } = useParams();

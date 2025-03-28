@@ -1,16 +1,15 @@
 // src/pages/ViewTransactions.js
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
-// Component Imports
 import "styles/tailwind.css";
-import LoadClientData from "components/LoadClientData";
-import Table from "components/Table"; 
-import Sidebar from "components/Sidebar";
 
 // Firebase imports
 import { db } from "../../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
+
+// Component Imports
+import { Sidebar, LoadClientData, Table } from 'components/Common';
+
 
 const ViewTransactions = () => {
   const { id } = useParams();

@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import ProtectedRoute from "components/ProtectedRoute";
+import ProtectedRoute from "components/Common/ProtectedRoute";
 
 // Pages
 import Login from "pages/Login";
@@ -11,7 +11,7 @@ import Budget from "pages/Budget";
 import AddClient from "pages/Client/ClientAddPage";
 import EditClient from "pages/Client/ClientEditPage";
 import ViewEditclient from "pages/Client/ViewEditclient";
-import Viewclient from "pages/Client/Viewclient";
+import Viewclient from "pages/Client/ClientViewPage";
 import Clientprofile from "pages/Client/ClientProfilePage";
 
 // Transaction Pages

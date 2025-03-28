@@ -1,10 +1,10 @@
 // src/pages/Instructions.js
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import "styles/tailwind.css";
 
 // Component Imports
-import Sidebar from "components/Sidebar";
-import "styles/tailwind.css";
+import { Sidebar } from 'components/Common';
 
 const links = [
   { path: "/dashboard", label: "Back To Dashboard", icon: "ph-check-square" },

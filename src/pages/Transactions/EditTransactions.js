@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-// Components imports
-import Sidebar from "components/Sidebar";
-import LoadClientData from "components/LoadClientData";
-import ViewSwitcher from "components/Common/ViewSwitcher";
-import EditTransactionView1 from "../../components/Transactions/EditTransactions/EditTransactonsView1";
-import EditTransactionView2 from "../../components/Transactions/EditTransactions/EditTransactonsView2";
-import EditTransactionView3 from "../../components/Transactions/EditTransactions/EditTransactonsView3";
-import EditTransactionView4 from "../../components/Transactions/EditTransactions/EditTransactonsView4";
+// Component Imports
+import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
+import EditTransactionView1 from "components/Transactions/EditTransactions/EditTransactonsView1";
+import EditTransactionView2 from "components/Transactions/EditTransactions/EditTransactonsView2";
+import EditTransactionView3 from "components/Transactions/EditTransactions/EditTransactonsView3";
+import EditTransactionView4 from "components/Transactions/EditTransactions/EditTransactonsView4";
 
 const EditTransactions = () => {
   const { id } = useParams();

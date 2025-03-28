@@ -76,7 +76,19 @@ const ClientViewTable1 = ({ sortedClients }) => {
               </div>
 
               <div className="mt-6">
-                <div className="text-xs text-gray-300 mb-1">Reports Progress</div>
+              {/* Insert progress % in the text too */}
+                <div className="text-xs text-gray-300 mb-1">
+                  Reports Progress:{" "}
+                  {client?.progress?.completed
+                    ? "100%"
+                    : client?.progress?.categorized
+                    ? "75%"
+                    : client?.progress?.extracted
+                    ? "50%"
+                    : client?.progress?.captured
+                    ? "25%"
+                    : "0%"}
+                </div>
                 <div className="w-full bg-gray-700 rounded-full h-2.5">
                   <div
                     className="h-2.5 rounded-full transition-all duration-300 ease-in-out"
@@ -93,14 +105,13 @@ const ClientViewTable1 = ({ sortedClients }) => {
                           : "0%"
                       }`,
                       backgroundColor: `${
-                        client?.progress?.completed
-                          ? "#4ade80"
-                          : "#facc15"
+                        client?.progress?.completed ? "#4ade80" : "#facc15"
                       }`,
                     }}
                   ></div>
                 </div>
               </div>
+
 
               <div className="flex justify-between mt-6">
                 <Link

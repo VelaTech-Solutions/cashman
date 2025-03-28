@@ -1,9 +1,9 @@
 // src/pages/Profile.js
 import React, { useEffect, useState } from "react";
+import "styles/tailwind.css";
 
 // Component Imports
-import Sidebar from "components/Sidebar";
-import "styles/tailwind.css";
+import { Sidebar } from 'components/Common';
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },

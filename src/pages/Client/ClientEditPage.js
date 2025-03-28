@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-// Component Imports
-// import LoadClientData from "components/LoadClientData";
-import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
 
 // Firebase imports
 import { db } from "../../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
+
+// Component Imports
+import { Sidebar, LoadClientData } from 'components/Common';
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },

@@ -1,21 +1,16 @@
+// src/components/Budget/InsuranceBreakdown.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import LoadClientData from "components/LoadClientData";
 
-import CFuneralLifeCoverDataTable from "./InsuranceBreakdown/cFuneralLifeCoverDataTable"; // Current Insurance - Funeral & Life Cover (Risk)
-import CSavingsInvestmentsDataTable from "./InsuranceBreakdown/cSavingsInvestmentsDataTable"; // Current Insurance - Savings & Investments
-import CShortTermInsuranceDataTable from "./InsuranceBreakdown/cShortTermInsuranceDataTable"; // Current Insurance - Short-Term Insurance
+// Firebase imports
+import { getFirestore } from "firebase/firestore";
 
-import RFuneralLifeCoverDataTable from "./InsuranceBreakdown/rFuneralLifeCoverDataTable"; // Restructure - Funeral & Life Cover (Risk)
-import RSavingsInvestmentsDataTable from "./InsuranceBreakdown/rSavingsInvestmentsDataTable"; // Restructure - Savings & Investments
-import RShortTermInsuranceDataTable from "./InsuranceBreakdown/rShortTermInsuranceDataTable"; // Restructure - Short-Term Insurance
-
+// Component Imports
+import LoadClientData from "components/Common/LoadClientData";
 import InsuranceDataTable1 from "./InsuranceBreakdown/InsuranceDataTable1";
 import InsuranceDataTable2 from "./InsuranceBreakdown/InsuranceDataTable2";
 import InsuranceDataTable3 from "./InsuranceBreakdown/InsuranceDataTable3";
 import InsuranceDataTable4 from "./InsuranceBreakdown/InsuranceDataTable4";
-
-import { getFirestore } from "firebase/firestore";
 
 const InsuranceBreakdown = () => {
   const { id } = useParams();
@@ -42,40 +37,6 @@ const InsuranceBreakdown = () => {
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
       <h2 className="text-xl text-white font-bold mb-4">Insurance Breakdown</h2>
-      
-    {/* <h2 className="text-xl text-white font-bold mb-4">Current Insurance</h2> */}
-      {/* Grid Layout for Tables */}
-      {/* <div className="grid grid-cols-3 gap-4 border border-gray-700 p-2 rounded-lg"> */}
-        {/* Funeral & Life Cover */}
-        {/* <div className="w-1/18">
-          <CFuneralLifeCoverDataTable transactions={clientData.transactions} />
-        </div> */}
-        {/* Savings & Investments */}
-        {/* <div className="w-1/18">
-          <CSavingsInvestmentsDataTable transactions={clientData.transactions} />
-        </div> */}
-        {/* Short-Term Insurance */}
-        {/* <div className="w-1/18">
-          <CShortTermInsuranceDataTable transactions={clientData.transactions} />
-        </div>
-      </div> */}
-      
-      {/* <h2 className="text-xl text-white font-bold mb-4 mt-6">Restructure Insurance</h2> */}
-      {/* Grid Layout for Tables */}
-      {/* <div className="grid grid-cols-3 gap-4 border border-gray-700 p-2 rounded-lg"> */}
-        {/* Funeral & Life Cover */}
-        {/* <div className="w-1/18">
-          <RFuneralLifeCoverDataTable transactions={clientData.transactions} />
-        </div> */}
-        {/* Savings & Investments */}
-        {/* <div className="w-1/18">
-          <RSavingsInvestmentsDataTable transactions={clientData.transactions} />
-        </div> */}
-        {/* Short-Term Insurance */}
-        {/* <div className="w-1/18">
-          <RShortTermInsuranceDataTable transactions={clientData.transactions} />
-        </div>
-         */}
         {/* View Mode Toggle */}
         <div className="flex space-x-1">
           {[
@@ -90,7 +51,7 @@ const InsuranceBreakdown = () => {
               className={`px-3 py-1 text-xs rounded-md transition-all duration-300 shadow-sm ${
                 viewMode === mode
                   ? mode === 4
-                    ? "bg-cyan-500 animate-pulse shadow-md" // Cyberpunk pulses
+                    ? "bg-cyan-500 animate-pulse shadow-md" 
                     : "bg-blue-500 shadow-md"
                   : "bg-gray-800 hover:bg-gray-700 hover:shadow-sm"
               }`}

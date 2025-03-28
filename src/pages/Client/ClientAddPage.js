@@ -1,11 +1,15 @@
 // src/pages/AddClient.js
 import React, { useState, useEffect } from "react";
-import Sidebar from "components/Sidebar";
 import "styles/tailwind.css";
+
+// Firebase Imports
 import { db, storage, auth } from "../../firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
+
+// Component Imports
+import { Sidebar } from 'components/Common';
 
 const links = [
   { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -50,7 +54,7 @@ const ClientAddPage = () => {
     }
 
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
-    const maxFileSize = 5 * 1024 * 1024;
+    const maxFileSize = 10 * 1024 * 1024;
 
     if (!allowedTypes.includes(selectedFile.type)) {
       setUploadStatus("Invalid file type. Please upload a PDF, JPEG, or PNG file.");

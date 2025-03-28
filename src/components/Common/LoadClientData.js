@@ -1,7 +1,7 @@
 // src/components/LoadClientData.js
 
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase"; // Import your Firestore instance
+import { db } from "../../firebase/firebase"; // Import your Firestore instance
 
 // Function to load client data based on ID number
 const LoadClientData = async (idNumber) => {

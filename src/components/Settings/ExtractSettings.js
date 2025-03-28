@@ -1,16 +1,16 @@
 // src/pages/ExtractSettings.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-// Components Imports
-import Button from "components/Button";
-import LoadClientData from "components/LoadClientData";
-import Sidebar from "components/Sidebar"; 
 import "styles/tailwind.css";
 
 // Firebase Imports
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+
+// Component Imports
+import { Sidebar, LoadClientData, Button } from 'components/Common';
+
+
 
 function ExtractSettings() {
   const { id } = useParams();

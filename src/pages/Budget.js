@@ -1,13 +1,14 @@
 // src/pages/Budget.js
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import "styles/tailwind.css";
 
-// Components Imports
+// Component Imports
+import { Sidebar } from 'components/Common';
 import BudgetSection from "components/Budget/BudgetSection";
 import InsuranceBreakdown from "components/Budget/InsuranceBreakdown";
 import BudgetSummary from "components/Budget/BudgetSummary";
-import Sidebar from "components/Sidebar";
-import "styles/tailwind.css";
+
 
 
 const Budget = () => {
