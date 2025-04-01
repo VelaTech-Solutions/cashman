@@ -8,7 +8,7 @@ import { db } from "../../../firebase/firebase";
 import { doc, updateDoc, collection, getDocs, addDoc } from "firebase/firestore";
 
 // Component Imports
-import { Sidebar, LoadClientData } from 'components/Common';
+import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
 import NormalCategorizer from "components/Transactions/CategorizeTransactions/NormalCategorizer/NormalCategorizePage";
 import SmartCategorizer from "components/Transactions/CategorizeTransactions/SmartCategorizer/SmartCategorizePage";
 import AICategorizer from "components/Transactions/CategorizeTransactions/AICategorizer/AICategorizePage";

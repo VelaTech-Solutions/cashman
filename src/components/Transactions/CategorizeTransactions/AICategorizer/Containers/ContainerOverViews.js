@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
 // Component Imports
-import ViewSwitcher from "components/Common/ViewSwitcher";
+import { ViewSwitcher } from 'components/Common';
 import CategorizeOverview1 from "./CategorizeTransactionsOverview1";
 import CategorizeOverview2 from "./CategorizeTransactionsOverview2";
 import CategorizeOverview3 from "./CategorizeTransactionsOverview3";
 
-const CategorizeOverviewContainer = ({ transactions }) => {
+const ContainerOverViews = ({ transactions }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     { key: "view1", label: "View 1", Component: <CategorizeOverview1 transactions={transactions || []} /> },
@@ -32,4 +32,4 @@ const CategorizeOverviewContainer = ({ transactions }) => {
   );
 };
 
-export default CategorizeOverviewContainer;
+export default ContainerOverViews;

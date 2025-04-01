@@ -10,11 +10,21 @@ import { db } from "../../../../firebase/firebase";
 // Component Imports
 import { Button } from 'components/Common';
 
+
+const banks = [
+  "Absa Bank",
+  "Capitec Bank",
+  "Fnb Bank",
+  "Ned Bank",
+  "Standard Bank",
+  "Tyme Bank",
+];
+
 function IgnoredLineActions1() {
+  const [selectedBank, setSelectedBank] = useState(banks[0]);
   const [ignoredLines, setIgnoredLines] = useState([]);
   const [fuzzyIgnoredLines, setFuzzyIgnoredLines] = useState([]);
   const [selectedRows, setSelectedRows] = useState(new Set());
-  const [selectedBank, setSelectedBank] = useState(""); // State to track selected bank
 
 
   // Fetch ignored lines based on selected bank
@@ -125,12 +135,24 @@ function IgnoredLineActions1() {
       
 
 return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-        <div className="relative bg-gray-900 p-6 rounded-lg shadow-md w-full">
-        <h1 className="text-2xl font-semibold mb-4">Extract Settings</h1>
+      <div className="p-4 bg-gray-900 rounded-md shadow text-white">
+        <h3 className="text-lg font-semibold mb-4">Bank headers & Footers Removal</h3>
+
+
+
+
+        <select
+          value={selectedBank}
+          onChange={(e) => setSelectedBank(e.target.value)}
+          className="mb-4 p-2 rounded bg-gray-800 text-white border border-gray-700"
+        >
+          {banks.map((bank) => (
+            <option key={bank} value={bank}>{bank}</option>
+          ))}
+        </select>
 
         {/* Select Bank Dropdown */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
             <label className="block mb-2 text-sm font-medium">Select Bank</label>
             <select
             className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
@@ -145,7 +167,9 @@ return (
             <option value="Standard Bank">Standard Bank</option>
             <option value="Tyme Bank">Tyme Bank</option>
             </select>
-        </div>
+        </div> */}
+
+
         {/* input Ignored Line Section */}
         <div className="mb-4">
             <label className="block mb-2 text-sm font-medium">Ignored Line</label>
@@ -290,7 +314,6 @@ return (
             </table>
         </div>
         </div>
-    </div>
     );
 };
 

@@ -1,7 +1,11 @@
 // SmartCategorizer.js
 import React, { useEffect, useState } from "react";
+
+// Firebase Imports
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
+
+// Component Imports
 import SmartCategorizeActions from "./Actions/SmartCategorizeActions";
 import SmartCategorizeTable from "./Tables/SmartCategorizeTable";
 

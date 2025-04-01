@@ -1,4 +1,5 @@
 // src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescriptionVerify.js
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescriptionVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
@@ -9,93 +10,175 @@ const extractDescriptionVerify = async (id, bankName) => {
   }
 
   try {
-    console.log(
-      `🔄 Verifying and Cleaning Descriptions for Client: ${id} | Bank: ${bankName}`
-    );
-
-    // Step 1: Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
+    const settingsRef = doc(db, "settings", "description", bankName, "config");
+    
+
     await updateDoc(clientRef, {
       "extractProgress.Descriptions Verified": "processing",
     });
 
-    // Step 2: Fetch client data
-    const clientSnap = await getDoc(clientRef);
+    const [clientSnap, settingsSnap] = await Promise.all([
+      getDoc(clientRef),
+      getDoc(settingsRef),
+    ]);
+
     if (!clientSnap.exists()) {
-      console.error("❌ No client data found");
       await updateDoc(clientRef, {
         "extractProgress.Descriptions Verified": "failed",
       });
       return;
     }
 
-    let { filteredData = [], transactions = [] } = clientSnap.data();
-
-    if (filteredData.length === 0) {
-      console.warn(
-        "⚠️ No filtered data found, skipping veriftioaction and cleaning description extraction."
-      );
+    const { transactions = [] } = clientSnap.data();
+    if (transactions.length === 0) {
       await updateDoc(clientRef, {
         "extractProgress.Descriptions Verified": "failed",
       });
       return;
     }
 
-    // Step 3: Process each line in filteredData
-    const updatedFilteredData = [...filteredData];
+    const settingsData = settingsSnap.exists() ? settingsSnap.data() : {};
+    console.log("📋 Description Settings Selected:");
+    Object.entries(settingsData).forEach(([key, val]) => {
+      console.log(`- ${key}: ${val?.enabled ? "✅ enabled" : "❌ disabled"}`);
+    });
+
+    const activePatterns = Object.entries(settingsData)
+      .filter(([_, val]) => val?.enabled && val?.pattern)
+      .map(([_, val]) => new RegExp(val.pattern, "g"));
+
     const updatedTransactions = [...transactions];
 
-    // Initialize a counter for lines where descriptions were extracted
-    let totalDescriptionLinesProcessed = 0;
-
-    filteredData.forEach((line, index) => {
-        if (!line) return;
-
-        // In this case, use the entire line as the description
-        const description = line.trim();
-
-        // ✅ Count the line as processed if it contains a description
-        if (description) {
-            totalDescriptionLinesProcessed++;
-        }
-
-        // Remove the description from the original line (results in an empty string)
-        const strippedLine = "";
-
-        // Update our local copy of filteredData with the stripped line
-        updatedFilteredData[index] = strippedLine;
-
-        // Ensure transactions[index] exists
-        if (!updatedTransactions[index]) {
-            updatedTransactions[index] = { original: line };
-        }
-
-        // Merge with existing transaction data
+    if (activePatterns.length === 0) {
+      // No regex selected, just clean and copy
+      transactions.forEach((txn, index) => {
         updatedTransactions[index] = {
-            ...updatedTransactions[index],
-            description,
+          ...txn,
+          description: txn.description?.trim() || "",
+          description2: "",
         };
-    });
+      });
+    } else {
+      // Apply regex patterns
+      transactions.forEach((txn, index) => {
+        let description = txn.description?.trim();
+        if (!description) return;
 
-    // Log total lines processed for descriptions
-    // console.log(`✅ Total Lines with Verifying and Cleaning Descriptions Processed: ${totalDescriptionLinesProcessed}`);
-    // console.log("✅ Descriptions Verifying Cleaning:");
+        const description2 = [];
 
+        activePatterns.forEach((regex) => {
+          const matches = [...(description.match(regex) || [])];
+          if (matches.length > 0) {
+            description2.push(...matches);
+            matches.forEach((match) => {
+              description = description.replace(match, "").trim();
+            });
+          }
+        });
 
-    // Step 4: Update Firestore with the updated transactions and stripped filteredData
+        updatedTransactions[index] = {
+          ...txn,
+          description,
+          description2: description2.length ? description2.join(" | ") : "",
+        };
+      });
+    }
+
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      filteredData: updatedFilteredData,
       "extractProgress.Descriptions Verified": "success",
     });
-
-    console.log("🎉 Description Verifying and Cleaning Completed!");
   } catch (error) {
-    console.error("🔥 Error Verifying and Cleaning description:", error);
-    await updateDoc(clientRef, {
+    await updateDoc(doc(db, "clients", id), {
       "extractProgress.Descriptions Verified": "failed",
     });
+    console.error("🔥 Error verifying descriptions:", error);
   }
 };
 
 export default extractDescriptionVerify;
+
+
+
+// Account Numbers
+// (map)
+
+
+// enabled
+// false
+// (boolean)
+
+
+
+// Amounts
+// (map)
+
+
+// enabled
+// false
+// (boolean)
+
+
+
+// Card Numbers
+// (map)
+
+
+// enabled
+// false
+// (boolean)
+
+
+// pattern
+// "\\b(?:\\d{4}[\\s-]?){3}\\d{4}|\\*{4}\\d{4}\\b"
+// (string)
+
+
+
+// Dates
+// (map)
+
+
+// enabled
+// false
+// (boolean)
+
+
+
+// Numbers
+// (map)
+
+
+// enabled
+// true
+// (boolean)
+
+
+// pattern
+// "\[\d+\]"
+// (string)
+
+
+
+// Time
+// (map)
+
+
+// enabled
+// false
+// (boolean)
+
+
+
+// cards
+// (map)
+
+
+// enabled
+// true
+// (boolean)
+
+
+// pattern
+// "\(Card\s\d{3,4}\)"

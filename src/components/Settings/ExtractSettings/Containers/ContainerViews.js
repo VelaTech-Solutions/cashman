@@ -5,16 +5,21 @@ import React, { useState } from "react";
 import { ViewSwitcher } from 'components/Common';
 import ExtractIgnoredLinesView1 from "../Views/ExtractIgnoredLinesView1";
 import ExtractAlignmentView2 from "../Views/ExtractAlignmentView2";
+import ExtractDescriptionView3 from "../Views/ExtractDescriptionView3";
 
 
 const ContainerViews = ({ viewMode, setViewMode }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
-    { key: "view1", label: "Ignored Line Settings", Component: <ExtractIgnoredLinesView1 
+    { key: "view1", label: "Removal Settings", Component: <ExtractIgnoredLinesView1 
       viewMode={viewMode}
       setViewMode={setViewMode}
          /> },
     { key: "view2", label: "Alignment Settings", Component: <ExtractAlignmentView2 
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+          /> },
+    { key: "view3", label: "Description Settings", Component: <ExtractDescriptionView3 
       viewMode={viewMode}
       setViewMode={setViewMode}
           /> },

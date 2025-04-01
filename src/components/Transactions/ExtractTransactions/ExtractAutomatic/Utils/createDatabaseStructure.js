@@ -22,6 +22,7 @@ const createDatabaseStructure = async (id) => {
     fees_amount: 0.0,
     fees_type: null,
     description: "",
+    description2: "", // this is not being created why?
     debit_amount: 0.0,
     credit_amount: 0.0,
     credit_debit_amount: 0.0,
@@ -58,8 +59,9 @@ const createDatabaseStructure = async (id) => {
     } else {
       const data = clientSnap.data();
       const updatedTransactions = data.transactions
-        ? data.transactions.map((txn) => ({ ...defaultTransaction, ...txn }))
-        : [defaultTransaction];
+      ? data.transactions.map((txn) => ({ ...txn, ...defaultTransaction }))
+      : [defaultTransaction];
+    
 
       await updateDoc(clientRef, {
         transactions: updatedTransactions,

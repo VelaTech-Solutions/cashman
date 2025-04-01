@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 
 // Component Imports
-import ViewSwitcher from "components/Common/ViewSwitcher";
+import { ViewSwitcher } from 'components/Common';
 import CategorizeTables1 from "./CategorizeTables1";
 import CategorizeTables2 from "./CategorizeTables2";
 import CategorizeTables3 from "./CategorizeTables3";
 
 
-const CategorizeTablesContainer = ({ transactions, selectedTransactions, setSelectedTransactions }) => {
+const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransactions }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     {
@@ -57,4 +57,4 @@ const CategorizeTablesContainer = ({ transactions, selectedTransactions, setSele
   );
 };
 
-export default CategorizeTablesContainer;
+export default ContainerTables;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // Component Imports
-import ViewSwitcher from "components/Common/ViewSwitcher";
+import { ViewSwitcher } from 'components/Common';
 import CategorizeOverview1 from "./CategorizeTransactionsOverview1";
 import CategorizeOverview2 from "./CategorizeTransactionsOverview2";
 import CategorizeOverview3 from "./CategorizeTransactionsOverview3";
