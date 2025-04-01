@@ -1,6 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+// Firebase Imports
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
+
+// Component Imports
+import ProgressUtils from './ProgressUtils';
+
+// Helper to align transactions
+const handleAlignTransactions = async (data) => {
+  const amountRegex = /\d+\.\d{2}/;
+  let formattedTransactions = [];
+  let currentTransaction = [];
+
+  data.forEach((line) => {
+    if (amountRegex.test(line)) {
+      if (currentTransaction.length > 0) {
+        formattedTransactions.push(currentTransaction.join(" "));
+      }
+      currentTransaction = [line];
+    } else {
+      currentTransaction.push(line);
+    }
+  });
+
+  if (currentTransaction.length > 0) {
+    formattedTransactions.push(currentTransaction.join(" "));
+  }
+
+  return formattedTransactions;
+};
 
 const cleanStatement = async ({ id, bankName }) => {
   if (!id || !bankName) {
@@ -8,96 +35,66 @@ const cleanStatement = async ({ id, bankName }) => {
     return;
   }
 
+  const clientRef = doc(db, "clients", id);
+  const bankRef = doc(db, "banks", bankName);
+  const alignmentRef = doc(db, "settings", "alignment");
+
   try {
-    console.log("🔄 Starting cleanStatement...");
+    await ProgressUtils.updateProgress(id, "Clean Statement", "processing");
 
-    // Step 1: Set cleaning progress to "processing"
-    const clientRef = doc(db, "clients", id);
-    await setDoc(clientRef, { extractProgress: { cleanStatementProgress: "processing" } }, { merge: true });
+    const [bankSnap, filteredSnap, alignmentSnap] = await Promise.all([
+      getDoc(bankRef),
+      getDoc(clientRef),
+      getDoc(alignmentRef)
+    ]);
 
-    // Step 2: Fetch ignored lines & fuzzy ignored lines
-    const bankRef = doc(db, "banks", bankName);
-    const bankSnapshot = await getDoc(bankRef);
-    const bankData = bankSnapshot.exists() ? bankSnapshot.data() : {};
+    if (!filteredSnap.exists()) {
+      console.error("❌ No filtered data found");
+      await updateDoc(clientRef, {
+        "extractProgress.Clean Statement": "failed",
+      });
+      return;
+    }
 
+    const bankData = bankSnap.exists() ? bankSnap.data() : {};
     const ignoredLines = bankData.ignoredLines || [];
     const fuzzyIgnoredLines = bankData.fuzzyIgnoredLines || [];
-
-    // Step 3: Fetch filteredData
-    const filteredDataRef = doc(db, "clients", id);
-    const filteredDataSnap = await getDoc(filteredDataRef);
-    let filteredData = filteredDataSnap.exists() ? filteredDataSnap.data().filteredData || [] : [];
-
-    console.log("📌 Original Filtered Data Length:", filteredData.length);
+    let filteredData = filteredSnap.data().filteredData || [];
 
     if (filteredData.length === 0) {
       console.warn("⚠️ No filtered data found, skipping cleaning.");
       return;
     }
 
-    // Step 4: Apply filtering to remove unwanted lines
+    // Apply filtering
     let cleanedData = filteredData.filter((line) => {
       return (
-        !ignoredLines.includes(line.trim()) && // Exact match removal
-        !fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase())) // Fuzzy match removal
+        !ignoredLines.includes(line.trim()) &&
+        !fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase()))
       );
     });
 
-    console.log("✅ Cleaned Data Length:", cleanedData.length);
+    // ✅ Check alignment toggle in Firestore
+    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
+    const shouldAlign = alignmentSettings[bankName] ?? false;
 
-    // Step 5: Align transactions based on the bank type
-    const handleAlignTransactions = async (data) => {
-      const amountRegex = /\d+\.\d{2}/; // Detects amounts (e.g., 105.00)
-      let formattedTransactions = [];
-      let currentTransaction = [];
+    // console log the alignment selection
+    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
 
-      data.forEach((line) => {
-        if (amountRegex.test(line)) {
-          if (currentTransaction.length > 0) {
-            formattedTransactions.push(currentTransaction.join(" ")); // Merge previous transaction
-          }
-          currentTransaction = [line]; // Start a new transaction
-        } else {
-          currentTransaction.push(line); // Append additional details
-        }
-      });
-
-      if (currentTransaction.length > 0) {
-        formattedTransactions.push(currentTransaction.join(" ")); // Add last transaction
-      }
-
-      return formattedTransactions;
-    };
-
-    // Define bank-specific alignment rules
-    const banksWithAlignment = ["Absa Bank", "Capitec Bank", "Ned Bank", "Standard Bank"];
-
-    if (banksWithAlignment.includes(bankName)) {
-      console.log(`🔄 Aligning transactions for ${bankName}...`);
+    if (shouldAlign) {
       cleanedData = await handleAlignTransactions(cleanedData);
-    } else {
-      console.log(`⏭️ Skipping alignment for ${bankName}`);
     }
 
-    // Step 6: Update Firestore with cleaned & aligned data
-    await updateDoc(clientRef, { filteredData: cleanedData });
+    await updateDoc(clientRef, {
+      filteredData: cleanedData,
+      "extractProgress.Clean Statement": "processing",
+    });
 
-    // Step 7: Set cleaning progress to "success"
-    await updateDoc(clientRef, { "extractProgress.cleanStatementProgress": "success" });
-
-    console.log("🎉 Cleaning Completed! Removed:", filteredData.length - cleanedData.length, "lines.");
+    await ProgressUtils.updateProgress(id, "Clean Statement", "success");
   } catch (error) {
+    await ProgressUtils.updateProgress(id, "Clean Statement", "failed");
     console.error("🔥 Error in cleanStatement:", error);
-    await updateDoc(doc(db, "clients", id), { "extractProgress.cleanStatementProgress": "failed" });
   }
 };
 
 export default cleanStatement;
-
-
-    // "Absa Bank", handleAddLine
-    // "Capitec Bank", Skip
-    // "Fnb Bank", Skip
-    // "Ned Bank", handleAddLine
-    // "Standard Bank", handleAddLine
-    // "Tyme Bank", Skip

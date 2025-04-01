@@ -14,7 +14,7 @@ import extractDescription from "../Utils/extractDescription"; // 🚧 Commented 
 import VerifyTransactions from "../Utils/VerifyTransactions"; // 🚧 Commented out for now
 import VerifyTransactions2 from "../Utils/VerifyTransactions2"; // 🚧 Commented out for now
 
-export const ExtractAutomaticActions = ({
+export const AutomaticActions = ({
   id,
   bankName, // ✅ Ensure bankName is correctly passed
   clientData,
@@ -24,6 +24,7 @@ export const ExtractAutomaticActions = ({
   processingMethod,
 }) => {
   const [processing, setProcessing] = useState(false);
+  const PROCESS_METHODS = { PDF_PARSER: "pdfparser", OCR: "ocr" };
 
   useEffect(() => {
     if (!id) return;
@@ -132,13 +133,13 @@ export const ExtractAutomaticActions = ({
       // }
   
       // Step 4: Extract Amounts
-      setExtractionStatus((prev) => ({ ...prev, "Extracting amounts": "processing" }));
+      setExtractionStatus((prev) => ({ ...prev, "Amounts Extracted": "processing" }));
       try {
         await extractAmounts(id, bankName);
-        setExtractionStatus((prev) => ({ ...prev, "Extracting amounts": "success" }));
+        setExtractionStatus((prev) => ({ ...prev, "Amounts Extracted": "success" }));
       } catch (error) {
-        console.error("⚠️ Extracting amounts failed, continuing...");
-        setExtractionStatus((prev) => ({ ...prev, "Extracting amounts": "failed" }));
+        console.error("⚠️ Amounts Extracted failed, continuing...");
+        setExtractionStatus((prev) => ({ ...prev, "Amounts Extracted": "failed" }));
       }
 
 
@@ -241,6 +242,25 @@ export const ExtractAutomaticActions = ({
   };
   return (
     <div className="flex flex-wrap gap-3">
+
+
+<div className="flex items-center gap-2">
+        <span className="text-white text-sm">PDF Parser</span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={processingMethod === PROCESS_METHODS.OCR}
+            onChange={(e) =>
+              setProcessingMethod(
+                e.target.checked ? PROCESS_METHODS.OCR : PROCESS_METHODS.PDF_PARSER
+              )
+            }
+          />
+          <div className="w-10 h-5 bg-gray-400 rounded-full peer-checked:bg-blue-600 transition relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+        </label>
+        <span className="text-white text-sm">OCR</span>
+      </div>
       <button
         onClick={startExtractionProcess}
         className={`bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium ${
@@ -261,4 +281,4 @@ export const ExtractAutomaticActions = ({
   );
 };
 
-export default ExtractAutomaticActions;
+export default AutomaticActions;

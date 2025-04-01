@@ -80,25 +80,22 @@ const ClientViewPage = () => {
 
       switch (sortField) {
         case "clientName":
-          comparison = a.clientName.localeCompare(b.clientName);
+          comparison = (a.clientName || "").localeCompare(b.clientName || "");
           break;
         case "bankName":
-          comparison = a.bankName.localeCompare(b.bankName);
+          comparison = (a.bankName || "").localeCompare(b.bankName || "");
           break;
         case "id":
-          // If these aren't guaranteed to be numbers, convert them
-          // or compare them as strings with localeCompare.
-          comparison = parseInt(a.id) - parseInt(b.id);
+          comparison = parseInt(a.id || 0) - parseInt(b.id || 0);
           break;
         case "dateCreated":
-          // Converting to Date objects to compare properly
           comparison =
-            new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
+            new Date(a.dateCreated || 0).getTime() - new Date(b.dateCreated || 0).getTime();
           break;
         default:
-          // default = no sorting
           comparison = 0;
       }
+      
 
       // Flip comparison if sorting is descending
       return sortOrder === "asc" ? comparison : -comparison;

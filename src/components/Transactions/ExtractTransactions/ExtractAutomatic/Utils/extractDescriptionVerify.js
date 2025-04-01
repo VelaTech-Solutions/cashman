@@ -1,5 +1,6 @@
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescriptionVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../../firebase/firebase";
+import { db } from "../../../../../firebase/firebase";
 
 const extractDescriptionVerify = async (id, bankName) => {
   if (!id || !bankName) {
@@ -15,7 +16,7 @@ const extractDescriptionVerify = async (id, bankName) => {
     // Step 1: Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
     await updateDoc(clientRef, {
-      "extractProgress.verifyDescriptionsProgress": "processing",
+      "extractProgress.Descriptions Verified": "processing",
     });
 
     // Step 2: Fetch client data
@@ -23,7 +24,7 @@ const extractDescriptionVerify = async (id, bankName) => {
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       await updateDoc(clientRef, {
-        "extractProgress.verifyDescriptionsProgress": "failed",
+        "extractProgress.Descriptions Verified": "failed",
       });
       return;
     }
@@ -35,7 +36,7 @@ const extractDescriptionVerify = async (id, bankName) => {
         "⚠️ No filtered data found, skipping veriftioaction and cleaning description extraction."
       );
       await updateDoc(clientRef, {
-        "extractProgress.verifyDescriptionsProgress": "failed",
+        "extractProgress.Descriptions Verified": "failed",
       });
       return;
     }
@@ -85,14 +86,14 @@ const extractDescriptionVerify = async (id, bankName) => {
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
-      "extractProgress.verifyDescriptionsProgress": "success",
+      "extractProgress.Descriptions Verified": "success",
     });
 
     console.log("🎉 Description Verifying and Cleaning Completed!");
   } catch (error) {
     console.error("🔥 Error Verifying and Cleaning description:", error);
     await updateDoc(clientRef, {
-      "extractProgress.verifyDescriptionsProgress": "failed",
+      "extractProgress.Descriptions Verified": "failed",
     });
   }
 };

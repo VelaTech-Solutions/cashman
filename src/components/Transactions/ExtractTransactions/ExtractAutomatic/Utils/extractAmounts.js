@@ -1,3 +1,4 @@
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmounts.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 import BankAmountsRules from "../../../../Rules/bankAmountsRules"; // ✅ Ensure correct import
@@ -9,12 +10,12 @@ const extractAmounts = async (id, bankName) => {
   }
 
   try {
-    console.log(`🔄 Extracting Amounts for Client: ${id} | Bank: ${bankName}`);
+    console.log(`🔄 Amounts Extracted for Client: ${id} | Bank: ${bankName}`);
 
     // Step 1: Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
     await updateDoc(clientRef, {
-      "extractProgress.extractAmountsProgress": "processing",
+      "extractProgress.Amounts Extracted": "processing",
     });
 
     // Step 2: Fetch client data
@@ -22,7 +23,7 @@ const extractAmounts = async (id, bankName) => {
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       await updateDoc(clientRef, {
-        "extractProgress.extractAmountsProgress": "failed",
+        "extractProgress.Amounts Extracted": "failed",
       });
       return;
     }
@@ -32,7 +33,7 @@ const extractAmounts = async (id, bankName) => {
     if (filteredData.length === 0) {
       console.warn("⚠️ No filtered data found, skipping amount extraction.");
       await updateDoc(clientRef, {
-        "extractProgress.extractAmountsProgress": "failed",
+        "extractProgress.Amounts Extracted": "failed",
       });
       return;
     }
@@ -117,14 +118,14 @@ const extractAmounts = async (id, bankName) => {
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData, // Store stripped lines
-      "extractProgress.extractAmountsProgress": "success",
+      "extractProgress.Amounts Extracted": "success",
     });
 
     console.log("🎉 Amount Extraction Completed!");
   } catch (error) {
-    console.error("🔥 Error extracting amounts:", error);
+    console.error("🔥 Error Amounts Extracted:", error);
     await updateDoc(clientRef, {
-      "extractProgress.extractAmountsProgress": "failed",
+      "extractProgress.Amounts Extracted": "failed",
     });
   }
 };

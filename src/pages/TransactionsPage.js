@@ -3,10 +3,8 @@ import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
 // Component Imports
-import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
-import ContainerOverView from "components/Transactions/TransactionsPage/Containers/ContainerOverView";
-
-
+import { Sidebar, LoadClientData, LoadTransactions } from 'components/Common';
+import ContainerOverView from "../components/Transactions/TransactionsPage/Containers/ContainerOverView";
 
 const TransactionsPage = () => {
   const { id } = useParams();
@@ -38,12 +36,6 @@ const TransactionsPage = () => {
       icon: "ph-file-text",
     },
   ];
-  const views = [
-    { key: "view1", label: "View 1", Component: <TransactionsOverview1 transactions={clientData?.transactions || []} /> },
-    { key: "view2", label: "View 2", Component: <TransactionsOverview2 transactions={clientData?.transactions || []} /> },
-    { key: "view3", label: "View 3", Component: <TransactionsOverview3 transactions={clientData?.transactions || []} /> },
-    { key: "view4", label: "View 4", Component: <TransactionsOverview4 transactions={clientData?.transactions || []} /> },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +51,21 @@ const TransactionsPage = () => {
     fetchData();
   }, [id]);
 
+    // load transactions
+    const [transactions, setTransactions] = useState([]);
+    useEffect(() => {
+      const fetchTransactions = async () => {
+        try {
+          const loadedTransactions = await LoadTransactions(id);
+          setTransactions(loadedTransactions);
+        } catch (err) {
+          console.error("Error fetching transactions:", err);
+          setError(err.message);
+        }
+      };
+      fetchTransactions();
+    }, [id]);
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Client Profile" links={links} />
@@ -67,18 +74,12 @@ const TransactionsPage = () => {
           <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
         </header>
           <div className="flex items-center h-10 space-x-2">
-
-                    {/* {sTransactions.length > 0 && (
-                      <SmartCategorizeTable transactions={sTransactions} />
-                    )} */}
             <ContainerOverView
-              views={views}
-              activeViewKey={activeView}
-              setActiveViewKey={setActiveView}
+              transactions={transactions}
             />
           </div>
           <div className="mt-6">
-            {views.find((v) => v.key === activeView)?.Component}
+            {/* {views.find((v) => v.key === activeView)?.Component} */}
           </div>
         </div>
       </div>

@@ -1,7 +1,8 @@
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmountsVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
-const VerifyTransactions = async (id) => {
+const extractAmountsVerify = async (id) => {
   if (!id) {
     console.error("❌ Missing Client ID");
     return;
@@ -13,7 +14,7 @@ const VerifyTransactions = async (id) => {
     // Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
     await updateDoc(clientRef, {
-      "extractProgress.extractVerifyProgress": "processing",
+      "extractProgress.Amounts Verifed Step 1": "processing",
     });
 
     // Fetch client data
@@ -21,7 +22,7 @@ const VerifyTransactions = async (id) => {
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       await updateDoc(clientRef, {
-        "extractProgress.extractVerifyProgress": "failed",
+        "extractProgress.Amounts Verifed Step 1": "failed",
       });
       return;
     }
@@ -30,7 +31,7 @@ const VerifyTransactions = async (id) => {
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
       await updateDoc(clientRef, {
-        "extractProgress.extractVerifyProgress": "failed",
+        "extractProgress.Amounts Verifed Step 1": "failed",
       });
       return;
     }
@@ -82,7 +83,7 @@ const VerifyTransactions = async (id) => {
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
       number_of_transactions: correctedTransactions.length,
-      "extractProgress.extractVerifyProgress": "success",
+      "extractProgress.Amounts Verifed Step 1": "success",
     });
 
     console.log("✅ Transactions verified successfully.");
@@ -90,7 +91,7 @@ const VerifyTransactions = async (id) => {
     console.error("🔥 Error verifying transactions:", error);
     try {
       await updateDoc(clientRef, {
-        "extractProgress.extractVerifyProgress": "failed",
+        "extractProgress.Amounts Verifed Step 1": "failed",
       });
     } catch (updateError) {
       console.error("❌ Failed to update Firestore after error:", updateError);
@@ -98,4 +99,4 @@ const VerifyTransactions = async (id) => {
   }
 };
 
-export default VerifyTransactions;
+export default extractAmountsVerify;

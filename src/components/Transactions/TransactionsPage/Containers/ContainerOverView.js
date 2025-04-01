@@ -7,7 +7,7 @@ import OverView2 from "../OverViews/OverView2";
 import OverView3 from "../OverViews/OverView3";
 import OverView4 from "../OverViews/OverView4";
 
-const OverViewContainer = ({ transactions }) => {
+const ContainerOverView = ({ transactions }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     { key: "view1", label: "View 1", Component: <OverView1 transactions={transactions || []} /> },
@@ -34,4 +34,4 @@ const OverViewContainer = ({ transactions }) => {
   );
 };
 
-export default OverViewContainer;
+export default ContainerOverView;

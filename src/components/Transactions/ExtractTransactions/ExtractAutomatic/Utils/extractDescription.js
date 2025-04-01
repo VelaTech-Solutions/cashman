@@ -1,3 +1,4 @@
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescription.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
@@ -15,7 +16,7 @@ const extractDescription = async (id, bankName) => {
     // Step 1: Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
     await updateDoc(clientRef, {
-      "extractProgress.extractDescriptionsProgress": "processing",
+      "extractProgress.Descriptions Extracted": "processing",
     });
 
     // Step 2: Fetch client data
@@ -23,7 +24,7 @@ const extractDescription = async (id, bankName) => {
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       await updateDoc(clientRef, {
-        "extractProgress.extractDescriptionsProgress": "failed",
+        "extractProgress.Descriptions Extracted": "failed",
       });
       return;
     }
@@ -35,7 +36,7 @@ const extractDescription = async (id, bankName) => {
         "⚠️ No filtered data found, skipping description extraction."
       );
       await updateDoc(clientRef, {
-        "extractProgress.extractDescriptionsProgress": "failed",
+        "extractProgress.Descriptions Extracted": "failed",
       });
       return;
     }
@@ -85,14 +86,14 @@ const extractDescription = async (id, bankName) => {
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
-      "extractProgress.extractDescriptionsProgress": "success",
+      "extractProgress.Descriptions Extracted": "success",
     });
 
     console.log("🎉 Description Extraction Completed!");
   } catch (error) {
     console.error("🔥 Error extracting description:", error);
     await updateDoc(clientRef, {
-      "extractProgress.extractDescriptionsProgress": "failed",
+      "extractProgress.Descriptions Extracted": "failed",
     });
   }
 };

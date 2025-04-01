@@ -16,16 +16,17 @@ import {
 
 // Components Imports
 import { LoadClientData, Button, Table } from 'components/Common';
-
-// Extract Components Imports
-import ShowRawData from "./Tables/ShowRawData"; 
-import EditTransactions from "./Tables/EditTransactions"; 
-import ShowFilteredData from "./Tables/ShowFilteredData"; 
-import ViewTransactions from "./Tables/ViewTransactions"; 
-import ExtractDates from "./Utils/ExtractDates";
-import ExtractDescription from "./Utils/ExtractDescription";
-import ExtractAmounts from "./Utils/ExtractAmounts"; 
-import VerifyTransactions from "./Utils/VerifyTransactions"; 
+// import BankCleanRules from "../../../../Rules/BankCleanRules";
+import ContainerActions from "./Containers/ContainerActions";
+import ContainerTables from "./Containers/ContainerTables";
+// import ShowRawData from "./Tables/ShowRawData"; 
+// import EditTransactions from "./Tables/EditTransactions"; 
+// import ShowFilteredData from "./Tables/ShowFilteredData"; 
+// import ViewTransactions from "./Tables/ViewTransactions"; 
+// import ExtractDates from "./Utils/ExtractDates";
+// import ExtractDescription from "./Utils/ExtractDescription";
+// import ExtractAmounts from "./Utils/ExtractAmounts"; 
+// import VerifyTransactions from "./Utils/VerifyTransactions"; 
 
 
 
@@ -90,96 +91,42 @@ function ExtractManually() {
   }, [id]);
   
   // Handle data extraction Manually
-  const handleExtractDataManual = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
-  
-    setProcessing(true);
-    setErrorMessage("");
-  
-    try {
-      const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractDataManual",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: id,
-            bankName: clientData.bankName || "Unknown",
-            method: processingMethod === "pdfparser" ? "Parser" : "OCR",
-          }),
-        }
-      );
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Request failed with status ${response.status}: ${errorText}`
-        );
-      }
-  
-      const result = await response.json();
-      alert(result.message || "Data extracted successfully!");
-  
-      // Refresh data or reload
-      if (typeof fetchClientData === "function") {
-        await fetchClientData();
-      } else {
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error("Error extracting data:", error);
-      setErrorMessage(
-        `An error occurred while extracting data: ${error.message}. Please try again.`
-      );
-    } finally {
-      setProcessing(false);
-    }
-  };
-  // Function to handle deletion of extracted data
-  const handleDeleteExtractedData = async () => {
-    if (!id) {
-      alert("Client ID is not provided.");
-      return;
-    }
 
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete all extracted data? This action cannot be undone.",
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      // Reference the Firestore document for this client using the ID
-      const clientRef = doc(db, "clients", id);
-
-      // Remove the specific fields from the document
-      await updateDoc(clientRef, {
-        rawData: deleteField(),
-        transactions: deleteField(),
-        number_of_transactions: deleteField(),
-        filteredData: deleteField(),
-      });
-
-      alert("Extracted data deleted successfully!");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting extracted data:", error);
-      alert("Failed to delete extracted data. Please try again.");
-    }
-  };
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-      <h1 className="text-2xl font-bold mb-4 text-blue-400">
-        Extract Manually
-        </h1>
-      
-        <div className="flex gap-2 mb-4">
+
+      <div className="flex justify-start items-center space-x-4 mb-4">
+        <ContainerActions 
+        id={id}
+        bankName={clientData?.bankName}
+        clientData={clientData}
+        setClientData={setClientData}
+        rawData={rawData}
+        setRawData={setRawData}
+
+        
+        />
+      </div>
+
+
+      <div className="flex justify-start items-center space-x-4 mb-4">
+          <ContainerTables 
+          id={id}
+          bankName={clientData?.bankName}
+          clientData={clientData}
+          setClientData={setClientData}
+          rawData={rawData}
+          setRawData={setRawData}
+          transactions={transactions}
+          setTransactions={setTransactions}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          tabs={tabs}
+          />
+      </div>
+
+        {/* <div className="flex gap-2 mb-4">
           <div className="flex items-center gap-4">
 
             <Button
@@ -194,8 +141,6 @@ function ExtractManually() {
               text="Delete Extracted Data"
               className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium text-center"
             />
-
-            {/* OCR Toggle */}
             <div className="flex items-center gap-2">
               <span className="text-white text-sm">PDF Parser</span>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -213,25 +158,15 @@ function ExtractManually() {
               </label>
               <span className="text-white text-sm">OCR</span>
             </div>
-
-            {/* Bank Name Display */}
             {clientData?.bankName && (
               <span className="bg-gray-700 text-white text-sm font-medium px-3 py-1 rounded-lg border border-gray-600">
                 Bank: {clientData.bankName}
               </span>
             )}
           </div>
+        </div> */}
 
-          {/* Right group: Compact Summary Bar */}
-          {/* <div className="bg-gray-900 p-3 rounded-lg border border-gray-700 text-white shadow  flex justify-start items-center gap-4 text-sm">
-            <h3 className="text-lg font-semibold">Summary:</h3>
-            <p>Total Transactions: {transactions.length}</p>
-            <p>Placeholder 1: Coming soon</p>
-            <p>Placeholder 2: Coming soon</p>
-          </div> */}
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* <div className="flex flex-wrap gap-2 mb-4">
           {tabs.map((tab) => (
             <Button
               key={tab.key}
@@ -241,16 +176,17 @@ function ExtractManually() {
               className={activeTab === tab.key ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300"}
             />
           ))}
-        </div>
-        {activeTab === "rawData" && <ShowRawData />}
+        </div> */}
+        {/* {activeTab === "rawData" && <ShowRawData />}
         {activeTab === "editData" && <EditTransactions />}
         {activeTab === "extractDates" && <ExtractDates />}
         {activeTab === "extractAmounts" && <ExtractAmounts />}
         {activeTab === "extractDescription" && <ExtractDescription />}
         {activeTab === "verifyTransactions" && <VerifyTransactions />}
         {activeTab === "debugData" && <ShowFilteredData />}
-        {activeTab === "viewTransactions" && <ViewTransactions />}
+        {activeTab === "viewTransactions" && <ViewTransactions />} */}
       </div>
+
   );
 }
 

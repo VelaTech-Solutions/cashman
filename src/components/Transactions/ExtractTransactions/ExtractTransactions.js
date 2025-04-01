@@ -1,10 +1,11 @@
-// src/pages/Transactions/ExtractTransactions.js
+// src/components/Transactions/ExtractTransactions/ExtractTransactions.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
 // Component Imports
 import { Sidebar, LoadClientData } from 'components/Common';
+
 import ExtractAutomatically from "./ExtractAutomatic/ExtractAutomatically";
 import ExtractManually from "./ExtractManual/ExtractManually";
 // import HelpExtract from "../help/HelpExtract";
@@ -25,7 +26,18 @@ function ExtractTransactions() {
       label: `Edit Transactions (${unverifiedCount})`,
       icon: "ph-file-text",
     },
-    { type: "divider" }, 
+    { type: "divider" },
+    {
+      label: "Automatically",
+      icon: "ph-rocket-launch",
+      onClick: () => setActiveSection("ExtractAutomatically"),
+    },
+    {
+      label: "Manually",
+      icon: "ph-pencil",
+      onClick: () => setActiveSection("ExtractManually"),
+    },
+    { type: "divider" },
     {
       path: `/ExtractSettings/${id}`,
       label: "Extract Settings",
@@ -33,6 +45,7 @@ function ExtractTransactions() {
     },
     { path: "/HelpExtract", label: "Extract Help", icon: "ph-arrow-left" },
   ];
+  
 
   // Fetch client data
   useEffect(() => {
@@ -56,32 +69,7 @@ function ExtractTransactions() {
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Extract Transactions" links={links} />
       <div className="flex-1 p-8">
-        {/* Header Section */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">
-            Extract Transactions
-          </h1>
-        </header>
-        <div className="space-x-4 mb-6">
-          <button
-            className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
-              activeSection === "ExtractAutomatically"
-                ? "bg-green-600 shadow-lg shadow-green-600/50"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-            onClick={() => setActiveSection("ExtractAutomatically")}
-          >🚀 Extract Automatically
-          </button>
-          <button
-            className={`px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
-              activeSection === "ExtractManually"
-                ? "bg-green-600 shadow-lg shadow-green-600/50"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-            onClick={() => setActiveSection("ExtractManually")}
-          >✍️ Extract Manually
-          </button>
-        </div>
+        <h2 className="text-2xl font-bold mb-4">Extract Transactions</h2>
           {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
           {activeSection === "ExtractManually" && <ExtractManually />}
       </div>

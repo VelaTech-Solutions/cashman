@@ -28,8 +28,8 @@ import Settings from "pages/Settings";
 import ViewSettings from "components/Settings/ViewSettings"
 import EditSettings from "components/Settings/EditSettings"
 import CategorySettings from "components/Settings/CategorySettings";
-import ExtractSettings from "components/Settings/ExtractSettings";
-
+import ExtractSettings from "components/Settings/ExtractSettings/ExtractSettingsPage";
+// /home/ubuntu/cashman/src/components/Settings/ExtractSettings/ExtractSettingsPage.js
 import Developernotes from "pages/Developernotes";
 import Profile from "pages/Profile";
 

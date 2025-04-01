@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 // Component Imports
 import ViewSwitcher from "components/Common/ViewSwitcher";
-import CategorizeTables1 from "./CategorizeTables1";
+import CategorizeTables1 from "../Tables/";
 import CategorizeTables2 from "./CategorizeTables2";
 import CategorizeTables3 from "./CategorizeTables3";
 

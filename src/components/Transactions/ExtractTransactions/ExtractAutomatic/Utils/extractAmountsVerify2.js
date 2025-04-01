@@ -1,7 +1,9 @@
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmountsVerify2.js
+
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
-const VerifyTransactions2 = async (id) => {
+const extractAmountsVerify2 = async (id) => {
   if (!id) {
     console.error("❌ Missing Client ID");
     return;
@@ -13,7 +15,7 @@ const VerifyTransactions2 = async (id) => {
     // Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
     await updateDoc(clientRef, {
-      "extractProgress.extractVerify2Progress": "processing",
+      "extractProgress.Amounts Verifed Step 2": "processing",
     });
 
     // Fetch client data
@@ -21,7 +23,7 @@ const VerifyTransactions2 = async (id) => {
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       await updateDoc(clientRef, {
-        "extractProgress.extractVerify2Progress": "failed",
+        "extractProgress.Amounts Verifed Step 2": "failed",
       });
       return;
     }
@@ -30,7 +32,7 @@ const VerifyTransactions2 = async (id) => {
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
       await updateDoc(clientRef, {
-        "extractProgress.extractVerify2Progress": "failed",
+        "extractProgress.Amounts Verifed Step 2": "failed",
       });
       return;
     }
@@ -50,9 +52,9 @@ const VerifyTransactions2 = async (id) => {
           let expectedBalance = previousBalance + credit - debit;
 
           if (Math.abs(expectedBalance - currBalance) > 0.01) {
-            console.warn(
-              `⚠️ Balance mismatch at index ${index + 1}: Expected ${expectedBalance}, Found ${currBalance}`
-            );
+            // console.warn(
+            //   `⚠️ Balance mismatch at index ${index + 1}: Expected ${expectedBalance}, Found ${currBalance}`
+            // );
 
             // Auto-fix the incorrect credit or debit
             let difference = currBalance - previousBalance;
@@ -88,7 +90,7 @@ const VerifyTransactions2 = async (id) => {
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
       number_of_transactions: correctedTransactions.length,
-      "extractProgress.extractVerify2Progress": "success",
+      "extractProgress.Amounts Verifed Step 2": "success",
     });
 
     console.log("✅ Transactions verified successfully.");
@@ -96,7 +98,7 @@ const VerifyTransactions2 = async (id) => {
     console.error("🔥 Error verifying transactions:", error);
     try {
       await updateDoc(clientRef, {
-        "extractProgress.extractVerify2Progress": "failed",
+        "extractProgress.Amounts Verifed Step 2": "failed",
       });
     } catch (updateError) {
       console.error("❌ Failed to update Firestore after error:", updateError);
@@ -104,4 +106,4 @@ const VerifyTransactions2 = async (id) => {
   }
 };
 
-export default VerifyTransactions2;
+export default extractAmountsVerify2;

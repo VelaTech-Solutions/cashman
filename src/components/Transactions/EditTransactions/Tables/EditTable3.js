@@ -6,7 +6,7 @@ const EditTable3 = ({ transactions, onEditClick }) => {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-y-auto max-h-[600px] overflow-x-auto">
       <table className="w-full table-auto border border-gray-700 text-white">
         <thead className="bg-gray-800">
           <tr>

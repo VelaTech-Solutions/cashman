@@ -1,6 +1,6 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../../firebase/firebase";
-import BankDatesRules from "../../Rules/BankDatesRules"; // ✅ Ensure correct import
+import { db } from "../../../../../firebase/firebase";
+import BankDatesRules from "../../../../Rules/BankDatesRules"; // ⬅️ Assuming you have this defined elsewhere
 
 const extractDatesVerify = async (id, bankName) => {
   if (!id || !bankName) {
@@ -8,87 +8,72 @@ const extractDatesVerify = async (id, bankName) => {
     return;
   }
 
-  try {
-    console.log(`🔄 Verify and Cleaning Dates for Client: ${id} | Bank: ${bankName}`);
+  const clientRef = doc(db, "clients", id);
 
-    // Step 1: Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", id);
+  try {
     await updateDoc(clientRef, {
-      "extractProgress.verifyDatesProgress": "processing",
+      "extractProgress.Verifing Extracted Dates": "processing",
     });
 
-    // Step 2: Fetch `filteredData` & `transactions`
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
-      console.error("❌ No client data found");
-      await updateDoc(clientRef, { "extractProgress.verifyDatesProgress": "failed" });
+      await updateDoc(clientRef, {
+        "extractProgress.Verifing Extracted Dates": "failed",
+      });
       return;
     }
 
     let { filteredData = [], transactions = [] } = clientSnap.data();
-
     if (filteredData.length === 0) {
-      console.warn("⚠️ No filtered data found, skipping date extraction.");
-      await updateDoc(clientRef, { "extractProgress.verifyDatesProgress": "failed" });
+      await updateDoc(clientRef, {
+        "extractProgress.Verifing Extracted Dates": "failed",
+      });
       return;
     }
 
-    // Step 3: Process each line in filteredData
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
-
-    // Initialize a counter for lines processed (not individual dates)
     let totalDateLinesProcessed = 0;
 
     filteredData.forEach((line, index) => {
-        if (!line) return;
+      if (!line) return;
 
-        const extractDatesFromText = (text) =>
-            BankDatesRules[bankName] ? BankDatesRules[bankName](text) : [];
+      const extractDates = BankDatesRules[bankName] || (() => []);
+      const extractedDates = extractDates(line);
 
-        const extractedDates = extractDatesFromText(line);
+      if (extractedDates.length > 0) totalDateLinesProcessed++;
 
-        // ✅ Count this line if any date was found
-        if (extractedDates.length > 0) {
-            totalDateLinesProcessed++;
-        }
+      const date1 = extractedDates[0] || null;
+      const date2 = extractedDates[1] || "None";
+      const cleanedLine = extractedDates.reduce(
+        (acc, d) => acc.replace(d, "").trim(),
+        line
+      );
 
-        let date1 = extractedDates[0] || null;
-        let date2 = extractedDates[1] || "None";
+      updatedFilteredData[index] = cleanedLine || line;
 
-        let strippedLine = extractedDates.reduce((acc, date) => acc.replace(date, "").trim(), line);
+      if (!updatedTransactions[index]) {
+        updatedTransactions[index] = { original: line };
+      }
 
-        updatedFilteredData[index] = strippedLine || line;
-
-        if (!updatedTransactions[index]) {
-            updatedTransactions[index] = { original: line };
-        }
-
-        updatedTransactions[index] = {
-            ...updatedTransactions[index], // Keep existing data
-            date1,
-            date2,
-            original: line,
-        };
+      updatedTransactions[index] = {
+        ...updatedTransactions[index],
+        date1,
+        date2,
+      };
     });
 
-    // Log total lines processed for dates
-    console.log(`✅ Total Lines with Dates Processed: ${totalDateLinesProcessed}`);
-    console.log("✅ Verify and Cleaning Dates & Updated Transactions:");
-
-
-    // Step 4: Update Firestore
     await updateDoc(clientRef, {
       filteredData: updatedFilteredData,
       transactions: updatedTransactions,
-      "extractProgress.verifyDatesProgress": "success",
+      "extractProgress.Verifing Extracted Dates": "success",
     });
 
-    console.log("🎉 Date Verify and Cleaning Completed!");
-
   } catch (error) {
-    console.error("🔥 Error Verify and Cleaning dates:", error);
-    await updateDoc(clientRef, { "extractProgress.verifyDatesProgress": "failed" });
+    console.error("🔥 Error verifying dates:", error);
+    await updateDoc(clientRef, {
+      "extractProgress.Verifing Extracted Dates": "failed",
+    });
   }
 };
 

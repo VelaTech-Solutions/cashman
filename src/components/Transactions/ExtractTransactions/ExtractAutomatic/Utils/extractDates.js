@@ -1,3 +1,4 @@
+// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDates.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 import BankDatesRules from "../../../../Rules/BankDatesRules"; // ✅ Ensure correct import
@@ -9,19 +10,19 @@ const extractDates = async (id, bankName) => {
   }
 
   try {
-    console.log(`🔄 Extracting Dates for Client: ${id} | Bank: ${bankName}`);
+    console.log(`🔄 Dates Extracted for Client: ${id} | Bank: ${bankName}`);
 
     // Step 1: Set Firestore progress to "processing"
     const clientRef = doc(db, "clients", id);
     await updateDoc(clientRef, {
-      "extractProgress.extractDatesProgress": "processing",
+      "extractProgress.Dates Extracted": "processing",
     });
 
     // Step 2: Fetch `filteredData` & `transactions`
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
-      await updateDoc(clientRef, { "extractProgress.extractDatesProgress": "failed" });
+      await updateDoc(clientRef, { "extractProgress.Dates Extracted": "failed" });
       return;
     }
 
@@ -29,7 +30,7 @@ const extractDates = async (id, bankName) => {
 
     if (filteredData.length === 0) {
       console.warn("⚠️ No filtered data found, skipping date extraction.");
-      await updateDoc(clientRef, { "extractProgress.extractDatesProgress": "failed" });
+      await updateDoc(clientRef, { "extractProgress.Dates Extracted": "failed" });
       return;
     }
 
@@ -81,14 +82,14 @@ const extractDates = async (id, bankName) => {
     await updateDoc(clientRef, {
       filteredData: updatedFilteredData,
       transactions: updatedTransactions,
-      "extractProgress.extractDatesProgress": "success",
+      "extractProgress.Dates Extracted": "success",
     });
 
     console.log("🎉 Date Extraction Completed!");
 
   } catch (error) {
-    console.error("🔥 Error extracting dates:", error);
-    await updateDoc(clientRef, { "extractProgress.extractDatesProgress": "failed" });
+    console.error("🔥 Error Dates Extracted:", error);
+    await updateDoc(clientRef, { "extractProgress.Dates Extracted": "failed" });
   }
 };
 
