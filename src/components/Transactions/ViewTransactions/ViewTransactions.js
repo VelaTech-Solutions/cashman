@@ -9,6 +9,8 @@ import { doc, getDoc } from "firebase/firestore";
 
 // Component Imports
 import { Sidebar, LoadClientData, Table } from 'components/Common';
+import ContainerOverViews from "../ViewTransactions/Containers/ContainerOverViews";
+// import ContainerTables from "../EditTransactions/Containers/ContainerTables";
 
 
 const ViewTransactions = () => {
@@ -68,20 +70,14 @@ const ViewTransactions = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      {/* Sidebar */}
       <Sidebar title="View Transactions" links={links} />
-
-      {/* Main Content */}
       <div className="flex-1 p-8">
-        {/* Header Section */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">
-            View Transactions
-          </h1>
-        </header>
-
+        <h2 className="text-2xl font-bold mb-4">View Transactions</h2>
+        <div className="flex justify-start items-center space-x-4 mb-4">
+          <ContainerOverViews transactions={clientData?.transactions || []} />
+        </div>
         {/* Overview Section */}
-        <section className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
+        {/* <section className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-2xl font-semibold text-blue-400 mb-4">
             Transactions Overview
           </h2>
@@ -99,7 +95,7 @@ const ViewTransactions = () => {
                 Transactions Needing Review
               </p>
               <p className="text-3xl font-bold text-white">
-                {/* Placeholder */}0
+                0
               </p>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
@@ -107,11 +103,11 @@ const ViewTransactions = () => {
                 Corrected Transactions
               </p>
               <p className="text-3xl font-bold text-white">
-                {/* Placeholder */}0
+                0
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Search Bar */}
         <section className="mt-8">

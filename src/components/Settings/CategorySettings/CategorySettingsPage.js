@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { Sidebar } from 'components/Common';
 
 // Nested Components
-import CategorySettingsAddCategory from "./CategorySettings/CategorySettingsAddCategory"; // rendered directly
-import CategorySettingsAddSubcategory from "./CategorySettings/CategorySettingsAddSubcategory";
-import CategorySettingsTransactions from "./CategorySettings/CategorySettingsTransactions"; // rendered directly
+import CategorySettingsAddCategory from "../CategorySettings/Views/CategorySettingsAddCategory"; 
+import CategorySettingsAddSubcategory from "../CategorySettings/Views/CategorySettingsAddSubcategory";
+import CategorySettingsTransactions from "../CategorySettings/Views/CategorySettingsTransactions"; 
 
 const CategorySettings = () => {
   const navigate = useNavigate();

@@ -73,9 +73,8 @@ const TransactionsPage = () => {
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
         </header>
-          <div className="flex items-center h-10 space-x-2">
-            <ContainerOverView
-              transactions={transactions}
+        <div className="flex justify-start items-center space-x-4 mb-4">
+            <ContainerOverView transactions={transactions}
             />
           </div>
           <div className="mt-6">

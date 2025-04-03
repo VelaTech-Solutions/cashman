@@ -14,21 +14,18 @@ const ContainerOverViews = ({ transactions }) => {
     { key: "view3", label: "View 3", Component: <CategorizeOverview3 transactions={transactions || []} /> },
   ];
   return (
-    <div className="bg-gray-900 p-4 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-
-        <div className="flex items-center h-10 space-x-2">
-          <ViewSwitcher
-            views={views}
-            activeViewKey={activeView}
-            setActiveViewKey={setActiveView}
-          />
-        </div>
-        <div className="mt-6">
-          {views.find((v) => v.key === activeView)?.Component}
-        </div>
-      </div>  
-    </div>
+    <div className="w-full bg-gray-900 p-4 rounded-lg shadow-md">
+      <div className="flex items-center h-10 space-x-2">
+        <ViewSwitcher
+          views={views}
+          activeViewKey={activeView}
+          setActiveViewKey={setActiveView}
+        />
+      </div>
+      <div className="mt-6">
+        {views.find((v) => v.key === activeView)?.Component}
+      </div>
+    </div>  
   );
 };
 

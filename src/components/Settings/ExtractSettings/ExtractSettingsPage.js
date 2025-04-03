@@ -31,13 +31,7 @@ function ExtractSettingsPage() {
       <Sidebar title="Extract Settings" links={links} />
       <div className="flex-1 p-8">
         <h2 className="text-2xl font-bold mb-4">Extract Settings</h2>
-        {/* View Switch Tabs */}
         <ContainerViews setViewMode={setViewMode} viewMode={viewMode} />
-
-
-        {/* <p className="text-sm text-gray-400 mb-6">
-          Configure the settings for transaction extraction.
-        </p>         */}
       </div>
     </div>
   );

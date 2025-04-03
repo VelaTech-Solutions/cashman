@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Firebase Imports
-import { db } from "../../../firebase/firebase";
+import { db } from "../../../../firebase/firebase";
 import {
   getDocs,
   collection,

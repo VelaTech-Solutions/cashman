@@ -12,6 +12,7 @@ import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
 import NormalCategorizer from "components/Transactions/CategorizeTransactions/NormalCategorizer/NormalCategorizePage";
 import SmartCategorizer from "components/Transactions/CategorizeTransactions/SmartCategorizer/SmartCategorizePage";
 import AICategorizer from "components/Transactions/CategorizeTransactions/AICategorizer/AICategorizePage";
+import PlayCategorizer from "components/Transactions/CategorizeTransactions/PlayCategorizer/PlayCategorizer";
 
 const CategorizeTransactions = () => {
   const { id } = useParams();
@@ -67,6 +68,17 @@ const CategorizeTransactions = () => {
           className="w-full text-left px-4 py-2 mb-2 bg-purple-500 hover:bg-purple-600 text-white rounded transition-all"
         >
           AI Categorizer
+        </button>
+      ),
+    },
+    {
+      type: "custom",
+      content: (
+        <button
+          onClick={() => setActivePage("PlayCategorizer")}
+          className="w-full text-left px-4 py-2 mb-2 bg-green-500 hover:bg-green-600 text-white rounded transition-all"
+        >
+          Play Categorizer
         </button>
       ),
     },
@@ -253,6 +265,11 @@ const CategorizeTransactions = () => {
         {activePage === "AICategorizer" && (
           <AICategorizer transactions={transactions} clientId={id}/>
         )}
+        {activePage === "PlayCategorizer" && (
+          <PlayCategorizer transactions={transactions} id={id}/>
+        )}
+
+
       </div>
     </div>
   );

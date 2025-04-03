@@ -19,7 +19,11 @@ const ContainerOverViews = ({ transactions, bankName }) => {
   return (
     <div className="w-full bg-gray-900 p-4 rounded-lg shadow-md">
       <div className="flex items-center h-10 space-x-2">
-        <ViewSwitcher views={views} activeViewKey={activeView} setActiveViewKey={setActiveView} />
+        <ViewSwitcher 
+          views={views} 
+          activeViewKey={activeView} 
+          setActiveViewKey={setActiveView} 
+        />
       </div>
       <div className="mt-6">
         {views.find((v) => v.key === activeView)?.Component}
