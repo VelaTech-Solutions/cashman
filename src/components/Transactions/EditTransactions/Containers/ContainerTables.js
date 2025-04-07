@@ -15,7 +15,7 @@ import EditTableZeroAmounts from "../Tables/EditTableZeroAmounts";
 import EditTableDuplicates from "../Tables/EditTableDuplicates";
 
 
-const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransactions }) => {
+const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransactions, id }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     {
@@ -26,6 +26,7 @@ const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransa
           transactions={transactions}
           selectedTransactions={selectedTransactions}
           setSelectedTransactions={setSelectedTransactions}
+          id={id}
         />
       ),
     },

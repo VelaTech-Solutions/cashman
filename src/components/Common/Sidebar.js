@@ -5,13 +5,16 @@ import { motion } from "framer-motion";
 const Sidebar = ({ links }) => {
   const navigate = useNavigate();
 
-  const handleNavigation = (path) => {
-    if (path === "javascript:void(0)") {
+  const handleNavigation = (link) => {
+    if (link.onClick) {
+      link.onClick();
+    } else if (link.path === "goBack") {
       navigate(-1);
-    } else {
-      navigate(path);
+    } else if (link.path) {
+      navigate(link.path);
     }
   };
+  
 
   return (
     <motion.div
@@ -79,3 +82,5 @@ const Sidebar = ({ links }) => {
 };
 
 export default Sidebar;
+
+

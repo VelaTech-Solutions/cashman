@@ -50,7 +50,7 @@ const EditTransactions = () => {
           <ContainerOverViews transactions={clientData?.transactions || []} />
         </div>
         <div className="flex justify-start items-center space-x-4 mb-4">
-          <ContainerTables transactions={clientData?.transactions || []} />
+          <ContainerTables transactions={clientData?.transactions || [] } id={id} />
         </div>
         <div className="mt-6">
           {/* {views.find((v) => v.key === activeView)?.Component} */}
