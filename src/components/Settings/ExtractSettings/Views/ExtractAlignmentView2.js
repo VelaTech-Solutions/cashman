@@ -1,32 +1,36 @@
-// src/components/Settings/ExtractSettings/Views/ExtractAlignmentView2.js
 import React, { useEffect, useState } from "react";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
-
-const defaultAlignmentSettings = {
-  "Absa Bank": false,
-  "Capitec Bank": false,
-  "Fnb Bank": false,
-  "Ned Bank": false,
-  "Standard Bank": false,
-  "Tyme Bank": false,
-};
-
-const orderedBanks = Object.keys(defaultAlignmentSettings);
 
 const ExtractAlignmentView2 = () => {
   const [alignmentSettings, setAlignmentSettings] = useState({});
+  const [orderedBanks, setOrderedBanks] = useState([]);
 
   useEffect(() => {
     const fetchOrCreateSettings = async () => {
-      const ref = doc(db, "settings", "alignment");
-      const snap = await getDoc(ref);
+      try {
+        // Step 1: Get all bank IDs
+        const bankSnapshot = await getDocs(collection(db, "banks"));
+        const bankNames = bankSnapshot.docs.map((doc) => doc.id);
+        setOrderedBanks(bankNames);
 
-      if (!snap.exists()) {
-        await setDoc(ref, defaultAlignmentSettings);
-        setAlignmentSettings(defaultAlignmentSettings);
-      } else {
-        setAlignmentSettings(snap.data());
+        // Step 2: Check if alignment settings exist
+        const ref = doc(db, "settings", "alignment");
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          // Step 3: Create with all banks set to false
+          const defaultSettings = {};
+          bankNames.forEach((name) => {
+            defaultSettings[name] = false;
+          });
+          await setDoc(ref, defaultSettings);
+          setAlignmentSettings(defaultSettings);
+        } else {
+          setAlignmentSettings(snap.data());
+        }
+      } catch (err) {
+        console.error("Error loading alignment settings:", err.message);
       }
     };
 

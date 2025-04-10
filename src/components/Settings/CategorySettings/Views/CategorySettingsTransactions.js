@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { doc,collection, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 
 const CategorySettingsTransactions = () => {
@@ -7,16 +7,32 @@ const CategorySettingsTransactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [bankOptions, setBankOptions] = useState([]); // New state to store dynamic bank names
 
-  const bankOptions = [
-    "Absa Bank",
-    "Capitec Bank",
-    "Fnb Bank",
-    "Ned Bank",
-    "Standard Bank",
-    "Tyme Bank",
-  ];
+  // ✅ Moved outside of useEffect so it can be reused
+  const fetchBankNames = async () => {
+    try {
+      const docRef = doc(db, "settings", "banks");
+      const docSnap = await getDoc(docRef);
 
+      if (docSnap.exists()) {
+        const bankData = docSnap.data().banks;
+        setBankOptions(bankData);
+      } else {
+        console.log("No bank data found!");
+      }
+    } catch (error) {
+      console.error("Error fetching bank names:", error);
+    }
+  };
+
+  // 🧠 Fetch banks on mount
+  useEffect(() => {
+    fetchBankNames();
+  }, []);
+  
+
+  // Fetch transactions for a selected bank
   const fetchTransactions = async (selectedBank) => {
     if (!selectedBank) return;
 
@@ -32,12 +48,13 @@ const CategorySettingsTransactions = () => {
       setTransactions(results);
     } catch (err) {
       console.error("Error fetching transactions:", err);
-      setError("Failed to load transactions");
+      setError("Failed to load transactions.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle deleting a single transaction
   const handleDelete = async (id) => {
     if (!bankName || !id) return;
     if (!window.confirm("Delete this transaction?")) return;
@@ -49,12 +66,11 @@ const CategorySettingsTransactions = () => {
     }
   };
 
+  // Handle bulk deletion
   const handleBulkDelete = async () => {
     if (!bankName) return;
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ALL transactions for ${bankName}?`
-    );
+    const confirmDelete = window.confirm(`Are you sure you want to delete ALL transactions for ${bankName}?`);
     if (!confirmDelete) return;
 
     try {
@@ -72,6 +88,12 @@ const CategorySettingsTransactions = () => {
     }
   };
 
+  // Effect to fetch bank names when the component mounts
+  useEffect(() => {
+    fetchBankNames();
+  }, []); // Empty dependency array ensures it runs only once when the component mounts
+
+  // Fetch transactions when a bank is selected
   useEffect(() => {
     if (bankName) {
       fetchTransactions(bankName);
@@ -88,11 +110,15 @@ const CategorySettingsTransactions = () => {
           className="p-2 rounded bg-gray-700 text-white"
         >
           <option value="">-- Choose a bank --</option>
-          {bankOptions.map((bank) => (
-            <option key={bank} value={bank}>
-              {bank}
-            </option>
-          ))}
+          {bankOptions.length > 0 ? (
+            bankOptions.map((bank) => (
+              <option key={bank} value={bank}>
+                {bank}
+              </option>
+            ))
+          ) : (
+            <option value="">No banks available</option>
+          )}
         </select>
       </div>
 

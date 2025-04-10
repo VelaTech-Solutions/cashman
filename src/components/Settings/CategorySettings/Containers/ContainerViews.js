@@ -3,32 +3,26 @@ import React, { useState } from "react";
 
 // Component Imports
 import { ViewSwitcher } from 'components/Common';
-import ExtractIgnoredLinesView1 from "../Views/ExtractIgnoredLinesView1";
-import ExtractAlignmentView2 from "../Views/ExtractAlignmentView2";
-import ExtractDescriptionView3 from "../Views/ExtractDescriptionView3";
-import ExtractDatesView4 from "../Views/ExtractDatesView4";
+import CategorySettingsAddCategory from "../Views/CategorySettingsAddCategory";
+import CategorySettingsAddSubcategory from "../Views/CategorySettingsAddSubcategory";
+import CategorySettingsTransactions from "../Views/CategorySettingsTransactions";
 
 
 const ContainerViews = ({ viewMode, setViewMode }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
-    { key: "view1", label: "Removal Settings", Component: <ExtractIgnoredLinesView1 
+    { key: "view1", label: "Add Category", Component: <CategorySettingsAddCategory 
       viewMode={viewMode}
       setViewMode={setViewMode}
          /> },
-    { key: "view2", label: "Alignment Settings", Component: <ExtractAlignmentView2 
+    { key: "view2", label: "Add Subcategory", Component: <CategorySettingsAddSubcategory 
       viewMode={viewMode}
       setViewMode={setViewMode}
           /> },
-    { key: "view3", label: "Description Settings", Component: <ExtractDescriptionView3 
+    { key: "view3", label: "Settings Transactions", Component: <CategorySettingsTransactions 
       viewMode={viewMode}
       setViewMode={setViewMode}
           /> },
-    { key: "view4", label: "Dates Settings", Component: <ExtractDatesView4
-      viewMode={viewMode}
-      setViewMode={setViewMode}
-          />
-            },
   ];
   return (
     <div className="w-full bg-gray-900 p-4 rounded-lg shadow-md">

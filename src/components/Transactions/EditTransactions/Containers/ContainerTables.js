@@ -11,7 +11,8 @@ import EditTable4 from "../Tables/EditTable4";
 import EditTableOriginal from "../Tables/EditTableOriginal";
 import EditTableBroken from "../Tables/EditTableBroken";
 import EditTableMissingDescriptions from "../Tables/EditTableMissingDescriptions";
-import EditTableZeroAmounts from "../Tables/EditTableZeroAmounts";
+import EditTableMissingCreditDebitAmounts from "../Tables/EditTableMissingCreditDebitAmounts";
+import EditTableMissingAllAmounts from "../Tables/EditTableMissingAllAmounts";
 import EditTableDuplicates from "../Tables/EditTableDuplicates";
 
 
@@ -53,13 +54,20 @@ const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransa
       ),
     },
     {
-      key: "view7",
-      label: "Zero Amounts",
+      key: "view4",
+      label: "Missing Credit Debit",
       component: (
-        <EditTableZeroAmounts
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
+        <EditTableMissingCreditDebitAmounts
+        id={id}
+        />
+      ),
+    },
+    {
+      key: "view7",
+      label: "Missing All Amounts",
+      component: (
+        <EditTableMissingAllAmounts
+          id={id}
         />
       ),
     },

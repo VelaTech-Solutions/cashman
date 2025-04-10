@@ -16,6 +16,7 @@ const EditTableMissingDescriptions  = ({ transactions, onEditClick }) => {
             <th className="px-4 py-2 text-left w-[60px] border border-gray-700">Date1</th>
             <th className="px-4 py-2 text-left w-[60px] border border-gray-700">Date2</th>
             <th className="px-4 py-2 text-left w-[600px] border border-gray-700">Description</th>
+            <th className="px-4 py-2 text-left w-[200px] border border-gray-700">Description2</th>
             <th className="px-4 py-2 text-left w-[80px] border border-gray-700">Credit</th>
             <th className="px-4 py-2 text-left w-[80px] border border-gray-700">Debit</th>
             <th className="px-4 py-2 text-left w-[80px] border-gray-700">Balance</th>
@@ -28,6 +29,7 @@ const EditTableMissingDescriptions  = ({ transactions, onEditClick }) => {
             <td className="px-4 py-2 w-[60px] truncate overflow-hidden whitespace-nowrap border border-gray-700">{tx.date1 || "—"}</td>
             <td className="px-4 py-2 w-[60px] truncate overflow-hidden whitespace-nowrap border border-gray-700">{tx.date2 || "—"}</td>
             <td className="px-4 py-2 w-[600px] truncate overflow-hidden whitespace-nowrap text-ellipsis border border-gray-700">{tx.description || "—"}</td>
+            <td className="px-4 py-2 w-[200px] truncate overflow-hidden whitespace-nowrap text-ellipsis border border-gray-700">{tx.description2 || "—"}</td>
             <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.credit_amount || 0).toFixed(2)}</td>
             <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.debit_amount || 0).toFixed(2)}</td>
             <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.balance_amount || 0).toFixed(2)}</td>

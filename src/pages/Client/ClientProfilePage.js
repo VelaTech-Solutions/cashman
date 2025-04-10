@@ -118,6 +118,7 @@ const ClientProfilePage = () => {
   const actionLinks = id ? [
     { label: "Budget", path: `/budget/${id}` },
     { label: "Transactions", path: `/client/${id}/transactionspage` },
+    { label: "Archives", path: `/client/${id}/archive` },
   ]
 : [];
   const views = [

@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
 // Firebase Imports
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc,getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 // Component Imports
@@ -15,8 +15,22 @@ function IgnoredLineActions1() {
   const [fuzzyIgnoredLines, setFuzzyIgnoredLines] = useState([]);
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [selectedBank, setSelectedBank] = useState(""); // State to track selected bank
+  const [banks, setBanks] = useState([]);
 
-
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "banks"));
+        const bankNames = snapshot.docs.map((doc) => doc.id);
+        setBanks(bankNames);
+      } catch (err) {
+        console.error("Error fetching banks:", err.message);
+      }
+    };
+  
+    fetchBanks();
+  }, []);
+  
   // Fetch ignored lines based on selected bank
   useEffect(() => {
     const fetchIgnoredLines = async () => {
@@ -131,20 +145,18 @@ return (
 
         {/* Select Bank Dropdown */}
         <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium">Select Bank</label>
-            <select
+          <select
             className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             value={selectedBank}
             onChange={(e) => setSelectedBank(e.target.value)}
-            >
+          >
             <option value="">Select Bank</option>
-            <option value="Absa Bank">Absa Bank</option>
-            <option value="Capitec Bank">Capitec Bank</option>
-            <option value="Fnb Bank">Fnb Bank</option>
-            <option value="Ned Bank">Ned Bank</option>
-            <option value="Standard Bank">Standard Bank</option>
-            <option value="Tyme Bank">Tyme Bank</option>
-            </select>
+            {banks.map((bankName) => (
+              <option key={bankName} value={bankName}>
+                {bankName}
+              </option>
+            ))}
+          </select>
         </div>
         {/* input Ignored Line Section */}
         <div className="mb-4">

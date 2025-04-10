@@ -4,7 +4,7 @@ import "styles/tailwind.css";
 
 // Firebase Imports
 import { db, storage, auth } from "../../firebase/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, Doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -29,6 +29,7 @@ const ClientAddPage = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [bankNames, setBankNames] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,6 +39,26 @@ const ClientAddPage = () => {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const docRef = doc(db, "settings", "banks"); // Reference to the 'banks' document
+        const docSnap = await getDoc(docRef); // Fetch the document snapshot
+  
+        if (docSnap.exists()) {
+          const bankData = docSnap.data().banks; // Retrieve the 'banks' array
+          setBankNames(bankData); // Store the array of bank names in state
+        } else {
+          console.log("No bank data found!");
+        }
+      } catch (error) {
+        console.error("Error fetching bank names:", error);
+      }
+    };
+  
+    fetchBanks();
+  }, []);
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setClientDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
@@ -189,20 +210,20 @@ const ClientAddPage = () => {
               onChange={handleInputChange}
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
-            <select
-              name="bankName"
-              value={clientDetails.bankName}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            >
-              <option value="">Select Bank</option>
-              <option value="Absa Bank">Absa Bank</option>
-              <option value="Capitec Bank">Capitec Bank</option>
-              <option value="Fnb Bank">Fnb Bank</option>
-              <option value="Ned Bank">Ned Bank</option>
-              <option value="Standard Bank">Standard Bank</option>
-              <option value="Tyme Bank">Tyme Bank</option>
-            </select>
+<select
+  name="bankName"
+  value={clientDetails.bankName}
+  onChange={handleInputChange}
+  className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+>
+  <option value="">Select Bank</option>
+  {bankNames.map((bank, index) => (
+    <option key={index} value={bank}>
+      {bank}
+    </option>
+  ))}
+</select>
+
 
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Upload Bank Statements</h2>
             <input

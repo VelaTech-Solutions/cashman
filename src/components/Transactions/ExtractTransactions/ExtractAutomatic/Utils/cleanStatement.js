@@ -42,10 +42,10 @@ const cleanStatement = async ({ id, bankName }) => {
   try {
     await ProgressUtils.updateProgress(id, "Clean Statement", "processing");
 
-    const [bankSnap, filteredSnap, alignmentSnap] = await Promise.all([
-      getDoc(bankRef),
-      getDoc(clientRef),
-      getDoc(alignmentRef)
+    const [bankSnap, filteredSnap, alignmentSnap] = await Promise.all([ 
+      getDoc(bankRef), 
+      getDoc(clientRef), 
+      getDoc(alignmentRef) 
     ]);
 
     if (!filteredSnap.exists()) {
@@ -66,27 +66,54 @@ const cleanStatement = async ({ id, bankName }) => {
       return;
     }
 
-    // Apply filtering
-    let cleanedData = filteredData.filter((line) => {
-      return (
-        !ignoredLines.includes(line.trim()) &&
-        !fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase()))
-      );
+    // Initialize an array to hold the lines to be archived
+    let linesToArchive = [];
+
+    // Name the archive source field to filtered Extract
+    const archiveSourceField = "filtered Extract";
+
+    // Apply filtering: Remove lines that are in ignoredLines or match fuzzyIgnoredLines, but save them to archive first
+    filteredData = filteredData.filter((line) => {
+      // If the line matches ignored or fuzzy ignored, archive it first
+      if (
+        ignoredLines.includes(line.trim()) || 
+        fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase()))
+      ) {
+        // Add the line to the archive array
+        linesToArchive.push({
+          content: line,
+          source: archiveSourceField,  // Or any source you want
+        });
+        return false;  // This will remove the line from filteredData
+      }
+      return true;
     });
+
+    // If there are lines to archive, update the archive in Firestore
+    if (linesToArchive.length > 0) {
+      const clientData = filteredSnap.data();
+      const existingArchive = clientData.archive || [];
+      const updatedArchive = [...existingArchive, ...linesToArchive];
+      
+      await updateDoc(clientRef, {
+        archive: updatedArchive,  // Add the lines to the archive
+      });
+    }
 
     // ✅ Check alignment toggle in Firestore
     const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
     const shouldAlign = alignmentSettings[bankName] ?? false;
 
-    // console log the alignment selection
+    // Log the alignment selection
     console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
 
     if (shouldAlign) {
-      cleanedData = await handleAlignTransactions(cleanedData);
+      filteredData = await handleAlignTransactions(filteredData);
     }
 
+    // Save the cleaned data back into Firestore
     await updateDoc(clientRef, {
-      filteredData: cleanedData,
+      filteredData: filteredData,
       "extractProgress.Clean Statement": "processing",
     });
 
@@ -97,4 +124,9 @@ const cleanStatement = async ({ id, bankName }) => {
   }
 };
 
+
 export default cleanStatement;
+
+
+
+// we need to store the

@@ -32,54 +32,50 @@ const createDatabaseStructure = async (id) => {
     cleaned: false,
   };
 
+  const defaultBudgetData = {
+    income: 0,
+    incomeavg: 0,
+    expenses: 0,
+    expensesavg: 0,
+    savings: 0,
+    savingsavg: 0,
+    housing: 0,
+    housingavg: 0,
+    transport: 0,
+    transportavg: 0,
+    debt: 0,
+    debtavg: 0,
+    timestamp: new Date().toISOString(),
+  };
+
   try {
     await ProgressUtils.updateProgress(id, "Creating database structure", "processing");
 
     if (!clientSnap.exists()) {
       await setDoc(clientRef, {
         transactions: [defaultTransaction],
-        budgetData: {
-          income: 0,
-          incomeavg: 0,
-          expenses: 0,
-          expensesavg: 0,
-          savings: 0,
-          savingsavg: 0,
-          housing: 0,
-          housingavg: 0,
-          transport: 0,
-          transportavg: 0,
-          debt: 0,
-          debtavg: 0,
-          timestamp: new Date().toISOString(),
-        },
+        budgetData: defaultBudgetData,
+        archive: [], 
         processedReports: [],
         extractProgress: {},
       });
     } else {
+      
       const data = clientSnap.data();
+
       const updatedTransactions = data.transactions
-      ? data.transactions.map((txn) => ({ ...txn, ...defaultTransaction }))
-      : [defaultTransaction];
+        ? data.transactions.map((txn) => ({
+          ...txn, 
+          ...defaultTransaction 
+          }))
+        : [defaultTransaction];
     
+      const updatedBudgetData = data.budgetData ?? defaultBudgetData;
 
       await updateDoc(clientRef, {
         transactions: updatedTransactions,
-        budgetData: {
-          income: data.budgetData?.income ?? 0,
-          incomeavg: data.budgetData?.incomeavg ?? 0,
-          expenses: data.budgetData?.expenses ?? 0,
-          expensesavg: data.budgetData?.expensesavg ?? 0,
-          savings: data.budgetData?.savings ?? 0,
-          savingsavg: data.budgetData?.savingsavg ?? 0,
-          housing: data.budgetData?.housing ?? 0,
-          housingavg: data.budgetData?.housingavg ?? 0,
-          transport: data.budgetData?.transport ?? 0,
-          transportavg: data.budgetData?.transportavg ?? 0,
-          debt: data.budgetData?.debt ?? 0,
-          debtavg: data.budgetData?.debtavg ?? 0,
-          timestamp: data.budgetData?.timestamp ?? new Date().toISOString(),
-        },
+        budgetData: updatedBudgetData,
+        archive: data.archive ?? [],       // Array for archived/deleted lines
         processedReports: data.processedReports ?? [],
         extractProgress: data.extractProgress ?? {},
       });

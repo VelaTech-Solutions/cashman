@@ -223,3 +223,8 @@ const helloFlow = ai.defineFlow('helloFlow', async (name) => {
 });
 
 helloFlow('Chris');
+
+ 
+rather havee thing that can be deceraed in the setting 
+
+first get the bank names set in the setting 

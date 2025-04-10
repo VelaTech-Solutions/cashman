@@ -1,5 +1,4 @@
 // src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescriptionVerify.js
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescriptionVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
@@ -38,52 +37,68 @@ const extractDescriptionVerify = async (id, bankName) => {
       return;
     }
 
+
+    // inside the settingsRef ok we have 
+    // enabled = true/false this is the regex switch
+    // pattern = "the regex" 
+    // deletion = true/false does not save too description2
+    // future feild to come
     const settingsData = settingsSnap.exists() ? settingsSnap.data() : {};
     console.log("📋 Description Settings Selected:");
     Object.entries(settingsData).forEach(([key, val]) => {
       console.log(`- ${key}: ${val?.enabled ? "✅ enabled" : "❌ disabled"}`);
     });
 
-    const activePatterns = Object.entries(settingsData)
-      .filter(([_, val]) => val?.enabled && val?.pattern)
-      .map(([_, val]) => new RegExp(val.pattern, "g"));
+    const activePatternConfigs = Object.entries(settingsData)
+    .filter(([_, val]) => val?.enabled && val?.pattern)
+    .map(([_, val]) => ({
+      regex: new RegExp(val.pattern, "g"),
+      deletion: val.deletion || false,
+    }));
+  
 
     const updatedTransactions = [...transactions];
 
-    if (activePatterns.length === 0) {
-      // No regex selected, just clean and copy
-      transactions.forEach((txn, index) => {
-        updatedTransactions[index] = {
-          ...txn,
-          description: txn.description?.trim() || "",
-          description2: "",
-        };
-      });
-    } else {
-      // Apply regex patterns
-      transactions.forEach((txn, index) => {
-        let description = txn.description?.trim();
-        if (!description) return;
+    // if (activePatterns.length === 0) {
+    //   // No regex selected, just clean and copy
+    //   transactions.forEach((txn, index) => {
+    //     updatedTransactions[index] = {
+    //       ...txn,
+    //       description: txn.description?.trim() || "",
+    //       description2: "",
+    //     };
+    //   });
+    // } else {
 
-        const description2 = [];
-
-        activePatterns.forEach((regex) => {
-          const matches = [...(description.match(regex) || [])];
-          if (matches.length > 0) {
+    // Apply regex patterns
+    transactions.forEach((txn, index) => {
+      let description = txn.description?.trim();
+      if (!description) return;
+    
+      const description2 = [];
+    
+      activePatternConfigs.forEach(({ regex, deletion }) => {
+        const matches = [...(description.match(regex) || [])];
+        if (matches.length > 0) {
+          if (!deletion) {
             description2.push(...matches);
-            matches.forEach((match) => {
-              description = description.replace(match, "").trim();
-            });
           }
-        });
-
-        updatedTransactions[index] = {
-          ...txn,
-          description,
-          description2: description2.length ? description2.join(" | ") : "",
-        };
+          matches.forEach((match) => {
+            description = description.replace(match, "").trim();
+          });
+        }
       });
-    }
+    
+      // Convert the description to lowercase
+      description = description.toLowerCase();
+    
+      updatedTransactions[index] = {
+        ...txn,
+        description,
+        description2: description2.length ? description2.join(" | ") : "",
+      };
+    });    
+    // }
 
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
@@ -98,87 +113,3 @@ const extractDescriptionVerify = async (id, bankName) => {
 };
 
 export default extractDescriptionVerify;
-
-
-
-// Account Numbers
-// (map)
-
-
-// enabled
-// false
-// (boolean)
-
-
-
-// Amounts
-// (map)
-
-
-// enabled
-// false
-// (boolean)
-
-
-
-// Card Numbers
-// (map)
-
-
-// enabled
-// false
-// (boolean)
-
-
-// pattern
-// "\\b(?:\\d{4}[\\s-]?){3}\\d{4}|\\*{4}\\d{4}\\b"
-// (string)
-
-
-
-// Dates
-// (map)
-
-
-// enabled
-// false
-// (boolean)
-
-
-
-// Numbers
-// (map)
-
-
-// enabled
-// true
-// (boolean)
-
-
-// pattern
-// "\[\d+\]"
-// (string)
-
-
-
-// Time
-// (map)
-
-
-// enabled
-// false
-// (boolean)
-
-
-
-// cards
-// (map)
-
-
-// enabled
-// true
-// (boolean)
-
-
-// pattern
-// "\(Card\s\d{3,4}\)"

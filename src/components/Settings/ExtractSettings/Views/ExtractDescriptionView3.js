@@ -5,20 +5,14 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  deleteField
+  deleteField,
+  getDocs,
+  collection,
 } from "firebase/firestore";
 
-const banks = [
-  "Absa Bank",
-  "Capitec Bank",
-  "Fnb Bank",
-  "Ned Bank",
-  "Standard Bank",
-  "Tyme Bank",
-];
-
 const ExtractDescriptionView3 = () => {
-  const [selectedBank, setSelectedBank] = useState(banks[0]);
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState("");
   const [descriptionSettings, setDescriptionSettings] = useState({});
   const [newLabel, setNewLabel] = useState("");
   const [newRegex, setNewRegex] = useState("");
@@ -26,7 +20,19 @@ const ExtractDescriptionView3 = () => {
   const bankRef = (bank) => doc(db, "settings", "description", bank, "config");
 
   useEffect(() => {
+    const fetchBanks = async () => {
+      const bankSnapshot = await getDocs(collection(db, "banks"));
+      const bankNames = bankSnapshot.docs.map((doc) => doc.id);
+      setBanks(bankNames);
+      if (bankNames.length > 0) setSelectedBank(bankNames[0]);
+    };
+
+    fetchBanks();
+  }, []);
+
+  useEffect(() => {
     const fetchSettings = async () => {
+      if (!selectedBank) return;
       const ref = bankRef(selectedBank);
       const snap = await getDoc(ref);
 
@@ -38,15 +44,29 @@ const ExtractDescriptionView3 = () => {
       }
     };
 
-    if (selectedBank) fetchSettings();
+    fetchSettings();
   }, [selectedBank]);
 
-  const handleToggle = async (label) => {
+  const handleToggleRemoval = async (label) => {
     const updated = {
       ...descriptionSettings,
       [label]: {
         ...descriptionSettings[label],
         enabled: !descriptionSettings[label]?.enabled,
+      },
+    };
+    setDescriptionSettings(updated);
+    await updateDoc(bankRef(selectedBank), {
+      [label]: updated[label],
+    });
+  };
+
+  const handleToggleDeletion = async (label) => {
+    const updated = {
+      ...descriptionSettings,
+      [label]: {
+        ...descriptionSettings[label],
+        deletion: !descriptionSettings[label]?.deletion,
       },
     };
     setDescriptionSettings(updated);
@@ -73,26 +93,28 @@ const ExtractDescriptionView3 = () => {
     if (!newLabel || !newRegex) return;
     const updated = {
       ...descriptionSettings,
-      [newLabel]: { enabled: false, pattern: newRegex },
+      [newLabel]: { enabled: false, deletion: false, pattern: newRegex },
     };
     setDescriptionSettings(updated);
     await updateDoc(bankRef(selectedBank), {
-      [newLabel]: { enabled: false, pattern: newRegex },
+      [newLabel]: { enabled: false, deletion: false, pattern: newRegex },
     });
     setNewLabel("");
     setNewRegex("");
   };
-  const handleDeleteSetting = async (label) => {
+
+  // DELETES THE LINE ADDED 🗑️
+  const handleDeleteEntry = async (label) => {
     const updated = { ...descriptionSettings };
     delete updated[label];
     setDescriptionSettings(updated);
-  
+
     const ref = bankRef(selectedBank);
     await updateDoc(ref, {
       [label]: deleteField(),
     });
   };
-  
+
   return (
     <div className="p-4 bg-gray-900 rounded-md shadow text-white">
       <h3 className="text-lg font-semibold mb-4">Description Extraction Settings</h3>
@@ -106,42 +128,56 @@ const ExtractDescriptionView3 = () => {
           <option key={bank} value={bank}>{bank}</option>
         ))}
       </select>
-        <div className="space-y-3">
-            {Object.entries(descriptionSettings).map(([label, data]) => (
-                <div key={label} className="border-b border-gray-700 pb-2 mb-2 space-y-2">
-                    <div className="flex justify-between items-center">
-                        <span className="font-medium">{label}</span>
-                        <div className="flex items-center space-x-2">
-                            <button
-                                onClick={() => handleDeleteSetting(label)}
-                                className="text-red-500 hover:text-red-700 text-lg"
-                                title="Delete this setting"
-                            >
-                                🗑️
-                            </button>
 
-                            <label className="inline-flex items-center cursor-pointer">
-                                <input
-                                type="checkbox"
-                                className="sr-only peer"
-                                checked={!!data?.enabled}
-                                onChange={() => handleToggle(label)}
-                                />
-                                <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
-                            </label>
-                        </div>
-                    </div>
-                    <input
-                        type="text"
-                        value={data.pattern || ""}
-                        onChange={(e) => handleRegexChange(label, e.target.value)}
-                        className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
-                        placeholder="Regex pattern"
-                    />
-                </div>
-            ))}
-        </div>
+      <div className="space-y-3">
+        {Object.entries(descriptionSettings).map(([label, data]) => (
+          <div key={label} className="border-b border-gray-700 pb-2 mb-2 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">{label}</span>
+              <div className="flex items-center space-x-2">
 
+                <button
+                  onClick={() => handleDeleteEntry(label)}
+                  className="text-red-500 hover:text-red-700 text-lg"
+                  title="Delete this setting"
+                >
+                  🗑️
+                </button>
+
+
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={!!data?.enabled}
+                    onChange={() => handleToggleRemoval(label)}
+                  />
+                  <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
+
+                {/* Toggle for deleting regex handleToggleDelete */}
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={!!data?.deletion}
+                    onChange={() => handleToggleDeletion(label)}  // This handles removing matching lines and dont save them to decs 2 please 
+                  />
+                  <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-red-500 relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
+
+              </div>
+            </div>
+            <input
+              type="text"
+              value={data.pattern || ""}
+              onChange={(e) => handleRegexChange(label, e.target.value)}
+              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
+              placeholder="Regex pattern"
+            />
+          </div>
+        ))}
+      </div>
 
       <div className="mt-6">
         <h4 className="text-md font-semibold mb-2">Add New Extraction Rule</h4>

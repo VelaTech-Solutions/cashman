@@ -23,8 +23,10 @@ import ExtractTransactions from "components/Transactions/ExtractTransactions/Ext
 import CategorizeTransactions from "components/Transactions/CategorizeTransactions/CategorizeTransactions";
 import ViewReports from "pages/Reports/ViewReports";
 
+import ArchivePage from "pages/ArchivePage"; // main
+
 // Settings Pages
-import Settings from "pages/Settings";
+import Settings from "pages/SettingsPage";
 import ViewSettings from "components/Settings/ViewSettings/ViewSettingsPage";
 import EditSettings from "components/Settings/EditSettings/EditSettingsPage";
 import CategorySettings from "components/Settings/CategorySettings/CategorySettingsPage";
@@ -65,6 +67,9 @@ const RoutesConfig = () => {
         <Route path="/client/:id/extract-transactions" element={<ExtractTransactions />} />
         <Route path="/client/:id/categorize-transactions" element={<CategorizeTransactions />} />
         <Route path="/client/:id/reports" element={<ViewReports />} />
+
+        {/* Archive Pages */}
+        <Route path="/client/:id/archive" element={<ArchivePage />} />
 
         {/* Settings Pages */}
         <Route path="/viewsettings/:id" element={<ViewSettings />} />

@@ -265,9 +265,9 @@ const CategorizeTransactions = () => {
         {activePage === "AICategorizer" && (
           <AICategorizer transactions={transactions} clientId={id}/>
         )}
-        {activePage === "PlayCategorizer" && (
+        {/* {activePage === "PlayCategorizer" && (
           <PlayCategorizer transactions={transactions} id={id}/>
-        )}
+        )} */}
 
 
       </div>

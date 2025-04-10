@@ -189,8 +189,8 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
             return response
         
 
-
-        extracted_text = clean_description(extracted_text)
+        extracted_text = extracted_text.replace("#", "").replace("*", "").strip()
+        # extracted_text = clean_description(extracted_text)
         # Clean statement based on bank name
         clean_amounts = {
             "Absa Bank": clean_amounts_in_string,

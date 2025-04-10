@@ -49,7 +49,6 @@ const ClientActions1 = ({
               {notes.length}
             </motion.div>
           </div>
-
           {/* Delete Button */}
           <button
             className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-lg hover:shadow-xl"
