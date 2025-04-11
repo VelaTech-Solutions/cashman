@@ -10,24 +10,27 @@ const ArchivedDataTable = ({ data }) => {
   }
 
   return (
-    <table className="min-w-full table-auto border-collapse">
-      <thead>
-        <tr>
-          <th className="px-4 py-2 text-left">Source</th>
-          <th className="px-4 py-2 text-left">Content</th>
+<div className="max-h-[400px] overflow-y-auto rounded border border-gray-700">
+  <table className="min-w-full table-auto border-collapse">
+    <thead className="sticky top-0 bg-gray-800 z-10">
+      <tr>
+        <th className="px-4 py-2 text-left border-b border-gray-600">Source</th>
+        <th className="px-4 py-2 text-left border-b border-gray-600">Content</th>
+      </tr>
+    </thead>
+    <tbody>
+      {data.map((item, index) => (
+        <tr key={index} className="border-t border-gray-700 hover:bg-gray-900">
+          <td className="px-4 py-2">{item.source || "—"}</td>
+          <td className="px-4 py-2">
+            {item.content || "No content available"}
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {data.map((item, index) => (
-          <tr key={index} className="border-t border-gray-700">
-            <td className="px-4 py-2">{item.source || "—"}</td>
-            <td className="px-4 py-2">
-              {item.content || "No content available"}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      ))}
+    </tbody>
+  </table>
+</div>
+
   );
 };
 

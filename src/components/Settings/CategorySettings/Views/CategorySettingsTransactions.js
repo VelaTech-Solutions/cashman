@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { doc,collection, getDocs, getDoc } from "firebase/firestore";
+import { doc,collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 
 const CategorySettingsTransactions = () => {

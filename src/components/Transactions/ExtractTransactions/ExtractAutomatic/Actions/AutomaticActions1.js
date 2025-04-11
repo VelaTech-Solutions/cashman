@@ -56,6 +56,7 @@ export const AutomaticActions1 = ({
       transactions: [],
       filteredData: [],
       extractProgress: {},
+      archive: [],
     });
   
     setTimeout(() => {

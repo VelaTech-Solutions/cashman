@@ -134,15 +134,15 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Dates Extracted": "failed" }));
       }
 
-      // // Step 3.1: Verify and Clean up Dates uniformity the dates
-      // setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "processing" }));
-      // try {
-      //   await extractDatesVerify(id, bankName);
-      //   setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "success" }));
-      // } catch (error) {
-      //   console.error("❌ Verifing dates failed, continuing...");
-      //   setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "failed" }));
-      // }
+      // Step 3.1: Verify and Clean up Dates uniformity the dates
+      setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "processing" }));
+      try {
+        await extractDatesVerify(id, bankName);
+        setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "success" }));
+      } catch (error) {
+        console.error("❌ Verifing dates failed, continuing...");
+        setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "failed" }));
+      }
   
       // Step 4: Extract Amounts
       setExtractionStatus((prev) => ({ ...prev, "Amounts Extracted": "processing" }));

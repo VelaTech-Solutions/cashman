@@ -89,7 +89,6 @@ function ExtractAutomatically() {
       {/* Container with Progress Extract Views */}
       <div className="flex justify-start items-center space-x-4 mb-4">
         <ContainerVeiws 
-        // send progressData to the component
         progressData={progressData}
         setProgressData={setProgressData}
         isProcessing={isProcessing}

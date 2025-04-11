@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Firebase Imports
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 
 // Component Imports
@@ -15,21 +15,22 @@ const EditTableOriginal = ({ id }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-
   useEffect(() => {
-    const fetchClientData = async () => {
-      try {
-        const data = await LoadClientData(id);
-        setClientData(data);
-        setTransactions(data.transactions || []);
-      } catch (err) {
-        setError("Failed to load client data.");
-      } finally {
+    const loadData = async () => {
+      const clientData = await FirestoreHelper.loadClientData(id); // new helper
+      if (!clientData) {
+        setError("Client not found.");
         setLoading(false);
+        return;
       }
+      setClientData(clientData);
+      setTransactions(clientData.transactions || []);
+      setLoading(false); // ✅ Don't forget to set loading to false once done
     };
-    fetchClientData();
+  
+    loadData();
   }, [id]);
+  
 
   const handleEditClick = (index) => setEditingIndex(index);
   // const handleSaveClick = () => setEditingIndex(null);
@@ -83,20 +84,34 @@ const EditTableOriginal = ({ id }) => {
 
   const handleDeleteClick = async (index) => {
     const updated = [...transactions];
-    updated.splice(index, 1);
+    const removed = updated.splice(index, 1); // remove and store the deleted transaction
     setTransactions(updated);
   
     try {
-      const clientRef = doc(db, "clients", id);
-      await updateDoc(clientRef, {
+      const transactionRef = doc(db, "clients", id);
+  
+      // Format removed line for archive
+      const archiveEntries = removed.map((tx) => ({
+        content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${tx.debit_amount || ""} ${tx.balance_amount || ""}`.trim(),
+        source: "EditTableOriginal",
+      }));
+  
+      // Get current archive (if exists)
+      const docSnap = await getDoc(transactionRef);
+      const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
+  
+      // Save updated transactions + updated archive
+      await updateDoc(transactionRef, {
         transactions: updated,
+        archive: [...currentArchive, ...archiveEntries],
       });
-      console.log("Transaction deleted and saved to Firestore.");
+  
+      console.log("Transaction deleted and archived successfully.");
     } catch (err) {
-      console.error("Failed to delete transaction from Firestore:", err);
+      console.error("Failed to delete and archive transaction:", err);
     }
   };
-  
+    
   if (loading) return <Loader />;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -115,7 +130,19 @@ const EditTableOriginal = ({ id }) => {
     </tr>
   );
 
-  const rows = transactions.map((tx, index) => {
+  const isInvalidDate = (date) => {
+    return !date || date === "None" || date === "null" || date === "(null)";
+  };
+  const invalidTransactions = transactions.filter(
+    tx => isInvalidDate(tx.date1) && isInvalidDate(tx.date2)
+  );
+
+  // Filter out invalid transactions for display
+  const filteredTransactions = transactions.filter(
+    tx => !isInvalidDate(tx.date1) || !isInvalidDate(tx.date2)
+  );
+  // Display the transactions in the table
+  const rows = filteredTransactions.map((tx, index) => {
     const isEditing = index === editingIndex;
 
     return (
@@ -161,7 +188,7 @@ const EditTableOriginal = ({ id }) => {
     <div>
       <h1 className="text-sm font-semibold mb-4">Transactions</h1>
       <BaseTable headers={headers} rows={rows} />
-      <p className="mt-4 text-gray-400">Transactions: {transactions.length}</p>
+      <p className="mt-4 text-gray-400">Transactions: {filteredTransactions.length}</p>
     </div>
   );
 };

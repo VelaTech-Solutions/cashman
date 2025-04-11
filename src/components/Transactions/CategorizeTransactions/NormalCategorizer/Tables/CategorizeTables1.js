@@ -67,8 +67,8 @@ const CategorizeTables1 = ({
                 </th>
                 <th className="p-3">Date</th>
                 <th className="p-3">Description</th>
-                <th className="p-3">Debit</th>
                 <th className="p-3">Credit</th>
+                <th className="p-3">Debit</th>
                 <th className="p-3">Balance</th>
                 <th className="p-3">Category</th>
                 <th className="p-3">Subcategory</th>
@@ -86,8 +86,8 @@ const CategorizeTables1 = ({
                   </td>
                   <td className="p-3">{transaction.date1 || "-"}</td>
                   <td className="p-3">{transaction.description || "-"}</td>
-                  <td className="p-3">{transaction.debit_amount || "-"}</td>
                   <td className="p-3">{transaction.credit_amount || "-"}</td>
+                  <td className="p-3">{transaction.debit_amount || "-"}</td>
                   <td className="p-3">{transaction.balance_amount || "-"}</td>
                   <td className="p-3">{transaction.category || "-"}</td>
                   <td className={`p-3 ${getCategoryColor(transaction.category)}`}>
