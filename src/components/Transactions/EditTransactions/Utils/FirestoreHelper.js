@@ -154,4 +154,3 @@ export const deleteFieldFromTransaction = async (clientId, transactionId, field)
     throw error;
   }
 };
-

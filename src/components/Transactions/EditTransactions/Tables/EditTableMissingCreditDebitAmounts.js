@@ -26,6 +26,26 @@ const EditTableMissingCreditDebitAmounts = ({ id }) => {
     parseFloat(tx.debit_amount || 0) === 0
   );
 
+  const handleRemoveZeros = async () => {
+    const confirm = window.confirm("Are you sure you want to remove all transactions with missing credit and debit amounts?");
+    if (!confirm) return;
+
+    const updatedTransactions = transactions.filter(
+      (tx) => !(
+        parseFloat(tx.credit_amount || 0) === 0 &&
+        parseFloat(tx.debit_amount || 0) === 0
+      )
+    );
+
+    const transactionRef = doc(db, "clients", id);
+    await updateDoc(transactionRef, {
+      transactions: updatedTransactions,
+    });
+
+    setTransactions(updatedTransactions);
+    alert("Transactions with missing credit and debit amounts have been removed.");
+  };
+  
   // Table headers
   const headers = (
     <tr>
@@ -60,25 +80,6 @@ const EditTableMissingCreditDebitAmounts = ({ id }) => {
     </tr>
   ));
 
-  const handleRemoveZeros = async () => {
-    const confirm = window.confirm("Are you sure you want to remove all transactions with missing credit and debit amounts?");
-    if (!confirm) return;
-
-    const updatedTransactions = transactions.filter(
-      (tx) => !(
-        parseFloat(tx.credit_amount || 0) === 0 &&
-        parseFloat(tx.debit_amount || 0) === 0
-      )
-    );
-
-    const transactionRef = doc(db, "clients", id);
-    await updateDoc(transactionRef, {
-      transactions: updatedTransactions,
-    });
-
-    setTransactions(updatedTransactions);
-    alert("Transactions with missing credit and debit amounts have been removed.");
-  };
 
   return (
     <div>
@@ -87,11 +88,11 @@ const EditTableMissingCreditDebitAmounts = ({ id }) => {
         className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 mb-4 rounded"
         onClick={handleRemoveZeros}
       >
-        Remove Missing Credit/Debit
+        Remove All
       </button>
       <BaseTable headers={headers} rows={rows} />
       <p className="mt-4 text-gray-400">
-        Total transactions with missing credit and debit: {filteredTransactions.length}
+        Missing credit & debit: {filteredTransactions.length}
       </p>
     </div>
   );

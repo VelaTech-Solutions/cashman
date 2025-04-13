@@ -4,7 +4,7 @@ import React from "react";
 // Utils imports
 import BaseTable from "../Utils/BaseTable";
 
-const EditTableBroken = ({ transactions, onEditClick }) => {
+const EditTableInvalid = ({ transactions, onEditClick }) => {
   if (!transactions || transactions.length === 0) {
     return <p className="text-gray-400">No transactions found.</p>;
   }
@@ -48,11 +48,9 @@ return (
     <div>
         <BaseTable headers={headers} rows={rows} />
         <p className="mt-4 text-gray-400">
-        Number of broken transactions: {filtered.length}
+        Invalid transactions: {filtered.length}
         </p>
     </div>
     );
 };
-export default EditTableBroken;
-
-// display the broken transactions only 
+export default EditTableInvalid;

@@ -277,7 +277,7 @@ function SettingsPage() {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left" },
+    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
     { path: "/HelpExtract", label: "Extract Help", icon: "ph-question" },
   ];
 

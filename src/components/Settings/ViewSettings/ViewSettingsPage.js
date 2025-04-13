@@ -14,7 +14,8 @@ const ViewSettings = () => {
   const [activePage, setActivePage] = useState("none");
 
   const links = [
-    { path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left" },
+    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
+
     { type: "divider" },
     {
       type: "custom",

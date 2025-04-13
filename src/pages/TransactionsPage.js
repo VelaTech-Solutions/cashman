@@ -9,6 +9,7 @@ import ContainerOverView from "../components/Transactions/TransactionsPage/Conta
 const TransactionsPage = () => {
   const { id } = useParams();
   const [clientData, setClientData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
   const [activeView, setActiveView] = useState("view1");
   const links = [
@@ -38,34 +39,20 @@ const TransactionsPage = () => {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
-        const loadedClientData = await LoadClientData(id);
-        setClientData(loadedClientData);
+        const clientData = await LoadClientData(id);
+        setClientData(clientData);
+        setTransactions(clientData.transactions || []);
+        setError("");
       } catch (err) {
         console.error("Error fetching data:", err.message);
         setError("Failed to fetch Client Data.");
       }
     };
 
-    fetchData();
+    loadData();
   }, [id]);
-
-    // load transactions
-    const [transactions, setTransactions] = useState([]);
-    useEffect(() => {
-      const fetchTransactions = async () => {
-        try {
-          const loadedTransactions = await LoadTransactions(id);
-          setTransactions(loadedTransactions);
-        } catch (err) {
-          console.error("Error fetching transactions:", err);
-          setError(err.message);
-        }
-      };
-      fetchTransactions();
-    }, [id]);
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Client Profile" links={links} />

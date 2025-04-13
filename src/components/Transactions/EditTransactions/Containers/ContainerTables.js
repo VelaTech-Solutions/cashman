@@ -4,19 +4,16 @@ import React, { useState } from "react";
 
 // Component Imports
 import { ViewSwitcher } from 'components/Common';
-import EditTable2 from "../Tables/EditTable2";
-import EditTable3 from "../Tables/EditTable3";
-import EditTable4 from "../Tables/EditTable4";
-
 import EditTableOriginal from "../Tables/EditTableOriginal";
-import EditTableBroken from "../Tables/EditTableBroken";
+import EditTableInvalid from "../Tables/EditTableInvalid";
+import EditTableMissingDates from "../Tables/EditTableMissingDates";
 import EditTableMissingDescriptions from "../Tables/EditTableMissingDescriptions";
 import EditTableMissingCreditDebitAmounts from "../Tables/EditTableMissingCreditDebitAmounts";
+import EditTableMissingBalanceAmounts from "../Tables/EditTableMissingBalanceAmounts";
 import EditTableMissingAllAmounts from "../Tables/EditTableMissingAllAmounts";
-import EditTableDuplicates from "../Tables/EditTableDuplicates";
 
 
-const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransactions, id }) => {
+const ContainerTables = ({ id }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     {
@@ -24,41 +21,52 @@ const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransa
       label: "Original",
       component: (
         <EditTableOriginal
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
+          id={id}
+        />
+      ),
+    },
+    {
+      key: "view2",
+      label: "Invalid",
+      component: (
+        <EditTableInvalid
+          id={id}
+        />
+      ),
+    },
+    {
+      key: "view3",
+      label: "Missing Dates",
+      component: (
+        <EditTableMissingDates
+          id={id}
+        />
+      ),
+    },
+    {
+      key: "view4",
+      label: "Missing Descriptions",
+      component: (
+        <EditTableMissingDescriptions
           id={id}
         />
       ),
     },
     {
       key: "view5",
-      label: "Broken",
+      label: "Missing Credit & Debit",
       component: (
-        <EditTableBroken
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
+        <EditTableMissingCreditDebitAmounts
+          id={id}
         />
       ),
     },
     {
       key: "view6",
-      label: "Missing Descriptions",
+      label: "Missing Balance",
       component: (
-        <EditTableMissingDescriptions
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
-        />
-      ),
-    },
-    {
-      key: "view4",
-      label: "Missing Credit Debit",
-      component: (
-        <EditTableMissingCreditDebitAmounts
-        id={id}
+        <EditTableMissingBalanceAmounts
+          id={id}
         />
       ),
     },
@@ -71,50 +79,6 @@ const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransa
         />
       ),
     },
-    {
-      key: "view8",
-      label: "Duplicates",
-      component: (
-        <EditTableDuplicates
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
-        />
-      ),
-    },
-    // {
-    //   key: "view2",
-    //   label: "Table 2",
-    //   component: (
-    //     <EditTable2
-    //       transactions={transactions}
-    //       selectedTransactions={selectedTransactions}
-    //       setSelectedTransactions={setSelectedTransactions}
-    //     />
-    //   ),
-    // },
-    // {
-    //   key: "view3",
-    //   label: "Table 3",
-    //   component: (
-    //     <EditTable3
-    //       transactions={transactions}
-    //       selectedTransactions={selectedTransactions}
-    //       setSelectedTransactions={setSelectedTransactions}
-    //     />
-    //   ),
-    // },
-    // {
-    //   key: "view4",
-    //   label: "Table 4",
-    //   component: (
-    //     <EditTable4
-    //       transactions={transactions}
-    //       selectedTransactions={selectedTransactions}
-    //       setSelectedTransactions={setSelectedTransactions}
-    //     />
-    //   ),
-    // },
   ];
 
   return (

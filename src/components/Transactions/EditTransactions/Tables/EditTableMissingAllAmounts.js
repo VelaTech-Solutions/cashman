@@ -1,16 +1,12 @@
-// src/components/Transactions/EditTransactions/Tables/EditTableZeroAmounts.js
 import React, { useState, useEffect } from "react";
-
-// Firebase Imports
-import { doc, updateDoc, getDoc  } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
-
-// Component Imports
-import { BaseTable, FirestoreHelper } from '../Utils/';
+import { BaseTable, FirestoreHelper } from "../Utils/";
 
 const EditTableMissingAllAmounts = ({ id }) => {
   const [transactions, setTransactions] = useState([]);
-  
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editedTransaction, setEditedTransaction] = useState(null);
   // Function to load client data and set transactions
   useEffect(() => {
     const loadData = async () => {
@@ -28,42 +24,78 @@ const EditTableMissingAllAmounts = ({ id }) => {
     parseFloat(tx.balance_amount || 0) === 0
   );
 
-  // Table headers
-  const headers = (
-    <tr>
-      <th className="px-4 py-2 text-left w-[60px] border border-gray-700">Date1</th>
-      <th className="px-4 py-2 text-left w-[60px] border border-gray-700">Date2</th>
-      <th className="px-4 py-2 text-left w-[600px] border border-gray-700">Description</th>
-      <th className="px-4 py-2 text-left w-[200px] border border-gray-700">Description2</th>
-      <th className="px-4 py-2 text-left w-[80px] border border-gray-700">Credit</th>
-      <th className="px-4 py-2 text-left w-[80px] border border-gray-700">Debit</th>
-      <th className="px-4 py-2 text-left w-[80px] border-gray-700">Balance</th>
-      <th className="px-4 py-2 text-left w-[80px] border border-gray-700">Actions</th>
-    </tr>
-  );
+  const handleInputChange = (field, value) => {
+    setEditedTransaction((prev) => ({ ...prev, [field]: value }));
+  };
 
-  // Table rows for displaying zero amount transactions
-  const rows = filteredTransactions.map((tx, index) => (
-    <tr key={tx.id || index} className="border-t border-gray-700">
-      <td className="px-4 py-2 w-[60px] truncate overflow-hidden whitespace-nowrap border border-gray-700">{tx.date1 || "—"}</td>
-      <td className="px-4 py-2 w-[60px] truncate overflow-hidden whitespace-nowrap border border-gray-700">{tx.date2 || "—"}</td>
-      <td className="px-4 py-2 w-[600px] truncate overflow-hidden whitespace-nowrap text-ellipsis border border-gray-700">{tx.description || "—"}</td>
-      <td className="px-4 py-2 w-[200px] truncate overflow-hidden whitespace-nowrap text-ellipsis border border-gray-700">{tx.description2 || "—"}</td>
-      <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.credit_amount || 0).toFixed(2)}</td>
-      <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.debit_amount || 0).toFixed(2)}</td>
-      <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.balance_amount || 0).toFixed(2)}</td>
-      <td className="px-4 py-2 border border-gray-700">
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-          onClick={() => onEditClick(tx)} // Edit functionality (you'll need to implement it)
-        >
-          Edit
-        </button>
-      </td>
-    </tr>
-  ));
+  const handleEditClick = (index) => {
+    setEditingIndex(index);
+    setEditedTransaction(filteredTransactions[index]);
+  };
 
-  // Remove all zero amounts from the transactions on click
+  const handleSaveClick = async () => {
+    const updated = [...transactions];
+    const originalTx = filteredTransactions[editingIndex];
+
+    // Find index in the full transactions list
+    const fullIndex = transactions.findIndex(
+      (tx) => tx.id === originalTx.id
+    );
+
+    if (fullIndex !== -1) {
+      updated[fullIndex] = editedTransaction;
+      const transactionRef = doc(db, "clients", id);
+      await updateDoc(transactionRef, { transactions: updated });
+      setTransactions(updated);
+      setEditingIndex(null);
+      setEditedTransaction(null);
+    }
+  };
+
+  const handleInsertClick = (index) => {
+    const newTx = {
+      date1: "",
+      date2: "",
+      description: "",
+      description2: "",
+      credit_amount: 0,
+      debit_amount: 0,
+      balance_amount: 0,
+    };
+    const updated = [...transactions];
+    updated.splice(index + 1, 0, newTx);
+    setTransactions(updated);
+  };
+  
+  const handleDeleteClick = async (index) => {
+    const updated = [...transactions];
+    const removed = updated.splice(index, 1); // remove and store the deleted transaction
+    setTransactions(updated);
+  
+    try {
+      const transactionRef = doc(db, "clients", id);
+  
+      // Format removed line for archive
+      const archiveEntries = removed.map((tx) => ({
+        content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${tx.debit_amount || ""} ${tx.balance_amount || ""}`.trim(),
+        source: "EditTableOriginal",
+      }));
+  
+      // Get current archive (if exists)
+      const docSnap = await getDoc(transactionRef);
+      const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
+  
+      // Save updated transactions + updated archive
+      await updateDoc(transactionRef, {
+        transactions: updated,
+        archive: [...currentArchive, ...archiveEntries],
+      });
+  
+      console.log("Transaction deleted and archived successfully.");
+    } catch (err) {
+      console.error("Failed to delete and archive transaction:", err);
+    }
+  }; 
 
   const handleRemoveZeros = async () => {
     const confirm = window.confirm("Are you sure you want to remove all zero amount transactions?");
@@ -106,19 +138,86 @@ const EditTableMissingAllAmounts = ({ id }) => {
     alert("All zero amount transactions have been removed and archived.");
   };
   
+  const headers = (
+    <tr>
+      <th className="px-2 py-2 w-[20px] border border-gray-700">+</th>
+      <th className="px-2 py-2 w-[20px] border border-gray-700">X</th>
+      <th className="px-4 py-2 w-[60px] border border-gray-700">Date1</th>
+      <th className="px-4 py-2 w-[60px] border border-gray-700">Date2</th>
+      <th className="px-4 py-2 w-[600px] border border-gray-700">Description</th>
+      <th className="px-4 py-2 w-[200px] border border-gray-700">Description2</th>
+      <th className="px-4 py-2 w-[80px] border border-gray-700">Credit</th>
+      <th className="px-4 py-2 w-[80px] border border-gray-700">Debit</th>
+      <th className="px-4 py-2 w-[80px] border border-gray-700">Balance</th>
+      <th className="px-4 py-2 w-[80px] border border-gray-700">Actions</th>
+    </tr>
+  );
+
+  const rows = filteredTransactions.map((tx, index) => {
+    const isEditing = editingIndex === index;
+
+    return (
+      <tr key={tx.id || index} className="border-t border-gray-700">
+        <td className="px-2 py-2 border border-gray-700">
+          <button className="text-green-500" onClick={() => handleInsertClick(index)}>+</button>
+        </td>
+        <td className="px-2 py-2 border border-gray-700">
+          <button className="text-red-500" onClick={() => handleDeleteClick(index)}>X</button>
+        </td>
+        {isEditing ? (
+          <>
+            <td><input className="w-full text-black" value={editedTransaction.date1} onChange={(e) => handleInputChange("date1", e.target.value)} /></td>
+            <td><input className="w-full text-black" value={editedTransaction.date2} onChange={(e) => handleInputChange("date2", e.target.value)} /></td>
+            <td><input className="w-full text-black" value={editedTransaction.description} onChange={(e) => handleInputChange("description", e.target.value)} /></td>
+            <td><input className="w-full text-black" value={editedTransaction.description2} onChange={(e) => handleInputChange("description2", e.target.value)} /></td>
+            <td><input className="w-full text-black" value={editedTransaction.credit_amount} onChange={(e) => handleInputChange("credit_amount", e.target.value)} /></td>
+            <td><input className="w-full text-black" value={editedTransaction.debit_amount} onChange={(e) => handleInputChange("debit_amount", e.target.value)} /></td>
+            <td><input className="w-full text-black" value={editedTransaction.balance_amount} onChange={(e) => handleInputChange("balance_amount", e.target.value)} /></td>
+            <td>
+              <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={handleSaveClick}>Save</button>
+            </td>
+          </>
+        ) : (
+          <>
+            <td className="px-4 py-2 border border-gray-700">{tx.date1 || "—"}</td>
+            <td className="px-4 py-2 border border-gray-700">{tx.date2 || "—"}</td>
+            <td className="px-4 py-2 border border-gray-700">{tx.description || "—"}</td>
+            <td className="px-4 py-2 border border-gray-700">{tx.description2 || "—"}</td>
+            <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.credit_amount || 0).toFixed(2)}</td>
+            <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.debit_amount || 0).toFixed(2)}</td>
+            <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.balance_amount || 0).toFixed(2)}</td>
+            <td className="px-4 py-2 border border-gray-700">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
+                onClick={() => handleEditClick(index)}
+              >
+                Edit
+              </button>
+            </td>
+          </>
+        )}
+      </tr>
+    );
+  });
+
 
   return (
     <div>
-      <h1 className="text-sm font-semibold mb-4">Transactions</h1>
+      <h1 className="text-sm font-semibold mb-4">All Amounts Missing</h1>
+      {/* fine print */}
+      <p className="text-gray-400 mb-4">
+        Transactions with all amounts (debit, credit, balance) missing.
+      </p>  
+
       <button
-        className="bg-red-600 hover:bg-red-600 text-white py-0 px-1 mb-4 rounded"
+        className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded mb-4"
         onClick={handleRemoveZeros}
       >
-        <span className="text-sm">Remove All</span>
+        Remove All
       </button>
       <BaseTable headers={headers} rows={rows} />
       <p className="mt-4 text-gray-400">
-        Zero amount transactions: {filteredTransactions.length}
+        Missing transactions: {filteredTransactions.length}
       </p>
     </div>
   );

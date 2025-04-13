@@ -21,7 +21,7 @@ const CategorySettingsAddSubcategory = () => {
   const [newSubcategoryName, setNewSubcategoryName] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-arrow-left" }];
+  const links = [{ path: "goBack", label: "Back", icon: "ph-arrow-left" }];
 
   const fetchCategories = async () => {
     setLoading(true);

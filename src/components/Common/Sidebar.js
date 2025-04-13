@@ -14,7 +14,6 @@ const Sidebar = ({ links }) => {
       navigate(link.path);
     }
   };
-  
 
   return (
     <motion.div
@@ -27,6 +26,7 @@ const Sidebar = ({ links }) => {
           Cash Flow Manager
         </h1>
       </div>
+
       <div className="w-full h-0.5 bg-gray-700"></div>
 
       <nav className="space-y-6">
@@ -40,13 +40,13 @@ const Sidebar = ({ links }) => {
               return <div key={index}>{link.content}</div>;
             }
 
-            // ✅ Handle custom onClick actions (like view switching)
-            if (link.onClick) {
+            // ✅ Button for goBack or custom onClick
+            if (link.path === "goBack" || link.onClick) {
               return (
                 <button
                   key={index}
                   className="flex items-center space-x-3 py-2 px-3 rounded-lg bg-gray-800 hover:bg-blue-500 transition hover:shadow-md w-full"
-                  onClick={link.onClick}
+                  onClick={() => handleNavigation(link)}
                 >
                   <i className={`${link.icon} text-xl text-blue-400`}></i>
                   <span className="text-white">{link.label}</span>
@@ -54,7 +54,7 @@ const Sidebar = ({ links }) => {
               );
             }
 
-            // ✅ Default navigation link
+            // ✅ Standard Link
             return (
               <Link
                 key={index}
@@ -82,5 +82,3 @@ const Sidebar = ({ links }) => {
 };
 
 export default Sidebar;
-
-
