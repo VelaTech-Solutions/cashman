@@ -1,26 +1,13 @@
 // src/components/Transactions/CategorizeTransactions/NormalCategorizePage.js
 
 import React from "react";
+
 import CategorizeActions from "./Actions/CategorizeActions";
+import CategorizeTransactionsOverview1 from "./OverViews/CategorizeTransactionsOverview1";
 import ContainerTables from "./Containers/ContainerTables";
 
-const NormalCategorizer = ({
-  transactions,
-  setTransactions,
-  selectedTransactions,
-  setSelectedTransactions,
-  searchQuery,
-  setSearchQuery,
-  category,
-  setCategory,
-  subcategory,
-  setSubcategory,
-  categories,
-  filteredSubcategories,
-  onMatchAll,
-  onCategorize,
-  onClear
-}) => {
+const NormalCategorizer = ({ clientId }) => {
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
@@ -32,24 +19,12 @@ const NormalCategorizer = ({
         button for the best results.
       </p>
 
-      <CategorizeActions
-        search={setSearchQuery}
-        category={category}
-        setCategory={setCategory}
-        subcategory={subcategory}
-        setSubcategory={setSubcategory}
-        categories={categories}
-        filteredSubcategories={filteredSubcategories}
-        onMatchAll={onMatchAll}
-        onCategorize={onCategorize}
-        onClear={onClear}
-      />
+      <CategorizeTransactionsOverview1 clientId={clientId} />
 
-      <ContainerTables
-        transactions={transactions}
-        selectedTransactions={selectedTransactions}
-        setSelectedTransactions={setSelectedTransactions}
-      />
+      <CategorizeActions clientId={clientId}/>
+
+      <ContainerTables clientId={clientId}/>
+      
     </div>
   );
 };

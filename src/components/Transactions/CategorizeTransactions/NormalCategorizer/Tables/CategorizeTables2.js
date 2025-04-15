@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CategoryColor from "components/Common/CategoryColor";
+import { CategoryColor } from "components/Common";
 
 const CategorizeTables2 = ({
   transactions,
@@ -77,7 +77,7 @@ const CategorizeTables2 = ({
               {currentTransactions.map((transaction, idx) => (
                 <tr
                   key={startIndex + idx}
-                  className={`border-t border-gray-700 hover:bg-gray-700/30 ${CategoryColor(
+                  className={`border-t border-gray-700 hover:bg-gray-700/30 ${CategoryColor.getCategoryColor(
                     transaction.category
                   )}`}
                 >

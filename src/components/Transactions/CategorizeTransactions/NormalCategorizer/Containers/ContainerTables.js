@@ -5,42 +5,38 @@ import { ViewSwitcher } from 'components/Common';
 import CategorizeTables1 from "../Tables/CategorizeTables1";
 import CategorizeTables2 from "../Tables/CategorizeTables2";
 import CategorizeTables3 from "../Tables/CategorizeTables3";
+import CategorizeTablesGroup4 from "../Tables/CategorizeTablesGroup4";
 
 
-const ContainerTables = ({ transactions, selectedTransactions, setSelectedTransactions }) => {
+const ContainerTables = ({ clientId }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     {
       key: "view1",
       label: "Table 1",
       component: (
-        <CategorizeTables1
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
-        />
+        <CategorizeTables1 clientId={clientId}/>
       ),
     },
     {
       key: "view2",
       label: "Table 2",
       component: (
-        <CategorizeTables2
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
-        />
+        <CategorizeTables2 clientId={clientId}/>
       ),
     },
     {
       key: "view3",
       label: "Table 3",
       component: (
-        <CategorizeTables3
-          transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          setSelectedTransactions={setSelectedTransactions}
-        />
+        <CategorizeTables3 clientId={clientId}/>
+      ),
+    },
+    {
+      key: "view4",
+      label: "Group Table",
+      component: (
+        <CategorizeTablesGroup4 clientId={clientId}/>
       ),
     },
   ];

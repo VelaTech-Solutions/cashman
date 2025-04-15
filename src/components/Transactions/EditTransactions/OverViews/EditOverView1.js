@@ -11,8 +11,16 @@ const EditOverView1 = ({ transactions = [] }) => {
   const invalidTransactions = transactions.filter(
     tx => isInvalidDate(tx.date1) && isInvalidDate(tx.date2)
   );
-  const countMissingDates = transactions.filter(tx => !tx.date1 && !tx.date2).length;
-  const countMissingDescriptions = transactions.filter(tx => !tx.description || tx.description.trim() === "").length;
+  const countMissingDates = transactions.filter(
+  tx => isInvalidDate(tx.date1) && isInvalidDate(tx.date2)
+);
+
+  const isInvalidDescription = (description) => {
+    return !description || description.trim() === "";
+  };
+  const countMissingDescriptions = transactions.filter(
+    tx => isInvalidDescription(tx.description) && isInvalidDescription(tx.description2)
+  );
   const countCreditDebitAmounts = transactions.filter(tx => parseFloat(tx.debit_amount || 0) === 0 && parseFloat(tx.credit_amount || 0) === 0).length;
   const countMissingBalances = transactions.filter(tx => !tx.balance_amount || tx.balance_amount === "0").length;
   const countZeroAmounts = transactions.filter(tx => parseFloat(tx.debit_amount || 0) === 0 && parseFloat(tx.credit_amount || 0) === 0 && parseFloat(tx.balance_amount || 0) === 0).length;
@@ -22,8 +30,8 @@ const EditOverView1 = ({ transactions = [] }) => {
       <div className="flex flex-wrap gap-4 text-sm">
         <div>📊 Total (Valid): <strong>{transactions.length - invalidTransactions.length}</strong></div>
         <div>❌ Invalid Transactions: <strong>{invalidTransactions.length}</strong></div>
-        <div>📅 Missing Dates: <strong>{countMissingDates}</strong></div>
-        <div>📝 Missing Desc: <strong>{countMissingDescriptions}</strong></div>
+        <div>📅 Missing Dates: <strong>{countMissingDates.length}</strong></div>
+        <div>📝 Missing Desc: <strong>{countMissingDescriptions.length}</strong></div>
         <div>💵 Missing Credit & Debit: <strong>{countCreditDebitAmounts}</strong></div>
         <div>💰 Missing Balances: <strong>{countMissingBalances}</strong></div>
         <div>💸 Missing All Amounts: <strong>{countZeroAmounts}</strong></div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CategoryColor from "components/Common/CategoryColor";
+import { CategoryColor } from "components/Common";
 
 const CategorizeTables3 = ({ transactions, selectedTransactions, setSelectedTransactions }) => {
   const rowsPerPage = 12;
@@ -27,7 +27,7 @@ const CategorizeTables3 = ({ transactions, selectedTransactions, setSelectedTran
           return (
             <div
               key={globalIndex}
-              className={`relative border-l-4 ${CategoryColor(transaction.category)} bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-[1.01]`}
+              className={`relative border-l-4 ${CategoryColor.getCategoryColor(transaction.category)} bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-[1.01]`}
             >
               <div className="absolute top-2 right-2">
                 <input

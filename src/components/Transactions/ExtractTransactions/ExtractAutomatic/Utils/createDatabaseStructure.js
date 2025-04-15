@@ -3,6 +3,9 @@
 import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
+// UUID Imports
+import { v4 as uuidv4 } from "uuid";
+
 // Component Imports
 import ProgressUtils from './ProgressUtils';
 
@@ -16,6 +19,7 @@ const createDatabaseStructure = async (id) => {
   const clientSnap = await getDoc(clientRef);
 
   const defaultTransaction = {
+    uid: uuidv4(),   // 🔐 Add UID
     date1: null,
     date2: null,
     original: "",
@@ -31,7 +35,7 @@ const createDatabaseStructure = async (id) => {
     verified: "",
     cleaned: false,
   };
-
+  console.log("Generated UUID for transaction:", defaultTransaction.uid);
   const defaultBudgetData = {
     income: 0,
     incomeavg: 0,

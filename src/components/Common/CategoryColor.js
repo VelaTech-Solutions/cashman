@@ -1,3 +1,5 @@
+// src/components/Common/CategoryColor.js
+
 const getCategoryColor = (category, mode = "bg") => {
   const colorMap = {
     Income: "green",
@@ -13,4 +15,6 @@ const getCategoryColor = (category, mode = "bg") => {
   return mode === "text" ? `text-${color}-500` : `bg-${color}-600`;
 };
 
-export default getCategoryColor;
+// 👇 Exporting as default so it works with your index.js
+const CategoryColor = { getCategoryColor };
+export default CategoryColor;

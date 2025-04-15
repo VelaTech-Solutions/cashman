@@ -7,6 +7,7 @@ const EditTableMissingAllAmounts = ({ id }) => {
   const [transactions, setTransactions] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedTransaction, setEditedTransaction] = useState(null);
+ 
   // Function to load client data and set transactions
   useEffect(() => {
     const loadData = async () => {

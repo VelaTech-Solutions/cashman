@@ -1,12 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { LoadClientData, Loader } from 'components/Common';
 
-const CategorizeTransactionsOverview1 = ({ transactions = [] }) => {
+const CategorizeTransactionsOverview1 = ({ clientId }) => {
+  const [clientData, setClientData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [showSummary, setShowSummary] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // **Ensure transactions is always an array**
-  if (!Array.isArray(transactions)) transactions = [];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await LoadClientData(clientId);
+        if (!data) {
+          setError("Client not found.");
+        } else {
+          setClientData(data);
+          setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
+        }
+      } catch (err) {
+        setError("Failed to load client data.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // **Pre-filter transactions once for better performance**
+    loadData(); // ✅ Call the async loader
+  }, [clientId]);
+
+  if (loading) return <Loader />;
+  if (error) return <p className="text-red-500">{error}</p>;
+
   const categorized = {
     Income: [],
     Savings: [],
@@ -26,7 +50,6 @@ const CategorizeTransactionsOverview1 = ({ transactions = [] }) => {
     }
   });
 
-  // **Calculate Totals Using Pre-filtered Data**
   const calculateTotal = (category) =>
     categorized[category]
       .reduce(
@@ -37,34 +60,31 @@ const CategorizeTransactionsOverview1 = ({ transactions = [] }) => {
       .toFixed(2);
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-2">
       <h2
         onClick={() => setShowSummary(!showSummary)}
-        className="text-xl font-semibold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
+        className="text-xl font-bold border-b border-gray-600 pb-2 cursor-pointer flex justify-between items-center"
       >
         Financial Summary
-        <span className="text-gray-500">{showSummary ? "▲" : "▼"}</span>
+        <span className="text-gray-400 text-sm">{showSummary ? "▲" : "▼"}</span>
       </h2>
 
       {showSummary && (
-        <div className="bg-gray-900 p-4 rounded-lg shadow-md text-white">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {/* Financial Summary Cards */}
-            {[
-              { label: "Total Income", color: "bg-green-600", total: calculateTotal("Income") },
-              { label: "Total Savings", color: "bg-blue-600", total: calculateTotal("Savings") },
-              { label: "Total Housing", color: "bg-purple-600", total: calculateTotal("Housing") },
-              { label: "Total Transportation", color: "bg-yellow-600", total: calculateTotal("Transportation") },
-              { label: "Total Expenses", color: "bg-red-600", total: calculateTotal("Expenses") },
-              { label: "Total Debt", color: "bg-gray-700", total: calculateTotal("Debt") },
-              { label: "Total Transactions", color: "bg-gray-500", total: transactions.length },
-              { label: "Total Uncategorized", color: "bg-gray-500", total: categorized["Uncategorized"].length },
-            ].map(({ label, color, total }, index) => (
-              <div key={index} className={`${color} p-3 rounded-lg shadow-md`}>
-                <p className="text-sm">{label}</p>
-                <p className="text-lg font-bold">R {total}</p>
-              </div>
-            ))}
+        <div className="text-sm text-gray-100 flex flex-col md:flex-row justify-between gap-8">
+          <div className="space-y-1">
+            <p>Total Income: R {calculateTotal("Income")}</p>
+            <p>Total Savings: R {calculateTotal("Savings")}</p>
+            <p>Total Housing: R {calculateTotal("Housing")}</p>
+          </div>
+          <div className="space-y-1">
+            <p>Total Transportation: R {calculateTotal("Transportation")}</p>
+            <p>Total Expenses: R {calculateTotal("Expenses")}</p>
+            <p>Total Debt: R {calculateTotal("Debt")}</p>
+          </div>
+          <div className="space-y-1">
+            <p>Total Transactions: {transactions.length}</p>
+            <p>Categorized Transactions: {transactions.length - categorized["Uncategorized"].length}</p>
+            <p>Uncategorized Transactions: {categorized["Uncategorized"].length}</p>
           </div>
         </div>
       )}

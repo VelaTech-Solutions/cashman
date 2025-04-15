@@ -11,10 +11,6 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 
-// Component Imports
-import { Sidebar } from 'components/Common';
-
-
 const CategorySettingsAddSubcategory = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
