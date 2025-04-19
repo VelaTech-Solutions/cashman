@@ -18,6 +18,8 @@ import {
   
     extractDescription, 
     extractDescriptionVerify,
+
+    removeNotTransactions,
      } from '../Utils/';
 
 
@@ -192,6 +194,16 @@ import {
       } catch (error) {
         console.error("⚠️ Verifing descriptions failed, continuing...");
         setExtractionStatus((prev) => ({ ...prev, "Verifing descriptions": "failed" }));
+      }
+
+      // Step 6: remove line thats are not transactions
+      setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "processing" }));
+      try {
+        await removeNotTransactions(id, bankName);
+        setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "success" })); 
+      } catch (error) {
+        console.error("⚠️ Removing not transactions failed, continuing...");
+        setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "failed" }));
       }
 
 

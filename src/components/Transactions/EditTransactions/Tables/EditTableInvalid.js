@@ -18,15 +18,20 @@ const EditTableInvalid = ({ id }) => {
       loadData();
     }, [id]);
   
-    // Filter transactions with all zero amounts in debit, credit, and balance
-    // Helper functions
+
+    // Helper functions 
+    // as an invailed transaction the date1, date2, Credit_Amount, Debit_Amount and Balance are empty
     const isInvalidDate = (date) => {
-        return !date || date === "None" || date === "null";
+      return !date || date === "None" || date === "null" || date === "";
     };
     
-    const filteredTransactions = transactions.filter(
-        tx => isInvalidDate(tx.date1) && isInvalidDate(tx.date2)
-    );
+    const isInvalidTransaction = (tx) => {
+      return isInvalidDate(tx.date1) && isInvalidDate(tx.date2);
+    };
+    
+    const filteredTransactions = transactions.filter(isInvalidTransaction);
+    
+    
   
     const handleInputChange = (field, value) => {
       setEditedTransaction((prev) => ({ ...prev, [field]: value }));
@@ -82,7 +87,7 @@ const EditTableInvalid = ({ id }) => {
         // Format removed line for archive
         const archiveEntries = removed.map((tx) => ({
           content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${tx.debit_amount || ""} ${tx.balance_amount || ""}`.trim(),
-          source: "EditTableOriginal",
+          source: "EditTableInvalid",
         }));
     
         // Get current archive (if exists)

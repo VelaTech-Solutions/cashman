@@ -3,7 +3,6 @@ import { db } from "../../../../firebase/firebase";
 import {
   doc,
   getDoc,
-  setDoc,
   updateDoc,
   deleteField,
   getDocs,
@@ -16,44 +15,39 @@ const ExtractDatesView4 = () => {
   const [dateSettings, setDateSettings] = useState({});
   const [newLabel, setNewLabel] = useState("");
   const [newRegex, setNewRegex] = useState("");
-  const [rejectsForExample, setRejectsForExample] = useState({}); // Rejects for the example date
 
   const bankRef = (bank) => doc(db, "settings", "dates", bank, "config");
 
-  // Fetch banks and rejects for each
   useEffect(() => {
-    const fetchBanks = async () => {
+    const fetchAll = async () => {
       const bankSnapshot = await getDocs(collection(db, "banks"));
       const bankNames = bankSnapshot.docs.map((doc) => doc.id);
-      setBanks(bankNames);
 
-      if (bankNames.length > 0) setSelectedBank(bankNames[0]); // Auto-select first bank
+      const settingsPromises = bankNames.map(async (bank) => {
+        const snap = await getDoc(bankRef(bank));
+        return { bank, data: snap.exists() ? snap.data() : {} };
+      });
+
+      const settingsResults = await Promise.all(settingsPromises);
+      const allSettings = {};
+      settingsResults.forEach(({ bank, data }) => {
+        allSettings[bank] = data;
+      });
+
+      setBanks(bankNames);
+      setDateSettings(allSettings);
+      if (bankNames.length > 0) setSelectedBank(bankNames[0]);
     };
 
-    fetchBanks();
+    fetchAll();
   }, []);
 
-  // Fetch reject settings for each bank
-  useEffect(() => {
-    const fetchRejects = async () => {
-      let allRejects = {};
-      for (let bank of banks) {
-        const ref = bankRef(bank);
-        const snap = await getDoc(ref);
+  const sanitizeKey = (label) =>
+    label.replace(/\//g, "_slash_")
+         .replace(/\[/g, "_open_")
+         .replace(/\]/g, "_close_")
+         .replace(/\./g, "_dot_");
 
-        if (snap.exists()) {
-          allRejects[bank] = snap.data();
-        } else {
-          allRejects[bank] = {};
-        }
-      }
-      setDateSettings(allRejects); // Set reject data for all banks
-    };
-
-    if (banks.length > 0) fetchRejects(); // Only fetch if there are banks
-  }, [banks]);
-
-  // Handle regex change
   const handleRegexChange = async (label, newPattern) => {
     const updated = {
       ...dateSettings,
@@ -71,22 +65,12 @@ const ExtractDatesView4 = () => {
     });
   };
 
-  const sanitizeKey = (label) =>
-    label.replace(/\//g, "_slash_")
-         .replace(/\[/g, "_open_")
-         .replace(/\]/g, "_close_")
-         .replace(/\./g, "_dot_"); // optional for extra safety
-  
   const handleAddSetting = async () => {
     if (!newLabel || !newRegex) return;
-  
+
     const safeLabelKey = sanitizeKey(newLabel);
-  
-    const newEntry = {
-      label: newLabel, // Keep original for display
-      pattern: newRegex,
-    };
-  
+    const newEntry = { label: newLabel, pattern: newRegex };
+
     const updated = {
       ...dateSettings,
       [selectedBank]: {
@@ -94,17 +78,15 @@ const ExtractDatesView4 = () => {
         [safeLabelKey]: newEntry,
       },
     };
-  
+
     setDateSettings(updated);
-  
     await updateDoc(bankRef(selectedBank), {
       [safeLabelKey]: newEntry,
     });
-  
+
     setNewLabel("");
     setNewRegex("");
   };
-  
 
   const handleDeleteEntry = async (labelKey, bank) => {
     const updated = {
@@ -123,18 +105,15 @@ const ExtractDatesView4 = () => {
   return (
     <div className="p-4 bg-gray-900 rounded-md shadow text-white">
       <h3 className="text-lg font-semibold mb-4">Bank Date Extraction Rules</h3>
-        <p className="text-sm text-gray-400">
-          Manage the date extraction rules per bank to ensure accurate transaction matching.
-        </p>
+      <p className="text-sm text-gray-400">
+        Manage the date extraction rules per bank to ensure accurate transaction matching.
+      </p>
 
-
-      {/* Current Regex Settings */}
-      <div className="mb-6 p-4 ">
-        <div className="space-y-4 ">
+      <div className="mb-6 p-4">
+        <div className="space-y-4">
           {Object.entries(dateSettings).map(([bank, settings]) => (
             <div key={bank} className="border-b border-gray-700 pb-3">
               <h5 className="font-medium text-lg">{bank}</h5>
-
               {Object.entries(settings).map(([labelKey, data]) => (
                 <div key={labelKey} className="mb-4">
                   <div className="flex justify-between items-center">
@@ -151,18 +130,13 @@ const ExtractDatesView4 = () => {
                   <div className="text-sm text-gray-400">{data.pattern}</div>
                 </div>
               ))}
-
-
             </div>
           ))}
         </div>
       </div>
 
-      {/* Add New Rule */}
       <div className="mt-6 p-4 rounded bg-gray-800 border border-gray-700">
         <h4 className="text-lg font-semibold mb-4">Add a New Date Pattern Extraction</h4>
-
-        {/* select bank */}
         <select
           value={selectedBank}
           onChange={(e) => setSelectedBank(e.target.value)}

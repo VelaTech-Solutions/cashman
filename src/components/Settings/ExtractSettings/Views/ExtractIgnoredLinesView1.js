@@ -1,321 +1,255 @@
-// src/components/Settings/ExtractSettings/Actions/IgnoredLineActions1.js
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
-
-// Firebase Imports
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
-
-// Component Imports
-import { Button } from 'components/Common';
-
-
-const banks = [
-  "Absa Bank",
-  "Capitec Bank",
-  "Fnb Bank",
-  "Ned Bank",
-  "Standard Bank",
-  "Tyme Bank",
-];
+import { Button } from "components/Common";
 
 function IgnoredLineActions1() {
-  const [selectedBank, setSelectedBank] = useState(banks[0]);
+  const [banks, setBanks] = useState([]);
+  const [removalSettings, setRemovalSettings] = useState({});
+  const [selectedBank, setSelectedBank] = useState("");
   const [ignoredLines, setIgnoredLines] = useState([]);
   const [fuzzyIgnoredLines, setFuzzyIgnoredLines] = useState([]);
-  const [selectedRows, setSelectedRows] = useState(new Set());
+  const [selectedIgnored, setSelectedIgnored] = useState(new Set());
+  const [selectedFuzzy, setSelectedFuzzy] = useState(new Set());
 
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const bankCollection = collection(db, "banks");
+        const snapshot = await getDocs(bankCollection);
+        const bankNames = snapshot.docs.map((doc) => doc.id);
+        setBanks(bankNames);
+        if (bankNames.length > 0) setSelectedBank(bankNames[0]);
+      } catch (err) {
+        console.error("Failed to load banks:", err);
+      }
+    };
+    fetchBanks();
+  }, []);
 
-  // Fetch ignored lines based on selected bank
   useEffect(() => {
     const fetchIgnoredLines = async () => {
       if (!selectedBank) return;
       try {
-        const bankRef = doc(db, "banks", selectedBank);
-        const bankSnap = await getDoc(bankRef);
-        if (bankSnap.exists()) {
-          setIgnoredLines(bankSnap.data().ignoredLines || []);
-          setFuzzyIgnoredLines(bankSnap.data().fuzzyIgnoredLines || []);
+        const ref = doc(db, "banks", selectedBank);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          setIgnoredLines(snap.data().ignoredLines || []);
+          setFuzzyIgnoredLines(snap.data().fuzzyIgnoredLines || []);
         } else {
           setIgnoredLines([]);
           setFuzzyIgnoredLines([]);
         }
+        setSelectedIgnored(new Set());
+        setSelectedFuzzy(new Set());
       } catch (err) {
-        console.error("Error fetching ignored lines:", err.message);
-        setError("Failed to fetch ignored lines.");
+        console.error("Error loading ignored lines:", err);
       }
     };
     fetchIgnoredLines();
   }, [selectedBank]);
 
-  // Handle row selection (checkbox toggle)
-  const handleToggleRow = (index) => {
-    setSelectedRows((prevSelected) => {
-      const newSelected = new Set(prevSelected);
-      if (newSelected.has(index)) {
-        newSelected.delete(index);
-      } else {
-        newSelected.add(index);
+  useEffect(() => {
+    const fetchOrCreateSettings = async () => {
+      try {
+        const bankSnapshot = await getDocs(collection(db, "banks"));
+        const bankNames = bankSnapshot.docs.map((doc) => doc.id);
+        setBanks(bankNames);
+
+        const ref = doc(db, "settings", "removal");
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          const defaultSettings = {};
+          bankNames.forEach((name) => {
+            defaultSettings[name] = false;
+          });
+          await setDoc(ref, defaultSettings);
+          setRemovalSettings(defaultSettings);
+        } else {
+          setRemovalSettings(snap.data());
+        }
+      } catch (err) {
+        console.error("Error loading removal settings:", err.message);
       }
-      return newSelected;
-    });
-  };
-
-  // add ignored line
-  const handleAddIgnoredLine = async () => {
-    const newIgnoredLine = document.querySelector("input[type='text']").value.trim();
-    if (!newIgnoredLine) return;
-    const updatedIgnoredLines = [...ignoredLines, newIgnoredLine];
-    try {
-      await updateDoc(doc(db, "banks", selectedBank), { ignoredLines: updatedIgnoredLines });
-      setIgnoredLines(updatedIgnoredLines);
-    } catch (err) {
-      console.error("Error updating ignored lines:", err.message);
-      setError("Failed to update ignored lines.");
-    }
-  };
-
-  // Add Fuzzy Ignored Line
-  const handleAddFuzzyIgnoredLine = async () => {
-    const newFuzzyIgnoredLine = document.querySelector("input[type='text']").value.trim();
-    if (!newFuzzyIgnoredLine) return;
-    const updatedFuzzyIgnoredLines = [...fuzzyIgnoredLines, newFuzzyIgnoredLine];
-    try {
-      await updateDoc(doc(db, "banks", selectedBank), { fuzzyIgnoredLines: updatedFuzzyIgnoredLines });
-      setFuzzyIgnoredLines(updatedFuzzyIgnoredLines);
-    } catch (err) {
-      console.error("Error updating fuzzy ignored lines:", err.message);
-      setError("Failed to update fuzzy ignored lines.");
-    }
-  };
-
-  // Handle deleting selected ignored lines
-  const handleDeleteIgnoredLines = async () => {
-    const updatedIgnoredLines = ignoredLines.filter((_, index) => !selectedRows.has(index));
-
-    try {
-      await updateDoc(doc(db, "banks", selectedBank), { ignoredLines: updatedIgnoredLines });
-      setIgnoredLines(updatedIgnoredLines);
-      setSelectedRows(new Set());
-    } catch (err) {
-      console.error("Error updating ignored lines:", err.message);
-      setError("Failed to update ignored lines.");
-    }
-  };
-
-  const handleDeleteFuzzyIgnoredLines = async () => {
-    const updatedFuzzyIgnoredLines = fuzzyIgnoredLines.filter((_, index) => !selectedRows.has(index));
-    try {
-    await updateDoc(doc(db, "banks", selectedBank), { fuzzyIgnoredLines: updatedFuzzyIgnoredLines });
-    setFuzzyIgnoredLines(updatedFuzzyIgnoredLines);
-    setSelectedRows(new Set());
-    } catch (err) {
-    console.error("Error deleting fuzzy ignored lines:", err.message);
-    setError("Failed to delete fuzzy ignored lines.");
-    }
     };
 
-  const handleCopyToFuzzyIgnored = async () => {
-    const selectedLines = Array.from(selectedRows).map((index) => ignoredLines[index]);
-    const updatedFuzzyIgnoredLines = [...new Set([...fuzzyIgnoredLines, ...selectedLines])];
-    
+    fetchOrCreateSettings();
+  }, []);
+
+  const handleToggleRemoval = async (bank) => {
+    const updated = { ...removalSettings, [bank]: !removalSettings[bank] };
+    setRemovalSettings(updated);
+    await updateDoc(doc(db, "settings", "removal"), updated);
+  };
+
+  const handleAddLine = async (type) => {
+    const input = document.querySelector("#ignoredLineInput").value.trim();
+    if (!input) return;
+
+    const lines = type === "fuzzy" ? fuzzyIgnoredLines : ignoredLines;
+    const updated = [...lines, input];
+
     try {
-        await updateDoc(doc(db, "banks", selectedBank), {
-        fuzzyIgnoredLines: updatedFuzzyIgnoredLines,
-        });
-        setFuzzyIgnoredLines(updatedFuzzyIgnoredLines);
-        setSelectedRows(new Set());
+      await updateDoc(doc(db, "banks", selectedBank), {
+        [type === "fuzzy" ? "fuzzyIgnoredLines" : "ignoredLines"]: updated,
+      });
+      type === "fuzzy" ? setFuzzyIgnoredLines(updated) : setIgnoredLines(updated);
+      document.querySelector("#ignoredLineInput").value = "";
     } catch (err) {
-        console.error("Error updating fuzzy ignored lines:", err.message);
-        setError("Failed to update fuzzy ignored lines.");
+      console.error(`Failed to add ${type} ignored line:`, err);
     }
-    };
+  };
 
-      
+  const handleDeleteLines = async (type) => {
+    const lines = type === "fuzzy" ? fuzzyIgnoredLines : ignoredLines;
+    const selected = type === "fuzzy" ? selectedFuzzy : selectedIgnored;
 
-return (
-      <div className="p-4 bg-gray-900 rounded-md shadow text-white">
-        <h3 className="text-lg font-semibold mb-4">Bank headers & Footers Removal</h3>
+    const updated = lines.filter((_, i) => !selected.has(i));
+    try {
+      await updateDoc(doc(db, "banks", selectedBank), {
+        [type === "fuzzy" ? "fuzzyIgnoredLines" : "ignoredLines"]: updated,
+      });
+      type === "fuzzy" ? setFuzzyIgnoredLines(updated) : setIgnoredLines(updated);
+      type === "fuzzy" ? setSelectedFuzzy(new Set()) : setSelectedIgnored(new Set());
+    } catch (err) {
+      console.error(`Failed to delete ${type} ignored lines:`, err);
+    }
+  };
 
+  const handleCopyToFuzzy = async () => {
+    const selected = Array.from(selectedIgnored).map((i) => ignoredLines[i]);
+    const updated = [...new Set([...fuzzyIgnoredLines, ...selected])];
+    try {
+      await updateDoc(doc(db, "banks", selectedBank), { fuzzyIgnoredLines: updated });
+      setFuzzyIgnoredLines(updated);
+      setSelectedIgnored(new Set());
+    } catch (err) {
+      console.error("Failed to copy lines to fuzzy:", err);
+    }
+  };
 
+  return (
+    <div className="p-6 bg-gray-900 text-white rounded-lg shadow-md">
+      <h2 className="text-xl font-bold text-blue-400 mb-4">Bank Headers & Footers Removal</h2>
 
+      <select
+        value={selectedBank}
+        onChange={(e) => setSelectedBank(e.target.value)}
+        className="mb-6 p-2 rounded bg-gray-800 text-white border border-gray-700 w-full"
+      >
+        {banks.map((bank) => (
+          <option key={bank} value={bank}>
+            {bank}
+          </option>
+        ))}
+      </select>
 
-        <select
-          value={selectedBank}
-          onChange={(e) => setSelectedBank(e.target.value)}
-          className="mb-4 p-2 rounded bg-gray-800 text-white border border-gray-700"
-        >
-          {banks.map((bank) => (
-            <option key={bank} value={bank}>{bank}</option>
-          ))}
-        </select>
+      <div className="mb-6 space-y-2">
+        {banks.map((bank) => (
+          <div key={bank} className="flex items-center gap-4">
+            <span className="text-white w-32">{bank}</span>
+            <label className="text-white">Remove Lines</label>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={removalSettings[bank] || false}
+                onChange={() => handleToggleRemoval(bank)}
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-red-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+            </label>
+          </div>
+        ))}
+      </div>
 
-        {/* Select Bank Dropdown */}
-        {/* <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium">Select Bank</label>
-            <select
-            className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            value={selectedBank}
-            onChange={(e) => setSelectedBank(e.target.value)}
-            >
-            <option value="">Select Bank</option>
-            <option value="Absa Bank">Absa Bank</option>
-            <option value="Capitec Bank">Capitec Bank</option>
-            <option value="Fnb Bank">Fnb Bank</option>
-            <option value="Ned Bank">Ned Bank</option>
-            <option value="Standard Bank">Standard Bank</option>
-            <option value="Tyme Bank">Tyme Bank</option>
-            </select>
-        </div> */}
+      <input
+        id="ignoredLineInput"
+        type="text"
+        placeholder="Enter line to ignore"
+        className="w-full mb-4 p-2 rounded bg-gray-700 text-white placeholder-gray-400"
+      />
 
+      <div className="mb-6 flex gap-2">
+        <Button onClick={() => handleAddLine("normal")} text="Add Ignored Line" small className="bg-green-600 hover:bg-green-700" />
+        <Button onClick={() => handleAddLine("fuzzy")} text="Add Fuzzy Ignored Line" small className="bg-purple-600 hover:bg-purple-700" />
+      </div>
 
-        {/* input Ignored Line Section */}
-        <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium">Ignored Line</label>
-            <input
-            type="text"
-            className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            placeholder="Enter the line to ignore"
-            />
-        </div>
+      <div className="flex justify-between mb-2">
+        <Button onClick={() => handleDeleteLines("normal")} text="Delete Selected" small className="bg-red-600 hover:bg-red-700" disabled={selectedIgnored.size === 0} />
+        <Button onClick={handleCopyToFuzzy} text="Copy to Fuzzy" small className="bg-blue-600 hover:bg-blue-700" disabled={selectedIgnored.size === 0} />
+      </div>
 
-
-        {/* input Fuzzy Ignored Line Section */}
-        <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium">Fuzzy Ignored Line</label>
-            <input
-            type="text"
-            className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            placeholder="Enter the fuzzy line to ignore"
-            />
-        </div>
-        {/* Add Line Button */}
-        <div className="mb-4">
-            <Button
-            onClick={handleAddIgnoredLine}
-            text="Add Ignored Line"
-            small
-            className="bg-blue-500 hover:bg-blue-600"
-            disabled={!selectedBank}
-            />
-
-            <Button
-            onClick={handleAddFuzzyIgnoredLine}
-            text="Add Fuzzy Ignored Line"
-            small
-            className="bg-blue-500 hover:bg-blue-600"
-            disabled={!selectedBank}
-            />
-
-
-        </div>
-
-        {/* Delete Selected Button */}
-        <div className="sticky top-0 bg-gray-900 p-2 z-10 flex justify-between border-b border-gray-700">
-            <Button
-            onClick={handleDeleteIgnoredLines}
-            text="Delete Selected"
-            small
-            className="bg-red-500 hover:bg-red-600"
-            disabled={selectedRows.size === 0 || !selectedBank}
-            />
-
-            <Button
-            onClick={handleCopyToFuzzyIgnored}
-            text="Copy to Fuzzy Ignored"
-            small
-            className="bg-red-500 hover:bg-red-600"
-            disabled={selectedRows.size === 0 || !selectedBank}
-            />
-        </div>
-        
-
-        {/* Scrollable Table Section */}
-        <div className="max-h-[500px] overflow-y-auto border border-gray-700 rounded-lg p-2">
-            <table className="w-full border-collapse border border-gray-700">
-            <thead>
-                <tr className="bg-gray-800">
-                <th className="p-2 border border-gray-600 text-left">Select</th>
-                <th className="p-2 border border-gray-600 text-left">Ignored Line</th>
+      <div className="mb-6 max-h-64 overflow-y-auto border border-gray-700 rounded">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-800 text-left">
+            <tr>
+              <th className="p-2 border-b border-gray-700">Select</th>
+              <th className="p-2 border-b border-gray-700">Ignored Line</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ignoredLines.length > 0 ? (
+              ignoredLines.map((line, i) => (
+                <tr key={i} className="border-b border-gray-800">
+                  <td className="p-2">
+                    <input type="checkbox" checked={selectedIgnored.has(i)} onChange={() => {
+                      const newSet = new Set(selectedIgnored);
+                      newSet.has(i) ? newSet.delete(i) : newSet.add(i);
+                      setSelectedIgnored(newSet);
+                    }} />
+                  </td>
+                  <td className="p-2">{line}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {ignoredLines.length > 0 ? (
-                ignoredLines.map((ignoredLine, index) => (
-                    <tr key={index} className="border-b border-gray-700">
-                    <td className="p-2">
-                        <input
-                        type="checkbox"
-                        checked={selectedRows.has(index)}
-                        onChange={() => handleToggleRow(index)}
-                        />
-                    </td>
-                    <td className="p-2">{ignoredLine}</td>
-                    </tr>
-                ))
-                ) : (
-                <tr>
-                    <td colSpan="2" className="text-center p-4">
-                    No ignored lines found.
-                    </td>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="2" className="text-center p-4 text-gray-500">
+                  No ignored lines found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="max-h-64 overflow-y-auto border border-gray-700 rounded">
+        <div className="mb-2 flex justify-end">
+          <Button onClick={() => handleDeleteLines("fuzzy")} text="Delete Selected Fuzzy" small className="bg-red-600 hover:bg-red-700" disabled={selectedFuzzy.size === 0} />
+        </div>
+        <table className="w-full text-sm">
+          <thead className="bg-gray-800 text-left">
+            <tr>
+              <th className="p-2 border-b border-gray-700">Select</th>
+              <th className="p-2 border-b border-gray-700">Fuzzy Ignored Line</th>
+            </tr>
+          </thead>
+          <tbody>
+            {fuzzyIgnoredLines.length > 0 ? (
+              fuzzyIgnoredLines.map((line, i) => (
+                <tr key={i} className="border-b border-gray-800">
+                  <td className="p-2">
+                    <input type="checkbox" checked={selectedFuzzy.has(i)} onChange={() => {
+                      const newSet = new Set(selectedFuzzy);
+                      newSet.has(i) ? newSet.delete(i) : newSet.add(i);
+                      setSelectedFuzzy(newSet);
+                    }} />
+                  </td>
+                  <td className="p-2">{line}</td>
                 </tr>
-                )}
-            </tbody>
-            </table>
-        </div>
-
-
-
-        {/* Scrollable Table Section */}
-        <div className="max-h-[500px] overflow-y-auto border border-gray-700 rounded-lg p-2 ">
-
-        {/* Delete Selected Button */}
-        <div className="flex gap-2 mb-4">
-            <Button
-            onClick={handleDeleteFuzzyIgnoredLines}
-            text="Delete Fuzzy Ignored Lines"
-            small
-            className="bg-red-500 hover:bg-red-600"
-            disabled={selectedRows.size === 0 || !selectedBank}
-            />
-
-        </div>
-
-            <table className="w-full border-collapse border border-gray-700">
-            <thead>
-                <tr className="bg-gray-800">
-                <th className="p-2 border border-gray-600 text-left">Select</th>
-                <th className="p-2 border border-gray-600 text-left">Fuzzy Ignored Line</th>
-                </tr>
-            </thead>
-            <tbody>
-                {fuzzyIgnoredLines.length > 0 ? (
-                fuzzyIgnoredLines.map((fuzzyIgnoredLines, index) => (
-                    <tr key={index} className="border-b border-gray-700">
-                    <td className="p-2">
-                        <input
-                        type="checkbox"
-                        checked={selectedRows.has(index)}
-                        onChange={() => handleToggleRow(index)}
-                        />
-                    </td>
-                    <td className="p-2">{fuzzyIgnoredLines}</td>
-                    </tr>
-                ))
-                ) : (
-                <tr>
-                    <td colSpan="2" className="text-center p-4">
-                    No fuzzy ignored lines found.
-                    </td>
-                </tr>
-                )}
-            </tbody>
-            </table>
-        </div>
-        </div>
-    );
-};
+              ))
+            ) : (
+              <tr>
+                <td colSpan="2" className="text-center p-4 text-gray-500">
+                  No fuzzy ignored lines found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export default IgnoredLineActions1;
-    

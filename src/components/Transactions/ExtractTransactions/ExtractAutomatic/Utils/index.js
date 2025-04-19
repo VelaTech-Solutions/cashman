@@ -20,6 +20,10 @@ export { default as extractAmountsVerify2 } from './extractAmountsVerify2';
 export { default as extractDescription } from './extractDescription';
 export { default as extractDescriptionVerify } from './extractDescriptionVerify';
 
+// Step 6: Verify Transactions
+export { default as removeNotTransactions } from './removeNotTransactions';
+
+
 // Final Aggregator
 export { default as ExtractionProcess } from './ExtractionProcess';
 
