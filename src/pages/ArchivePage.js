@@ -17,6 +17,7 @@ const ArchivePage = () => {
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" },
+    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
   ];
 
   useEffect(() => {

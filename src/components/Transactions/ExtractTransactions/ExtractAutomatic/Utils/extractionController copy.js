@@ -53,7 +53,7 @@ import {
   };
   
 
-  const ExtractionProcess = async ({
+  const extractionController = async ({
     id,
     bankName,
     clientData,
@@ -126,7 +126,7 @@ import {
         return; // Stop process if cleaning fails
       }
 
-      // Step 3: Extract Dates
+      // Step 4: Extract Dates
       setExtractionStatus((prev) => ({ ...prev, "Dates Extracted": "processing" }));
       try {
         await extractDates(id, bankName);
@@ -136,7 +136,7 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Dates Extracted": "failed" }));
       }
 
-      // Step 3.1: Verify and Clean up Dates uniformity the dates
+      // Step 4.1: Verify and Clean up Dates uniformity the dates
       setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "processing" }));
       try {
         await extractDatesVerify(id, bankName);
@@ -146,7 +146,7 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Dates": "failed" }));
       }
   
-      // Step 4: Extract Amounts
+      // Step 5: Extract Amounts
       setExtractionStatus((prev) => ({ ...prev, "Amounts Extracted": "processing" }));
       try {
         await extractAmounts(id, bankName);
@@ -156,7 +156,7 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Amounts Extracted": "failed" }));
       }
 
-      // Step 4.1: Verify amounts Step 1
+      // Step 5.1: Verify amounts Step 1
       setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Amounts Step 1": "processing" }));
       try {
         await extractAmountsVerify(id);
@@ -166,7 +166,7 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Amounts Step 1": "failed" }));
       }
  
-      // Step 4.2: Verify amounts Step 2
+      // Step 5.2: Verify amounts Step 2
       setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Amounts Step 2": "processing" }));
       try {
         await extractAmountsVerify2(id);
@@ -176,7 +176,7 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Verifing Extracted Amounts Step 2": "failed" }));
       }
    
-      // Step 5: Extract Descriptions
+      // Step 6: Extract Descriptions
       setExtractionStatus((prev) => ({ ...prev, "Extracting descriptions": "processing" }));
       try {
         await extractDescription(id, bankName);
@@ -186,7 +186,7 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Extracting descriptions": "failed" }));
       }
 
-      // Step 5.1: Verify and Clean up Descriptions
+      // Step 6.1: Verify and Clean up Descriptions
       setExtractionStatus((prev) => ({ ...prev, "Verifing descriptions": "processing" }));
       try {
         await extractDescriptionVerify(id, bankName);
@@ -196,18 +196,18 @@ import {
         setExtractionStatus((prev) => ({ ...prev, "Verifing descriptions": "failed" }));
       }
 
-      // Step 6: remove line thats are not transactions
-      setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "processing" }));
-      try {
-        await removeNotTransactions(id, bankName);
-        setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "success" })); 
-      } catch (error) {
-        console.error("⚠️ Removing not transactions failed, continuing...");
-        setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "failed" }));
-      }
+      // Step 7: remove line thats are not transactions
+      // setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "processing" }));
+      // try {
+      //   await removeNotTransactions(id, bankName);
+      //   setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "success" })); 
+      // } catch (error) {
+      //   console.error("⚠️ Removing not transactions failed, continuing...");
+      //   setExtractionStatus((prev) => ({ ...prev, "Removing not transactions": "failed" }));
+      // }
 
 
-      //  Step 6: End
+      //  Step 8: End
       // setExtractionStatus((prev) => ({ ...prev, "Extracting completed": "success" }));
       // try {
       //   await extractCompleted(id);
@@ -238,4 +238,4 @@ import {
   
 
 
-export default ExtractionProcess;
+export default extractionController;

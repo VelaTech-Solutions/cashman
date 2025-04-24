@@ -26,6 +26,10 @@ function ExtractTransactions() {
       label: `Edit Transactions (${unverifiedCount})`,
       icon: "ph-file-text",
     },
+    { path: `/client/${id}/archive`,
+      label: "Archive Data",
+      icon: "ph-file-text",
+    },
     { type: "divider" },
     {
       label: "Automatically",

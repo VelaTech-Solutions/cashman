@@ -7,7 +7,7 @@ import { db } from "../../../../../firebase/firebase";
 
 // Component Imports
 import { 
-  ExtractionProcess, 
+  extractionController, 
    } from '../Utils/';
 
 
@@ -57,6 +57,8 @@ export const AutomaticActions1 = ({
       filteredData: [],
       extractProgress: {},
       archive: [],
+      progress: {},
+      number_of_transactions: 0,
     });
   
     setTimeout(() => {
@@ -85,7 +87,7 @@ export const AutomaticActions1 = ({
       </div>
       <button
         onClick={() =>
-          ExtractionProcess({
+          extractionController({
             id,
             bankName,
             clientData,

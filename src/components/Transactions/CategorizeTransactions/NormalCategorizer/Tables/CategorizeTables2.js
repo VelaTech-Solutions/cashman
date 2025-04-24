@@ -1,130 +1,207 @@
-import React, { useState } from "react";
-import { CategoryColor } from "components/Common";
+import React, { useState, useEffect } from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import { Select, MenuItem, FormControl, InputLabel, Box } from "@mui/material";
 
-const CategorizeTables2 = ({
-  transactions,
-  selectedTransactions,
-  setSelectedTransactions,
-}) => {
-  const [currentTab, setCurrentTab] = useState("table2");
-  const rowsPerPage = 12;
-  const totalPages = Math.ceil(transactions.length / rowsPerPage);
-  const [currentPage, setCurrentPage] = useState(1);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const currentTransactions = transactions.slice(startIndex, startIndex + rowsPerPage);
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../../../../firebase/firebase";
+import { Loader, LoadClientData, loadCategories, loadSubcategories } from "components/Common";
 
-  const isAllSelected =
-    currentTransactions.length > 0 &&
-    currentTransactions.every((_, idx) => selectedTransactions.includes(startIndex + idx));
+const CategorizeTables2 = ({ clientId, transactions, selectedTransactions, setSelectedTransactions }) => {
+  const [bankName, setBankName] = useState('');
+  const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);  // Keep track of selected row indices
 
-  const handleSelectAll = () => {
-    const currentIndexes = currentTransactions.map((_, idx) => startIndex + idx);
-    if (isAllSelected) {
-      setSelectedTransactions(selectedTransactions.filter((i) => !currentIndexes.includes(i)));
-    } else {
-      const newSelections = [
-        ...selectedTransactions,
-        ...currentIndexes.filter((i) => !selectedTransactions.includes(i)),
-      ];
-      setSelectedTransactions(newSelections);
+  useEffect(() => {
+    const loadAll = async () => {
+      try {
+        //setLoading(true);
+        if (clientId) {
+          const data = await LoadClientData(clientId);
+          if (data?.transactions) {
+            setSelectedTransactions([]);
+            setBankName(data.bankName);
+            console.log(" Bank Name:", data.bankName);
+          } else {
+            setError("No data found for this client.");
+          }
+        }
+  
+        const cats = await loadCategories();
+        setCategories(cats);
+  
+        if (category) {
+          const subcats = await loadSubcategories(category);
+          setSubcategories(subcats);
+        }
+      } catch {
+        setError("Failed to load data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAll();
+  }, [clientId, setSelectedTransactions, category]);
+  
+
+
+  const columns = [
+    { field: "date1", headerName: "Date", width: 150 },
+    { field: "description", headerName: "Description", width: 250 },
+    { field: "description2", headerName: "Description2", width: 250 },
+    { field: "credit_amount", headerName: "Credit", width: 120 },
+    { field: "debit_amount", headerName: "Debit", width: 120 },
+    { field: "balance_amount", headerName: "Balance", width: 120 },
+    { field: "category", headerName: "Category", width: 150 },
+    { field: "subcategory", headerName: "Subcategory", width: 150 },
+  ];
+  const Dropdown = ({ label, value, onChange, items, placeholder }) => (
+    <FormControl size="small" sx={{ minWidth: 150 }}>
+      <InputLabel sx={{ color: 'white' }}>{label}</InputLabel>
+      <Select
+        value={value}
+        label={label}
+        onChange={onChange}
+        sx={{
+          backgroundColor: '#333',
+          color: 'white',
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
+          '&:hover': { backgroundColor: '#444' },
+          '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' },
+        }}
+      >
+        <MenuItem value="">{placeholder}</MenuItem>
+        {items.map((item) => (
+          <MenuItem key={item.id} value={item.id || item.name}>
+            {item.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+
+  const handleCategorize = async (clientId, category, subcategory, transaction) => {
+    if (!clientId || !category || !subcategory || !transaction) {
+      console.log("❌ Missing parameters for categorization");
+      console.error("Missing parameters for categorization");
+      return;
+    }
+    const clientRef = doc(db, "clients", clientId);
+    const transactionRef = doc(
+      db,
+      `transaction_database/${bankName}/transactions`,
+      transaction.id
+    );
+    console.log("Transaction Reference:", transactionRef);
+    try {
+      const clientDoc = await getDoc(clientRef);
+      const clientData = clientDoc.data();
+
+      if (!clientData) {
+        console.error("Client data not found.");
+        return;
+      }
+
+      const updatedTransactions = clientData.transactions.map((t) => {
+        if (t.id === transaction.id) {
+          return {
+            ...t,
+            category: category,
+            subcategory: subcategory,
+          };
+        }
+        return t;
+      });
+
+      await updateDoc(clientRef, {
+        transactions: updatedTransactions,
+      });
+
+      console.log("✅ Transaction categorized successfully.");
+    } catch (error) {
+      console.error("❌ Error categorizing transaction:", error);
     }
   };
 
-  const handleCheckboxChange = (localIndex) => {
-    const globalIndex = startIndex + localIndex;
-    if (selectedTransactions.includes(globalIndex)) {
-      setSelectedTransactions(selectedTransactions.filter((i) => i !== globalIndex));
-    } else {
-      setSelectedTransactions([...selectedTransactions, globalIndex]);
-    }
+  // selection model change
+  // selection model change
+  const handleSelectionModelChange = (selection) => {
+    console.log("🟡 Selected row indices:", selection);
+    setSelectedRows(selection);
+    const selected = selection.map((id) => transactions[id]);
+    setSelectedTransactions(selected);
+    console.log("🟡 Selected transactions:", selected);
   };
+
+
+  if (loading) return <Loader />;
+  if (error) return <div>{error}</div>;
 
   return (
-    <div className="text-white">
-      {/* Tabs */}
-      <div className="flex border-b border-gray-700 mb-4">
-        <button
-          className={`px-4 py-2 text-sm font-medium transition ${
-            currentTab === "table2"
-              ? "border-b-2 border-cyan-500 text-cyan-400"
-              : "text-gray-400 hover:text-white"
-          }`}
-          onClick={() => setCurrentTab("table2")}
-        >
-          Table 2
-        </button>
-      </div>
+    <>
+      <div className="flex gap-2 mb-4">
+        {/* Category Dropdown */}
+        <Dropdown 
+          label="Category" 
+          value={category} 
+          onChange={(e) => setCategory(e.target.value)} 
+          items={categories} 
+          placeholder="Category" 
+        />
 
-      {/* Table */}
-      {currentTab === "table2" && (
-        <div className="overflow-x-auto border border-gray-700 rounded-lg shadow-md">
-          <table className="min-w-full bg-gray-800">
-            <thead className="bg-gray-900 sticky top-0 z-10 text-sm text-left text-gray-300">
-              <tr>
-                <th className="p-3">
-                  <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
-                </th>
-                <th className="p-3">Date</th>
-                <th className="p-3">Description</th>
-                <th className="p-3">Debit</th>
-                <th className="p-3">Credit</th>
-                <th className="p-3">Balance</th>
-                <th className="p-3">Category</th>
-                <th className="p-3">Subcategory</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-gray-200">
-              {currentTransactions.map((transaction, idx) => (
-                <tr
-                  key={startIndex + idx}
-                  className={`border-t border-gray-700 hover:bg-gray-700/30 ${CategoryColor.getCategoryColor(
-                    transaction.category
-                  )}`}
-                >
-                  <td className="p-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedTransactions.includes(startIndex + idx)}
-                      onChange={() => handleCheckboxChange(idx)}
-                    />
-                  </td>
-                  <td className="p-3">{transaction.date1 || "-"}</td>
-                  <td className="p-3">{transaction.description || "-"}</td>
-                  <td className="p-3">{transaction.debit_amount || "-"}</td>
-                  <td className="p-3">{transaction.credit_amount || "-"}</td>
-                  <td className="p-3">{transaction.balance_amount || "-"}</td>
-                  <td className="p-3">{transaction.category || "-"}</td>
-                  <td className="p-3">{transaction.subcategory || "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        {/* Subcategory Dropdown */}
+        <Dropdown 
+          label="Subcategory" 
+          value={subcategory} 
+          onChange={(e) => setSubcategory(e.target.value)} 
+          items={subcategories} 
+          placeholder="Subcategory" 
+        />
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4 px-2">
-        <button
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span className="text-sm text-gray-400">
-          Page <span className="text-white">{currentPage}</span> of{" "}
-          <span className="text-white">{totalPages}</span>
-        </span>
-        <button
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+        {/* Action Buttons */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <button
+            onClick={() => {
+              console.log("🟢 Categorize clicked");
+              selectedTransactions.forEach((t) => {
+                console.log("Transaction to categorize:", t); // Logs each transaction
+                handleCategorize(clientId, category, subcategory, t);
+              });
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white p-2 text-xs rounded"
+          >
+            📂 Categorize
+          </button>
+            <button
+              onClick={() => {
+                console.log("🛑 Clear selected transactions");
+                setSelectedTransactions([]);
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white p-2 text-xs rounded"
+            >
+              ❌ Clear
+          </button>
+        </Box>
       </div>
-    </div>
+  
+      {/* Data Grid */}
+      <div style={{ height: 600, width: '100%' }}>
+      <DataGrid
+        rows={transactions.map((t, index) => {
+          //console.log("Row:", { id: index, ...t }); // Add console.log here to confirm rows
+          return { id: index, ...t };
+        })}
+        columns={columns}
+        checkboxSelection
+        onSelectionModelChange={handleSelectionModelChange}
+      />
+
+      </div>
+    </>
   );
 };
-
 export default CategorizeTables2;

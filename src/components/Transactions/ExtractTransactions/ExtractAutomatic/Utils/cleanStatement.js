@@ -3,9 +3,9 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
 // Component Imports
-import ProgressUtils from './ProgressUtils';
+import ProgressUtils from "./ProgressUtils";
 
-// Helper to align transactions
+// 🔁 Helper to align transactions
 const handleAlignTransactions = async (data) => {
   const amountRegex = /\d+\.\d{2}/;
   let formattedTransactions = [];
@@ -43,6 +43,13 @@ const shouldRunCleanStatement = async (bankName) => {
   return settings[bankName] ?? false;
 };
 
+// 🔁 Helper to find transaction by date
+const hasDate = (line, pattern) => {
+  if (!pattern) return false;
+  return pattern.test(line);
+};
+
+// ✅ Clean statement main function
 const cleanStatement = async ({ id, bankName }) => {
   if (!id || !bankName) {
     console.error("❌ Missing ID or Bank Name");
@@ -52,14 +59,18 @@ const cleanStatement = async ({ id, bankName }) => {
   const clientRef = doc(db, "clients", id);
   const bankRef = doc(db, "banks", bankName);
   const alignmentRef = doc(db, "settings", "alignment");
+  const bankDateRef = doc(db, "settings", "dates", bankName, "config");
 
   try {
+    console.log("🔄 Starting Clean Statement...");
+
     await ProgressUtils.updateProgress(id, "Clean Statement", "processing");
 
-    const [bankSnap, filteredSnap, alignmentSnap] = await Promise.all([
+    const [bankSnap, filteredSnap, alignmentSnap, bankDateSnap] = await Promise.all([
       getDoc(bankRef),
       getDoc(clientRef),
-      getDoc(alignmentRef)
+      getDoc(alignmentRef),
+      getDoc(bankDateRef),
     ]);
 
     if (!filteredSnap.exists()) {
@@ -71,6 +82,9 @@ const cleanStatement = async ({ id, bankName }) => {
     }
 
     const bankData = bankSnap.exists() ? bankSnap.data() : {};
+    const dateConfig = bankDateSnap.exists() ? bankDateSnap.data().config : {};
+    const datePattern = dateConfig.pattern ? new RegExp(dateConfig.pattern) : null;
+
     const ignoredLines = bankData.ignoredLines || [];
     const fuzzyIgnoredLines = bankData.fuzzyIgnoredLines || [];
     let filteredData = filteredSnap.data().filteredData || [];
@@ -87,9 +101,12 @@ const cleanStatement = async ({ id, bankName }) => {
       let linesToArchive = [];
 
       filteredData = filteredData.filter((line) => {
+        const hasMatch = hasDate(line, datePattern);
+
         if (
           ignoredLines.includes(line.trim()) ||
-          fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase()))
+          fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase())) ||
+          !hasMatch
         ) {
           linesToArchive.push({
             content: line,
@@ -100,6 +117,8 @@ const cleanStatement = async ({ id, bankName }) => {
         return true;
       });
 
+      console.log(`Lines to archive:`, linesToArchive);
+
       if (linesToArchive.length > 0) {
         const clientData = filteredSnap.data();
         const existingArchive = clientData.archive || [];
@@ -108,6 +127,7 @@ const cleanStatement = async ({ id, bankName }) => {
         await updateDoc(clientRef, {
           archive: updatedArchive,
         });
+        console.log("✔️ Cleaned lines archived for", bankName);
       }
     } else {
       console.log(`⚠️ Clean Statement removal skipped for ${bankName}`);
@@ -120,14 +140,17 @@ const cleanStatement = async ({ id, bankName }) => {
 
     if (shouldAlign) {
       filteredData = await handleAlignTransactions(filteredData);
+      console.log("✔️ Transactions aligned");
     }
 
+    // ✅ Update filtered data in Firestore
     await updateDoc(clientRef, {
       filteredData: filteredData,
       "extractProgress.Clean Statement": "processing",
     });
 
     await ProgressUtils.updateProgress(id, "Clean Statement", "success");
+    console.log("✔️ Clean Statement completed successfully");
   } catch (error) {
     await ProgressUtils.updateProgress(id, "Clean Statement", "failed");
     console.error("🔥 Error in cleanStatement:", error);

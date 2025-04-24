@@ -100,7 +100,7 @@ function ExtractAutomatically() {
 
       {/* Mark as Completed Button */}
       <div className="mt-6 bg-gray-900 p-4 rounded-lg text-white">
-        <h2 className="text-md font-semibold mb-2">Finalize Report</h2>
+        <h2 className="text-md font-semibold mb-2">Finalize Extraction</h2>
         {progressData.completed ? (
           <p className="text-green-400 font-semibold">✅ Report marked as completed.</p>
         ) : (

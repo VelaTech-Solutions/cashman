@@ -1,31 +1,34 @@
 // src/components/Transactions/CategorizeTransactions/NormalCategorizer/Utils/index.js
 
-
 // CREATE
-export { default as saveCatTrans } from "./saveCatTrans";
+export { default as saveCategorizedTransaction } from "./saveCategorizedTransaction";
 
-// // READ
+
+// READ
 // export { default as fetchCatTrans } from "./fetchCatTrans";
 // export { default as fetchTransactionsByCategory } from "./fetchTransactionsByCategory";
 
-// // UPDATE
+// UPDATE
 // export { default as updateCatTrans } from "./updateCatTrans";
 
-// // DELETE
+// DELETE
 // export { default as delTrans } from "./delTrans";
 
-// // VALIDATION
+// VALIDATION
 // export { default as validateCatTrans } from "./validateCatTrans";
 
-// // MATCHING / LINKING
+// MATCHING / LINKING
 // export { default as matchCatTrans } from "./matchCatTrans";
 
-// // DISPLAY / FORMAT
+// DISPLAY / FORMAT
 // export { default as formatTransactionForDisplay } from "./formatTransactionForDisplay";
 
-// // AUDIT
+// AUDIT
 // export { default as transactionAuditTrail } from "./transactionAuditTrail";
 
-// // FILTERING & SORTING
+// FILTERING & SORTING
 // export { default as filterTransactions } from "./filterTransactions";
 // export { default as sortTransactions } from "./sortTransactions";
+
+// // TABLE UTILS
+// export * from "./tableUtils";

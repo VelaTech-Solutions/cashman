@@ -1,14 +1,10 @@
-// src/components/Actions/CategorizeActions.js
-
 import React, { useState, useEffect } from "react";
 import { loadCategories, loadSubcategories } from "components/Common";
-import { saveCatTrans } from "../Utils";
+import { saveCategorizedTransaction } from "../Utils";
 
-const CategorizeActions = ({ clientId }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+const CategorizeActions = ({ clientId, selectedTransactions, setSelectedTransactions }) => {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
-  const [selectedTransactions, setSelectedTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
 
@@ -33,25 +29,15 @@ const CategorizeActions = ({ clientId }) => {
 
   const handleCategorize = async () => {
     if (!category || !subcategory || selectedTransactions.length === 0) return;
-    await saveCatTrans(selectedTransactions, category, subcategory);
-    setSelectedTransactions([]);
-  };
+    console.log('Categorizing transactions:', selectedTransactions);
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    // optionally implement search logic here
+    await saveCategorizedTransaction(selectedTransactions, category, subcategory);
+    setSelectedTransactions([]);  // Clear selected transactions after categorization
+    console.log("Categorized transactions:", selectedTransactions);
   };
 
   return (
     <div className="bg-gray-800 p-3 rounded-lg shadow-md flex flex-wrap items-center justify-between gap-2">
-      <input
-        type="text"
-        placeholder="🔍 Search..."
-        value={searchQuery}
-        onChange={handleSearchChange}
-        className="flex-1 min-w-[150px] p-2 text-sm rounded bg-gray-700 text-white placeholder-gray-400"
-      />
-
       <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 text-sm rounded bg-gray-700 text-white">
         <option value="">Category</option>
         {categories.map((cat) => (
@@ -65,13 +51,6 @@ const CategorizeActions = ({ clientId }) => {
           <option key={sub.id} value={sub.name}>{sub.name}</option>
         ))}
       </select>
-
-      <button
-        onClick={() => {/* optional: implement matchAll */}}
-        className="bg-green-500 hover:bg-green-600 text-white p-2 text-xs rounded"
-      >
-        ✅ Match All
-      </button>
 
       <button
         onClick={handleCategorize}
@@ -91,3 +70,5 @@ const CategorizeActions = ({ clientId }) => {
 };
 
 export default CategorizeActions;
+
+// 

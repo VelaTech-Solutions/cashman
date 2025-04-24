@@ -1,12 +1,30 @@
 // src/components/Transactions/CategorizeTransactions/NormalCategorizePage.js
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { LoadClientData, Loader } from "components/Common";
 
 import CategorizeActions from "./Actions/CategorizeActions";
 import CategorizeTransactionsOverview1 from "./OverViews/CategorizeTransactionsOverview1";
 import ContainerTables from "./Containers/ContainerTables";
 
 const NormalCategorizer = ({ clientId }) => {
+  const [transactions, setTransactions] = useState([]);
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+
+  // Load client data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await LoadClientData(clientId);
+        if (data) {
+          setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
+        }
+      } catch (error) {
+        console.error("Failed to load client data", error);
+      }
+    };
+    loadData();
+  }, [clientId]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
@@ -19,12 +37,23 @@ const NormalCategorizer = ({ clientId }) => {
         button for the best results.
       </p>
 
+      {/* Overview section */}
       <CategorizeTransactionsOverview1 clientId={clientId} />
 
-      <CategorizeActions clientId={clientId}/>
+      {/* Action buttons */}
+      {/* <CategorizeActions
+        clientId={clientId}
+        selectedTransactions={selectedTransactions}
+        setSelectedTransactions={setSelectedTransactions}
+      /> */}
 
-      <ContainerTables clientId={clientId}/>
-      
+      {/* Tables section */}
+      <ContainerTables
+        clientId={clientId}
+        transactions={transactions}
+        selectedTransactions={selectedTransactions}
+        setSelectedTransactions={setSelectedTransactions}
+      />
     </div>
   );
 };

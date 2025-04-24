@@ -25,7 +25,7 @@ export { default as removeNotTransactions } from './removeNotTransactions';
 
 
 // Final Aggregator
-export { default as ExtractionProcess } from './ExtractionProcess';
+export { default as extractionController } from './extractionController';
 
 
 export { default as ProgressUtils } from './ProgressUtils';

@@ -26,16 +26,17 @@ const createDatabaseStructure = async (id) => {
     fees_amount: 0.0,
     fees_type: null,
     description: "",
-    description2: "", // this is not being created why?
+    description2: "",
     debit_amount: 0.0,
     credit_amount: 0.0,
     credit_debit_amount: 0.0,
     balance_amount: 0.0,
     number_of_transactions: 0,
+    category: "",
+    subcategory: "",
     verified: "",
     cleaned: false,
   };
-  console.log("Generated UUID for transaction:", defaultTransaction.uid);
   const defaultBudgetData = {
     income: 0,
     incomeavg: 0,
@@ -79,7 +80,7 @@ const createDatabaseStructure = async (id) => {
       await updateDoc(clientRef, {
         transactions: updatedTransactions,
         budgetData: updatedBudgetData,
-        archive: data.archive ?? [],       // Array for archived/deleted lines
+        archive: data.archive ?? [],
         processedReports: data.processedReports ?? [],
         extractProgress: data.extractProgress ?? {},
       });

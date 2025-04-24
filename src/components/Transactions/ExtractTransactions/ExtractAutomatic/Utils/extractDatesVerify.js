@@ -53,6 +53,7 @@ const extractDatesVerify = async (id, bankName) => {
 
       return dateStr; // fallback if parsing fails
     };
+    // the date that we are looking for to be normalized should be in the format dd/mm/yyyy
 
     // Step 1: Only process the transactions with extracted date fields
     updatedTransactions.forEach((transaction, index) => {

@@ -3,9 +3,9 @@ import React, { useState } from "react";
 
 // Component Imports
 import { ViewSwitcher } from 'components/Common';
-import ExtractProgressView1 from "../Views/ExtractProgressView1";
-import ExtractProgressView2 from "../Views/ExtractProgressView2";
-import ExtractProgressView3 from "../Views/ExtractProgressView3";
+// import ExtractProgressView1 from "../Views/ExtractProgressView1";
+// import ExtractProgressView2 from "../Views/ExtractProgressView2";
+// import ExtractProgressView3 from "../Views/ExtractProgressView3";
 import ExtractProgressView4 from "../Views/ExtractProgressView4";
 
 
@@ -19,30 +19,30 @@ const ContainerVeiws = ({
  }) => {
   const [activeView, setActiveView] = useState("view4");
   const views = [
-    { key: "view1", label: "", Component: <ExtractProgressView1 
-        progressData={progressData || []}
-        setProgressData={setProgressData} 
-        isProcessing={isProcessing}
-        setIsProcessing={setIsProcessing}
-        extractionStatus={extractionStatus}
-        setExtractionStatus={setExtractionStatus}
-         /> },
-    { key: "view2", label: "", Component: <ExtractProgressView2 
-        progressData={progressData || []} 
-        isProcessing={isProcessing}
-        setProgressData={setProgressData}
-        setIsProcessing={setIsProcessing}
-        extractionStatus={extractionStatus}
-        setExtractionStatus={setExtractionStatus}
-        /> },
-    { key: "view3", label: "", Component: <ExtractProgressView3
-        progressData={progressData || []}
-        isProcessing={isProcessing}
-        setProgressData={setProgressData}
-        setIsProcessing={setIsProcessing}
-        extractionStatus={extractionStatus}
-        setExtractionStatus={setExtractionStatus}
-         /> },
+    // { key: "view1", label: "", Component: <ExtractProgressView1 
+    //     progressData={progressData || []}
+    //     setProgressData={setProgressData} 
+    //     isProcessing={isProcessing}
+    //     setIsProcessing={setIsProcessing}
+    //     extractionStatus={extractionStatus}
+    //     setExtractionStatus={setExtractionStatus}
+    //      /> },
+    // { key: "view2", label: "", Component: <ExtractProgressView2 
+    //     progressData={progressData || []} 
+    //     isProcessing={isProcessing}
+    //     setProgressData={setProgressData}
+    //     setIsProcessing={setIsProcessing}
+    //     extractionStatus={extractionStatus}
+    //     setExtractionStatus={setExtractionStatus}
+    //     /> },
+    // { key: "view3", label: "", Component: <ExtractProgressView3
+    //     progressData={progressData || []}
+    //     isProcessing={isProcessing}
+    //     setProgressData={setProgressData}
+    //     setIsProcessing={setIsProcessing}
+    //     extractionStatus={extractionStatus}
+    //     setExtractionStatus={setExtractionStatus}
+    //      /> },
     { key: "view4", label: "", Component: <ExtractProgressView4
         progressData={progressData || []}
         isProcessing={isProcessing}
