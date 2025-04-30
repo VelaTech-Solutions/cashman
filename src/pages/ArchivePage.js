@@ -9,7 +9,7 @@ import { Sidebar } from 'components/Common';
 import ArchivedData from "../components/ArchivedData/ArchivedData"; // You can uncomment when ready
 
 const ArchivePage = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [archive, setArchive] = useState([]);
   const [error, setError] = useState("");
   

@@ -50,21 +50,20 @@ const hasDate = (line, pattern) => {
 };
 
 // ✅ Clean statement main function
-const cleanStatement = async ({ id, bankName }) => {
-  if (!id || !bankName) {
+const cleanStatement = async ({ clientId, bankName }) => {
+  if (!clientId || !bankName) {
     console.error("❌ Missing ID or Bank Name");
     return;
   }
 
-  const clientRef = doc(db, "clients", id);
+  const clientRef = doc(db, "clients", clientId);
   const bankRef = doc(db, "banks", bankName);
   const alignmentRef = doc(db, "settings", "alignment");
   const bankDateRef = doc(db, "settings", "dates", bankName, "config");
 
   try {
     console.log("🔄 Starting Clean Statement...");
-
-    await ProgressUtils.updateProgress(id, "Clean Statement", "processing");
+    await ProgressUtils.updateProgress(clientId, "Clean Statement", "processing");
 
     const [bankSnap, filteredSnap, alignmentSnap, bankDateSnap] = await Promise.all([
       getDoc(bankRef),
@@ -82,11 +81,19 @@ const cleanStatement = async ({ id, bankName }) => {
     }
 
     const bankData = bankSnap.exists() ? bankSnap.data() : {};
-    const dateConfig = bankDateSnap.exists() ? bankDateSnap.data().config : {};
-    const datePattern = dateConfig.pattern ? new RegExp(dateConfig.pattern) : null;
-
     const ignoredLines = bankData.ignoredLines || [];
     const fuzzyIgnoredLines = bankData.fuzzyIgnoredLines || [];
+
+    const allDateConfigs = bankDateSnap.data();
+    const firstKey = Object.keys(allDateConfigs || {})[0];
+    const dateConfig = allDateConfigs?.[firstKey];
+
+    if (!dateConfig || !dateConfig.pattern) {
+      console.log("❌ Missing valid date pattern for bank:", bankName, dateConfig);
+      return;
+    }
+
+    const datePattern = new RegExp(dateConfig.pattern);
     let filteredData = filteredSnap.data().filteredData || [];
 
     if (filteredData.length === 0) {
@@ -94,43 +101,36 @@ const cleanStatement = async ({ id, bankName }) => {
       return;
     }
 
-    // ✅ Check toggle from settings/removal
     const shouldRemove = await shouldRunCleanStatement(bankName);
-    if (shouldRemove) {
-      const archiveSourceField = "filtered Extract";
-      let linesToArchive = [];
+    const archiveSourceField = "filtered Extract";
+    const initialLinesToArchive = [];
 
-      filteredData = filteredData.filter((line) => {
-        const hasMatch = hasDate(line, datePattern);
-
-        if (
-          ignoredLines.includes(line.trim()) ||
-          fuzzyIgnoredLines.some((ignored) => line.toLowerCase().includes(ignored.toLowerCase())) ||
-          !hasMatch
-        ) {
-          linesToArchive.push({
-            content: line,
-            source: archiveSourceField,
-          });
-          return false;
-        }
-        return true;
-      });
-
-      console.log(`Lines to archive:`, linesToArchive);
-
-      if (linesToArchive.length > 0) {
-        const clientData = filteredSnap.data();
-        const existingArchive = clientData.archive || [];
-        const updatedArchive = [...existingArchive, ...linesToArchive];
-
-        await updateDoc(clientRef, {
-          archive: updatedArchive,
-        });
-        console.log("✔️ Cleaned lines archived for", bankName);
+    filteredData = filteredData.filter((line) => {
+      const hasMatch = hasDate(line, datePattern);
+      if (
+        !hasMatch ||
+        (shouldRemove &&
+          (ignoredLines.includes(line.trim()) ||
+            fuzzyIgnoredLines.some((ignored) =>
+              line.toLowerCase().includes(ignored.toLowerCase())
+            )))
+      ) {
+        initialLinesToArchive.push({ content: line, source: archiveSourceField });
+        return false;
       }
-    } else {
-      console.log(`⚠️ Clean Statement removal skipped for ${bankName}`);
+      return true;
+    });
+
+    console.log("📦 Lines to archive:", initialLinesToArchive.length);
+
+    if (initialLinesToArchive.length > 0) {
+      const existingArchive = filteredSnap.data().archive || [];
+      const updatedArchive = [...existingArchive, ...initialLinesToArchive];
+
+      await updateDoc(clientRef, {
+        archive: updatedArchive,
+      });
+      console.log("✔️ Cleaned lines archived for", bankName);
     }
 
     // ✅ Alignment logic
@@ -146,13 +146,13 @@ const cleanStatement = async ({ id, bankName }) => {
     // ✅ Update filtered data in Firestore
     await updateDoc(clientRef, {
       filteredData: filteredData,
-      "extractProgress.Clean Statement": "processing",
+      "extractProgress.Clean Statement": "success",
     });
 
-    await ProgressUtils.updateProgress(id, "Clean Statement", "success");
+    await ProgressUtils.updateProgress(clientId, "Clean Statement", "success");
     console.log("✔️ Clean Statement completed successfully");
   } catch (error) {
-    await ProgressUtils.updateProgress(id, "Clean Statement", "failed");
+    await ProgressUtils.updateProgress(clientId, "Clean Statement", "failed");
     console.error("🔥 Error in cleanStatement:", error);
   }
 };

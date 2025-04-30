@@ -11,22 +11,22 @@ import ExtractManually from "./ExtractManual/ExtractManually";
 // import HelpExtract from "../help/HelpExtract";
 
 function ExtractTransactions() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("ExtractAutomatically");
   const unverifiedCount = clientData?.transactions?.filter(tx => tx.verified === "✗").length || 0;
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
-    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
+    { path: `/client/${clientId}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
+    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" },
     {
-      path: `/client/${id}/edit-transactions`,
+      path: `/client/${clientId}/edit-transactions`,
       label: `Edit Transactions (${unverifiedCount})`,
       icon: "ph-file-text",
     },
-    { path: `/client/${id}/archive`,
+    { path: `/client/${clientId}/archive`,
       label: "Archive Data",
       icon: "ph-file-text",
     },
@@ -43,7 +43,7 @@ function ExtractTransactions() {
     },
     { type: "divider" },
     {
-      path: `/ExtractSettings/${id}`,
+      path: `/ExtractSettings/${clientId}`,
       label: "Extract Settings",
       icon: "ph-arrow-left",
     },
@@ -56,7 +56,7 @@ function ExtractTransactions() {
     const fetchData = async () => {
       try {
         // Load client data using the reusable function
-        const clientData = await LoadClientData(id); // Assuming 'clientData' is the reusable function
+        const clientData = await LoadClientData(clientId); // Assuming 'clientData' is the reusable function
         setClientData(clientData);
       } catch (err) {
         console.error("Error fetching data:", err.message);
@@ -65,7 +65,7 @@ function ExtractTransactions() {
     };
 
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   if (error) return <div>Error: {error}</div>;
 

@@ -18,7 +18,7 @@ import ClientActions4 from "components/Client/ClientProfile/Actions/ClientAction
 
 
 const ClientProfilePage = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState("");
   const [note, setNote] = useState(""); // State for the new note
@@ -30,7 +30,7 @@ const ClientProfilePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clientData = await LoadClientData(id);
+        const clientData = await LoadClientData(clientId);
         
         setClientData(clientData);
         setNotes(clientData.notes || []); 
@@ -43,7 +43,7 @@ const ClientProfilePage = () => {
     };
   
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   // Handle add client notes
   const handleAddNote = async () => {
@@ -53,7 +53,7 @@ const ClientProfilePage = () => {
     }
 
     try {
-      const clientRef = doc(db, "clients", id);
+      const clientRef = doc(db, "clients", clientId);
       const clientSnapshot = await getDoc(clientRef);
 
       if (clientSnapshot.exists()) {
@@ -80,7 +80,7 @@ const ClientProfilePage = () => {
   // Function to delete a note from a client's notes array
   const deleteNote = async (noteIndex) => {
     try {
-      const clientRef = doc(db, "clients", id);
+      const clientRef = doc(db, "clients", clientId);
       const clientSnapshot = await getDoc(clientRef);
 
       if (clientSnapshot.exists()) {
@@ -100,7 +100,7 @@ const ClientProfilePage = () => {
   // Function to delete all notes
   const deleteAllNotes = async () => {
     try {
-      const clientRef = doc(db, "clients", id);
+      const clientRef = doc(db, "clients", clientId);
       await updateDoc(clientRef, { notes: [] });
       setNotes([]);
       alert("All notes deleted successfully!");
@@ -115,10 +115,10 @@ const ClientProfilePage = () => {
     { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
     {},
   ];
-  const actionLinks = id ? [
-    { label: "Budget", path: `/budget/${id}` },
-    { label: "Transactions", path: `/client/${id}/transactionspage` },
-    { label: "Archives", path: `/client/${id}/archive` },
+  const actionLinks = clientId ? [
+    { label: "Budget", path: `/budget/${clientId}` },
+    { label: "Transactions", path: `/client/${clientId}/transactionspage` },
+    { label: "Archives", path: `/client/${clientId}/archive` },
   ]
 : [];
   const views = [

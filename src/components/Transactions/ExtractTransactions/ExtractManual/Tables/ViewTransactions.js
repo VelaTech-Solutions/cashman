@@ -14,7 +14,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 function ViewTransactions() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ function ViewTransactions() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, "clients", id);
+        const docRef = doc(db, "clients", clientId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -42,7 +42,7 @@ function ViewTransactions() {
     };
 
     fetchData();
-  }, [id, refreshKey]);
+  }, [clientId, refreshKey]);
 
   if (loading) return <p className="text-white">Loading transactions...</p>;
   if (error) return <p className="text-red-500">{error}</p>;

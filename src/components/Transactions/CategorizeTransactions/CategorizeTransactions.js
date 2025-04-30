@@ -61,7 +61,7 @@ const CategorizeTransactions = () => {
         {activePage === "NormalCategorizer" && <NormalCategorizer clientId={clientId} />}
         {activePage === "SmartCategorizer" && <SmartCategorizer clientId={clientId} />}
         {activePage === "AICategorizer" && <AICategorizer clientId={clientId} />}
-        {/* {activePage === "PlayCategorizer" && <PlayCategorizer clientId={clientId} />} */}
+        {/* {activePage === "PlayCategorizer" && <PlayCategorizer clientId={clientId}} /> */}
       </div>
     </div>
   );

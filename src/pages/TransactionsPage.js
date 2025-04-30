@@ -7,32 +7,32 @@ import { Sidebar, LoadClientData, LoadTransactions } from 'components/Common';
 import ContainerOverView from "../components/Transactions/TransactionsPage/Containers/ContainerOverView";
 
 const TransactionsPage = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
   const [activeView, setActiveView] = useState("view1");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
+    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" },
     {
-      path: `/client/${id}/view-transactions`,
+      path: `/client/${clientId}/view-transactions`,
       label: "View Transactions",
       icon: "ph-file-text",
     },
     {
-      path: `/client/${id}/edit-transactions`,
+      path: `/client/${clientId}/edit-transactions`,
       label: "Edit Transactions",
       icon: "ph-file-text",
     },
     {
-      path: `/client/${id}/categorize-transactions`,
+      path: `/client/${clientId}/categorize-transactions`,
       label: "Categorize Transactions",
       icon: "ph-file-text",
     },
     {
-      path: `/client/${id}/extract-transactions`,
+      path: `/client/${clientId}/extract-transactions`,
       label: "Extract Transactions",
       icon: "ph-file-text",
     },
@@ -41,7 +41,7 @@ const TransactionsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const clientData = await LoadClientData(id);
+        const clientData = await LoadClientData(clientId);
         setClientData(clientData);
         setTransactions(clientData.transactions || []);
         setError("");
@@ -52,7 +52,7 @@ const TransactionsPage = () => {
     };
 
     loadData();
-  }, [id]);
+  }, [clientId]);
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Client Profile" links={links} />

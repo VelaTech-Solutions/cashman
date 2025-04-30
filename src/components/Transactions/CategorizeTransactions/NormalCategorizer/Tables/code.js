@@ -58,3 +58,29 @@
           ❌ Clear
         </button>
       </div>
+
+        const Dropdown = ({ label, value, onChange, items, placeholder }) => (
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel sx={{ color: 'white' }}>{label}</InputLabel>
+            <Select
+              value={value}
+              label={label}
+              onChange={onChange}
+              sx={{
+                backgroundColor: '#333',
+                color: 'white',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
+                '&:hover': { backgroundColor: '#444' },
+                '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' },
+              }}
+            >
+              <MenuItem value="">{placeholder}</MenuItem>
+              {items.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      

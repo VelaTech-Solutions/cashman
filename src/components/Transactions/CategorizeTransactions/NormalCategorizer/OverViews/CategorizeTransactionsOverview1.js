@@ -8,28 +8,25 @@ const CategorizeTransactionsOverview1 = ({ clientId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch client data
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await LoadClientData(clientId);
-        if (!data) {
-          setError("Client not found.");
-        } else {
-          setClientData(data);
-          setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
-        }
-      } catch (err) {
-        setError("Failed to load client data.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    const fetchData = async () => {
+          try {
+          const clientData = await LoadClientData(clientId);
+          setClientData(clientData);
+          setTransactions(clientData.transactions || []);
 
-    loadData(); // ✅ Call the async loader
-  }, [clientId]);
+          } catch (err) {
+          console.error("Error fetching data:", err.message);
+          setError("Failed to fetch Client Data.");
+          }
+      };
+  
+      fetchData();
+      }, [clientId]);
 
-  if (loading) return <Loader />;
-  if (error) return <p className="text-red-500">{error}</p>;
+  // if (loading) return <Loader />;
+  // if (error) return <p className="text-red-500">{error}</p>;
 
   const categorized = {
     Income: [],

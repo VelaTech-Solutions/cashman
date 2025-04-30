@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { loadCategories, loadSubcategories } from "components/Common";
 import { saveCategorizedTransaction } from "../Utils";
 
-const CategorizeActions = ({ clientId, selectedTransactions, setSelectedTransactions }) => {
+const CategorizeActions = ({ id, selectedTransactions, setSelectedTransactions }) => {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [categories, setCategories] = useState([]);

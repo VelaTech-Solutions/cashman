@@ -17,7 +17,7 @@ import LoadClientData from "components/LoadClientData";
 const links = [{ path: "javascript:void(0)", label: "Back", icon: "ph-home" }];
 
 const TransactionDatabase = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ const TransactionDatabase = () => {
   useEffect(() => {
     const fetchClientData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         setClientData(data);
       } catch (err) {
         console.error("Error fetching client data:", err.message);
@@ -35,7 +35,7 @@ const TransactionDatabase = () => {
     };
 
     fetchClientData();
-  }, [id]);
+  }, [clientId]);
 
   // Fetch transactions based on client data
   useEffect(() => {
@@ -187,8 +187,8 @@ const TransactionDatabase = () => {
   );
 
   // Handlers
-  const handleEdit = (id) => {
-    console.log(`Editing transaction with ID: ${id}`);
+  const handleEdit = (clientId) => {
+    console.log(`Editing transaction with ID: ${clientId}`);
   };
 };
 

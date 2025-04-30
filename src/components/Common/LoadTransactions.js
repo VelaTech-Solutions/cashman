@@ -3,9 +3,9 @@
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase"; // Import your Firestore instance
 
-const LoadTransactions = async (id) => {
+const LoadTransactions = async (clientId) => {
     try {
-        const docRef = doc(db, "transactions", id);
+        const docRef = doc(db, "transactions", clientId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             console.log("Document data:", docSnap.data());

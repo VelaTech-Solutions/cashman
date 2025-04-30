@@ -20,7 +20,7 @@ const links = [
 ];
 
 const ViewEditClient = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const navigate = useNavigate();
 
   const [clientData, setClientData] = useState(null);

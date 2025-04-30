@@ -13,7 +13,7 @@ const links = [
 ];
 
 const ViewReports = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ const ViewReports = () => {
   useEffect(() => {
     const fetchClientData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         setClientData(data);
         setTransactions(data.transactions || []);
       } catch (error) {
@@ -43,7 +43,7 @@ const ViewReports = () => {
     };
 
     fetchClientData();
-  }, [id]);
+  }, [clientId]);
 
   if (error) return <div>Error: {error}</div>;
 

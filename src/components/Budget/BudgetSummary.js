@@ -18,7 +18,7 @@ import BudgetSummaryView3 from "./BudgetSummaryView/Views/BudgetSummaryView3";
 // import BudgetSummaryView4 from "./BudgetSummaryView/Views/BudgetSummaryView4";
 
 const BudgetSummary = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [notes, setNotes] = useState([]); 
   const [note, setNote] = useState(""); 
@@ -29,14 +29,14 @@ const BudgetSummary = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         setClientData(data);
       } catch (err) {
         console.error("Error fetching data:", err.message);
       }
     };
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   if (!clientData) return <div className="text-white">Loading client data...</div>;
 
@@ -176,7 +176,7 @@ const disposableIncome = incomeAvg - totalExpenses;
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg shadow-md transition-all duration-300"
-          onClick={() => generateBudgetReport(id, templateBlob)}
+          onClick={() => generateBudgetReport(clientId, templateBlob)}
         >
           📥 Download Report
         </motion.button>

@@ -12,7 +12,7 @@ import {
 
 
 export const AutomaticActions1 = ({
-  id,
+  clientId,
   bankName, 
   clientData,
   setClientData, 
@@ -24,9 +24,9 @@ export const AutomaticActions1 = ({
   const [processingMethod, setProcessingMethod] = useState("pdfparser");
 
   useEffect(() => {
-    if (!id) return;
+    if (!clientId) return;
 
-    const clientRef = doc(db, "clients", id);
+    const clientRef = doc(db, "clients", clientId);
     const unsubscribe = onSnapshot(clientRef, (docSnap) => {
       if (docSnap.exists()) {
         // console.log("🔄 Client Data Updated:", docSnap.data());
@@ -40,18 +40,18 @@ export const AutomaticActions1 = ({
     });
 
     return () => unsubscribe();
-  }, [id]);
+  }, [clientId]);
 
 
 
   // reset deletes the following in the db  transactions filteredData extractProgress
   const handlereset = () => {
-    if (!id) {
+    if (!clientId) {
       console.error("❌ Missing client ID");
       return;
     }
   
-    const clientRef = doc(db, "clients", id);
+    const clientRef = doc(db, "clients", clientId);
     updateDoc(clientRef, {
       transactions: [],
       filteredData: [],
@@ -88,7 +88,7 @@ export const AutomaticActions1 = ({
       <button
         onClick={() =>
           extractionController({
-            id,
+            clientId,
             bankName,
             clientData,
             setClientData,

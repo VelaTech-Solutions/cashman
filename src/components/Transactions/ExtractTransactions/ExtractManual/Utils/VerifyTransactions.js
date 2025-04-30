@@ -13,7 +13,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 function VerifyTransactions() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ function VerifyTransactions() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, "clients", id);
+        const docRef = doc(db, "clients", clientId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -41,7 +41,7 @@ function VerifyTransactions() {
     };
 
     fetchData();
-  }, [id, refreshKey]);
+  }, [clientId, refreshKey]);
 
   const handleVerifyTransactions = async () => {
     let transactionCount = 0; // 🔹 Counter for number of processed transactions
@@ -106,7 +106,7 @@ function VerifyTransactions() {
     });
   
     try {
-      await updateDoc(doc(db, "clients", id), {
+      await updateDoc(doc(db, "clients", clientId), {
         transactions: updatedTransactions,
         number_of_transactions: transactionCount,
       });

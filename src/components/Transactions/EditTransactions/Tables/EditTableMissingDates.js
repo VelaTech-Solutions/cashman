@@ -3,18 +3,18 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 import { BaseTable, FirestoreHelper } from "../Utils/";
 
-const EditTableMissingDates = ({ id }) => {
+const EditTableMissingDates = ({ clientId }) => {
   const [transactions, setTransactions] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedTransaction, setEditedTransaction] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
-      const clientData = await FirestoreHelper.loadClientData(id);
+      const clientData = await FirestoreHelper.loadClientData(clientId);
       setTransactions(clientData.transactions || []);
     };
     loadData();
-  }, [id]);
+  }, [clientId]);
 
   const isInvalidDate = (date) => {
     return !date || date === "None" || date === "null";
@@ -44,7 +44,7 @@ const EditTableMissingDates = ({ id }) => {
 
     if (fullIndex !== -1) {
       updated[fullIndex] = editedTransaction;
-      const transactionRef = doc(db, "clients", id);
+      const transactionRef = doc(db, "clients", clientId);
       await updateDoc(transactionRef, { transactions: updated });
       setTransactions(updated);
       setEditingIndex(null);
@@ -73,7 +73,7 @@ const EditTableMissingDates = ({ id }) => {
     setTransactions(updated);
   
     try {
-      const transactionRef = doc(db, "clients", id);
+      const transactionRef = doc(db, "clients", clientId);
   
       // Format removed line for archive
       const archiveEntries = removed.map((tx) => ({
@@ -114,7 +114,7 @@ const EditTableMissingDates = ({ id }) => {
       source: "EditTableMissingDates",
     }));
   
-    const transactionRef = doc(db, "clients", id);
+    const transactionRef = doc(db, "clients", clientId);
     const docSnap = await getDoc(transactionRef);
     const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
   

@@ -14,20 +14,20 @@ import ContainerOverViews from "../ViewTransactions/Containers/ContainerOverView
 
 
 const ViewTransactions = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Dynamically generate links with the `id`
+  // Dynamically generate links with the `clientId`
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
-    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
+    { path: `/client/${clientId}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
+    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" },
     {
-      path: `/viewSettings/${id}`,
+      path: `/viewSettings/${clientId}`,
       label: "View Settings",
       icon: "ph-arrow-left",
     },
@@ -42,7 +42,7 @@ const ViewTransactions = () => {
   useEffect(() => {
     const fetchData = async () => {
           try {
-          const clientData = await LoadClientData(id);
+          const clientData = await LoadClientData(clientId);
           setClientData(clientData);
           setTransactions(clientData);
           } catch (err) {
@@ -52,7 +52,7 @@ const ViewTransactions = () => {
       };
   
       fetchData();
-      }, [id]);
+      }, [clientId]);
 
   // Filter transactions based on search query
   const filteredTransactions = clientData?.transactions?.filter(

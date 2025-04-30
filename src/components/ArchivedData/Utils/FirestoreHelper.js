@@ -4,9 +4,9 @@ import { doc, getDoc, updateDoc, deleteDoc, setDoc, arrayRemove, arrayUnion } fr
 import { db } from "../../../firebase/firebase";
 
 // Load full client document
-export const loadClientData = async (id) => {
+export const loadClientData = async (clientId) => {
   try {
-    const clientRef = doc(db, "clients", id);
+    const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
     if (clientSnap.exists()) {
       return clientSnap.data();

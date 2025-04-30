@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 // Component Imports
 import { ViewSwitcher } from 'components/Common';
-import ExtractIgnoredLinesView1 from "../Views/ExtractIgnoredLinesView1";
+import ExtractRemovalView1 from "../Views/ExtractRemovalView1";
 import ExtractAlignmentView2 from "../Views/ExtractAlignmentView2";
 import ExtractDescriptionView3 from "../Views/ExtractDescriptionView3";
 import ExtractDatesView4 from "../Views/ExtractDatesView4";
@@ -12,7 +12,7 @@ import ExtractDatesView4 from "../Views/ExtractDatesView4";
 const ContainerViews = ({ viewMode, setViewMode }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
-    { key: "view1", label: "Removal Settings", Component: <ExtractIgnoredLinesView1 
+    { key: "view1", label: "Removal Settings", Component: <ExtractRemovalView1 
       viewMode={viewMode}
       setViewMode={setViewMode}
          /> },

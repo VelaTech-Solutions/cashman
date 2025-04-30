@@ -3,7 +3,7 @@ import { doc, setDoc, getDoc, updateDoc, collection, getDocs } from "firebase/fi
 import { db } from "../../../../firebase/firebase";
 import { Button } from "components/Common";
 
-function IgnoredLineActions1() {
+function ExtractRemovalView1() {
   const [banks, setBanks] = useState([]);
   const [removalSettings, setRemovalSettings] = useState({});
   const [selectedBank, setSelectedBank] = useState("");
@@ -146,6 +146,7 @@ function IgnoredLineActions1() {
       </select>
 
       <div className="mb-6 space-y-2">
+        <h3 className="text-lg font-bold text-blue-400">Bank Headers & Footers Removal</h3>
         {banks.map((bank) => (
           <div key={bank} className="flex items-center gap-4">
             <span className="text-white w-32">{bank}</span>
@@ -157,7 +158,7 @@ function IgnoredLineActions1() {
                 checked={removalSettings[bank] || false}
                 onChange={() => handleToggleRemoval(bank)}
               />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-red-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+              <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
             </label>
           </div>
         ))}
@@ -252,4 +253,4 @@ function IgnoredLineActions1() {
   );
 }
 
-export default IgnoredLineActions1;
+export default ExtractRemovalView1;

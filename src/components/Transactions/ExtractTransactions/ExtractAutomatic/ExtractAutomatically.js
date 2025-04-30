@@ -14,7 +14,7 @@ import ContainerVeiws from "./Containers/ContainerVeiws";
 import ContainerActions from "./Containers/ContainerActions";
 
 function ExtractAutomatically() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [bankName, setBankName] = useState("");
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null);
@@ -22,15 +22,15 @@ function ExtractAutomatically() {
   const [progressData, setProgressData] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // // log id
-  // console.log("Client ID MainPage:", id);
+  // // log clientId
+  // console.log("Client ID MainPage:", clientId);
   // console.log("Bank Name MainPage:", bankName);
 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clientData = await LoadClientData(id);
+        const clientData = await LoadClientData(clientId);
         setClientData(clientData);
         setBankName(clientData.bankName || "Unknown");
 
@@ -40,13 +40,13 @@ function ExtractAutomatically() {
       }
     };
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!clientId) return;
     const fetchProgress = async () => {
       try {
-        const clientRef = doc(db, "clients", id);
+        const clientRef = doc(db, "clients", clientId);
         const clientSnap = await getDoc(clientRef);
 
         if (clientSnap.exists()) {
@@ -60,7 +60,7 @@ function ExtractAutomatically() {
     };
 
     fetchProgress();
-  }, [id]);
+  }, [clientId]);
 
   if (error) return <div>Error: {error}</div>;
 
@@ -76,7 +76,7 @@ function ExtractAutomatically() {
       {/* Actions Container */}
       <div className="flex justify-start items-center space-x-4 mb-4">
         <ContainerActions
-          id={id}
+          clientId={clientId}
           bankName={bankName}
           clientData={clientData}
           setClientData={setClientData}
@@ -107,7 +107,7 @@ function ExtractAutomatically() {
           <button
             onClick={async () => {
               try {
-                const clientRef = doc(db, "clients", id);
+                const clientRef = doc(db, "clients", clientId);
                 await updateDoc(clientRef, {
                   "progress.extracted": true,
                 });

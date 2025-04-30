@@ -12,7 +12,7 @@ import BudgetSummary from "components/Budget/BudgetSummary";
 
 
 const Budget = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [activeSection, setActiveSection] = useState("personalBudget");
 
   const links = [

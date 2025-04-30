@@ -2,33 +2,38 @@ import React, { useState } from "react";
 
 // Component Imports
 import { ViewSwitcher } from 'components/Common';
-import CategorizeTables1 from "../Tables/CategorizeTables1";
-import CategorizeTables2 from "../Tables/CategorizeTables2";
+import OriginalTable from "../Tables/OriginalTable";
+import UncategorizedTable from "../Tables/UncategorizedTable";
+import CategorizedTable from "../Tables/CategorizedTable";
 
-const ContainerTables = ({ 
-  clientId,
-  transactions,
-  selectedTransactions,
-  setSelectedTransactions }) => {
+const ContainerTables = ({ clientId }) => {
   const [activeView, setActiveView] = useState("view2");
   const views = [
     {
       key: "view1",
-      label: "Table 1",
+      label: "Original",
       component: (
-        <CategorizeTables1 clientId={clientId}/>
+        <OriginalTable
+        clientId={clientId}
+        />
       ),
     },
     {
       key: "view2",
-      label: "Table 2",
+      label: "Uncategorized",
       component: (
-        <CategorizeTables2 
-        
+        <UncategorizedTable 
         clientId={clientId}
-        transactions={transactions}
-        selectedTransactions={selectedTransactions}
-        setSelectedTransactions={setSelectedTransactions}/>
+        />
+      ),
+    },
+    {
+      key: "view3",
+      label: "Categorized",
+      component: (
+        <CategorizedTable 
+        clientId={clientId}
+        />
       ),
     },
 

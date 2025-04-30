@@ -17,7 +17,7 @@ import PersonalBudgetView7 from "components/Budget/BudgetView/PersonalBudgetView
 
 
 const BudgetSection = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const db = getFirestore();
   // State for toggling view mode (1 = Grid View, 2 = List View)
@@ -27,14 +27,14 @@ const BudgetSection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         setClientData(data);
       } catch (err) {
         console.error("Error fetching data:", err.message);
       }
     };
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   if (!clientData) return <div className="text-center py-10 text-gray-400">Loading client data...</div>;
 
@@ -73,7 +73,7 @@ const BudgetSection = () => {
         <div className="mt-6">
           {
               viewMode === 1 ? (
-            <PersonalBudgetView1 transactions={clientData.transactions} clientId={id} />
+            <PersonalBudgetView1 transactions={clientData.transactions} clientId={clientId} />
           ) : viewMode === 2 ? (
             <PersonalBudgetView2 transactions={clientData.transactions} />
           ) : viewMode === 3 ? (

@@ -8,17 +8,17 @@ import { db } from "../../../../firebase/firebase";
 // Component Imports
 import { BaseTable, FirestoreHelper } from '../Utils/';
 
-const EditTableMissingCreditDebitAmounts = ({ id }) => {
+const EditTableMissingCreditDebitAmounts = ({ clientId }) => {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
-      const clientData = await FirestoreHelper.loadClientData(id);
+      const clientData = await FirestoreHelper.loadClientData(clientId);
       setTransactions(clientData.transactions || []);
     };
 
     loadData();
-  }, [id]);
+  }, [clientId]);
 
   // Only include transactions with 0 credit and 0 debit
   const filteredTransactions = transactions.filter(tx =>
@@ -37,7 +37,7 @@ const EditTableMissingCreditDebitAmounts = ({ id }) => {
       )
     );
 
-    const transactionRef = doc(db, "clients", id);
+    const transactionRef = doc(db, "clients", clientId);
     await updateDoc(transactionRef, {
       transactions: updatedTransactions,
     });

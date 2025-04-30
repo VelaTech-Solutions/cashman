@@ -13,7 +13,7 @@ import InsuranceDataTable3 from "./InsuranceBreakdown/InsuranceDataTable3";
 import InsuranceDataTable4 from "./InsuranceBreakdown/InsuranceDataTable4";
 
 const InsuranceBreakdown = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const db = getFirestore();
 
@@ -23,14 +23,14 @@ const InsuranceBreakdown = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         setClientData(data);
       } catch (err) {
         console.error("Error fetching data:", err.message);
       }
     };
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   if (!clientData) return <div className="text-center py-10 text-gray-400">Loading client data...</div>;
 

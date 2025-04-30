@@ -15,7 +15,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 const ExtractDates = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [bankName, setBankName] = useState("Unknown Bank");
   const [transactions, setTransactions] = useState([]);
@@ -26,7 +26,7 @@ const ExtractDates = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         if (!data) {
           setError("No client data found.");
           return;
@@ -41,7 +41,7 @@ const ExtractDates = () => {
     };
   
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   // Extract dates using BankDatesRules
   const extractDates = (text) => {
@@ -73,7 +73,7 @@ const ExtractDates = () => {
     console.log("Final Transactions with Dates:", updatedTransactions);
   
     try {
-      await updateDoc(doc(db, "clients", id), {
+      await updateDoc(doc(db, "clients", clientId), {
         transactions: updatedTransactions,
       });
   

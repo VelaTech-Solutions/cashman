@@ -14,7 +14,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 function ShowRawData() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [rawData, setRawData] = useState([]); // ✅ Ensure default is an array
   const [error, setError] = useState(null);
@@ -23,7 +23,7 @@ function ShowRawData() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clientData = await LoadClientData(id);
+        const clientData = await LoadClientData(clientId);
         setClientData(clientData);
         setRawData(clientData?.rawData || []); // ✅ Ensure rawData is always an array
       } catch (err) {
@@ -35,7 +35,7 @@ function ShowRawData() {
     };
 
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   return (
     <div className="max-h-[800px] overflow-y-auto overflow-x-auto bg-gray-900 p-4 rounded-lg shadow-md">

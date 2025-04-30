@@ -4,18 +4,18 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 import { BaseTable, FirestoreHelper } from "../Utils/";
 
-const EditTableMissingBalanceAmounts = ({ id }) => {
+const EditTableMissingBalanceAmounts = ({ clientId }) => {
   const [transactions, setTransactions] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedTransaction, setEditedTransaction] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
-      const clientData = await FirestoreHelper.loadClientData(id);
+      const clientData = await FirestoreHelper.loadClientData(clientId);
       setTransactions(clientData.transactions || []);
     };
     loadData();
-  }, [id]);
+  }, [clientId]);
 
   const filteredTransactions = transactions.filter(
     (tx) => parseFloat(tx.balance_amount || 0) === 0
@@ -41,7 +41,7 @@ const EditTableMissingBalanceAmounts = ({ id }) => {
 
     if (fullIndex !== -1) {
       updated[fullIndex] = editedTransaction;
-      const transactionRef = doc(db, "clients", id);
+      const transactionRef = doc(db, "clients", clientId);
       await updateDoc(transactionRef, { transactions: updated });
       setTransactions(updated);
       setEditingIndex(null);
@@ -70,7 +70,7 @@ const EditTableMissingBalanceAmounts = ({ id }) => {
     setTransactions(updated);
   
     try {
-      const transactionRef = doc(db, "clients", id);
+      const transactionRef = doc(db, "clients", clientId);
   
       // Format removed line for archive
       const archiveEntries = removed.map((tx) => ({
@@ -110,7 +110,7 @@ const EditTableMissingBalanceAmounts = ({ id }) => {
       source: "EditTableMissingAllAmounts",
     }));
 
-    const transactionRef = doc(db, "clients", id);
+    const transactionRef = doc(db, "clients", clientId);
     const docSnap = await getDoc(transactionRef);
     const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
 

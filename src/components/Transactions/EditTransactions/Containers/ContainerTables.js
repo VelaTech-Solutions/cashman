@@ -13,7 +13,7 @@ import EditTableMissingBalanceAmounts from "../Tables/EditTableMissingBalanceAmo
 import EditTableMissingAllAmounts from "../Tables/EditTableMissingAllAmounts";
 
 
-const ContainerTables = ({ id }) => {
+const ContainerTables = ({ clientId }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     {
@@ -21,7 +21,7 @@ const ContainerTables = ({ id }) => {
       label: "Original",
       component: (
         <EditTableOriginal
-          id={id}
+          clientId={clientId}
         />
       ),
     },
@@ -30,7 +30,7 @@ const ContainerTables = ({ id }) => {
       label: "Invalid",
       component: (
         <EditTableInvalid
-          id={id}
+          clientId={clientId}
         />
       ),
     },
@@ -39,7 +39,7 @@ const ContainerTables = ({ id }) => {
       label: "Missing Dates",
       component: (
         <EditTableMissingDates
-          id={id}
+          clientId={clientId}
         />
       ),
     },
@@ -48,7 +48,7 @@ const ContainerTables = ({ id }) => {
       label: "Missing Descriptions",
       component: (
         <EditTableMissingDescriptions
-          id={id}
+          clientId={clientId}
         />
       ),
     },
@@ -57,7 +57,7 @@ const ContainerTables = ({ id }) => {
       label: "Missing Credit & Debit",
       component: (
         <EditTableMissingCreditDebitAmounts
-          id={id}
+          clientId={clientId}
         />
       ),
     },
@@ -66,7 +66,7 @@ const ContainerTables = ({ id }) => {
       label: "Missing Balance",
       component: (
         <EditTableMissingBalanceAmounts
-          id={id}
+          clientId={clientId}
         />
       ),
     },
@@ -75,7 +75,7 @@ const ContainerTables = ({ id }) => {
       label: "Missing All Amounts",
       component: (
         <EditTableMissingAllAmounts
-          id={id}
+          clientId={clientId}
         />
       ),
     },

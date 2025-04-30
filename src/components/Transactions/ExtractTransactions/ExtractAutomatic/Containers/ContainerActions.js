@@ -6,11 +6,11 @@ import React, { useState } from "react";
 import{ ViewSwitcher } from 'components/Common';
 import AutomaticActions1 from "../Actions/AutomaticActions1";
 
-const ContainerActions = ({ id, bankName, clientData, setClientData, setIsProcessing, setExtractionStatus, setProcessingMethod }) => {
+const ContainerActions = ({ clientId, bankName, clientData, setClientData, setIsProcessing, setExtractionStatus, setProcessingMethod }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
     { key: "view1", label: "Actions 1", component: (<AutomaticActions1
-          id={id}
+          clientId={clientId}
           bankName={bankName}
           clientData={clientData}
           setClientData={setClientData}

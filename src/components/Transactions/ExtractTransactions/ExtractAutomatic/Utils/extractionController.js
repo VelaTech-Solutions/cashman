@@ -15,12 +15,13 @@ import {
     extractAmountsVerify2, 
     extractDescription, 
     extractDescriptionVerify,
+    verifyDatabase,
     removeNotTransactions,
      } from '../Utils/';
 
 
   // Calls the Cloud Function to extract raw data
-  const extractRawData = async (id, bankName, processingMethod) => {
+  const extractRawData = async (clientId, bankName, processingMethod) => {
     try {
       const response = await fetch(
         "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractDataManual",
@@ -28,7 +29,7 @@ import {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            clientId: id,
+            clientId: clientId,
             bankName,
             method: processingMethod === "pdfparser" ? "Parser" : "OCR",
           }),
@@ -49,46 +50,49 @@ import {
   };
   
   const extractionController = async ({
-    id, 
+    clientId, 
     bankName, 
     clientData, 
     setClientData, 
     setProcessing, 
     setIsProcessing }) => {
-    if (!id || !bankName) return alert("Missing ID or Bank Name");
+    if (!clientId || !bankName) return alert("Missing ID or Bank Name");
     
     setProcessing(true);
     setIsProcessing(true);
     
     try {
-      await createDatabaseStructure(id); // Step 1: Create database structure
+      await createDatabaseStructure(clientId); // Step 1: Create database structure
   
       // Step 2: Extract Raw Data
       const rawDataExists = clientData?.rawData?.length;
       if (rawDataExists) {
-        await updateDoc(doc(db, "clients", id), { filteredData: clientData.rawData });
-        const updatedClientSnap = await getDoc(doc(db, "clients", id));
+        await updateDoc(doc(db, "clients", clientId), { filteredData: clientData.rawData });
+        const updatedClientSnap = await getDoc(doc(db, "clients", clientId));
         setClientData(updatedClientSnap.data());
       } else {
-        const extractionSuccess = await extractRawData(id, bankName, "pdfparser");
+        const extractionSuccess = await extractRawData(clientId, bankName, "pdfparser");
         if (!extractionSuccess) throw new Error("Raw data extraction failed");
       }
   
       // Step 3: Clean Statement
-      await cleanStatement({ id, bankName });
+      await cleanStatement({ clientId, bankName });
   
       // Step 4: Extract Dates
-      await extractDates(id, bankName);
-      //await extractDatesVerify(id, bankName);
+      await extractDates(clientId, bankName);
+      //await extractDatesVerify(clientId, bankName);
   
       // Step 5: Extract Amounts
-      await extractAmounts(id, bankName);
-      await extractAmountsVerify(id);
-      await extractAmountsVerify2(id);
+      await extractAmounts(clientId, bankName);
+      await extractAmountsVerify(clientId);
+      await extractAmountsVerify2(clientId);
 
       // Step 6: Extract Description
-      await extractDescription(id, bankName);
-      await extractDescriptionVerify(id, bankName);
+      await extractDescription(clientId, bankName);
+      await extractDescriptionVerify(clientId, bankName);
+
+      // Step 7: Verify Database
+      await verifyDatabase(clientId);
   
       alert("✅ Data extraction completed!");
     } catch (error) {

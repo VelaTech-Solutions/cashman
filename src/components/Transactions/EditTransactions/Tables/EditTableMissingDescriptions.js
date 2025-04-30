@@ -4,19 +4,19 @@ import { db } from "../../../../firebase/firebase";
 import { BaseTable, FirestoreHelper } from "../Utils/";
 
 
-const EditTableMissingDescriptions = ({ id }) => {
+const EditTableMissingDescriptions = ({ clientId }) => {
     const [transactions, setTransactions] = useState([]);
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedTransaction, setEditedTransaction] = useState(null);
     // Function to load client data and set transactions
     useEffect(() => {
       const loadData = async () => {
-        const clientData = await FirestoreHelper.loadClientData(id); // Load client data with FirestoreHelper
+        const clientData = await FirestoreHelper.loadClientData(clientId); // Load client data with FirestoreHelper
         setTransactions(clientData.transactions || []);
       };
       
       loadData();
-    }, [id]);
+    }, [clientId]);
   
 
     // Helper functions
@@ -47,7 +47,7 @@ const EditTableMissingDescriptions = ({ id }) => {
   
       if (fullIndex !== -1) {
         updated[fullIndex] = editedTransaction;
-        const transactionRef = doc(db, "clients", id);
+        const transactionRef = doc(db, "clients", clientId);
         await updateDoc(transactionRef, { transactions: updated });
         setTransactions(updated);
         setEditingIndex(null);
@@ -76,7 +76,7 @@ const EditTableMissingDescriptions = ({ id }) => {
       setTransactions(updated);
     
       try {
-        const transactionRef = doc(db, "clients", id);
+        const transactionRef = doc(db, "clients", clientId);
     
         // Format removed line for archive
         const archiveEntries = removed.map((tx) => ({
@@ -113,7 +113,7 @@ const EditTableMissingDescriptions = ({ id }) => {
       const updated = [...remaining, ...removed];
       setTransactions(updated);
     
-      const transactionRef = doc(db, "clients", id);
+      const transactionRef = doc(db, "clients", clientId);
     
       // Format removed lines for archive
       const archiveEntries = removed.map((tx) => ({

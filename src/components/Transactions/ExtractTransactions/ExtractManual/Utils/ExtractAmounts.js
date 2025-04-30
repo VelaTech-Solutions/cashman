@@ -14,7 +14,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 function ExtractAmounts() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [bankName, setBankName] = useState("Unknown Bank");
   const [transactions, setTransactions] = useState([]);
@@ -27,7 +27,7 @@ function ExtractAmounts() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         if (!data) {
           setError("No client data found.");
           return;
@@ -42,7 +42,7 @@ function ExtractAmounts() {
     };
   
     fetchData();
-  }, [id]);
+  }, [clientId]);
   
     // Extract Amounts using bankAmountsRules used t align the amounts
     const extractAmounts = (amounts) => {
@@ -84,7 +84,7 @@ function ExtractAmounts() {
       });
     
       try {
-        await updateDoc(doc(db, "clients", id), {
+        await updateDoc(doc(db, "clients", clientId), {
           transactions: updatedTransactions,
         });
     

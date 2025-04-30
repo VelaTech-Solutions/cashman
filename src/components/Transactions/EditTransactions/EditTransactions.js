@@ -7,14 +7,14 @@ import ContainerOverViews from "../EditTransactions/Containers/ContainerOverView
 import ContainerTables from "../EditTransactions/Containers/ContainerTables";
 
 const EditTransactions = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState("");
   const [activeView, setActiveView] = useState("view1");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}/transactionspage`, label: "Back to Transactions", icon: "ph-file-text" },
-    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-user" },
+    { path: `/client/${clientId}/transactionspage`, label: "Back to Transactions", icon: "ph-file-text" },
+    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-user" },
     { type: "divider" },
     {
       path: `/EditSettings`,
@@ -30,14 +30,14 @@ const EditTransactions = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         setClientData(data);
       } catch (err) {
         setError("Failed to load client data.");
       }
     };
     load();
-  }, [id]);
+  }, [clientId]);
 
   if (error) return <div className="text-red-500 p-8">{error}</div>;
 
@@ -50,7 +50,7 @@ const EditTransactions = () => {
           <ContainerOverViews transactions={clientData?.transactions || []} />
         </div>
         <div className="flex justify-start items-center space-x-4 mb-4">
-          <ContainerTables transactions={clientData?.transactions || [] } id={id} />
+          <ContainerTables transactions={clientData?.transactions || [] } clientId={clientId} />
         </div>
         <div className="mt-6">
           {/* {views.find((v) => v.key === activeView)?.Component} */}

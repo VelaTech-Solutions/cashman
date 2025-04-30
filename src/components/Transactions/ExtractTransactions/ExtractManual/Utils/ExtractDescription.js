@@ -14,7 +14,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 function ExtractDescription() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -22,7 +22,7 @@ function ExtractDescription() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(id);
+        const data = await LoadClientData(clientId);
         if (!data) {
           setError("No client data found.");
           return;
@@ -35,7 +35,7 @@ function ExtractDescription() {
     };
 
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
   const handleExtractDescription = async () => {
     const updatedTransactions = transactions.map((txn) => {
@@ -48,7 +48,7 @@ function ExtractDescription() {
     });
 
     try {
-      await updateDoc(doc(db, "clients", id), {
+      await updateDoc(doc(db, "clients", clientId), {
         transactions: updatedTransactions,
       });
 

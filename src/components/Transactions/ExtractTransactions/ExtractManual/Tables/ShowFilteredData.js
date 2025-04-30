@@ -15,7 +15,7 @@ import BankCleanRules from "../../../../Rules/BankCleanRules";
 
 
 function ShowFilteredData() {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [originalTransactions, setOriginalTransactions] = useState([]);
@@ -26,7 +26,7 @@ function ShowFilteredData() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clientData = await LoadClientData(id);
+        const clientData = await LoadClientData(clientId);
         setClientData(clientData);
 
         const cleanedData = (clientData.filteredData || []).map((line) =>
@@ -44,7 +44,7 @@ function ShowFilteredData() {
     };
 
     fetchData();
-  }, [id]);
+  }, [clientId]);
 
 
   return (

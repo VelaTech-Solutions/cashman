@@ -34,7 +34,7 @@ import ContainerTables from "./Containers/ContainerTables";
 
 function ExtractManually() {
 
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [rawData, setRawData] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -67,7 +67,7 @@ function ExtractManually() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clientData = await LoadClientData(id);
+        const clientData = await LoadClientData(clientId);
         
         setClientData(clientData);
         setRawData(clientData.rawData || []);
@@ -88,7 +88,7 @@ function ExtractManually() {
     };
   
     fetchData();
-  }, [id]);
+  }, [clientId]);
   
   // Handle data extraction Manually
 
@@ -98,7 +98,7 @@ function ExtractManually() {
 
       <div className="flex justify-start items-center space-x-4 mb-4">
         <ContainerActions 
-        id={id}
+        clientId={clientId}
         bankName={clientData?.bankName}
         clientData={clientData}
         setClientData={setClientData}
@@ -112,7 +112,7 @@ function ExtractManually() {
 
       <div className="flex justify-start items-center space-x-4 mb-4">
           <ContainerTables 
-          id={id}
+          clientId={clientId}
           bankName={clientData?.bankName}
           clientData={clientData}
           setClientData={setClientData}

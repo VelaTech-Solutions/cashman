@@ -4,9 +4,9 @@ import { doc, getDoc, updateDoc, deleteDoc, setDoc, arrayRemove, arrayUnion } fr
 import { db } from "../../../../firebase/firebase";
 
 // Load full client document
-export const loadClientData = async (id) => {
+export const loadClientData = async (clientId) => {
   try {
-    const clientRef = doc(db, "clients", id);
+    const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
     if (clientSnap.exists()) {
       return clientSnap.data();
@@ -95,7 +95,7 @@ export const deleteTransaction = async (clientId, transactionId) => {
   }
 };
 
-// Insert a new transaction at a specific index
+// Insert a new transaction at a specific index firestore helper
 export const insertTransaction = async (clientId, index, newTransaction) => {
   try {
     const clientRef = doc(db, "clients", clientId);

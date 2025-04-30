@@ -10,7 +10,7 @@ import ContainerTables from "./Containers/ContainerTables";
 import { BaseTable } from "./Utils";
 
 const ArchivedData = () => {
-  const { id } = useParams();
+  const { id: clientId } = useParams();
   const [archiveData, setArchiveData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,7 +18,7 @@ const ArchivedData = () => {
   useEffect(() => {
     const fetchArchive = async () => {
       try {
-        const clientRef = doc(db, "clients", id);
+        const clientRef = doc(db, "clients", clientId);
         const docSnap = await getDoc(clientRef);
 
         if (docSnap.exists()) {

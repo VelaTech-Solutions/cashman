@@ -2,7 +2,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
 
 // Function to save a categorized transaction
-const saveCategorizedTransaction = async (transactionData, bankName) => {
+const categorizeTransaction = async (transactionData, bankName) => {
   if (!transactionData || !bankName) {
     throw new Error("Missing transaction data or bank name");
   }
@@ -26,4 +26,4 @@ const saveCategorizedTransaction = async (transactionData, bankName) => {
   }
 };
 
-export default saveCategorizedTransaction;
+export default categorizeTransaction;
