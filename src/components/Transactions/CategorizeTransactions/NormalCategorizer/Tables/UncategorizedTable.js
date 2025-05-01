@@ -12,6 +12,28 @@ import {
   loadSubcategories,
   loadTransactionDatebase } from "components/Common";
 import { addTransactionDatabase } from "components/Common";
+import { LinearProgress } from '@mui/material';
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Stack,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Container,
+  List,
+  ListItem,
+  ListItemText,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from "@mui/material";
 
 const UncategorizedTable = ({ clientId }) => {
   const [clientData, setClientData] = useState(null);
@@ -31,6 +53,10 @@ const UncategorizedTable = ({ clientId }) => {
   const [subcategories, setSubcategories] = useState([]);
 
   const [transactionDb, setTransactionDb] = useState([]);
+
+
+
+
 
   // Fetch client data
   useEffect(() => {
@@ -55,9 +81,6 @@ const UncategorizedTable = ({ clientId }) => {
     loadData();
   }, [clientId]);
 
-  // console.log("Bank name", bankName)
-
-
   // load transaction database
   useEffect(() => {
     const fetchTransactionDb = async () => {
@@ -73,24 +96,6 @@ const UncategorizedTable = ({ clientId }) => {
     fetchTransactionDb();
   }, [bankName]);
 
-  // console.log("transaction db",transactionDb)
-
-
-// Compare client transactions against the transaction database = potential matches
-// Check potential matches for transactions using the transaction database
-// hinking of changing this up, just checking in the transaction database description basicly the transactionDB.description agaist the client transactions.description
-const checkPotentialMatches = () => {
-  const potentialMatches = transactions.filter((txn) =>
-    transactionDb.some((dbTxn) => dbTxn.description === txn.description)
-  );
-  return potentialMatches;
-};
-
-// console.log ("potential matches", potentialMatches)
-
-// Potential matches are just for display
-
-
   // Load categories once on mount
   useEffect(() => {
     const fetchCats = async () => {
@@ -99,17 +104,6 @@ const checkPotentialMatches = () => {
     };
     fetchCats();
   }, []);
-
-console.log("cat", categories)// want to see what cat is selected
-
-// the select part
-{/* <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 text-sm rounded bg-gray-700 text-white">
-<option value="">Category</option>
-{categories.map((cat) => (
-  <option key={cat.id} value={cat.id}>{cat.name}</option>
-))}
-</select> */}
-
 
   // Load subcategories when category changes
   useEffect(() => {
@@ -121,6 +115,13 @@ console.log("cat", categories)// want to see what cat is selected
     fetchSubs();
   }, [category]);
 
+  const checkPotentialMatches = () => {
+    const potentialMatches = transactions.filter((txn) =>
+      transactionDb.some((dbTxn) => dbTxn.description === txn.description)
+    );
+    return potentialMatches;
+  };
+  
   // Group transactions by category or description
   const toggleGroupBy = () => {
     setGroupBy((prev) => (prev === "category" ? "description" : "category"));
@@ -172,6 +173,51 @@ console.log("cat", categories)// want to see what cat is selected
   const totalPages = Math.ceil(groupedAndFlattened.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const currentItems = groupedAndFlattened.slice(startIndex, startIndex + rowsPerPage);
+
+  // Calculate progress
+  const categorizedCount = transactions.filter(transaction => transaction.category).length;
+  const totalTransactions = transactions.length;
+  
+  const progress = (categorizedCount / totalTransactions) * 100;
+
+
+
+  const [categoryTotals, setCategoryTotals] = useState({});
+
+  useEffect(() => {
+    const totals = {};
+  
+    transactions.forEach(({ category, credit_amount, debit_amount }) => {
+      if (category) {
+        // Ensure that credit_amount and debit_amount are valid numbers before adding
+        const credit = isNaN(credit_amount) ? 0 : parseFloat(credit_amount);
+        const debit = isNaN(debit_amount) ? 0 : parseFloat(debit_amount);
+  
+        const amount = credit + debit;
+  
+        totals[category] = (totals[category] || 0) + amount;
+      }
+    });
+  
+    console.log(totals);  // Check the totals before formatting
+  
+    const formattedTotals = Object.keys(totals).reduce((acc, key) => {
+      const total = totals[key];
+      // Only add to acc if total is a valid number
+      if (!isNaN(total)) {
+        acc[key] = total.toFixed(2);  // Ensure it's a number and format
+      }
+      return acc;
+    }, {});
+  
+    console.log(formattedTotals);  // Check the formatted totals
+    setCategoryTotals(formattedTotals);
+  }, [transactions]);
+  
+  
+  
+  console.log("totals",categoryTotals);
+
 
   const handleCheckboxChange = (uid) => {
     if (!uid) return;
@@ -248,10 +294,7 @@ console.log("cat", categories)// want to see what cat is selected
     }
   };
   
-  
-  
-  // clear the field txn.category and txn.subcategory in client transaction
-  // clear the field txn.category and txn.subcategory in all transactions
+
   const handleClearCategorized = async () => {
     try {
       const updated = transactions.map(txn => ({
@@ -280,50 +323,39 @@ console.log("cat", categories)// want to see what cat is selected
 
   return (
     <div className="text-white">
-<span className="text-sm text-gray-400">
-  {groupedAndFlattened.length} transactions, {checkPotentialMatches().length} potential matches
-</span>
-
+      <span className="text-sm text-gray-400">
+        {groupedAndFlattened.length} transactions, {checkPotentialMatches().length} potential matches
+      </span>
       <div className="flex border-b border-gray-700 mb-4 justify-between items-center">
         <div className="flex items-center gap-4">
-
-
-          {/* <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 text-sm rounded bg-gray-700 text-white">
+        
+          <select 
+            value={category} 
+            onChange={(e) => {
+              const selectedCategoryId = e.target.value;
+              setCategory(selectedCategoryId);
+              const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+              setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+              setSubcategory("");
+            }} 
+            className="p-2 text-sm rounded bg-gray-700 text-white"
+          >
             <option value="">Category</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
-          </select> */}
-        <select 
-          value={category} 
-          onChange={(e) => {
-            const selectedCategoryId = e.target.value;
-            console.log("Category selected:", selectedCategoryId);
-            setCategory(selectedCategoryId); // Set the category id
-            // Find subcategories for the selected category
-            const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-            setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
-            setSubcategory(""); // Reset subcategory when category changes
-          }} 
-          className="p-2 text-sm rounded bg-gray-700 text-white"
-        >
-          <option value="">Category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
+          </select>
 
-        <select 
-          value={subcategory} 
-          onChange={(e) => setSubcategory(e.target.value)} 
-          className="p-2 text-sm rounded bg-gray-700 text-white"
-        >
-          <option value="">Subcategory</option>
-          {subcategories.map((sub) => (
-            <option key={sub.id} value={sub.id}>{sub.name}</option>
-          ))}
-        </select>`
-
+          <select 
+            value={subcategory} 
+            onChange={(e) => setSubcategory(e.target.value)} 
+            className="p-2 text-sm rounded bg-gray-700 text-white"
+          >
+            <option value="">Subcategory</option>
+            {subcategories.map((sub) => (
+              <option key={sub.id} value={sub.id}>{sub.name}</option>
+            ))}
+          </select>`
 
           <div className="flex items-center gap-2 pr-2">
             <span className="text-sm text-gray-400">Group by:</span>
@@ -368,11 +400,6 @@ console.log("cat", categories)// want to see what cat is selected
             <thead className="bg-gray-900 sticky top-0 z-10 text-sm text-left text-gray-300">
               <tr>
                 <th className="px-2 py-2 w-[20px] border border-gray-700">
-                  {/* <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                  /> */}
                 </th>
                 <th className="px-4 py-2 w-[60px] border border-gray-700">Date</th>
                 <th className="px-4 py-2 w-[600px] border border-gray-700">Description</th>
@@ -422,7 +449,6 @@ console.log("cat", categories)// want to see what cat is selected
                     {item.subcategory || "-"}
                   </td>
                 </tr>
-
                 )
               )}
             </tbody>
@@ -430,30 +456,115 @@ console.log("cat", categories)// want to see what cat is selected
         </div>
       )}
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4 px-2">
-        <button
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span className="text-sm text-gray-400">
-          Page <span className="text-white">{currentPage}</span> of{" "}
-          <span className="text-white">{totalPages}</span>
-        </span>
-        <span className="text-white">{transactions.length}</span>
-        <button
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Container for Pagination and Progress */}
+      <div className="flex flex-col items-center mt-4 px-2 w-full space-y-2">
+
+        {/* Pagination Row */}
+        <div className="flex justify-between items-center w-full">
+          <button
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+
+          <span className="text-sm font-semibold text-white">
+            Page <span>{currentPage}</span> of <span>{totalPages}</span>
+          </span>
+
+          <button
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+
+        {/* Progress Text */}
+        <div className="w-full text-left">
+          <span className="text-sm font-semibold text-white">
+            {Math.round(progress)}% Categorized
+          </span>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full border-4 border-gray-400 rounded-lg p-1">
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{
+              height: '12px',
+              borderRadius: '4px',
+            }}
+          />
+        </div>
       </div>
+
+      {/* Container for Category Metrics */}
+      {/* <div className="text-xs text-gray-400 mt-4 space-y-1">
+        {Object.entries(categoryTotals).map(([name, total]) => (
+          <div key={name} className="flex justify-between w-full">
+            <span>{name}</span>
+            <span className="text-white font-semibold">{total.toFixed(2)}</span>
+          </div>
+        ))}
+      </div> */}
+      {/* // Container (Box): A flexible container to center everything, with padding and a column layout.
+
+      // Paper: Wraps the content in a clean, elevated box with a light shadow.
+
+      // Typography: Used for text display, with categories rendered in a clean format.
+
+      // Grid: A responsive grid system from MUI to organize the totals in rows and columns. */}
+
+
+      <List dense sx={{ width: 200 }}>
+        {Object.entries(categoryTotals)
+          .filter(([_, total]) => !isNaN(total) && total !== 0)
+          .map(([name, total]) => (
+            <ListItemText 
+              key={name} 
+              primary={`${name}: ${total}`} 
+              primaryTypographyProps={{ fontSize: 14 }}
+            />
+          ))}
+      </List>
+
+
     </div>
   );
 };
 
 export default UncategorizedTable;
+
+
+// Container (Box): A flexible container to center everything, with padding and a column layout.
+
+// Paper: Wraps the content in a clean, elevated box with a light shadow.
+
+// Typography: Used for text display, with categories rendered in a clean format.
+
+// Grid: A responsive grid system from MUI to organize the totals in rows and columns.
+
+
+
+{/* <div className="mt-4 relative">
+<LinearProgress 
+  variant="determinate" 
+  value={progress} 
+  sx={{
+    height: 10, 
+    borderRadius: '5px', 
+    background: 'linear-gradient(to right, #00c6ff, #0072ff)', 
+    '& .MuiLinearProgress-bar': {
+      backgroundColor: '#ff4e00',
+      borderRadius: '5px',
+    }
+  }} 
+/>
+<span className="absolute inset-0 flex items-center justify-center text-sm text-white font-semibold">
+  {Math.round(progress)}% Categorized
+</span>
+</div> */}

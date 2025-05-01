@@ -1,13 +1,12 @@
 // src/components/Transactions/CategorizeTransactions/NormalCategorizePage.js
 
 import React, { useState, useEffect } from "react";
-import CategorizeTransactionsOverview1 from "./OverViews/CategorizeTransactionsOverview1";
+// import Overview from "./OverViews/Overview";
 import ContainerTables from "./Containers/ContainerTables";
 
 const NormalCategorizer = ({ clientId }) => {
-
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="bg-gray-900 text-white p-8">
       <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
 
       <p className="text-sm text-gray-400 mb-4">
@@ -18,7 +17,9 @@ const NormalCategorizer = ({ clientId }) => {
       </p>
 
       {/* Overview section */}
-      <CategorizeTransactionsOverview1 clientId={clientId} />
+      {/* <Overview 
+        transactions={transactions}
+      /> */}
 
       {/* Action buttons */}
       {/* <CategorizeActions

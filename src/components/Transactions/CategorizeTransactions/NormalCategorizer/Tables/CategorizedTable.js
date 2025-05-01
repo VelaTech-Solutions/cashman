@@ -55,6 +55,8 @@ const CategorizedTable = ({ clientId }) => {
       fetchData();
       }, [clientId]);
 
+      console.log("Transactions", transactions)
+
   useEffect(() => {
     const loadCats = async () => {
       const cats = await loadCategories();
@@ -75,6 +77,7 @@ const CategorizedTable = ({ clientId }) => {
     loadSubcats();
   }, [category]);
 
+  
 
   const Dropdown = ({ label, value, onChange, items, placeholder }) => (
     <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -131,6 +134,29 @@ const CategorizedTable = ({ clientId }) => {
     }
   };
 
+  const handleClearCategorized = async () => {
+    try {
+      const updated = transactions.map(txn => ({
+        ...txn,
+        category: "",
+        subcategory: ""
+      }));
+
+      setTransactions(updated);
+
+      // 3. Save to Firestore
+      await updateDoc(doc(db, "clients", clientId), {
+        transactions: updated,
+      });
+
+      console.log("Reset all Cat and Subcat");
+    } catch (error) {
+      console.error("Error updating transactions:", error);
+    }
+  };
+
+
+
   const handleSelectionModelChange = (selection) => {
     const selected = transactions.filter((t) => selection.includes(t.uid));
     setSelectedTransactions(selected);
@@ -138,17 +164,17 @@ const CategorizedTable = ({ clientId }) => {
   };
 
   // Filter transactions based on category and subcategory but only display the trasactions that are categorized
-  const filteredTransactions = transactions.filter((t) => {
-    return t.category === category && t.subcategory === subcategory && t.categorized;
-  });
-
+  const categorizedTransactions = transactions.filter(
+    (t) => t.category && t.subcategory
+  );
+  
   if (error) return <div>{error}</div>;
 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className="flex gap-2 mb-4">
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
-          <Dropdown
+          {/* <Dropdown
             label="Category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -161,8 +187,8 @@ const CategorizedTable = ({ clientId }) => {
             onChange={(e) => setSubcategory(e.target.value)}
             items={subcategories}
             placeholder="Subcategory"
-          />
-
+          /> */}
+{/* 
           <Button
             variant="contained"
             color="success"
@@ -186,12 +212,12 @@ const CategorizedTable = ({ clientId }) => {
             startIcon={<span>📂</span>}
           >
             Categorize
-          </Button>
+          </Button> */}
           <Button
             variant="contained"
             color="error"
             size="small"
-            onClick={() => setSelectedTransactions([])}
+            onClick={() => handleClearCategorized([])}
             startIcon={<span>❌</span>}
           >
             Clear
@@ -201,7 +227,7 @@ const CategorizedTable = ({ clientId }) => {
 
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={filteredTransactions.map((t) => ({ id: t.uid, ...t }))}
+          rows={categorizedTransactions.map((t) => ({ id: t.uid, ...t }))}
           columns={columns}
           checkboxSelection
           onSelectionModelChange={handleSelectionModelChange}

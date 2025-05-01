@@ -17,7 +17,7 @@ const Budget = () => {
 
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
+    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" }, // Divider line
     {
       path: "/BudgetSettings",

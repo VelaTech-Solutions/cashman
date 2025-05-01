@@ -6,7 +6,7 @@ import OriginalTable from "../Tables/OriginalTable";
 import UncategorizedTable from "../Tables/UncategorizedTable";
 import CategorizedTable from "../Tables/CategorizedTable";
 
-const ContainerTables = ({ clientId }) => {
+const ContainerTables = ({ clientId, onTransactionsUpdate }) => {
   const [activeView, setActiveView] = useState("view2");
   const views = [
     {

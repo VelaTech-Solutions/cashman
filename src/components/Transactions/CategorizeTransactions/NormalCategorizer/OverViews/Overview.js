@@ -1,32 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { LoadClientData, Loader } from 'components/Common';
+import React, { useState } from "react";
 
-const CategorizeTransactionsOverview1 = ({ clientId }) => {
-  const [clientData, setClientData] = useState(null);
-  const [transactions, setTransactions] = useState([]);
+const Overview = ({ transactions }) => {
   const [showSummary, setShowSummary] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Fetch client data
-  useEffect(() => {
-    const fetchData = async () => {
-          try {
-          const clientData = await LoadClientData(clientId);
-          setClientData(clientData);
-          setTransactions(clientData.transactions || []);
-
-          } catch (err) {
-          console.error("Error fetching data:", err.message);
-          setError("Failed to fetch Client Data.");
-          }
-      };
-  
-      fetchData();
-      }, [clientId]);
-
-  // if (loading) return <Loader />;
-  // if (error) return <p className="text-red-500">{error}</p>;
 
   const categorized = {
     Income: [],
@@ -89,4 +64,4 @@ const CategorizeTransactionsOverview1 = ({ clientId }) => {
   );
 };
 
-export default CategorizeTransactionsOverview1;
+export default Overview;
