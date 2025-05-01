@@ -55,8 +55,6 @@ const CategorizedTable = ({ clientId }) => {
       fetchData();
       }, [clientId]);
 
-      console.log("Transactions", transactions)
-
   useEffect(() => {
     const loadCats = async () => {
       const cats = await loadCategories();
@@ -230,7 +228,7 @@ const CategorizedTable = ({ clientId }) => {
           rows={categorizedTransactions.map((t) => ({ id: t.uid, ...t }))}
           columns={columns}
           checkboxSelection
-          onSelectionModelChange={handleSelectionModelChange}
+          // onSelectionModelChange={handleSelectionModelChange}
         />
       </div>
     </ThemeProvider>

@@ -12,7 +12,7 @@ import {
   loadSubcategories,
   loadTransactionDatebase } from "components/Common";
 import { addTransactionDatabase } from "components/Common";
-import { LinearProgress } from '@mui/material';
+import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
   Paper,
@@ -34,8 +34,8 @@ import {
   TableHead,
   TableRow
 } from "@mui/material";
-
-const UncategorizedTable = ({ clientId }) => {
+import { Select, MenuItem, InputLabel, FormControl, LinearProgress, Button, } from '@mui/material';
+const UncategorizedTable2 = ({ clientId }) => {
   const [clientData, setClientData] = useState(null);
   const [bankName, setBankName] = useState('');
   const [transactions, setTransactions] = useState([]);
@@ -136,18 +136,6 @@ const UncategorizedTable = ({ clientId }) => {
   };
 
   const uncategorizedTransactions = filterUncategorizedTransactions(transactions);
-  // Filter valid transactions based on the required fields
-  const filterValidTransactions = (transactions) => {
-    return transactions.filter(txn => {
-      return txn.date1 &&
-        txn.description &&
-        (txn.credit_amount || txn.debit_amount) &&
-        txn.balance_amount;
-    });
-  };
-
-  // Filtered transactions: Only valid ones will be shown here
-  const validTransactions = useMemo(() => filterValidTransactions(transactions), [transactions]);
 
   // Group and flatten transactions
   const groupedAndFlattened = useMemo(() => {
@@ -177,11 +165,7 @@ const UncategorizedTable = ({ clientId }) => {
   // Calculate progress
   const categorizedCount = transactions.filter(transaction => transaction.category).length;
   const totalTransactions = transactions.length;
-  
   const progress = (categorizedCount / totalTransactions) * 100;
-
-
-
   const [categoryTotals, setCategoryTotals] = useState({});
 
   useEffect(() => {
@@ -214,11 +198,6 @@ const UncategorizedTable = ({ clientId }) => {
     setCategoryTotals(formattedTotals);
   }, [transactions]);
   
-  
-  
-  console.log("totals",categoryTotals);
-
-
   const handleCheckboxChange = (uid) => {
     if (!uid) return;
     setSelectedTransactions(prev => {
@@ -316,7 +295,27 @@ const UncategorizedTable = ({ clientId }) => {
     }
   };
 
-
+  // Custom select input styles for Select Cat and Subcat
+  const selectSx = {
+    backgroundColor: '#333', // Dark background for the select input
+    color: 'white', // White text color
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' }, // Darker border for the input outline
+    '&:hover': { backgroundColor: '#444' }, // Darker background on hover
+    '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' }, // Focused state: dark background with a light blue border
+  };
+ 
+  const columns = [
+    { field: "date1", headerName: "Date", width: 150 },
+    { field: "description", headerName: "Description", width: 250 },
+    { field: "description2", headerName: "Description2", width: 250 },
+    { field: "credit_amount", headerName: "Credit", width: 120 },
+    { field: "debit_amount", headerName: "Debit", width: 120 },
+    { field: "balance_amount", headerName: "Balance", width: 120 },
+    { field: "category", headerName: "Category", width: 150 },
+    { field: "subcategory", headerName: "Subcategory", width: 150 },
+  ];
+  
+  
   if (loading) return <Loader />;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -325,38 +324,83 @@ const UncategorizedTable = ({ clientId }) => {
       <span className="text-sm text-gray-400">
         {groupedAndFlattened.length} transactions, {checkPotentialMatches().length} potential matches
       </span>
-      <div className="flex border-b border-gray-700 mb-4 justify-between items-center">
-        <div className="flex items-center gap-4">
-        
-          <select 
-            value={category} 
-            onChange={(e) => {
-              const selectedCategoryId = e.target.value;
-              setCategory(selectedCategoryId);
-              const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-              setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
-              setSubcategory("");
-            }} 
-            className="p-2 text-sm rounded bg-gray-700 text-white"
-          >
-            <option value="">Category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
 
-          <select 
-            value={subcategory} 
-            onChange={(e) => setSubcategory(e.target.value)} 
-            className="p-2 text-sm rounded bg-gray-700 text-white"
-          >
-            <option value="">Subcategory</option>
-            {subcategories.map((sub) => (
-              <option key={sub.id} value={sub.id}>{sub.name}</option>
-            ))}
-          </select>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid #374151", // gray-700
+          mb: 2,
+          pb: 1,
+        }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center" mt={2}>
+          {/* Category Select */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel sx={{ color: 'white' }}>Category</InputLabel>
+            <Select
+              label="Category"
+              value={category}
+              onChange={(e) => {
+                const selectedCategoryId = e.target.value;
+                setCategory(selectedCategoryId);
+                const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+                setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+                setSubcategory("");
+              }}
+              sx={selectSx}
+            >
+              <MenuItem value="">Category</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-          <div className="flex items-center gap-2 pr-2">
+          {/* Subcategory Select */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel sx={{ color: 'white' }}>Subcategory</InputLabel>
+            <Select
+              label="Subcategory"
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+              sx={selectSx}
+            >
+              <MenuItem value="">Subcategory</MenuItem>
+              {subcategories.map((sub) => (
+                <MenuItem key={sub.id} value={sub.id}>{sub.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Categorize Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleCategorizeClick}
+            // disabled={selectedTransactions.length === 0}
+            startIcon={<span>📂</span>}
+          >
+            Categorize
+          </Button>
+          {/* Match All Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            //onClick={}
+            disabled={selectedTransactions.length === 0}
+            startIcon={<span>📂</span>}
+          >
+            Match All
+          </Button>
+        </Stack>
+      </Box>
+
+
+      <div className="flex items-center gap-2 pr-2">
             <span className="text-sm text-gray-400">Group by:</span>
             <button
               onClick={toggleGroupBy}
@@ -365,32 +409,25 @@ const UncategorizedTable = ({ clientId }) => {
               {groupBy === "category" ? "Category" : "Description"}
             </button>
           </div>
-          <button
-            // onClick={}
-            disabled={selectedTransactions.length === 0}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
-          >
-            Check Category Match
-          </button>
+      {/* Progress Text */}
+      {/* <div className="w-full text-left">
+        <span className="text-sm font-semibold text-white">
+          {Math.round(progress)}% Categorized
+        </span>
+      </div> */}
 
-          <button
-            onClick={handleClearCategorized}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
-          >
-            Reset Category
-          </button>
-          
-          {/* testing this now so so working*/}
-          <button
-            onClick={handleCategorizeClick}
-            disabled={selectedTransactions.length === 0}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
-          >
-            Categorize Transaction
-          </button>
-
-        </div>
-      </div>
+      {/* Progress Bar */}
+      {/* <div className=""> */}
+        <LinearProgress
+          variant="determinate"
+          value={progress}
+          sx={{
+            height: '12px',           // Custom height for better visibility
+            borderRadius: '4px',      // Rounded edges
+            my: 2                     // Vertical margin (theme spacing)
+          }}
+        />
+      {/* </div>   */}
 
       {/* Filtered and grouped table */}
       {currentTab === "table1" && (
@@ -481,25 +518,25 @@ const UncategorizedTable = ({ clientId }) => {
           </button>
         </div>
 
-        {/* Progress Text */}
-        <div className="w-full text-left">
-          <span className="text-sm font-semibold text-white">
-            {Math.round(progress)}% Categorized
-          </span>
-        </div>
 
-        {/* Progress Bar */}
-        <div className="w-full border-4 border-gray-400 rounded-lg p-1">
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: '12px',
-              borderRadius: '4px',
-            }}
-          />
-        </div>
       </div>
+
+
+      {/* <div style={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={currentItems.map((t) => ({ id: t.uid, ...t }))}
+          columns={columns}
+          checkboxSelection
+          <td className="p-3">
+            <input
+              type="checkbox"
+              checked={selectedTransactions.includes(item.uid)}
+              onChange={() => handleCheckboxChange(item.uid)}
+            />
+          </td>
+          // onSelectionModelChange={handleSelectionModelChange}
+        />
+      </div> */}
 
       <List dense sx={{ width: 200 }}>
         {Object.entries(categoryTotals)
@@ -518,34 +555,4 @@ const UncategorizedTable = ({ clientId }) => {
   );
 };
 
-export default UncategorizedTable;
-
-
-// Container (Box): A flexible container to center everything, with padding and a column layout.
-
-// Paper: Wraps the content in a clean, elevated box with a light shadow.
-
-// Typography: Used for text display, with categories rendered in a clean format.
-
-// Grid: A responsive grid system from MUI to organize the totals in rows and columns.
-
-
-
-{/* <div className="mt-4 relative">
-<LinearProgress 
-  variant="determinate" 
-  value={progress} 
-  sx={{
-    height: 10, 
-    borderRadius: '5px', 
-    background: 'linear-gradient(to right, #00c6ff, #0072ff)', 
-    '& .MuiLinearProgress-bar': {
-      backgroundColor: '#ff4e00',
-      borderRadius: '5px',
-    }
-  }} 
-/>
-<span className="absolute inset-0 flex items-center justify-center text-sm text-white font-semibold">
-  {Math.round(progress)}% Categorized
-</span>
-</div> */}
+export default UncategorizedTable2;

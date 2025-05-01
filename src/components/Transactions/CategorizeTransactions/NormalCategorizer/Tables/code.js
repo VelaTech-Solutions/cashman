@@ -84,3 +84,84 @@
           </FormControl>
         );
       
+
+
+
+
+
+      <div className="flex border-b border-gray-700 mb-4 justify-between items-center">
+        <div className="flex items-center gap-4">
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
+          {/* Select Cat */}
+          <FormControl fullWidth size="small">
+            <InputLabel sx={{ color: 'white' }}>Category</InputLabel>
+            <Select
+              label="Category"
+              value={category}
+              onChange={(e) => {
+                const selectedCategoryId = e.target.value;
+                setCategory(selectedCategoryId);
+                const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+                setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+                setSubcategory("");
+              }}
+              sx={selectSx}
+            >
+              <MenuItem value="">Category</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* Select Subcat */}
+          <FormControl fullWidth size="small">
+            <InputLabel sx={{ color: 'white' }}>Subcategory</InputLabel>
+            <Select
+              label="Subcategory"
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+              sx={selectSx}
+            >
+              <MenuItem value="">Subcategory</MenuItem>
+              {subcategories.map((sub) => (
+                <MenuItem key={sub.id} value={sub.id}>{sub.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleCategorizeClick}
+            disabled={selectedTransactions.length === 0}
+            startIcon={<span>📂</span>}
+          >
+            Categorize
+          </Button>
+          {/* <button
+            // onClick={}
+            disabled={selectedTransactions.length === 0}
+            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
+          >
+            Check Category Match
+          </button>
+
+          <button
+            onClick={handleClearCategorized}
+            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
+          >
+            Reset Category
+          </button>
+          
+          {/* testing this now so so working*/}
+          {/*<button
+            onClick={handleCategorizeClick}
+            disabled={selectedTransactions.length === 0}
+            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
+          >
+            Categorize Transaction
+          </button> */}
+        </Box>
+        </div>
+      </div>
