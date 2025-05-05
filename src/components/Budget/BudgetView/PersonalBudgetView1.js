@@ -3,6 +3,11 @@ import moment from "moment";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 
+import { 
+  LoadClientData,
+  loadCategories, 
+  loadSubcategories,
+ } from "components/Common";
 const PersonalBudgetView1 = ({ transactions, clientId }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -22,36 +27,27 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+  
   const calculateBudget = async () => {
     setLoading(true);
     setMessage("");
 
-    let budgetTotals = {};
-    let budgetAverages = {};
-
+    let totals = {}, avgs = {};
     categories.forEach(({ name, filter, key }) => {
-      const categoryTransactions = transactions.filter(filter);
-      const total = categoryTransactions.reduce((sum, txn) => sum + (parseFloat(txn[key]) || 0), 0);
-      const monthsWithData = new Set(categoryTransactions.map(txn => moment(txn.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM")));
-      const avg = monthsWithData.size > 0 ? total / monthsWithData.size : 0;
-
-      budgetTotals[name.toLowerCase()] = parseFloat(total.toFixed(2));
-      budgetAverages[`${name.toLowerCase()}avg`] = parseFloat(avg.toFixed(2));
+      const txns = transactions.filter(filter);
+      const total = txns.reduce((sum, t) => sum + (parseFloat(t[key]) || 0), 0);
+      const monthSet = new Set(txns.map(t => moment(t.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM")));
+      const avg = monthSet.size > 0 ? total / monthSet.size : 0;
+      totals[name.toLowerCase()] = parseFloat(total.toFixed(2));
+      avgs[`${name.toLowerCase()}avg`] = parseFloat(avg.toFixed(2));
     });
 
     try {
-      const clientRef = doc(db, "clients", clientId);
-      await updateDoc(clientRef, {
-        budgetData: {
-          ...budgetTotals,
-          ...budgetAverages,
-          timestamp: new Date().toISOString(),
-        },
-      });
-
+      const ref = doc(db, "clients", clientId);
+      await updateDoc(ref, { budgetData: { ...totals, ...avgs, timestamp: new Date().toISOString() } });
       setMessage("✅ Budget calculated & saved successfully!");
-    } catch (error) {
-      console.error("🔥 Error saving budget:", error);
+    } catch (err) {
+      console.error("🔥 Error saving budget:", err);
       setMessage("❌ Failed to save budget.");
     }
 
@@ -70,73 +66,68 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
       {message && <p className="text-center text-lg font-bold text-green-400">{message}</p>}
 
       {categories.map(({ name, filter, key }) => {
-        const filteredTransactions = transactions.filter(filter);
-        const groupedData = filteredTransactions.reduce((acc, txn) => {
-          const month = moment(txn.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM");
-          const subcategory = txn.subcategory || "Uncategorized";
-
-          if (!acc[subcategory]) acc[subcategory] = { total: 0 };
-          if (!acc[subcategory][month]) acc[subcategory][month] = 0;
-
-          acc[subcategory][month] += parseFloat(txn[key]) || 0;
-          acc[subcategory].total += parseFloat(txn[key]) || 0;
+        const rows = transactions.filter(filter).reduce((acc, t) => {
+          const m = moment(t.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM");
+          const sub = t.subcategory || "Uncategorized";
+          if (!acc[sub]) acc[sub] = { total: 0 };
+          if (!acc[sub][m]) acc[sub][m] = 0;
+          acc[sub][m] += parseFloat(t[key]) || 0;
+          acc[sub].total += parseFloat(t[key]) || 0;
           return acc;
         }, {});
 
-        const totalByMonth = months.reduce((acc, month) => {
-          acc[month] = Object.values(groupedData).reduce((sum, subcat) => sum + (subcat[month] || 0), 0);
+        const monthTotals = months.reduce((acc, m) => {
+          acc[m] = Object.values(rows).reduce((s, r) => s + (r[m] || 0), 0);
           return acc;
         }, {});
 
-        const grandTotal = Object.values(totalByMonth).reduce((sum, val) => sum + val, 0).toFixed(2);
-        const validMonths = Object.values(totalByMonth).filter((value) => value !== 0);
-        const grandAverage = validMonths.length > 0 ? (grandTotal / validMonths.length).toFixed(2) : "0.00";
+        const grandTotal = Object.values(monthTotals).reduce((s, v) => s + v, 0).toFixed(2);
+        const validMonths = Object.values(monthTotals).filter(v => v !== 0);
+        const grandAvg = validMonths.length ? (grandTotal / validMonths.length).toFixed(2) : "0.00";
 
         return (
           <div key={name} className="mb-4 p-2 border border-gray-300 rounded-md text-xs">
-            <h3 className="text-lg font-semibold">{name} (Total: R {grandTotal} | Avg: R {grandAverage})</h3>
+            <h3 className="text-lg font-semibold">{name} (Total: R {grandTotal} | Avg: R {grandAvg})</h3>
             <div className="overflow-x-auto mt-2">
               <table className="w-full border-collapse text-xs">
                 <thead className="bg-gray-200 text-gray-700">
                   <tr>
                     <th className="p-2 border border-gray-400 text-left">Subcategory</th>
-                    {months.map((month) => (
-                      <th key={month} className="p-2 border border-gray-400 text-center">{month}</th>
-                    ))}
+                    {months.map(m => <th key={m} className="p-2 border border-gray-400 text-center">{m}</th>)}
                     <th className="p-2 border border-gray-400 text-right">Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(groupedData).map(([subcategory, monthData]) => (
-                    <tr key={subcategory} className="border-b border-gray-300">
-                      <td className="p-2 border border-gray-400 font-semibold">{subcategory}</td>
-                      {months.map((month) => (
-                        <td key={month} className="p-2 text-right border border-gray-400">
-                          {monthData[month] ? `R ${monthData[month].toFixed(2)}` : "-"}
+                  {Object.entries(rows).map(([sub, mdata]) => (
+                    <tr key={sub} className="border-b border-gray-300">
+                      <td className="p-2 border border-gray-400 font-semibold">{sub}</td>
+                      {months.map(m => (
+                        <td key={m} className="p-2 text-right border border-gray-400">
+                          {mdata[m] ? `R ${mdata[m].toFixed(2)}` : "-"}
                         </td>
                       ))}
-                      <td className="p-2 text-right font-bold border border-gray-500">R {monthData.total.toFixed(2)}</td>
+                      <td className="p-2 text-right font-bold border border-gray-500">R {mdata.total.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr>
                     <td className="p-2 border border-gray-400 font-bold">TOTAL</td>
-                    {months.map((month) => (
-                      <td key={month} className="p-2 text-right border border-gray-400 font-bold">
-                        {totalByMonth[month] ? `R ${totalByMonth[month].toFixed(2)}` : "-"}
+                    {months.map(m => (
+                      <td key={m} className="p-2 text-right border border-gray-400 font-bold">
+                        {monthTotals[m] ? `R ${monthTotals[m].toFixed(2)}` : "-"}
                       </td>
                     ))}
                     <td className="p-2 text-right border border-gray-600 font-bold">R {grandTotal}</td>
                   </tr>
                   <tr>
                     <td className="p-2 border border-gray-400 font-bold">AVERAGE</td>
-                    {months.map((month) => (
-                      <td key={month} className="p-2 text-right border border-gray-400 font-bold">
-                        {totalByMonth[month] > 0 ? `R ${(totalByMonth[month] / validMonths.length).toFixed(2)}` : "-"}
+                    {months.map(m => (
+                      <td key={m} className="p-2 text-right border border-gray-400 font-bold">
+                        {monthTotals[m] ? `R ${(monthTotals[m] / validMonths.length).toFixed(2)}` : "-"}
                       </td>
                     ))}
-                    <td className="p-2 text-right border border-gray-600 font-bold">R {grandAverage}</td>
+                    <td className="p-2 text-right border border-gray-600 font-bold">R {grandAvg}</td>
                   </tr>
                 </tfoot>
               </table>

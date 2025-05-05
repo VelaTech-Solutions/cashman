@@ -15,27 +15,12 @@ import { addTransactionDatabase } from "components/Common";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
-  Paper,
-  Typography,
-  Grid,
   Stack,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Container,
   List,
-  ListItem,
-  ListItemText,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
+  ListItemText
 } from "@mui/material";
 import { Select, MenuItem, InputLabel, FormControl, LinearProgress, Button, } from '@mui/material';
-const UncategorizedTable2 = ({ clientId }) => {
+const UncategorizedTablemui = ({ clientId }) => {
   const [clientData, setClientData] = useState(null);
   const [bankName, setBankName] = useState('');
   const [transactions, setTransactions] = useState([]);
@@ -118,11 +103,6 @@ const UncategorizedTable2 = ({ clientId }) => {
     return potentialMatches;
   };
   
-  // Group transactions by category or description
-  const toggleGroupBy = () => {
-    setGroupBy((prev) => (prev === "category" ? "description" : "category"));
-    setCurrentPage(1);
-  };
 
   // Filter by Uncategorized Transactions
   const filterUncategorizedTransactions = (transactions) =>{
@@ -194,6 +174,7 @@ const UncategorizedTable2 = ({ clientId }) => {
     setCategoryTotals(formattedTotals);
   }, [transactions]);
   
+  // my oldway
   const handleCheckboxChange = (uid) => {
     if (!uid) return;
     setSelectedTransactions(prev => {
@@ -209,27 +190,12 @@ const UncategorizedTable2 = ({ clientId }) => {
     });
   };
   
-  const isGroupFullySelected = (groupKey) => {
-    const groupItems = currentItems.filter(item => item.groupKey === groupKey && !item.isHeader);
-    return groupItems.every(item => selectedTransactions.includes(item.uid));
-  };
-  
-  const handleToggleGroup = (groupKey) => {
-    const groupItems = currentItems.filter(item => item.groupKey === groupKey && !item.isHeader);
-    const groupUids = groupItems.map(item => item.uid);
-  
-    const isFullySelected = groupUids.every(uid => selectedTransactions.includes(uid));
-  
-    setSelectedTransactions(prev => {
-      if (isFullySelected) {
-        return prev.filter(uid => !groupUids.includes(uid));
-      } else {
-        return [...prev, ...groupUids.filter(uid => !prev.includes(uid))];
-      }
-    });
-  };
-  
 
+  const [selectedRows, setSelectedRows] = useState([]);
+  const handleSelectionChange = (newSelection) => {
+    setSelectedRows(Array.isArray(newSelection) ? newSelection : Array.from(newSelection));
+  };
+  
   const handleCategorizeClick = async () => {
     const selectedTxns = transactions.filter(txn => selectedTransactions.includes(txn.uid));
     if (selectedTxns.length === 0) return;
@@ -268,53 +234,7 @@ const UncategorizedTable2 = ({ clientId }) => {
       console.error("Error updating transactions:", error);
     }
   };
-  
-  const [selectedRows, setSelectedRows] = useState([]);
-  const handleSelectionChange = (newSelection) => {
-    setSelectedRows(Array.isArray(newSelection) ? newSelection : Array.from(newSelection));
-  };
-  
 
-  const handleCategorizeClickmui = async () => {
-    const selectedTxns = transactions.filter(txn => selectedRows.includes(txn.uid));
-    if (selectedTxns.length === 0) return;
-    
-  
-    // Get category and subcategory names from selected ID
-    const selectedCategory = categories.find(cat => cat.id === category);
-    const selectedSubcategory = subcategories.find(sub => sub.id === subcategory);
-  
-    const payload = {
-      category: selectedCategory ? selectedCategory.name : "",  // Use name instead of id
-      subcategory: selectedSubcategory ? selectedSubcategory.name : "",  // Use name instead of id
-      description: selectedTxns[0].description || "",
-      createdAt: new Date().toISOString(),
-    };
-  
-    try {
-      // 1. Add to transaction database
-      await addTransactionDatabase(bankName, payload);
-  
-      // 2. Update client data locally
-      const updated = transactions.map(txn => {
-        if (selectedRows.includes(txn.uid)) {
-          return { ...txn, category: payload.category, subcategory: payload.subcategory };
-        }
-        return txn;
-      });
-      setTransactions(updated);
-  
-      // 3. Save to Firestore
-      await updateDoc(doc(db, "clients", clientId), {
-        transactions: updated,
-      });
-  
-      console.log("Updated selected transactions with:", payload);
-    } catch (error) {
-      console.error("Error updating transactions:", error);
-    }
-  };
-  
   const handleClearCategorized = async () => {
     try {
       const updated = transactions.map(txn => ({
@@ -374,9 +294,10 @@ const UncategorizedTable2 = ({ clientId }) => {
   return (
     <div className="text-white">
       <span className="text-sm text-gray-400">
-        {groupedAndFlattened.length} transactions, {checkPotentialMatches().length} potential matches
+        {groupedAndFlattened.length} transactions, {checkPotentialMatches().length} potential matches , {Math.round(progress)}% Categorized
       </span>
 
+      {/* Selection and Buttons */}
       <Box
         sx={{
           display: "flex",
@@ -435,18 +356,6 @@ const UncategorizedTable2 = ({ clientId }) => {
             // disabled={selectedTransactions.length === 0}
             startIcon={<span>📂</span>}
           >
-            Categorize
-          </Button>
-
-          {/* Categorize Button */}
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleCategorizeClickmui}
-            // disabled={selectedTransactions.length === 0}
-            startIcon={<span>📂</span>}
-          >
             Categorize MUI
           </Button>
           {/* Match All Button */}
@@ -455,157 +364,49 @@ const UncategorizedTable2 = ({ clientId }) => {
             color="primary"
             size="small"
             //onClick={}
-            disabled={selectedTransactions.length === 0}
             startIcon={<span>📂</span>}
           >
             Match All
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleClearCategorized}
+            startIcon={<span>📂</span>}
+          >
+            Clear All
           </Button>
         </Stack>
       </Box>
 
 
-      <div className="flex items-center gap-2 pr-2">
-            <span className="text-sm text-gray-400">Group by:</span>
-            <button
-              onClick={toggleGroupBy}
-              className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-cyan-400 border border-cyan-500"
-            >
-              {groupBy === "category" ? "Category" : "Description"}
-            </button>
-          </div>
-      {/* Progress Text */}
-      {/* <div className="w-full text-left">
-        <span className="text-sm font-semibold text-white">
-          {Math.round(progress)}% Categorized
-        </span>
-      </div> */}
 
       {/* Progress Bar */}
-      {/* <div className=""> */}
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          sx={{
-            height: '12px',           // Custom height for better visibility
-            borderRadius: '4px',      // Rounded edges
-            my: 2                     // Vertical margin (theme spacing)
-          }}
-        />
-      {/* </div>   */}
-
-      {/* Filtered and grouped table */}
-      {currentTab === "table1" && (
-        <div className="overflow-x-auto border border-gray-700 rounded-lg shadow-md">
-          <table className="min-w-full bg-gray-800">
-            <thead className="bg-gray-900 sticky top-0 z-10 text-sm text-left text-gray-300">
-              <tr>
-                <th className="px-2 py-2 w-[20px] border border-gray-700">
-                </th>
-                <th className="px-4 py-2 w-[60px] border border-gray-700">Date</th>
-                <th className="px-4 py-2 w-[600px] border border-gray-700">Description</th>
-                <th className="px-4 py-2 w-[200px] border border-gray-700">Description2</th>
-                <th className="px-4 py-2 w-[80px] border border-gray-700">Credit</th>
-                <th className="px-4 py-2 w-[80px] border border-gray-700">Debit</th>
-                <th className="px-4 py-2 w-[80px] border border-gray-700">Balance</th>
-                <th className="px-4 py-2 w-[80px] border border-gray-700">Category</th>
-                <th className="px-4 py-2 w-[80px] border border-gray-700">Subcategory</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-gray-200">
-              {currentItems.map((item, idx) =>
-                item.isHeader ? (
-                  <tr key={`header-${item.groupKey}`} className="bg-gray-900 border-t border-gray-700">
-                    <td colSpan={8} className=" w-[20px] border border-gray-700">
-                      <div className="p-3 flex items-center gap-1 truncate">
-                        <input
-                          type="checkbox"
-                          // checked={isGroupFullySelected(item.groupKey)}
-                          // onChange={() => handleToggleGroup(item.groupKey)}
-                        />
-                        {groupBy === "description" && (
-                          <span className="text-xs text-blue-400 block">{item.groupKey}</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  
-                <tr key={startIndex + idx} className="border-t border-gray-700 hover:bg-gray-700/30">
-                  <td className="p-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedTransactions.includes(item.uid)}
-                      onChange={() => handleCheckboxChange(item.uid)}
-                    />
-                  </td>
-                  <td className="p-3 border border-gray-700 truncate">{item.date1 || "-"}</td>
-                  <td className="p-3 border border-gray-700 truncate">{item.description || "-"}</td>
-                  <td className="p-3 border border-gray-700 truncate">{item.description2 || "-"}</td>
-                  <td className="p-3 border border-gray-700 truncate">{item.credit_amount || "-"}</td>
-                  <td className="p-3 border border-gray-700 truncate">{item.debit_amount || "-"}</td>
-                  <td className="p-3 border border-gray-700 truncate">{item.balance_amount || "-"}</td>
-                  <td className="p-3 border border-gray-700 truncate">{item.category || "-"}</td>
-                  <td className={`p-3 border border-gray-700 truncate ${CategoryColor.getCategoryColor(item.category)}`}>
-                    {item.subcategory || "-"}
-                  </td>
-                </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
+      <LinearProgress
+        variant="determinate"
+        value={progress}
+        sx={{
+          height: '12px',           // Custom height for better visibility
+          borderRadius: '4px',      // Rounded edges
+          my: 2                     // Vertical margin (theme spacing)
+        }}
+      />
+      
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={rows}
           columns={columns}
           checkboxSelection
-          // checked={selectedTransactions.includes(item.uid)}
-          // onChange={() => handleCheckboxChange(item.uid)}
-          // <td className="p-3">
-          //   <input
-          //     type="checkbox"
-          //     checked={selectedTransactions.includes(item.uid)}
-          //     onChange={() => handleCheckboxChange(item.uid)}
-          //   />
-          // </td>
-          onRowSelectionModelChange={handleSelectionChange}
-          // selectedTransactions={selectedTransactions}
+          // onRowSelectionModelChange={(newSelection) => { // dont know how to link this with the handleCheckboxChange
+          //   setSelectedRows(newSelection.ids);  // Update selected rows
+          // }}
+          // rowSelectionModel={selectedRows}  // Control row selection via state
+          showToolbar
         />
       </div>
-      {/* Container for Pagination and Progress */}
-      <div className="flex flex-col items-center mt-4 px-2 w-full space-y-2">
-
-        {/* Pagination Row */}
-        <div className="flex justify-between items-center w-full">
-          <button
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-
-          <span className="text-sm font-semibold text-white">
-            Page <span>{currentPage}</span> of <span>{totalPages}</span>
-          </span>
-
-          <button
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-        </div>
-
-
-      </div>
-
-
-
-
+      {/* Category Totals */}
       <List dense sx={{ width: 200 }}>
         {Object.entries(categoryTotals)
           .filter(([_, total]) => !isNaN(total) && total !== 0)
@@ -617,10 +418,9 @@ const UncategorizedTable2 = ({ clientId }) => {
             />
           ))}
       </List>
-
-
     </div>
   );
 };
 
-export default UncategorizedTable2;
+export default UncategorizedTablemui;
+

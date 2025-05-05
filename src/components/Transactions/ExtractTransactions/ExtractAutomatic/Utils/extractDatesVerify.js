@@ -27,35 +27,39 @@ const extractDatesVerify = async (id, bankName) => {
 
     const dateRules = bankSnap.data();
 
-    let { filteredData = [], transactions = [] } = clientSnap.data();
+    let { transactions = [] } = clientSnap.data();
     if (!transactions.length) throw new Error("No transactions to verify.");
 
     const updatedTransactions = [...transactions];
     let totalDateLinesProcessed = 0;
 
-    const normalizeDate = (dateStr) => {
-      const formatsToTry = [
-        "yyyy-MM-dd",
-        "dd-MM-yyyy",
-        "dd/MM/yyyy",
-        "MM/dd/yyyy",
-        "yyyy/MM/dd",
-      ];
 
-      for (const fmt of formatsToTry) {
-        try {
-          const parsed = parse(dateStr, fmt, new Date());
-          if (!isNaN(parsed)) {
-            return format(parsed, "yyyy-MM-dd");
-          }
-        } catch (_) {}
-      }
-
-      return dateStr; // fallback if parsing fails
-    };
+    // we can use the bank rules to normalize the dates the daterules  contains the regex to find the dates  but we can use that to 
+    //  find the dates in the field transactions, date1 and date2 
+    // basically we are going to use the regex to find the dates in the field transactions, date1 and date2
+    // then convert the date to the format dd/mm/yyyy
+    // if the date has no yyyy the date will be converted to the current year or thinking we can make a setting for it to choose the year
     // the date that we are looking for to be normalized should be in the format dd/mm/yyyy
+    const normalizeDate = (inputDate) => {
+      const currentYear = new Date().getFullYear();
+    
+      try {
+        // Attempt parsing "dd MMM yy" like "16 Jan 20"
+        let parsed = parse(inputDate, "dd MMM yy", new Date());
+        if (!isNaN(parsed)) return format(parsed, "dd/MM/yyyy");
+    
+        // Attempt parsing "dd MMM" and use current year
+        parsed = parse(`${inputDate} ${currentYear}`, "dd MMM yyyy", new Date());
+        if (!isNaN(parsed)) return format(parsed, "dd/MM/yyyy");
+      } catch {
+        return inputDate;
+      }
+    
+      return inputDate;
+    };
+    
 
-    // Step 1: Only process the transactions with extracted date fields
+        // Step 1: Only process the transactions with extracted date fields
     updatedTransactions.forEach((transaction, index) => {
       if (!transaction || !transaction.date1) return;
 

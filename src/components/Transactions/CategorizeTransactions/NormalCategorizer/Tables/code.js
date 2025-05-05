@@ -165,3 +165,52 @@
         </Box>
         </div>
       </div>
+
+
+
+
+  const isGroupFullySelected = (groupKey) => {
+    const groupItems = currentItems.filter(item => item.groupKey === groupKey && !item.isHeader);
+    return groupItems.every(item => selectedTransactions.includes(item.uid));
+  };
+  
+  const handleToggleGroup = (groupKey) => {
+    const groupItems = currentItems.filter(item => item.groupKey === groupKey && !item.isHeader);
+    const groupUids = groupItems.map(item => item.uid);
+  
+    const isFullySelected = groupUids.every(uid => selectedTransactions.includes(uid));
+  
+    setSelectedTransactions(prev => {
+      if (isFullySelected) {
+        return prev.filter(uid => !groupUids.includes(uid));
+      } else {
+        return [...prev, ...groupUids.filter(uid => !prev.includes(uid))];
+      }
+    });
+  };
+
+
+
+  // Group transactions by category or description
+  const toggleGroupBy = () => {
+    setGroupBy((prev) => (prev === "category" ? "description" : "category"));
+    setCurrentPage(1);
+  };
+
+
+      {/* Group By Button */}
+      {/* <div className="flex items-center gap-2 pr-2">
+        <span className="text-sm text-gray-400">Group by:</span>
+        <button
+          onClick={toggleGroupBy}
+          className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-cyan-400 border border-cyan-500"
+        >
+          {groupBy === "category" ? "Category" : "Description"}
+        </button>
+      </div> */}
+      {/* Progress Text */}
+      {/* <div className="w-full text-left">
+        <span className="text-sm font-semibold text-white">
+          {Math.round(progress)}% Categorized
+        </span>
+      </div> */}

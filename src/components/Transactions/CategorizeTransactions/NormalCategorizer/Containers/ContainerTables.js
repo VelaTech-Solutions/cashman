@@ -5,10 +5,11 @@ import { ViewSwitcher } from 'components/Common';
 import OriginalTable from "../Tables/OriginalTable";
 import UncategorizedTable from "../Tables/UncategorizedTable";
 import UncategorizedTable2 from "../Tables/UncategorizedTable2";
+import UncategorizedTablemui from "../Tables/UncategorizedTablemui";
 import CategorizedTable from "../Tables/CategorizedTable";
 
 const ContainerTables = ({ clientId }) => {
-  const [activeView, setActiveView] = useState("view3");
+  const [activeView, setActiveView] = useState("view2");
   const views = [
     {
       key: "view1",
@@ -37,8 +38,17 @@ const ContainerTables = ({ clientId }) => {
         />
       ),
     },
+    // {
+    //   key: "view4",
+    //   label: "Uncategorized Mui",
+    //   component: (
+    //     <UncategorizedTablemui 
+    //     clientId={clientId}
+    //     />
+    //   ),
+    // },
     {
-      key: "view4",
+      key: "view5",
       label: "Categorized",
       component: (
         <CategorizedTable 

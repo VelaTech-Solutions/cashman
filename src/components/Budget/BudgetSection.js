@@ -21,7 +21,7 @@ const BudgetSection = () => {
   const [clientData, setClientData] = useState(null);
   const db = getFirestore();
   // State for toggling view mode (1 = Grid View, 2 = List View)
-  const [viewMode, setViewMode] = useState(1);
+  const [viewMode, setViewMode] = useState(7);
 
 
   useEffect(() => {
@@ -85,7 +85,7 @@ const BudgetSection = () => {
           ) : viewMode === 6 ? (
             <PersonalBudgetView6 transactions={clientData.transactions} />
           ) : viewMode === 7 ? (
-            <PersonalBudgetView7 transactions={clientData.transactions} />
+            <PersonalBudgetView7 clientId={clientId} />
           ) : null
           }
         </div>

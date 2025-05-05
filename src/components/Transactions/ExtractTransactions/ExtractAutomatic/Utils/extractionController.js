@@ -80,7 +80,7 @@ import {
   
       // Step 4: Extract Dates
       await extractDates(clientId, bankName);
-      //await extractDatesVerify(clientId, bankName);
+      await extractDatesVerify(clientId, bankName);
   
       // Step 5: Extract Amounts
       await extractAmounts(clientId, bankName);

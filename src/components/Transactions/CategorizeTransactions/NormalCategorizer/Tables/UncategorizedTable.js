@@ -10,29 +10,24 @@ import {
   Loader,
   loadCategories, 
   loadSubcategories,
-  loadTransactionDatebase } from "components/Common";
-import { addTransactionDatabase } from "components/Common";
-import { LinearProgress } from '@mui/material';
+  loadTransactionDatebase,
+  addTransactionDatabase,
+  clearTransactionDatabase } from "components/Common";
+
+
 import {
   Box,
-  Paper,
-  Typography,
-  Grid,
   Stack,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Container,
   List,
-  ListItem,
   ListItemText,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
+  Select, MenuItem, 
+  InputLabel, 
+  FormControl, 
+  LinearProgress, 
+  Button,
+  Chip,
+  Divider,
+  Typography 
 } from "@mui/material";
 
 const UncategorizedTable = ({ clientId }) => {
@@ -51,10 +46,104 @@ const UncategorizedTable = ({ clientId }) => {
   const [subcategory, setSubcategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-
   const [transactionDb, setTransactionDb] = useState([]);
 
+  
+  // Filter by Uncategorized Transactions
+  const filterUncategorizedTransactions = (transactions) =>{
+    return transactions.filter(txn => {
+      return !txn.category || !txn.subcategory;
+    });
+  };
 
+  const uncategorizedTransactions = filterUncategorizedTransactions(transactions);
+
+  // Group and flatten transactions
+  const groupedAndFlattened = useMemo(() => {
+    const grouped = uncategorizedTransactions.reduce((acc, txn) => {
+      const key = groupBy === "description"
+        ? txn.description || "No Description"
+        : txn.category || "Uncategorized";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(txn);
+      return acc;
+    }, {});
+
+    let flat = [];
+    Object.entries(grouped).forEach(([groupKey, txns]) => {
+      flat.push({ isHeader: true, groupKey });
+      flat.push(...txns);
+    });
+
+    return flat;
+  }, [uncategorizedTransactions, groupBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(groupedAndFlattened.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const currentItems = groupedAndFlattened.slice(startIndex, startIndex + rowsPerPage);
+
+  // Calculate progress
+  const categorizedCount = transactions.filter(transaction => transaction.category).length;
+  const totalTransactions = transactions.length;
+  
+  const progress = (categorizedCount / totalTransactions) * 100;
+
+
+
+  const [categoryTotals, setCategoryTotals] = useState({});
+
+  useEffect(() => {
+    const totals = {};
+  
+    transactions.forEach(({ category, credit_amount, debit_amount }) => {
+      if (category) {
+        // Ensure that credit_amount and debit_amount are valid numbers before adding
+        const credit = isNaN(credit_amount) ? 0 : parseFloat(credit_amount);
+        const debit = isNaN(debit_amount) ? 0 : parseFloat(debit_amount);
+  
+        const amount = credit + debit;
+  
+        totals[category] = (totals[category] || 0) + amount;
+      }
+    });
+  
+    // console.log(totals);  // Check the totals before formatting
+  
+    const formattedTotals = Object.keys(totals).reduce((acc, key) => {
+      const total = totals[key];
+      // Only add to acc if total is a valid number
+      if (!isNaN(total)) {
+        acc[key] = total.toFixed(2);  // Ensure it's a number and format
+      }
+      return acc;
+    }, {});
+  
+    // console.log(formattedTotals);  // Check the formatted totals
+    setCategoryTotals(formattedTotals);
+  }, [transactions]);
+
+  const potentialMatches = useMemo(() => {
+    return transactions.filter((txn) =>
+      transactionDb.some((dbTxn) => dbTxn.description === txn.description)
+    );
+  }, [transactions, transactionDb]);
+
+  // const reloadMetrics = () => {
+  //   // Recalculate metrics that need to be updated
+  //   const potentialMatches = checkPotentialMatches();
+  //   const uncategorizedTransactions = transactions.filter(txn => !txn.category);
+  //   const groupedAndFlattened = groupTransactions(transactions);  // Replace with your actual grouping logic
+  //   const progress = Math.round((groupedAndFlattened.length / transactions.length) * 100);
+  //   const categoryTotals = calculateCategoryTotals(transactions);  // Replace with your actual category totals logic
+  
+  //   // Set updated state values
+  //   setPotentialMatches(potentialMatches);
+  //   setUncategorizedTransactions(uncategorizedTransactions);
+  //   setGroupedAndFlattened(groupedAndFlattened);
+  //   setProgress(progress);
+  //   setCategoryTotals(categoryTotals);
+  // };
 
 
 
@@ -115,110 +204,6 @@ const UncategorizedTable = ({ clientId }) => {
     fetchSubs();
   }, [category]);
 
-  const checkPotentialMatches = () => {
-    const potentialMatches = transactions.filter((txn) =>
-      transactionDb.some((dbTxn) => dbTxn.description === txn.description)
-    );
-    return potentialMatches;
-  };
-  
-  // Group transactions by category or description
-  const toggleGroupBy = () => {
-    setGroupBy((prev) => (prev === "category" ? "description" : "category"));
-    setCurrentPage(1);
-  };
-
-  // Filter by Uncategorized Transactions
-  const filterUncategorizedTransactions = (transactions) =>{
-    return transactions.filter(txn => {
-      return !txn.category || !txn.subcategory;
-    });
-  };
-
-  const uncategorizedTransactions = filterUncategorizedTransactions(transactions);
-  // Filter valid transactions based on the required fields
-  const filterValidTransactions = (transactions) => {
-    return transactions.filter(txn => {
-      return txn.date1 &&
-        txn.description &&
-        (txn.credit_amount || txn.debit_amount) &&
-        txn.balance_amount;
-    });
-  };
-
-  // Filtered transactions: Only valid ones will be shown here
-  const validTransactions = useMemo(() => filterValidTransactions(transactions), [transactions]);
-
-  // Group and flatten transactions
-  const groupedAndFlattened = useMemo(() => {
-    const grouped = uncategorizedTransactions.reduce((acc, txn) => {
-      const key = groupBy === "description"
-        ? txn.description || "No Description"
-        : txn.category || "Uncategorized";
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(txn);
-      return acc;
-    }, {});
-
-    let flat = [];
-    Object.entries(grouped).forEach(([groupKey, txns]) => {
-      flat.push({ isHeader: true, groupKey });
-      flat.push(...txns);
-    });
-
-    return flat;
-  }, [uncategorizedTransactions, groupBy]);
-
-  // Pagination
-  const totalPages = Math.ceil(groupedAndFlattened.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const currentItems = groupedAndFlattened.slice(startIndex, startIndex + rowsPerPage);
-
-  // Calculate progress
-  const categorizedCount = transactions.filter(transaction => transaction.category).length;
-  const totalTransactions = transactions.length;
-  
-  const progress = (categorizedCount / totalTransactions) * 100;
-
-
-
-  const [categoryTotals, setCategoryTotals] = useState({});
-
-  useEffect(() => {
-    const totals = {};
-  
-    transactions.forEach(({ category, credit_amount, debit_amount }) => {
-      if (category) {
-        // Ensure that credit_amount and debit_amount are valid numbers before adding
-        const credit = isNaN(credit_amount) ? 0 : parseFloat(credit_amount);
-        const debit = isNaN(debit_amount) ? 0 : parseFloat(debit_amount);
-  
-        const amount = credit + debit;
-  
-        totals[category] = (totals[category] || 0) + amount;
-      }
-    });
-  
-    console.log(totals);  // Check the totals before formatting
-  
-    const formattedTotals = Object.keys(totals).reduce((acc, key) => {
-      const total = totals[key];
-      // Only add to acc if total is a valid number
-      if (!isNaN(total)) {
-        acc[key] = total.toFixed(2);  // Ensure it's a number and format
-      }
-      return acc;
-    }, {});
-  
-    console.log(formattedTotals);  // Check the formatted totals
-    setCategoryTotals(formattedTotals);
-  }, [transactions]);
-  
-  
-  
-  console.log("totals",categoryTotals);
-
-
   const handleCheckboxChange = (uid) => {
     if (!uid) return;
     setSelectedTransactions(prev => {
@@ -228,33 +213,12 @@ const UncategorizedTable = ({ clientId }) => {
       
       // Full transaction objects
       const selectedObjects = currentItems.filter(item => newSelected.includes(item.uid));
-      console.log("Selected Transactions (full):", selectedObjects);
+      //console.log("Selected Transactions (full):", selectedObjects);
       
       return newSelected;
     });
   };
   
-  const isGroupFullySelected = (groupKey) => {
-    const groupItems = currentItems.filter(item => item.groupKey === groupKey && !item.isHeader);
-    return groupItems.every(item => selectedTransactions.includes(item.uid));
-  };
-  
-  const handleToggleGroup = (groupKey) => {
-    const groupItems = currentItems.filter(item => item.groupKey === groupKey && !item.isHeader);
-    const groupUids = groupItems.map(item => item.uid);
-  
-    const isFullySelected = groupUids.every(uid => selectedTransactions.includes(uid));
-  
-    setSelectedTransactions(prev => {
-      if (isFullySelected) {
-        return prev.filter(uid => !groupUids.includes(uid));
-      } else {
-        return [...prev, ...groupUids.filter(uid => !prev.includes(uid))];
-      }
-    });
-  };
-  
-
   const handleCategorizeClick = async () => {
     const selectedTxns = transactions.filter(txn => selectedTransactions.includes(txn.uid));
     if (selectedTxns.length === 0) return;
@@ -283,18 +247,24 @@ const UncategorizedTable = ({ clientId }) => {
       });
       setTransactions(updated);
   
-      // 3. Save to Firestore
+      // 3. Update transactionDb (local or fetch from Firestore)
+      setTransactionDb(updated); // Ensure transactionDb is updated
+  
+      // 4. Save to Firestore
       await updateDoc(doc(db, "clients", clientId), {
         transactions: updated,
       });
-  
+
+      // Reload metrics after updating transactions
+      // reloadMetrics();
+
       console.log("Updated selected transactions with:", payload);
+      
     } catch (error) {
       console.error("Error updating transactions:", error);
     }
   };
   
-
   const handleClearCategorized = async () => {
     try {
       const updated = transactions.map(txn => ({
@@ -316,82 +286,201 @@ const UncategorizedTable = ({ clientId }) => {
     }
   };
 
+  // handleMatchAll =use the transactions in the trandactionDb then match them against the clients transctions we doing this now
+  const handleMatchAll = async () => {
+    if (!transactionDb.length) return;
+
+    const toBeMatched = transactions.filter(txn =>
+      transactionDb.some(dbTxn => dbTxn.description === txn.description)
+    );
+    console.log("Transactions to be matched:", toBeMatched);
+    const updated = transactions.map(txn => {
+      const match = transactionDb.find(dbTxn => dbTxn.description === txn.description);
+      if (match) {
+        return {
+          ...txn,
+          category: match.category,
+          subcategory: match.subcategory,
+        };
+      }
+      return txn;
+    });
+  
+    setTransactions(updated);
+  
+    try {
+      await updateDoc(doc(db, "clients", clientId), {
+        transactions: updated,
+      });
+      console.log("Matched and updated transactions.");
+    } catch (error) {
+      console.error("Error during match all update:", error);
+    }
+  };
+
+  // handleClearTransactionDatabase
+  const handleClearTransactionDatabase = async () => {
+    try {
+      await clearTransactionDatabase(bankName);
+      console.log("Transaction database cleared.");
+    } catch (error) {
+      console.error("Error clearing transaction database:", error);
+    }
+  };
+  
+  // Custom select input styles for Select Cat and Subcat
+  const selectSx = {
+    backgroundColor: '#333', // Dark background for the select input
+    color: 'white', // White text color
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' }, // Darker border for the input outline
+    '&:hover': { backgroundColor: '#444' }, // Darker background on hover
+    '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' }, // Focused state: dark background with a light blue border
+  };
 
   if (loading) return <Loader />;
   if (error) return <p className="text-red-500">{error}</p>;
 
+
+  
   return (
     <div className="text-white">
-      <span className="text-sm text-gray-400">
-        {groupedAndFlattened.length} transactions, {checkPotentialMatches().length} potential matches
-      </span>
-      <div className="flex border-b border-gray-700 mb-4 justify-between items-center">
-        <div className="flex items-center gap-4">
-        
-          <select 
-            value={category} 
-            onChange={(e) => {
-              const selectedCategoryId = e.target.value;
-              setCategory(selectedCategoryId);
-              const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-              setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
-              setSubcategory("");
-            }} 
-            className="p-2 text-sm rounded bg-gray-700 text-white"
-          >
-            <option value="">Category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
 
-          <select 
-            value={subcategory} 
-            onChange={(e) => setSubcategory(e.target.value)} 
-            className="p-2 text-sm rounded bg-gray-700 text-white"
-          >
-            <option value="">Subcategory</option>
-            {subcategories.map((sub) => (
-              <option key={sub.id} value={sub.id}>{sub.name}</option>
+      {/* after handleCategorizeClick this doesnt update the display data */}
+      <Box sx={{ width: '100%', mb: 1 }}>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          <Chip label={`${groupedAndFlattened.length} Shown`} size="small" sx={{ color: "white", backgroundColor: "#424242" }} />
+          <Chip label={`${potentialMatches.length} Matches`} size="small" sx={{ color: "white", backgroundColor: "#424242" }} />
+          <Chip label={`${Math.round(progress)}% Done`} size="small" sx={{ color: "white", backgroundColor: "#424242" }} />
+          <Chip label={`${uncategorizedTransactions.length} Uncategorized`} size="small" sx={{ color: "white", backgroundColor: "#424242" }} />
+          <Chip label={`${transactions.length} Total`} size="small" sx={{ color: "white", backgroundColor: "#424242" }} />
+        </Stack>
+      </Box>
+      {/* line or divier  thisupdate somehow do know how but it does */}
+      <Divider sx={{ my: 1, borderColor: "#555" }} />
+      <Box sx={{ width: '100%', mb: 1 }}>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          {Object.entries(categoryTotals)
+            .filter(([_, total]) => !isNaN(total) && total !== 0)
+            .map(([name, total]) => (
+              <Chip
+                key={name}
+                label={`${name}: ${total}`}
+                size="small"
+                sx={{ color: "white", backgroundColor: "#424242" }}
+              />
             ))}
-          </select>
-
-          <div className="flex items-center gap-2 pr-2">
-            <span className="text-sm text-gray-400">Group by:</span>
-            <button
-              onClick={toggleGroupBy}
-              className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-cyan-400 border border-cyan-500"
+        </Stack>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid #374151", // gray-700
+          mb: 2,
+          pb: 1,
+        }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center" mt={2}>
+          {/* Category Select */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel sx={{ color: 'white' }}>Category</InputLabel>
+            <Select
+              label="Category"
+              value={category}
+              onChange={(e) => {
+                const selectedCategoryId = e.target.value;
+                setCategory(selectedCategoryId);
+                const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+                setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+                setSubcategory("");
+              }}
+              sx={selectSx}
             >
-              {groupBy === "category" ? "Category" : "Description"}
-            </button>
-          </div>
-          <button
-            // onClick={}
-            disabled={selectedTransactions.length === 0}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
-          >
-            Check Category Match
-          </button>
+              <MenuItem value="">Category</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-          <button
-            onClick={handleClearCategorized}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
-          >
-            Reset Category
-          </button>
-          
-          {/* testing this now so so working*/}
-          <button
+          {/* Subcategory Select */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel sx={{ color: 'white' }}>Subcategory</InputLabel>
+            <Select
+              label="Subcategory"
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+              sx={selectSx}
+            >
+              <MenuItem value="">Subcategory</MenuItem>
+              {subcategories.map((sub) => (
+                <MenuItem key={sub.id} value={sub.id}>{sub.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Categorize Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
             onClick={handleCategorizeClick}
-            disabled={selectedTransactions.length === 0}
-            className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
+            // disabled={selectedTransactions.length === 0}
+            startIcon={<span>📂</span>}
           >
-            Categorize Transaction
-          </button>
+            Categorize
+          </Button>
 
-        </div>
-      </div>
+          {/* Match All Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleMatchAll}
+            startIcon={<span>📂</span>}
+          >
+            Match All
+          </Button>
 
+          {/* clear all Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleClearCategorized}
+            startIcon={<span>📂</span>}
+          >
+            Clear All
+          </Button>
+
+          {/* for debug transaction database clearer clearTransactionDatabase Button*/}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleClearTransactionDatabase}
+            startIcon={<span>📂</span>}
+          >
+            Clear Transaction Database
+          </Button>
+
+
+        </Stack>
+      </Box>
+      {/* Progress Bar space under the bar */}
+      <Box sx={{ width: '100%', mb: 1 }}>
+        <LinearProgress
+          variant="determinate"
+          value={progress}
+          sx={{
+            height: 12,
+            borderRadius: 4,
+            backgroundColor: '#333',
+            '& .MuiLinearProgress-bar': { backgroundColor: '#90caf9' }
+          }}
+        />
+      </Box>
       {/* Filtered and grouped table */}
       {currentTab === "table1" && (
         <div className="overflow-x-auto border border-gray-700 rounded-lg shadow-md">
@@ -480,72 +569,9 @@ const UncategorizedTable = ({ clientId }) => {
             Next
           </button>
         </div>
-
-        {/* Progress Text */}
-        <div className="w-full text-left">
-          <span className="text-sm font-semibold text-white">
-            {Math.round(progress)}% Categorized
-          </span>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full border-4 border-gray-400 rounded-lg p-1">
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: '12px',
-              borderRadius: '4px',
-            }}
-          />
-        </div>
       </div>
-
-      <List dense sx={{ width: 200 }}>
-        {Object.entries(categoryTotals)
-          .filter(([_, total]) => !isNaN(total) && total !== 0)
-          .map(([name, total]) => (
-            <ListItemText 
-              key={name} 
-              primary={`${name}: ${total}`} 
-              primaryTypographyProps={{ fontSize: 14 }}
-            />
-          ))}
-      </List>
-
-
     </div>
   );
 };
 
 export default UncategorizedTable;
-
-
-// Container (Box): A flexible container to center everything, with padding and a column layout.
-
-// Paper: Wraps the content in a clean, elevated box with a light shadow.
-
-// Typography: Used for text display, with categories rendered in a clean format.
-
-// Grid: A responsive grid system from MUI to organize the totals in rows and columns.
-
-
-
-{/* <div className="mt-4 relative">
-<LinearProgress 
-  variant="determinate" 
-  value={progress} 
-  sx={{
-    height: 10, 
-    borderRadius: '5px', 
-    background: 'linear-gradient(to right, #00c6ff, #0072ff)', 
-    '& .MuiLinearProgress-bar': {
-      backgroundColor: '#ff4e00',
-      borderRadius: '5px',
-    }
-  }} 
-/>
-<span className="absolute inset-0 flex items-center justify-center text-sm text-white font-semibold">
-  {Math.round(progress)}% Categorized
-</span>
-</div> */}
