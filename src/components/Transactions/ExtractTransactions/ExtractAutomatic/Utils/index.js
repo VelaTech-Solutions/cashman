@@ -4,6 +4,9 @@
 // Step 1: Create Database Structure
 export { default as createDatabaseStructure } from './createDatabaseStructure';
 
+
+export { default as filterStatement } from './filterStatement';
+
 // Step 2: Clean Statement
 export { default as cleanStatement } from './cleanStatement';
 
@@ -33,7 +36,10 @@ export { default as ProgressUtils } from './ProgressUtils';
 
 // Notes on Steps:
 // 1. Create Database Structure
-// 2. Clean Statement
+
+// 2. filterStatement
+// 2.1. Clean Statement
+
 // 3. Extract Dates
 // 3.1 Verify Dates
 // 4. Extract Amounts

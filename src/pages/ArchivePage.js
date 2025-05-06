@@ -15,7 +15,7 @@ const ArchivePage = () => {
   
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${id}`, label: "Back to Profile", icon: "ph-file-text" },
+    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
     { type: "divider" },
     { path: "goBack", label: "Back", icon: "ph-arrow-left" },
   ];
@@ -23,7 +23,7 @@ const ArchivePage = () => {
   useEffect(() => {
     const fetchArchiveData = async () => {
       try {
-        const clientRef = doc(db, "clients", id);
+        const clientRef = doc(db, "clients", clientId);
         const clientSnap = await getDoc(clientRef);
 
         if (clientSnap.exists()) {
@@ -40,7 +40,7 @@ const ArchivePage = () => {
     };
 
     fetchArchiveData();
-  }, [id]);
+  }, [clientId]);
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">

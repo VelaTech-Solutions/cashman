@@ -10,6 +10,7 @@ import { db } from "../firebase/firebase";
 // Component Imports
 import { Sidebar } from 'components/Common';
 import MainSettings from "../components/Settings/MainSettings/Containers/ContainerViews";
+import FilterSettings from "../components/Settings/FilterSettings/Containers/ContainerViews";
 import CategorySettings from "../components/Settings/CategorySettings/Containers/ContainerViews";
 import ExtractSettings from "../components/Settings/ExtractSettings/Containers/ContainerViews";
 // import EditSettings from "../components/Settings/EditSettings/EditSettings";
@@ -33,8 +34,10 @@ function SettingsPage() {
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
   return (
+
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Settings" links={links} />
+      {/*  */}
       <div className="flex-1 p-8">
         <h2 className="text-2xl font-bold mb-4">Settings</h2>
         
@@ -51,6 +54,12 @@ function SettingsPage() {
             className={`px-4 py-2 rounded ${viewMode === "categorySettings" ? "bg-blue-500" : "bg-gray-700"}`}
           >
             Category Settings
+          </button>
+          <button
+            onClick={() => setViewMode("filterSettings")}
+            className={`px-4 py-2 rounded ${viewMode === "filterSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          >
+            Filter Settings
           </button>
           <button 
             onClick={() => setViewMode("extractSettings")}
@@ -74,6 +83,7 @@ function SettingsPage() {
         
         {/* Conditional Rendering Based on Active Section */}
         {viewMode === "mainSettings" && <MainSettings />}
+        {viewMode === "filterSettings" && <FilterSettings />}
         {viewMode === "categorySettings" && <CategorySettings />}
         {viewMode === "extractSettings" && <ExtractSettings />}
         {viewMode === "editSettings" && <EditSettings />}
@@ -84,7 +94,3 @@ function SettingsPage() {
 }
 
 export default SettingsPage;
-
-
-// old settings below 
-

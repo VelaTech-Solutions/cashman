@@ -37,7 +37,7 @@ const ArchivedData = () => {
     };
 
     fetchArchive();
-  }, [id]);
+  }, [clientId]);
 
   if (loading) return <Loader />;
   if (error) return <div className="text-red-500">{error}</div>;

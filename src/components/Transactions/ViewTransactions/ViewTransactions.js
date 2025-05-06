@@ -7,10 +7,23 @@ import "styles/tailwind.css";
 import { db } from "../../../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
+import {
+  Box,
+  Typography,
+  TextField,
+  Paper,
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+
+
 // Component Imports
 import { Sidebar, LoadClientData, Table } from 'components/Common';
-import ContainerOverViews from "../ViewTransactions/Containers/ContainerOverViews";
-// import ContainerTables from "../EditTransactions/Containers/ContainerTables";
+import OverViews from "../ViewTransactions/OverViews/OverView";
 
 
 const ViewTransactions = () => {
@@ -74,184 +87,69 @@ const ViewTransactions = () => {
       <div className="flex-1 p-8">
         <h2 className="text-2xl font-bold mb-4">View Transactions</h2>
         <div className="flex justify-start items-center space-x-4 mb-4">
-          <ContainerOverViews transactions={clientData?.transactions || []} />
+          <OverViews transactions={clientData?.transactions || []} />
         </div>
-        {/* Overview Section */}
-        {/* <section className="bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-semibold text-blue-400 mb-4">
-            Transactions Overview
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Total Transactions
-              </p>
-              <p className="text-3xl font-bold text-white">
-                {clientData?.transactions?.length ?? 0}
-              </p>
-            </div>
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Transactions Needing Review
-              </p>
-              <p className="text-3xl font-bold text-white">
-                0
-              </p>
-            </div>
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-              <p className="text-lg font-bold text-blue-400">
-                Corrected Transactions
-              </p>
-              <p className="text-3xl font-bold text-white">
-                0
-              </p>
-            </div>
-          </div>
-        </section> */}
-
         {/* Search Bar */}
-        <section className="mt-8">
-          <input
-            type="text"
-            placeholder="Search transactions by date or description..."
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </section>
-                {/* Transactions Table */}
-                <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+        <TextField
+          fullWidth
+          variant="outlined"
+          label="Search by date or description"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ input: { color: "white" }, label: { color: "#ccc" }, mb: 4 }}
+        />
+
+        <Paper sx={{ bgcolor: "#1e1e1e", p: 2 }}>
           {filteredTransactions?.length > 0 ? (
-            <div className="overflow-y-auto h-96">
-              <Table className="table-auto w-full text-left">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="px-4 py-2 text-sm">Date1</th>
-                    <th className="px-4 py-2 text-sm">Date2</th>
-                    <th className="px-4 py-2 text-sm">Description</th>
-                    <th className="px-4 py-2 text-sm">Fee Type</th>
-                    <th className="px-4 py-2 text-sm">Fee Amount</th>
-                    <th className="px-4 py-2 text-sm">Credit/Debit</th>
-                    <th className="px-4 py-2 text-sm">Credit Amount</th>
-                    <th className="px-4 py-2 text-sm">Balance Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTransactions.map((transaction, index) => (
-                    <tr key={index} className="border-b border-gray-700">
-                      
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.date1}
-                        </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.date2}
-                        </td>
-                      
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.description}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.fee_type}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.fee_amount}
-                      </td>
-                     
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_debit_amount}
-                      </td>
-                     
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_amount}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.balance_amount}
-                      </td>
-
-                    </tr>
+            <TableContainer sx={{ maxHeight: 500 }}>
+              <MuiTable stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {[
+                    "Date1", "Date2", "Description", "Description +", "Fee Type",
+                    "Fee Amount", "Credit/Debit", "Credit Amount", "Debit Amount", "Balance Amount"
+                  ].map((header, i, arr) => (
+                    <TableCell
+                      key={i}
+                      sx={{
+                        color: "black",
+                        borderBottom: "1px solid #444",
+                        borderRight: i < arr.length - 1 ? "1px solid #444" : "none"
+                      }}
+                    >
+                      {header}
+                    </TableCell>
                   ))}
-                </tbody>
-              </Table>
-            </div>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredTransactions.map((txn, index) => (
+                  <TableRow key={index}>
+                    {[
+                      txn.date1, txn.date2, txn.description, txn.description2,
+                      txn.fee_type, txn.fee_amount, txn.credit_debit_amount,
+                      txn.credit_amount, txn.debit_amount, txn.balance_amount
+                    ].map((value, i, arr) => (
+                      <TableCell
+                        key={i}
+                        sx={{
+                          color: "white",
+                          borderRight: i < arr.length - 1 ? "1px solid #444" : "none"
+                        }}
+                      >
+                        {value}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+              </MuiTable>
+            </TableContainer>
           ) : (
-            <p className="text-center text-lg text-gray-500">
+            <Typography sx={{ textAlign: "center", py: 3, color: "#aaa" }}>
               No transactions found.
-            </p>
+            </Typography>
           )}
-        </section>
-
-        {/* Transactions Table */}
-        <section className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
-          {filteredTransactions?.length > 0 ? (
-            <div className="overflow-y-auto h-96">
-              <Table className="table-auto w-full text-left">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="px-4 py-2 text-sm">Date1</th>
-                    <th className="px-4 py-2 text-sm">Date2</th>
-                    <th className="px-4 py-2 text-sm">Description</th>
-                    <th className="px-4 py-2 text-sm">Fee Type</th>
-                    <th className="px-4 py-2 text-sm">Fee Amount</th>
-                    <th className="px-4 py-2 text-sm">Credit/Debit</th>
-                    <th className="px-4 py-2 text-sm">Credit Amount</th>
-                    <th className="px-4 py-2 text-sm">Debit Amount</th>
-                    <th className="px-4 py-2 text-sm">Balance Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTransactions.map((transaction, index) => (
-                    <tr key={index} className="border-b border-gray-700">
-                      
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.date1}
-                        </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.date2}
-                        </td>
-                      
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.description}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.fee_type}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.fee_amount}
-                      </td>
-                     
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_debit_amount}
-                      </td>
-                     
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.credit_amount}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.debit_amount}
-                      </td>
-
-                      <td className="px-4 py-2 text-sm">
-                        {transaction.balance_amount}
-                      </td>
-
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-center text-lg text-gray-500">
-              No transactions found.
-            </p>
-          )}
-        </section>
+        </Paper>
       </div>
     </div>
   );

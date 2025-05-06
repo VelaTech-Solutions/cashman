@@ -128,7 +128,7 @@ export const generateBudgetReport = async (clientId) => {
           ? parseFloat(txn.credit_amount || 0)
           : parseFloat(txn.debit_amount || 0);
       const month = date
-        ? months[moment(date, ["DD/MM/YYYY", "YYYY-MM-DD"]).month()]
+        ? months[moment(date, ["DD/MM/YYYY"]).month()]// convert date to month
         : null;
     
       if (!category || !subcategory || !month) return;

@@ -22,7 +22,7 @@ import EditTransactions from "components/Transactions/EditTransactions/EditTrans
 import ExtractTransactions from "components/Transactions/ExtractTransactions/ExtractTransactions";
 import CategorizeTransactions from "components/Transactions/CategorizeTransactions/CategorizeTransactions";
 import ViewReports from "pages/Reports/ViewReports";
-
+import DevelopPage from "pages/DevelopPage";
 import ArchivePage from "pages/ArchivePage"; // main
 
 // Settings Pages
@@ -31,7 +31,6 @@ import ViewSettings from "components/Settings/ViewSettings/ViewSettingsPage";
 import EditSettings from "components/Settings/EditSettings/EditSettingsPage";
 import CategorySettings from "components/Settings/CategorySettings/CategorySettingsPage";
 import ExtractSettings from "components/Settings/ExtractSettings/ExtractSettingsPage";
-// import Developernotes from "pages/Developernotes";
 import Profile from "pages/Profile";
 
 // Help Pages
@@ -77,10 +76,10 @@ const RoutesConfig = () => {
         <Route path="/categorysettings/:id" element={<CategorySettings />} />
         <Route path="/extractsettings/:id" element={<ExtractSettings />} />
         <Route path="/settings" element={<Settings />} />
-        {/* <Route path="/developernotes" element={<Developernotes />} /> */}
 
         {/* Help pages */}
-        <Route path="/instructions" element={<Instructions />} />
+        <Route path="/DevelopPage" element={<DevelopPage />} />
+        <Route path="/Help/instructions" element={<Instructions />} />
         <Route path="/HelpView" element={<HelpView />} />
         <Route path="/HelpEdit" element={<HelpEdit />} />   
         <Route path="/HelpCategory" element={<HelpCategory />} />

@@ -44,7 +44,8 @@ export const AutomaticActions1 = ({
 
 
 
-  // reset deletes the following in the db  transactions filteredData extractProgress
+  const [countdown, setCountdown] = useState(null);
+
   const handlereset = () => {
     if (!clientId) {
       console.error("❌ Missing client ID");
@@ -61,10 +62,19 @@ export const AutomaticActions1 = ({
       number_of_transactions: 0,
     });
   
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
+    setCountdown(2); // Start countdown
+  
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === 1) {
+          clearInterval(interval);
+          window.location.reload();
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
+  
   
   return (
     <div className="flex flex-wrap gap-3">
@@ -106,12 +116,19 @@ export const AutomaticActions1 = ({
         {processing ? "Processing..." : "Extract"}
       </button>
 
+      {countdown !== null && (
+        <p className="text-red-600 font-semibold mb-2">
+          Resetting in {countdown} second{countdown !== 1 && 's'}...
+        </p>
+      )}
+
       <button
         onClick={handlereset}
         className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-medium"
       >
         Reset
       </button>
+
     </div>
   );
 };

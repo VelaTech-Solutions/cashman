@@ -3,15 +3,14 @@ import { useParams } from "react-router-dom";
 import "styles/tailwind.css";
 
 // Component Imports
-import { Sidebar, LoadClientData, LoadTransactions } from 'components/Common';
-import ContainerOverView from "../components/Transactions/TransactionsPage/Containers/ContainerOverView";
+import { Sidebar, LoadClientData } from 'components/Common';
+import OverView2 from "../components/Transactions/TransactionsPage/OverViews/OverView2";
 
 const TransactionsPage = () => {
   const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
-  const [activeView, setActiveView] = useState("view1");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
@@ -39,20 +38,20 @@ const TransactionsPage = () => {
   ];
 
   useEffect(() => {
-    const loadData = async () => {
+    const fetchData = async () => {
       try {
         const clientData = await LoadClientData(clientId);
         setClientData(clientData);
+        setBankName(clientData.bankName || "Unknown");
         setTransactions(clientData.transactions || []);
-        setError("");
       } catch (err) {
-        console.error("Error fetching data:", err.message);
+        console.error("🔥 Error fetching client data:", err.message);
         setError("Failed to fetch Client Data.");
       }
     };
-
-    loadData();
+    fetchData();
   }, [clientId]);
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
       <Sidebar title="Client Profile" links={links} />
@@ -60,13 +59,8 @@ const TransactionsPage = () => {
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
         </header>
-        <div className="flex justify-start items-center space-x-4 mb-4">
-            <ContainerOverView transactions={transactions}
+            <OverView2 transactions={transactions}
             />
-          </div>
-          <div className="mt-6">
-            {/* {views.find((v) => v.key === activeView)?.Component} */}
-          </div>
         </div>
       </div>
 

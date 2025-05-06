@@ -105,21 +105,21 @@ const cleanStatement = async ({ clientId, bankName }) => {
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
 
-    filteredData = filteredData.filter((line) => {
-      const hasMatch = hasDate(line, datePattern);
-      if (
-        !hasMatch ||
-        (shouldRemove &&
-          (ignoredLines.includes(line.trim()) ||
-            fuzzyIgnoredLines.some((ignored) =>
-              line.toLowerCase().includes(ignored.toLowerCase())
-            )))
-      ) {
-        initialLinesToArchive.push({ content: line, source: archiveSourceField });
-        return false;
-      }
-      return true;
-    });
+    // filteredData = filteredData.filter((line) => {
+    //   const hasMatch = hasDate(line, datePattern);
+    //   if (
+    //     !hasMatch ||
+    //     (shouldRemove &&
+    //       (ignoredLines.includes(line.trim()) ||
+    //         fuzzyIgnoredLines.some((ignored) =>
+    //           line.toLowerCase().includes(ignored.toLowerCase())
+    //         )))
+    //   ) {
+    //     initialLinesToArchive.push({ content: line, source: archiveSourceField });
+    //     return false;
+    //   }
+    //   return true;
+    // });
 
     console.log("📦 Lines to archive:", initialLinesToArchive.length);
 
@@ -141,6 +141,29 @@ const cleanStatement = async ({ clientId, bankName }) => {
     if (shouldAlign) {
       filteredData = await handleAlignTransactions(filteredData);
       console.log("✔️ Transactions aligned");
+    }
+
+
+    // ✅ Remove ignored lines
+    if (shouldRemove) {
+      filteredData = filteredData.filter((line) => {
+        const hasMatch = hasDate(line, datePattern);
+        if (
+          !hasMatch ||
+          (ignoredLines.includes(line.trim()) ||
+            fuzzyIgnoredLines.some((ignored) =>
+              line.toLowerCase().includes(ignored.toLowerCase())
+            ))
+        ) {
+
+          // still need to move the line to archive
+          initialLinesToArchive.push({ content: line, source: archiveSourceField });
+
+          return false;
+        }
+        return true;
+      });
+      console.log("✔️ Ignored lines removed");
     }
 
     // ✅ Update filtered data in Firestore

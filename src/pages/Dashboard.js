@@ -80,6 +80,8 @@ const Dashboard = () => {
     { path: "/viewclient", label: "View Client" },
     { path: "/settings", label: "Settings" },
     { path: "/Help/Instructions", label: "Instructions" },
+    { path: "/DevelopPage", label: "Development Notes" },
+
   ];
 
   return (
@@ -100,3 +102,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

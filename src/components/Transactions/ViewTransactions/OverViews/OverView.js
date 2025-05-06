@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, Paper, Typography, Box } from "@mui/material";
 
-const OverView2 = ({ transactions }) => {
+const OverView = ({ transactions }) => {
   if (!transactions || transactions.length === 0) return null;
 
   const totalTransactions = transactions.length;
@@ -52,4 +52,4 @@ const OverView2 = ({ transactions }) => {
   );
 };
 
-export default OverView2;
+export default OverView;

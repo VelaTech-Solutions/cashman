@@ -10,7 +10,7 @@ def clean_text(line):
     Returns:
         str: Cleaned text.
     """
-    return line.replace(",", "").replace("*", "").strip()
+    return line.replace(",", "").replace("*", " ").strip()
 
 def clean_list(lines):
     """

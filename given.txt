@@ -1,0 +1,14 @@
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setBankName(clientData.bankName || "Unknown");
+
+      } catch (err) {
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
+      }
+    };
+    fetchData();
+  }, [clientId]);

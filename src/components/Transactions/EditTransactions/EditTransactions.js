@@ -2,15 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 // Component Imports
-import { Sidebar, LoadClientData, ViewSwitcher } from 'components/Common';
-import ContainerOverViews from "../EditTransactions/Containers/ContainerOverViews";
+import { Sidebar, LoadClientData } from 'components/Common';
+import OverViews from "../EditTransactions/OverViews/OverView";
 import ContainerTables from "../EditTransactions/Containers/ContainerTables";
 
 const EditTransactions = () => {
   const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState("");
-  const [activeView, setActiveView] = useState("view1");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
     { path: `/client/${clientId}/transactionspage`, label: "Back to Transactions", icon: "ph-file-text" },
@@ -47,13 +46,10 @@ const EditTransactions = () => {
       <div className="flex-1 p-8">
         <h2 className="text-2xl font-bold mb-4">Edit Transactions</h2>
         <div className="flex justify-start items-center space-x-4 mb-4">
-          <ContainerOverViews transactions={clientData?.transactions || []} />
+          <OverViews transactions={clientData?.transactions || []} />
         </div>
         <div className="flex justify-start items-center space-x-4 mb-4">
           <ContainerTables transactions={clientData?.transactions || [] } clientId={clientId} />
-        </div>
-        <div className="mt-6">
-          {/* {views.find((v) => v.key === activeView)?.Component} */}
         </div>
       </div>
     </div>

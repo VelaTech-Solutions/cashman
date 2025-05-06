@@ -7,6 +7,7 @@ import { db } from "../../../../../firebase/firebase";
 // Component Imports
 import { 
     createDatabaseStructure, 
+    filterStatement,
     cleanStatement, 
     extractDates, 
     extractDatesVerify,
@@ -74,7 +75,11 @@ import {
         const extractionSuccess = await extractRawData(clientId, bankName, "pdfparser");
         if (!extractionSuccess) throw new Error("Raw data extraction failed");
       }
-  
+      
+
+      // Step 3: filter statement
+      await filterStatement({ clientId, bankName});
+
       // Step 3: Clean Statement
       await cleanStatement({ clientId, bankName });
   

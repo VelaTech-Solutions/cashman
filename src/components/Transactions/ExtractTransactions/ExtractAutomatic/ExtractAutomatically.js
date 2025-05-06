@@ -11,7 +11,7 @@ import { db } from "../../../../firebase/firebase";
 import { LoadClientData } from 'components/Common';
 import ContainerOverViews from "./Containers/ContainerOverViews";
 import ContainerVeiws from "./Containers/ContainerVeiws";
-import ContainerActions from "./Containers/ContainerActions";
+import AutomaticActions from "./Actions/AutomaticActions";
 
 function ExtractAutomatically() {
   const { id: clientId } = useParams();
@@ -75,7 +75,7 @@ function ExtractAutomatically() {
 
       {/* Actions Container */}
       <div className="flex justify-start items-center space-x-4 mb-4">
-        <ContainerActions
+        <AutomaticActions
           clientId={clientId}
           bankName={bankName}
           clientData={clientData}

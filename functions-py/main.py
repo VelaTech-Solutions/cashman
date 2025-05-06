@@ -189,7 +189,7 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
             return response
         
 
-        extracted_text = extracted_text.replace("#", "").replace("*", "").strip()
+        extracted_text = extracted_text.replace("#", "").replace("*", " ").strip()
         # extracted_text = clean_description(extracted_text)
         # Clean statement based on bank name
         clean_amounts = {
@@ -209,7 +209,7 @@ def handleExtractDataManual(req: https_fn.Request) -> https_fn.Response:
             extracted_text = clean_amounts[bank_name](extracted_text)
 
         # Apply additional cleaning (remove "," and "*")
-        extracted_text = extracted_text.replace(",", "").replace("*", "").strip()
+        extracted_text = extracted_text.replace(",", "").replace("*", " ").strip()
 
 
         # Convert rawData to Array

@@ -2,7 +2,7 @@ import React, { Component, useState } from "react";
 
 // Component Imports
 import { ViewSwitcher } from 'components/Common';
-import OverView1 from "../OverViews/OverView1";
+import OverView from "../OverViews/OverView1";
 import OverView2 from "../OverViews/OverView2";
 import OverView3 from "../OverViews/OverView3";
 import OverView4 from "../OverViews/OverView4";
