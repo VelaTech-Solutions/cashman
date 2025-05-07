@@ -4,7 +4,7 @@ import "styles/tailwind.css";
 
 // Component Imports
 import { Sidebar, LoadClientData } from 'components/Common';
-import OverView2 from "../components/Transactions/TransactionsPage/OverViews/OverView2";
+import OverView from "../components/Transactions/TransactionsPage/OverViews/OverView";
 
 const TransactionsPage = () => {
   const { id: clientId } = useParams();
@@ -42,7 +42,6 @@ const TransactionsPage = () => {
       try {
         const clientData = await LoadClientData(clientId);
         setClientData(clientData);
-        setBankName(clientData.bankName || "Unknown");
         setTransactions(clientData.transactions || []);
       } catch (err) {
         console.error("🔥 Error fetching client data:", err.message);
@@ -59,7 +58,7 @@ const TransactionsPage = () => {
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
         </header>
-            <OverView2 transactions={transactions}
+            <OverView transactions={transactions}
             />
         </div>
       </div>

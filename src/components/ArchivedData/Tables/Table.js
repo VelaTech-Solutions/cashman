@@ -1,6 +1,6 @@
 import React from "react";
 
-const ArchivedDataTable = ({ data }) => {
+const Table = ({ data }) => {
   if (!data || data.length === 0) {
     return <div className="text-gray-400 text-sm">No archived data available.</div>;
   }
@@ -70,4 +70,4 @@ const ArchivedDataTable = ({ data }) => {
   );
 };
 
-export default ArchivedDataTable;
+export default Table;

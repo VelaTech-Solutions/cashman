@@ -43,6 +43,8 @@ const ClientEditPage = () => {
     fetchClients();
   }, []);
 
+  
+
   if (error) return <div>Error: {error}</div>;
 
   // Main UI

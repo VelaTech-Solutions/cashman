@@ -210,19 +210,20 @@ const ClientAddPage = () => {
               onChange={handleInputChange}
               className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
             />
-<select
-  name="bankName"
-  value={clientDetails.bankName}
-  onChange={handleInputChange}
-  className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
->
-  <option value="">Select Bank</option>
-  {bankNames.map((bank, index) => (
-    <option key={index} value={bank}>
-      {bank}
-    </option>
-  ))}
-</select>
+
+            <select
+              name="bankName"
+              value={clientDetails.bankName}
+              onChange={handleInputChange}
+              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
+            >
+              <option value="">Select Bank</option>
+              {bankNames.map((bank, index) => (
+                <option key={index} value={bank}>
+                  {bank}
+                </option>
+              ))}
+            </select>
 
 
             <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Upload Bank Statements</h2>

@@ -36,7 +36,7 @@ const StatCard = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-const Dashboard = () => {
+const DashboardPage = () => {
   const [userEmail, setUserEmail] = useState("Not logged in");
   const [clients, setClients] = useState([]);
   const navigate = useNavigate();
@@ -45,7 +45,6 @@ const Dashboard = () => {
     const fetchClients = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "clients"));
-        // client 
         const clientData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -101,5 +100,5 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;
 

@@ -257,6 +257,16 @@ const UncategorizedTable = ({ clientId }) => {
 
       // Reload metrics after updating transactions
       // reloadMetrics();
+      
+      // 5. Calculate % categorized and update client document
+      const total = updated.length;
+      const categorizedCount = updated.filter(txn => txn.category && txn.subcategory).length;
+      const percentage = Math.round((categorizedCount / total) * 100);
+
+      await updateDoc(doc(db, "clients", clientId), {
+        categorized: percentage,
+      });
+
 
       console.log("Updated selected transactions with:", payload);
       
@@ -264,6 +274,7 @@ const UncategorizedTable = ({ clientId }) => {
       console.error("Error updating transactions:", error);
     }
   };
+
   
   const handleClearCategorized = async () => {
     try {

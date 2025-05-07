@@ -9,11 +9,9 @@ import { auth, db } from "../../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 // Component Imports
-import { Sidebar, ViewSwitcher } from "components/Common";
-import ClientViewTable1 from "components/Client/ClientView/Tables/ClientViewTable1";
-import ClientViewTable2 from "components/Client/ClientView/Tables/ClientViewTable2";
-import ClientViewTable3 from "components/Client/ClientView/Tables/ClientViewTable3";
-import ClientViewTable4 from "components/Client/ClientView/Tables/ClientViewTable4";
+import { Sidebar } from "components/Common";
+import Table from "components/Client/ClientView/Tables/Table";
+
 
 
 const ClientViewPage = () => {
@@ -22,13 +20,9 @@ const ClientViewPage = () => {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeView, setActiveView] = useState("view1");
   // ---- ADDED SORTING STATE ----
   const [sortField, setSortField] = useState("clientName");
   const [sortOrder, setSortOrder] = useState("asc");
-
-  // State for toggling view mode (1 = Grid View, 2 = List View)
-  const [viewMode, setViewMode] = useState(1);
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
   ];
@@ -104,32 +98,7 @@ const ClientViewPage = () => {
     return clientsCopy;
   }, [filteredClients, sortField, sortOrder]);
   
-  const views = [
-    {
-      key: "view1",
-      label: "View 1",
-      component: (<ClientViewTable1 sortedClients={sortedClients} />
-      ),
-    },
-    {
-      key: "view2",
-      label: "View 2",
-      component: (<ClientViewTable2 sortedClients={sortedClients} />
-      ),
-    },
-    {
-      key: "view3",
-      label: "View 3",
-      component: (<ClientViewTable3 sortedClients={sortedClients} />
-      ),
-    },
-      {
-        key: "view4",
-        label: "View 4",
-        component: (<ClientViewTable4 sortedClients={sortedClients} />
-      )
-    },
-  ];
+
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -137,28 +106,23 @@ const ClientViewPage = () => {
       <Sidebar title="View Clients" links={links} />
       <div className="flex-1 p-8">
         <header className="flex justify-between items-center mb-8">
-          <button
-            className="lg:hidden text-gray-400"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <i className="ph-list text-2xl"></i>
-          </button>
+        <h1 className="text-3xl font-bold text-blue-400">Client List View</h1>
         </header>
 
         <section className="mt-6 flex flex-wrap items-center gap-4">
           <div className="relative">
-            <input
+            {/* <input
               type="text"
               placeholder="Search clients..."
               onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
               value={searchQuery}
               className="pl-10 pr-4 h-10 w-56 rounded-md bg-gray-900 text-white placeholder-gray-400 border border-gray-700 focus:ring-2 focus:ring-cyan-500"
             />
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400">🔍</div>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400">🔍</div> */}
           </div>
           <div className="flex items-center h-10">
-            <label className="text-gray-300 text-sm mr-2">Sort:</label>
-            <select
+            {/* <label className="text-gray-300 text-sm mr-2">Sort:</label> */}
+            {/* <select
               value={sortField}
               onChange={(e) => setSortField(e.target.value)}
               className="h-full bg-gray-800 text-white px-3 rounded-md border border-gray-700 text-sm"
@@ -171,26 +135,17 @@ const ClientViewPage = () => {
               ].map(({ value, label }) => (
                 <option key={value} value={value}>{label}</option>
               ))}
-            </select>
-            <button
+            </select> */}
+            {/* <button
               className="h-full ml-2 px-3 rounded-md bg-gray-800 text-white text-sm border border-gray-700 hover:bg-cyan-600"
               onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
             >
               {sortOrder === "asc" ? "⬆" : "⬇"}
-            </button>
-          </div>
-
-          {/* View Switcher Buttons - Custom local wrapper to control layout */}
-          <div className="flex items-center h-10 space-x-2">
-            <ViewSwitcher
-              views={views}
-              activeViewKey={activeView}
-              setActiveViewKey={setActiveView}
-            />
+            </button> */}
           </div>
         </section>
         <section className="mt-6">
-          {views.find((v) => v.key === activeView)?.component}
+        <Table sortedClients={sortedClients} />
         </section>
     </div>
   </div>

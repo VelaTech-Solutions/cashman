@@ -1,6 +1,6 @@
 import React from "react";
 
-const EditOverView1 = ({ data = [] }) => {
+const OverView = ({ data = [] }) => {
   if (!Array.isArray(data)) data = [];
 
   // Helper functions
@@ -15,4 +15,4 @@ const EditOverView1 = ({ data = [] }) => {
   );
 };
 
-export default EditOverView1;
+export default OverView;
