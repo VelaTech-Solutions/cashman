@@ -9,6 +9,8 @@ import ContainerTables from "../EditTransactions/Containers/ContainerTables";
 const EditTransactions = () => {
   const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
+  const [bankName, setBankName] = useState("Unknown");
+  const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
   const links = [
     { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
@@ -26,16 +28,21 @@ const EditTransactions = () => {
       icon: "ph-arrow-left" 
     },
   ];
+
   useEffect(() => {
-    const load = async () => {
+    const fetchData = async () => {
       try {
-        const data = await LoadClientData(clientId);
-        setClientData(data);
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setBankName(clientData.bankName || "Unknown");
+        setTransactions(clientData.transactions || []);
+
       } catch (err) {
-        setError("Failed to load client data.");
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
       }
     };
-    load();
+    fetchData();
   }, [clientId]);
 
   if (error) return <div className="text-red-500 p-8">{error}</div>;
@@ -49,7 +56,7 @@ const EditTransactions = () => {
           <OverViews transactions={clientData?.transactions || []} />
         </div>
         <div className="flex justify-start items-center space-x-4 mb-4">
-          <ContainerTables transactions={clientData?.transactions || [] } clientId={clientId} />
+          <ContainerTables clientId={clientId} />
         </div>
       </div>
     </div>

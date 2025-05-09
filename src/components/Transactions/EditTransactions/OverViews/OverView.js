@@ -14,14 +14,23 @@ const EditOverView1 = ({ transactions = [] }) => {
   );
   const countMissingDates = invalidTransactions;
   const countMissingDescriptions = validTx.filter(
-    tx => isInvalidDescription(tx.description) && isInvalidDescription(tx.description2)
+    tx => isInvalidDescription(tx.description)
   );
+  
   const countCreditDebitAmounts = validTx.filter(
     tx => parseFloat(tx.debit_amount || 0) === 0 && parseFloat(tx.credit_amount || 0) === 0
   ).length;
+
+  // const isInvalidBalance = (balance_amount) => {
+  //   const num = Number(balance_amount);
+  //   return isNaN(num) || num === 0;
+  // };
+  
+  // const countMissingBalances = validTx.filter(tx => isInvalidBalance(tx.balance_amount));
   const countMissingBalances = validTx.filter(
     tx => !tx.balance_amount || tx.balance_amount === "0"
   ).length;
+
   const countZeroAmounts = validTx.filter(
     tx =>
       parseFloat(tx.debit_amount || 0) === 0 &&

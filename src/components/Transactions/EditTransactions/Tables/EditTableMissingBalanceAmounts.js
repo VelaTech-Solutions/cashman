@@ -1,205 +1,391 @@
-// src/components/Transactions/EditTransactions/Tables/EditTableZeroAmounts.js
 import React, { useState, useEffect } from "react";
+
+// Firebase Imports
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
-import { BaseTable, FirestoreHelper } from "../Utils/";
+
+// Common Components Import
+import { LoadClientData } from "components/Common";
+
+// uuid import
+import { v4 as uuidv4 } from "uuid";
+
+// MUI Imports
+import Tooltip from '@mui/material/Tooltip';
+import { Grid, Box, CircularProgress,TextField, InputAdornment, Typography } from "@mui/material";
+import {
+  DataGrid,
+  Toolbar,
+  ToolbarButton,
+  QuickFilter,
+  QuickFilterControl,
+  QuickFilterClear,
+  QuickFilterTrigger,
+  GridRowModes,
+  GridActionsCellItem
+} from '@mui/x-data-grid';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from "@mui/icons-material/Delete";
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import SearchIcon from '@mui/icons-material/Search';
+import CancelIcon from '@mui/icons-material/Cancel';
+
+const CustomToolbar = () => (
+  <Toolbar>
+    <Tooltip title="Columns">
+      <IconButton sx={{ ml: 1, mr: 1 }}>
+        <ViewColumnIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <Tooltip title="Filter">
+      <IconButton sx={{ ml: 1, mr: 1 }}>
+        <FilterListIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <QuickFilter>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', flexGrow: 1, width: 'auto' }}>
+        <QuickFilterTrigger
+          render={(triggerProps, state) => (
+            <Tooltip title="Search" enterDelay={0}>
+              <IconButton
+                {...triggerProps}
+                color="default"
+                aria-disabled={state.expanded}
+                sx={{ ml: 1, mr: 1 }}
+              >
+                <SearchIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        />
+        <QuickFilterControl
+          render={({ ref, ...controlProps }, state) => (
+            <TextField
+              {...controlProps} // spread other props
+              inputRef={ref} // use inputRef for TextField
+              aria-label="Search"
+              placeholder="Search..."
+              size="small"
+              sx={{
+                padding: '8px',
+                borderRadius: '4px',
+                width: '100%',
+              }}
+              InputProps={{
+                startAdornment: state.value && (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: state.value ? (
+                  <InputAdornment position="end">
+                    <QuickFilterClear
+                      edge="end"
+                      size="small"
+                      aria-label="Clear search"
+                      sx={{ mr: -0.75 }}
+                    >
+                      <CancelIcon fontSize="small" />
+                    </QuickFilterClear>
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          )}
+        />
+      </Box>
+    </QuickFilter>
+  </Toolbar>
+);
+
 
 const EditTableMissingBalanceAmounts = ({ clientId }) => {
+  const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editedTransaction, setEditedTransaction] = useState(null);
+  const [editingRowId, setEditingRowId] = useState(null);
+  const [rowModesModel, setRowModesModel] = useState({});
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true); // default true
+
 
   useEffect(() => {
-    const loadData = async () => {
-      const clientData = await FirestoreHelper.loadClientData(clientId);
-      setTransactions(clientData.transactions || []);
+    // simulate loading or fetch logic
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000); // or when your actual data is ready
+  }, []);
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setTransactions(clientData.transactions || []);
+      } catch (err) {
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
+      }
     };
-    loadData();
+    fetchData();
   }, [clientId]);
 
-  const filteredTransactions = transactions.filter(
-    (tx) => parseFloat(tx.balance_amount || 0) === 0
-  );
-
-  const handleInputChange = (field, value) => {
-    setEditedTransaction((prev) => ({ ...prev, [field]: value }));
+  const isInvalidBalance = (balance_amount) => {
+    const num = Number(balance_amount);
+    return isNaN(num) || num === 0;
   };
+  
+  const filteredTransactions = transactions.filter(tx => isInvalidBalance(tx.balance_amount));
 
-  const handleEditClick = (index) => {
-    setEditingIndex(index);
-    setEditedTransaction(filteredTransactions[index]);
-  };
 
-  const handleSaveClick = async () => {
+  const rows = filteredTransactions.map((tx) => ({
+    id: tx.uid || uuidv4(),
+    ...tx,
+  }));
+
+
+  const columns = [
+    {
+      field: "date1",
+      headerName: "Date 1",
+      width: 120,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "date2",
+      headerName: "Date 2",
+      width: 120,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "description",
+      type: "string",
+      headerName: "Description",
+      width: 400,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "description2",
+      type: "string",
+      headerName: "Description +",
+      width: 300,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "credit_amount",
+      type: "number",
+      headerName: "Credit Amount",
+      width: 130,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "debit_amount",
+      type: "number",
+      headerName: "Debit Amount",
+      width: 130,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "balance_amount",
+      type: "number",
+      headerName: "Balance Amount",
+      width: 130,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      getActions: (params) => {
+        const isInEditMode = rowModesModel[params.id]?.mode === GridRowModes.Edit;
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={() => setRowModesModel({ [params.id]: { mode: GridRowModes.View } })}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              onClick={() =>
+                setRowModesModel({
+                  [params.id]: { mode: GridRowModes.View, ignoreModifications: true },
+                })
+              }
+            />,
+          ];
+        }
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            onClick={() => setRowModesModel({ [params.id]: { mode: GridRowModes.Edit } })}
+          />,
+          <GridActionsCellItem
+            icon={<AddIcon />}
+            label="Add"
+            onClick={() => handleCreateClick(params.id)}
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(params.id)}
+          />,
+        ];
+      },
+    },
+  ];
+
+  const processRowUpdate = async (newRow, oldRow) => {
     const updated = [...transactions];
-    const originalTx = filteredTransactions[editingIndex];
+    const index = transactions.findIndex((tx) => tx.uid === newRow.uid);
 
-    // Find index in the full transactions list
-    const fullIndex = transactions.findIndex(
-      (tx) => tx.id === originalTx.id
-    );
+    if (index === -1) return oldRow;
 
-    if (fullIndex !== -1) {
-      updated[fullIndex] = editedTransaction;
-      const transactionRef = doc(db, "clients", clientId);
-      await updateDoc(transactionRef, { transactions: updated });
+    updated[index] = newRow;
+
+    try {
+      const ref = doc(db, "clients", clientId);
+      await updateDoc(ref, { transactions: updated });
       setTransactions(updated);
-      setEditingIndex(null);
-      setEditedTransaction(null);
+      return newRow;
+    } catch (error) {
+      console.error("Save error:", error);
+      return oldRow;
     }
   };
 
-  const handleInsertClick = (index) => {
-    const newTx = {
-      date1: "",
-      date2: "",
-      description: "",
-      description2: "",
-      credit_amount: 0,
-      debit_amount: 0,
-      balance_amount: 0,
-    };
-    const updated = [...transactions];
-    updated.splice(index + 1, 0, newTx);
-    setTransactions(updated);
-  };
+  const handleRemoveZeros = async () => {
+    const confirm = window.confirm("Are you sure you want to remove all transactions with missing credit and debit amounts?");
+    if (!confirm) return;
 
+    const updatedTransactions = transactions.filter(
+      (tx) => !(
+        parseFloat(tx.credit_amount || 0) === 0 &&
+        parseFloat(tx.debit_amount || 0) === 0
+      )
+    );
+
+    const transactionRef = doc(db, "clients", clientId);
+    await updateDoc(transactionRef, {
+      transactions: updatedTransactions,
+    });
+
+    setTransactions(updatedTransactions);
+    alert("Transactions with missing credit and debit amounts have been removed.");
+  };
+ 
   const handleDeleteClick = async (index) => {
     const updated = [...transactions];
-    const removed = updated.splice(index, 1); // remove and store the deleted transaction
+    const removed = updated.splice(index, 1);
     setTransactions(updated);
-  
+
     try {
       const transactionRef = doc(db, "clients", clientId);
-  
-      // Format removed line for archive
+
       const archiveEntries = removed.map((tx) => ({
-        content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${tx.debit_amount || ""} ${tx.balance_amount || ""}`.trim(),
-        source: "EditTableOriginal",
+        content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${
+          tx.debit_amount || ""
+        } ${tx.balance_amount || ""}`.trim(),
+        source: "EditTableMissingBalance",
       }));
-  
-      // Get current archive (if exists)
+
       const docSnap = await getDoc(transactionRef);
       const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
-  
-      // Save updated transactions + updated archive
+
       await updateDoc(transactionRef, {
         transactions: updated,
         archive: [...currentArchive, ...archiveEntries],
       });
-  
+
       console.log("Transaction deleted and archived successfully.");
     } catch (err) {
       console.error("Failed to delete and archive transaction:", err);
     }
   };
 
-  const handleRemoveZeros = async () => {
-    const confirm = window.confirm("Remove all zero balance transactions?");
-    if (!confirm) return;
+  const handleCreateClick = async (index) => {
+    const createTx = {
+      original: "",
+      uid: uuidv4(),
+      id: "",
+      date1: "",
+      date2: "",
+      description: "",
+      description2: "",
+      fees_type: "",
+      fees_amount: 0,
+      credit_debit_amount: 0,
+      credit_amount: 0,
+      debit_amount: 0,
+      balance_amount: 0,
+      verified: "✗",
+      category: "",
+      subcategory: "",
+    };
+    createTx.id = createTx.uid;
+    const updated = [...transactions];
+    updated.splice(index + 1, 0, createTx);
+    setTransactions(updated);
 
-    const removed = transactions.filter(
-      (tx) => parseFloat(tx.balance_amount || 0) === 0
-    );
-    const remaining = transactions.filter(
-      (tx) => parseFloat(tx.balance_amount || 0) !== 0
-    );
-
-    const archiveEntries = removed.map((tx) => ({
-      content: `${tx.description || ""} ${tx.description2 || ""}`.trim(),
-      source: "EditTableMissingAllAmounts",
-    }));
-
-    const transactionRef = doc(db, "clients", clientId);
-    const docSnap = await getDoc(transactionRef);
-    const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
-
-    await updateDoc(transactionRef, {
-      transactions: remaining,
-      archive: [...currentArchive, ...archiveEntries],
-    });
-
-    setTransactions(remaining);
-    alert("Removed and archived all zero balance transactions.");
+    try {
+      const transactionRef = doc(db, "clients", clientId);
+      await updateDoc(transactionRef, { transactions: updated });
+      console.log("Transaction created successfully.");
+    } catch (err) {
+      console.error("Failed to create transaction:", err);
+    }
   };
-
-  const headers = (
-    <tr>
-      <th className="px-2 py-2 w-[20px] border border-gray-700">+</th>
-      <th className="px-2 py-2 w-[20px] border border-gray-700">X</th>
-      <th className="px-4 py-2 w-[60px] border border-gray-700">Date1</th>
-      <th className="px-4 py-2 w-[60px] border border-gray-700">Date2</th>
-      <th className="px-4 py-2 w-[600px] border border-gray-700">Description</th>
-      <th className="px-4 py-2 w-[200px] border border-gray-700">Description2</th>
-      <th className="px-4 py-2 w-[80px] border border-gray-700">Credit</th>
-      <th className="px-4 py-2 w-[80px] border border-gray-700">Debit</th>
-      <th className="px-4 py-2 w-[80px] border border-gray-700">Balance</th>
-      <th className="px-4 py-2 w-[80px] border border-gray-700">Actions</th>
-    </tr>
-  );
-
-  const rows = filteredTransactions.map((tx, index) => {
-    const isEditing = editingIndex === index;
-
-    return (
-      <tr key={tx.id || index} className="border-t border-gray-700">
-        <td className="px-2 py-2 border border-gray-700">
-          <button className="text-green-500" onClick={() => handleInsertClick(index)}>+</button>
-        </td>
-        <td className="px-2 py-2 border border-gray-700">
-          <button className="text-red-500" onClick={() => handleDeleteClick(index)}>X</button>
-        </td>
-
-
-        {isEditing ? (
-          <>
-            <td><input className="w-full text-black" value={editedTransaction.date1} onChange={(e) => handleInputChange("date1", e.target.value)} /></td>
-            <td><input className="w-full text-black" value={editedTransaction.date2} onChange={(e) => handleInputChange("date2", e.target.value)} /></td>
-            <td><input className="w-full text-black" value={editedTransaction.description} onChange={(e) => handleInputChange("description", e.target.value)} /></td>
-            <td><input className="w-full text-black" value={editedTransaction.description2} onChange={(e) => handleInputChange("description2", e.target.value)} /></td>
-            <td><input className="w-full text-black" value={editedTransaction.credit_amount} onChange={(e) => handleInputChange("credit_amount", e.target.value)} /></td>
-            <td><input className="w-full text-black" value={editedTransaction.debit_amount} onChange={(e) => handleInputChange("debit_amount", e.target.value)} /></td>
-            <td><input className="w-full text-black" value={editedTransaction.balance_amount} onChange={(e) => handleInputChange("balance_amount", e.target.value)} /></td>
-            <td>
-              <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={handleSaveClick}>Save</button>
-            </td>
-          </>
-        ) : (
-          <>
-            <td className="px-4 py-2 border border-gray-700">{tx.date1 || "—"}</td>
-            <td className="px-4 py-2 border border-gray-700">{tx.date2 || "—"}</td>
-            <td className="px-4 py-2 border border-gray-700">{tx.description || "—"}</td>
-            <td className="px-4 py-2 border border-gray-700">{tx.description2 || "—"}</td>
-            <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.credit_amount || 0).toFixed(2)}</td>
-            <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.debit_amount || 0).toFixed(2)}</td>
-            <td className="px-4 py-2 border border-gray-700">R {parseFloat(tx.balance_amount || 0).toFixed(2)}</td>
-            <td className="px-4 py-2 border border-gray-700">
-              <button
-                className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-                onClick={() => handleEditClick(index)}
-              >
-                Edit
-              </button>
-            </td>
-          </>
-        )}
-      </tr>
-    );
-  });
 
   return (
     <div>
-      <h1 className="text-sm font-semibold mb-4">Zero Balance Transactions</h1>
-      <button
-        className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded mb-4"
-        onClick={handleRemoveZeros}
-      >
-        Remove All
-      </button>
-      <BaseTable headers={headers} rows={rows} />
-      <p className="mt-4 text-gray-400">
-        Total zero balance transactions: {filteredTransactions.length}
-      </p>
+      <Grid container spacing={2} sx={{ mt: 4 }}>
+
+        <Grid size={12}>
+          <Typography variant="h6"> Missing Balance Transactions</Typography>
+        </Grid>
+        <Grid size={12}>
+        {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+              <CircularProgress />
+            </Box>
+          ) : rows.length === 0 ? (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+              <Typography variant="body1">No missing Balance found.</Typography>
+            </Box>
+          ) : (
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              editMode="row"
+              getRowId={(row) => row.id}
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={setRowModesModel}
+              processRowUpdate={processRowUpdate}
+              getRowClassName={(params) =>
+                params.id === Object.keys(rowModesModel)[0] ? "editing-row" : ""
+              }
+              pageSizeOptions={[20, 50, 100]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 20, page: 0 } },
+              }}
+              slots={{ toolbar: CustomToolbar }}
+              sx={{
+                height: 690,
+                width: "100%",
+                overflow: "auto",
+              }}
+            />
+          )}
+        </Grid>
+      </Grid>
     </div>
   );
 };

@@ -52,6 +52,9 @@ const verifyDatabase = async (id) => {
           if (!tx.uid) {
             updatedTx.uid = uuidv4();
           }
+          // Ensure `id` is always present and matches `uid`
+          updatedTx.id = updatedTx.uid;
+
           return updatedTx;
         });
 
