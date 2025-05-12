@@ -84,12 +84,25 @@ export const deleteTransactionDatabase = async (bankName, transactionId) => {
 // clear function
 export const clearTransactionDatabase = async (bankName) => {
   try {
-          const collectionRef = collection(db, `transaction_database/${bankName}/transactions`);
-          const snapshot = await getDocs(collectionRef);
-    
-          const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
-          await Promise.all(deletePromises);
+    const collectionRef = collection(db, `transaction_database/${bankName}/transactions`);
+    const snapshot = await getDocs(collectionRef);
+
+    const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
   } catch (error) {
     console.error("Error clearing Transaction Data:", error);
+  }
+};
+
+
+export const BulkDeleteTransactionDatabase = async (bankName) => {
+  try {
+    const collectionRef = collection(db, `transaction_database/${bankName}/transactions`);
+    const snapshot = await getDocs(collectionRef);
+
+    const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Bulk delete failed:", error);
   }
 };

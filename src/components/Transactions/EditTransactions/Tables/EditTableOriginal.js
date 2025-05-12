@@ -127,6 +127,87 @@ const EditTableOriginal = ({ clientId }) => {
     fetchData();
   }, [clientId]);
 
+  const processRowUpdate = async (newRow, oldRow) => {
+    const updated = [...transactions];
+    const index = transactions.findIndex((tx) => tx.uid === newRow.uid);
+
+    if (index === -1) return oldRow;
+
+    updated[index] = newRow;
+
+    try {
+      const ref = doc(db, "clients", clientId);
+      await updateDoc(ref, { transactions: updated });
+      setTransactions(updated);
+      return newRow;
+    } catch (error) {
+      console.error("Save error:", error);
+      return oldRow;
+    }
+  };
+
+  const handleDeleteClick = async (index) => {
+    const updated = [...transactions];
+    const removed = updated.splice(index, 1);
+    setTransactions(updated);
+
+    try {
+      const transactionRef = doc(db, "clients", clientId);
+
+      const archiveEntries = removed.map((tx) => ({
+        content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${
+          tx.debit_amount || ""
+        } ${tx.balance_amount || ""}`.trim(),
+        source: "EditTableOriginal",
+      }));
+
+      const docSnap = await getDoc(transactionRef);
+      const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
+
+      await updateDoc(transactionRef, {
+        transactions: updated,
+        archive: [...currentArchive, ...archiveEntries],
+      });
+
+      console.log("Transaction deleted and archived successfully.");
+    } catch (err) {
+      console.error("Failed to delete and archive transaction:", err);
+    }
+  };
+
+  const handleCreateClick = async (index) => {
+    const createTx = {
+      original: "",
+      uid: uuidv4(),
+      id: "",
+      date1: "",
+      date2: "",
+      description: "",
+      description2: "",
+      fees_type: "",
+      fees_amount: 0,
+      credit_debit_amount: 0,
+      credit_amount: 0,
+      debit_amount: 0,
+      balance_amount: 0,
+      verified: "✗",
+      category: "",
+      subcategory: "",
+    };
+    createTx.id = createTx.uid;
+    const updated = [...transactions];
+    updated.splice(index + 1, 0, createTx);
+    setTransactions(updated);
+
+    try {
+      const transactionRef = doc(db, "clients", clientId);
+      await updateDoc(transactionRef, { transactions: updated });
+      console.log("Transaction created successfully.");
+    } catch (err) {
+      console.error("Failed to create transaction:", err);
+    }
+  };
+
   const rows = transactions.map((tx) => ({
     id: tx.uid || uuidv4(),
     ...tx,
@@ -224,87 +305,6 @@ const EditTableOriginal = ({ clientId }) => {
       },
     },
   ];
-
-  const processRowUpdate = async (newRow, oldRow) => {
-    const updated = [...transactions];
-    const index = transactions.findIndex((tx) => tx.uid === newRow.uid);
-
-    if (index === -1) return oldRow;
-
-    updated[index] = newRow;
-
-    try {
-      const ref = doc(db, "clients", clientId);
-      await updateDoc(ref, { transactions: updated });
-      setTransactions(updated);
-      return newRow;
-    } catch (error) {
-      console.error("Save error:", error);
-      return oldRow;
-    }
-  };
-
-  const handleDeleteClick = async (index) => {
-    const updated = [...transactions];
-    const removed = updated.splice(index, 1);
-    setTransactions(updated);
-
-    try {
-      const transactionRef = doc(db, "clients", clientId);
-
-      const archiveEntries = removed.map((tx) => ({
-        content: `${tx.description || ""} ${tx.description2 || ""} ${tx.credit_amount || ""} ${
-          tx.debit_amount || ""
-        } ${tx.balance_amount || ""}`.trim(),
-        source: "EditTableOriginal",
-      }));
-
-      const docSnap = await getDoc(transactionRef);
-      const currentArchive = docSnap.exists() ? docSnap.data().archive || [] : [];
-
-      await updateDoc(transactionRef, {
-        transactions: updated,
-        archive: [...currentArchive, ...archiveEntries],
-      });
-
-      console.log("Transaction deleted and archived successfully.");
-    } catch (err) {
-      console.error("Failed to delete and archive transaction:", err);
-    }
-  };
-
-  const handleCreateClick = async (index) => {
-    const createTx = {
-      original: "",
-      uid: uuidv4(),
-      id: "",
-      date1: "",
-      date2: "",
-      description: "",
-      description2: "",
-      fees_type: "",
-      fees_amount: 0,
-      credit_debit_amount: 0,
-      credit_amount: 0,
-      debit_amount: 0,
-      balance_amount: 0,
-      verified: "✗",
-      category: "",
-      subcategory: "",
-    };
-    createTx.id = createTx.uid;
-    const updated = [...transactions];
-    updated.splice(index + 1, 0, createTx);
-    setTransactions(updated);
-
-    try {
-      const transactionRef = doc(db, "clients", clientId);
-      await updateDoc(transactionRef, { transactions: updated });
-      console.log("Transaction created successfully.");
-    } catch (err) {
-      console.error("Failed to create transaction:", err);
-    }
-  };
 
   return (
     <div>

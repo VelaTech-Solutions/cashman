@@ -147,41 +147,38 @@ const UncategorizedTable = ({ clientId }) => {
 
 
 
-  // Fetch client data
   useEffect(() => {
-    const loadData = async () => {
+    const fetchData = async () => {
       try {
-        const data = await LoadClientData(clientId);
-        if (!data) {
-          setError("Client not found.");
-        } else {
-          setClientData(data);
-          setBankName(data.bankName);
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setBankName(clientData.bankName || "Unknown");
+        setTransactions(clientData.transactions || []);
 
-          setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
-        }
       } catch (err) {
-        setError("Failed to load client data.");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching data:", err.message);
+        setError("Failed to fetch Client Data.");
       }
     };
-
-    loadData();
+    fetchData();
   }, [clientId]);
+
 
   // load transaction database
   useEffect(() => {
+    if (!bankName) return;
     const fetchTransactionDb = async () => {
+      setLoading(true);
       try {
         const transactionsData = await loadTransactionDatebase(bankName);
         setTransactionDb(transactionsData);
       } catch (err) {
         console.error("Error fetching transactions:", err);
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchTransactionDb();
   }, [bankName]);
 
@@ -274,7 +271,6 @@ const UncategorizedTable = ({ clientId }) => {
       console.error("Error updating transactions:", error);
     }
   };
-
   
   const handleClearCategorized = async () => {
     try {

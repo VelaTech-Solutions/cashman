@@ -30,6 +30,7 @@ import ViewSettings from "components/Settings/ViewSettings/ViewSettingsPage";
 import EditSettings from "components/Settings/EditSettings/EditSettingsPage";
 import CategorySettings from "components/Settings/CategorySettings/CategorySettingsPage";
 import ExtractSettings from "components/Settings/ExtractSettings/ExtractSettingsPage";
+import DatabaseSettings from "components/Settings/DatabaseSettings/DatabaseSettingsPage";
 
 // Help Pages
 import HelpView from "components/Help/HelpView";
@@ -72,6 +73,7 @@ const RoutesConfig = () => {
         <Route path="/EditSettings" element={<EditSettings />} />
         <Route path="/categorysettings/:id" element={<CategorySettings />} />
         <Route path="/extractsettings/:id" element={<ExtractSettings />} />
+        <Route path="/databasesettings" element={<DatabaseSettings />} />
         <Route path="/settings" element={<Settings />} />
 
         {/* Help pages */}

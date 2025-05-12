@@ -7,7 +7,7 @@ import CategorizeOverview1 from "../OverViews/CategorizeTransactionsOverview1";
 const ContainerOverViews = ({ transactions }) => {
   const [activeView, setActiveView] = useState("view1");
   const views = [
-    { key: "view1", label: "View 1", Component: <CategorizeOverview1 transactions={transactions || []} /> },
+    { key: "view1", label: "View 1", Component: <CategorizeOOverview1 transactions={transactions || []} /> },
 
   ];
   return (

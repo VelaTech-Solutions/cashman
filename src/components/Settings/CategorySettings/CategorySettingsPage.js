@@ -7,7 +7,7 @@ import { Sidebar } from 'components/Common';
 // Nested Components
 import CategorySettingsAddCategory from "../CategorySettings/Views/CategorySettingsAddCategory"; 
 import CategorySettingsAddSubcategory from "../CategorySettings/Views/CategorySettingsAddSubcategory";
-import CategorySettingsTransactions from "../CategorySettings/Views/CategorySettingsTransactions"; 
+import TransactionDatabase from "../CategorySettings/Views/TransactionsDatabaseView"; 
 
 const CategorySettings = () => {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const CategorySettings = () => {
           onClick={() => setActivePage("transactions")}
           className="w-full text-left px-4 py-2 mb-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded transition-all"
         >
-          📂 View Transactions
+          📂 Transaction db
         </button>
       ),
     },
@@ -56,7 +56,7 @@ const CategorySettings = () => {
       <Sidebar title="Category Settings" links={links} />
 
       <div className="flex-1 p-8">
-        {activePage === "transactions" && <CategorySettingsTransactions />}
+        {activePage === "transactions" && <TransactionDatabase />}
 
         {activePage === "add-category" && <CategorySettingsAddCategory />}
 

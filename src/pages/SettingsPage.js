@@ -10,6 +10,7 @@ import { db } from "../firebase/firebase";
 // Component Imports
 import { Sidebar } from 'components/Common';
 import MainSettings from "../components/Settings/MainSettings/Containers/ContainerViews";
+import DatabaseSettings from "../components/Settings/DatabaseSettings/Containers/ContainerViews";
 import FilterSettings from "../components/Settings/FilterSettings/Containers/ContainerViews";
 import CategorySettings from "../components/Settings/CategorySettings/Containers/ContainerViews";
 import ExtractSettings from "../components/Settings/ExtractSettings/Containers/ContainerViews";
@@ -49,6 +50,14 @@ function SettingsPage() {
           >
             Main Settings
           </button>
+
+          <button 
+            onClick={() => setViewMode("databaseSettings")}
+            className={`px-4 py-2 rounded ${viewMode === "databaseSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          >
+            Database Settings
+          </button>
+
           <button 
             onClick={() => setViewMode("categorySettings")}
             className={`px-4 py-2 rounded ${viewMode === "categorySettings" ? "bg-blue-500" : "bg-gray-700"}`}
@@ -83,6 +92,7 @@ function SettingsPage() {
         
         {/* Conditional Rendering Based on Active Section */}
         {viewMode === "mainSettings" && <MainSettings />}
+        {viewMode === "databaseSettings" && <DatabaseSettings />}
         {viewMode === "filterSettings" && <FilterSettings />}
         {viewMode === "categorySettings" && <CategorySettings />}
         {viewMode === "extractSettings" && <ExtractSettings />}

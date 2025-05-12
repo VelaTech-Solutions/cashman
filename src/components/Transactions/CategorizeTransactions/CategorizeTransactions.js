@@ -8,6 +8,7 @@ import SmartCategorizer from "components/Transactions/CategorizeTransactions/Sma
 import AICategorizer from "components/Transactions/CategorizeTransactions/AICategorizer/AICategorizePage";
 // import PlayCategorizer from "components/Transactions/CategorizeTransactions/PlayCategorizer/PlayCategorizer";
 
+
 const CategorizeTransactions = () => {
   const { id: clientId } = useParams();
   const [activePage, setActivePage] = useState("NormalCategorizer");
@@ -51,6 +52,8 @@ const CategorizeTransactions = () => {
     },
     { type: "divider" },
     { path: `/categorysettings/${clientId}`, label: "Category Settings", icon: "ph-file-text" },
+  
+    { path: "/databasesettings", label: "Transaction Database", icon: "ph-file-text" }, 
     { path: "/HelpCategory", label: "Category Help", icon: "ph-file-text" },
   ];
 
