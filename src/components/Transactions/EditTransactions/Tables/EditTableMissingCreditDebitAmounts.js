@@ -135,14 +135,6 @@ const EditTableMissingCreditDebitAmounts = ({ clientId }) => {
     fetchData();
   }, [clientId]);
 
-
-  // const isInvalidAmounts = (credit_amount, debit_amount) => {
-  //   const num = Number(credit_amount, debit_amount);
-  //   return isNaN(num) || num === 0;
-  // };
-
-  // const filteredTransactions = transactions.filter((tx) => !(isInvalidAmounts(tx.credit_amount, tx.debit_amount)));
-
   // Only include transactions with 0 credit and 0 debit
   const filteredTransactions = transactions.filter(tx =>
     parseFloat(tx.credit_amount || 0) === 0 &&
@@ -355,6 +347,7 @@ const EditTableMissingCreditDebitAmounts = ({ clientId }) => {
         <Grid size={12}>
           <Typography variant="h6"> Missing Credit & Debit Transactions</Typography>
         </Grid>
+        
         <Grid size={12}>
         {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>

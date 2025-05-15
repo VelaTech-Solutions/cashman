@@ -2,29 +2,29 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// Firebase imports
-import { getFirestore } from "firebase/firestore";
-
 // Component Imports
 import LoadClientData from "components/Common/LoadClientData";
-import InsuranceDataTable1 from "./InsuranceBreakdown/InsuranceDataTable1";
+import InsuranceDataTable from "./Tables/InsuranceDataTable";
 
 const InsuranceBreakdown = () => {
   const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
-  const db = getFirestore();
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await LoadClientData(clientId);
-        setClientData(data);
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setTransactions(clientData.transactions || []);
       } catch (err) {
-        console.error("Error fetching data:", err.message);
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
       }
     };
     fetchData();
   }, [clientId]);
+
 
   if (!clientData) return <div className="text-center py-10 text-gray-400">Loading client data...</div>;
 
@@ -34,7 +34,7 @@ const InsuranceBreakdown = () => {
 
       {/* Render the Insurance Table */}
       <div className="mt-6">
-        <InsuranceDataTable1 insurance={clientData.insurance} />
+        <InsuranceDataTable insurance={clientData.insurance} />
       </div>
     </div>
   );

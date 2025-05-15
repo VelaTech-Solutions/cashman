@@ -1,6 +1,6 @@
 import React from "react";
 
-const BudgetSummaryView1 = ({ budgetData }) => {
+const SummaryView = ({ budgetData }) => {
   // Default values to avoid `NaN`
   const defaultValues = {
     incomeavg: 0,
@@ -142,4 +142,4 @@ const BudgetSummaryView1 = ({ budgetData }) => {
   );
 };
 
-export default BudgetSummaryView1;
+export default SummaryView;

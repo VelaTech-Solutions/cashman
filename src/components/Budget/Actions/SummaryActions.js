@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const BudgetSummaryActions1 = ({
+const SummaryActions = ({
   notes,
   setNote,
   note,
@@ -106,4 +106,4 @@ const BudgetSummaryActions1 = ({
   );
 };
 
-export default BudgetSummaryActions1;
+export default SummaryActions;

@@ -111,13 +111,12 @@ const EditTableMissingDescriptions = ({ clientId }) => {
   const [editingRowId, setEditingRowId] = useState(null);
   const [rowModesModel, setRowModesModel] = useState({});
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); // default true
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // simulate loading or fetch logic
     setTimeout(() => {
       setLoading(false);
-    }, 1000); // or when your actual data is ready
+    }, 1000);
   }, []);
   
 
@@ -141,7 +140,6 @@ const EditTableMissingDescriptions = ({ clientId }) => {
   };
   
   const filteredTransactions = transactions.filter(tx => isInvalidDescription(tx.description));
-
 
   const rows = filteredTransactions.map((tx) => ({
     id: tx.uid || uuidv4(),
@@ -329,6 +327,8 @@ const EditTableMissingDescriptions = ({ clientId }) => {
         <Grid size={12}>
           <Typography variant="h6"> Missing Description Transactions</Typography>
         </Grid>
+
+
         <Grid size={12}>
         {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
@@ -336,7 +336,7 @@ const EditTableMissingDescriptions = ({ clientId }) => {
             </Box>
           ) : rows.length === 0 ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-              <Typography variant="body1">No missing dates found.</Typography>
+              <Typography variant="body1">No missing description found.</Typography>
             </Box>
           ) : (
             <DataGrid

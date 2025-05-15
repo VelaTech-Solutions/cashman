@@ -14,6 +14,7 @@ import DatabaseSettings from "../components/Settings/DatabaseSettings/Containers
 import FilterSettings from "../components/Settings/FilterSettings/Containers/ContainerViews";
 import CategorySettings from "../components/Settings/CategorySettings/Containers/ContainerViews";
 import ExtractSettings from "../components/Settings/ExtractSettings/Containers/ContainerViews";
+import BudgetSettings from "../components/Settings/BudgetSettings/Containers/ContainerViews";
 // import EditSettings from "../components/Settings/EditSettings/EditSettings";
 // import ViewSettings from "../components/Settings/ViewSettings/ViewSettings";
 
@@ -58,6 +59,13 @@ function SettingsPage() {
             Database Settings
           </button>
 
+          <button
+            onClick={() => setViewMode("budgetsettings")}
+            className={`px-4 py-2 rounded ${viewMode === "budgetsettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          >
+            Budget Settings
+          </button>
+
           <button 
             onClick={() => setViewMode("categorySettings")}
             className={`px-4 py-2 rounded ${viewMode === "categorySettings" ? "bg-blue-500" : "bg-gray-700"}`}
@@ -93,6 +101,7 @@ function SettingsPage() {
         {/* Conditional Rendering Based on Active Section */}
         {viewMode === "mainSettings" && <MainSettings />}
         {viewMode === "databaseSettings" && <DatabaseSettings />}
+        {viewMode === "budgetsettings" && <BudgetSettings />}
         {viewMode === "filterSettings" && <FilterSettings />}
         {viewMode === "categorySettings" && <CategorySettings />}
         {viewMode === "extractSettings" && <ExtractSettings />}

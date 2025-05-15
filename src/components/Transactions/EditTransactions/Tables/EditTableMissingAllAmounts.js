@@ -110,14 +110,13 @@ const EditTableMissingAllAmounts = ({ clientId }) => {
   const [editingRowId, setEditingRowId] = useState(null);
   const [rowModesModel, setRowModesModel] = useState({});
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); // default true
+  const [loading, setLoading] = useState(true);
  
 
   useEffect(() => {
-    // simulate loading or fetch logic
     setTimeout(() => {
       setLoading(false);
-    }, 1000); // or when your actual data is ready
+    }, 1000); 
   }, []);
   
 
@@ -142,12 +141,10 @@ const EditTableMissingAllAmounts = ({ clientId }) => {
     parseFloat(tx.balance_amount || 0) === 0
   );
 
-
   const rows = filteredTransactions.map((tx) => ({
     id: tx.uid || uuidv4(),
     ...tx,
   }));
-
 
   const columns = [
     {
@@ -350,6 +347,7 @@ const EditTableMissingAllAmounts = ({ clientId }) => {
         <Grid size={12}>
           <Typography variant="h6"> Missing All Amounts Transactions</Typography>
         </Grid>
+        
         <Grid size={12}>
         {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>

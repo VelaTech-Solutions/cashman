@@ -110,16 +110,14 @@ const EditTableInvalid = ({ clientId }) => {
   const [editingRowId, setEditingRowId] = useState(null);
   const [rowModesModel, setRowModesModel] = useState({});
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); // default true
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // simulate loading or fetch logic
     setTimeout(() => {
       setLoading(false);
-    }, 1000); // or when your actual data is ready
+    }, 1000); 
   }, []);
   
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -133,7 +131,6 @@ const EditTableInvalid = ({ clientId }) => {
     };
     fetchData();
   }, [clientId]);
-
 
   // this needs to change all fields reminder
   const isInvalidDate = (date) => {

@@ -115,10 +115,9 @@ const EditTableMissingBalanceAmounts = ({ clientId }) => {
 
 
   useEffect(() => {
-    // simulate loading or fetch logic
     setTimeout(() => {
       setLoading(false);
-    }, 1000); // or when your actual data is ready
+    }, 1000);
   }, []);
   
 

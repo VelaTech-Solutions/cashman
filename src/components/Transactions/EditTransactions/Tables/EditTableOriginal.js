@@ -111,7 +111,13 @@ const EditTableOriginal = ({ clientId }) => {
   const [editingRowId, setEditingRowId] = useState(null);
   const [rowModesModel, setRowModesModel] = useState({});
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -316,9 +322,13 @@ const EditTableOriginal = ({ clientId }) => {
 
 
         <Grid size={12}>
-          {rows.length === 0 ? (
+        {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
               <CircularProgress />
+            </Box>
+          ) : rows.length === 0 ? (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+              <Typography variant="body1">No transactions found.</Typography>
             </Box>
           ) : (
             <DataGrid

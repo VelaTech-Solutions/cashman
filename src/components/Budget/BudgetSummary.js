@@ -10,11 +10,11 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 // Component Imports
 import LoadClientData from "components/Common/LoadClientData";
 import { TemplateContext } from "components/Common/TemplateContext"; 
-import { generateBudgetReport } from "components/Budget/xlsxModule"; 
-import BudgetSummaryActions1 from "./BudgetSummaryView/Acttions/BudgetSummaryActions1";
-import BudgetSummaryView1 from "./BudgetSummaryView/Views/BudgetSummaryView1";
-import BudgetSummaryView2 from "./BudgetSummaryView/Views/BudgetSummaryView2";
-import BudgetSummaryView3 from "./BudgetSummaryView/Views/BudgetSummaryView3";
+import { generateBudgetReport } from "components/Budget/Utils/xlsxModule"; 
+
+import SummaryActions from "./Actions/SummaryActions";
+import SummaryView from "./Views/SummaryView";
+
 // import BudgetSummaryView4 from "./BudgetSummaryView/Views/BudgetSummaryView4";
 
 const BudgetSummary = () => {
@@ -104,52 +104,9 @@ const disposableIncome = incomeAvg - totalExpenses;
     <div className="bg-gray-800 p-6 rounded-lg shadow-md">
       <h2 className="text-xl text-white font-bold mb-4">Budget Summary</h2>
 
-      {/* View Mode Toggle */}
-      <div className="flex space-x-1">
-        {[
-          { mode: 1, label: "📊" },
-          { mode: 2, label: "📋" },
-          { mode: 3, label: "🎛️" },
-          { mode: 4, label: "🚀" },
-        ].map(({ mode, label }) => (
-          <button
-            key={mode}
-            onClick={() => setViewMode(mode)}
-            className={`px-3 py-1 text-xs rounded-md transition-all duration-300 shadow-sm ${
-              viewMode === mode ? "bg-blue-500 shadow-md" : "bg-gray-800 hover:bg-gray-700 hover:shadow-sm"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
       {/* Render the Selected View */}
       <div className="mt-6">
-        {viewMode === 1 ? (
-          <BudgetSummaryView1 budgetData={clientData.budgetData} />
-
-        ) : viewMode === 2 ? (
-          <BudgetSummaryView2
-            incomeAvg={incomeAvg}
-            savingsAvg={savingsAvg}
-            housingAvg={housingAvg}
-            transportationAvg={transportationAvg}
-            expensesAvg={expensesAvg}
-            debtAvg={debtAvg}
-          />
-        ) : viewMode === 3 ? (
-          <BudgetSummaryView3
-            incomeAvg={incomeAvg}
-            savingsAvg={savingsAvg}
-            housingAvg={housingAvg}
-            transportationAvg={transportationAvg}
-            expensesAvg={expensesAvg}
-            debtAvg={debtAvg}
-          />
-        ) : (
-          <BudgetSummaryView4 insurance={clientData.insurance} />
-        )}
+          <SummaryView budgetData={clientData.budgetData} />
       </div>
 
 
@@ -158,7 +115,7 @@ const disposableIncome = incomeAvg - totalExpenses;
 
         {/* Button Actions */}
         <div className="flex space-x-3">
-          <BudgetSummaryActions1
+          <SummaryActions
             notes={notes || []}
             setNote={setNote}
             note={note}
@@ -167,10 +124,6 @@ const disposableIncome = incomeAvg - totalExpenses;
             deleteAllNotes={() => console.log("Delete All Notes")}
           />
         </div>
-
-
-        {/*  */}
-
         {/* Download Button - Lighter Feel */}
         <motion.button
           whileHover={{ scale: 1.05 }}

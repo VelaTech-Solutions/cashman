@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import moment from "moment";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
@@ -6,24 +6,74 @@ import { db } from "../../../firebase/firebase";
 import { 
   LoadClientData,
   loadCategories, 
-  loadSubcategories,
+  LoadSubcategories,
  } from "components/Common";
-const PersonalBudgetView1 = ({ transactions, clientId }) => {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+const BudgetView = ({ transactions, clientId }) => {
+
+    const [clientData, setClientData] = useState(null);
+    //const [transactions, setTransactions] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [category, setCategory] = useState('');
+    //const [subcategory, setSubcategory] = useState('');
+      const [categories, setCategories] = useState([]);
+    //const [subcategories, setSubcategories] = useState([]);
 
   if (!transactions || transactions.length === 0) {
     return <div className="text-center py-6">No transactions available</div>;
   }
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const clientData = await LoadClientData(clientId);
+  //       setClientData(clientData);
+  //       setTransactions(clientData.transactions || []);
+  //     } catch (err) {
+  //       console.error("🔥 Error fetching client data:", err.message);
+  //       setError("Failed to fetch Client Data.");
+  //     }
+  //   };
+  //   fetchData();
+  // }, [clientId]);
 
-  const categories = [
-    { name: "Income", filter: (t) => t.category === "Income", key: "credit_amount" },
-    { name: "Savings", filter: (t) => t.category === "Savings", key: "debit_amount" },
-    { name: "Housing", filter: (t) => t.category === "Housing", key: "debit_amount" },
-    { name: "Transport", filter: (t) => t.category === "Transportation", key: "debit_amount" },
-    { name: "Expenses", filter: (t) => t.category === "Expenses", key: "debit_amount" },
-    { name: "Debits", filter: (t) => t.category === "Debits", key: "debit_amount" },
-  ];
+  // Load categories subcategories
+  useEffect(() => {
+  const fetchCats = async () => {
+    const cats = await loadCategories(); // assuming this returns [{ name, subcategories }]
+    const enriched = cats.map(cat => ({
+      ...cat,
+      key: cat.name === "Income" ? "credit_amount" : "debit_amount",
+      filter: (t) => t.category === cat.name
+    }));
+    setCategories(enriched);
+  };
+
+    fetchCats();
+  }, []);
+
+
+  // // Load subcategories when category changes
+  // useEffect(() => {
+  //   const fetchSubs = async () => {
+  //     if (!category) return;
+  //     const subs = await loadSubcategories(category);
+  //     setSubcategories(subs);
+  //   };
+  //   fetchSubs();
+  // }, [category]);
+
+  // part of old code
+  // const categories = [
+  //   { name: "Income", filter: (t) => t.category === "Income", key: "credit_amount" },
+  //   { name: "Savings", filter: (t) => t.category === "Savings", key: "debit_amount" },
+  //   { name: "Housing", filter: (t) => t.category === "Housing", key: "debit_amount" },
+  //   { name: "Transport", filter: (t) => t.category === "Transportation", key: "debit_amount" },
+  //   { name: "Expenses", filter: (t) => t.category === "Expenses", key: "debit_amount" },
+  //   { name: "Debits", filter: (t) => t.category === "Debits", key: "debit_amount" },
+  // ];
+
+// so when we load the cat and subcat  only income is credit_amount
+//
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -36,7 +86,7 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
     categories.forEach(({ name, filter, key }) => {
       const txns = transactions.filter(filter);
       const total = txns.reduce((sum, t) => sum + (parseFloat(t[key]) || 0), 0);
-      const monthSet = new Set(txns.map(t => moment(t.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM")));
+      const monthSet = new Set(txns.map(t => moment(t.date1, ["DD/MM/YYYY"]).format("MMM")));
       const avg = monthSet.size > 0 ? total / monthSet.size : 0;
       totals[name.toLowerCase()] = parseFloat(total.toFixed(2));
       avgs[`${name.toLowerCase()}avg`] = parseFloat(avg.toFixed(2));
@@ -54,6 +104,13 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
     setLoading(false);
   };
 
+// things ill need
+// catname
+// subcatname
+// grandTotal
+// grandAvg
+// monthTotals
+// validMonths
   return (
     <div className="p-4">
       <button
@@ -63,11 +120,13 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
       >
         {loading ? "Calculating..." : "📊 Calculate & Save Budget"}
       </button>
-      {message && <p className="text-center text-lg font-bold text-green-400">{message}</p>}
 
-      {categories.map(({ name, filter, key }) => {
+
+{/* then i can create own type of looks ui design */}
+{/* //can we turn it into a standalone */}
+        {categories.map(({ name, filter, key }) => {
         const rows = transactions.filter(filter).reduce((acc, t) => {
-          const m = moment(t.date1, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("MMM");
+          const m = moment(t.date1, ["DD/MM/YYYY"]).format("MMM");
           const sub = t.subcategory || "Uncategorized";
           if (!acc[sub]) acc[sub] = { total: 0 };
           if (!acc[sub][m]) acc[sub][m] = 0;
@@ -84,6 +143,9 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
         const grandTotal = Object.values(monthTotals).reduce((s, v) => s + v, 0).toFixed(2);
         const validMonths = Object.values(monthTotals).filter(v => v !== 0);
         const grandAvg = validMonths.length ? (grandTotal / validMonths.length).toFixed(2) : "0.00";
+
+{/* // can we turn it into a standalone */}
+
 
         return (
           <div key={name} className="mb-4 p-2 border border-gray-300 rounded-md text-xs">
@@ -134,9 +196,10 @@ const PersonalBudgetView1 = ({ transactions, clientId }) => {
             </div>
           </div>
         );
-      })}
+              })}
+{/* then i can create own type of looks ui design */}
     </div>
   );
 };
 
-export default PersonalBudgetView1;
+export default BudgetView;

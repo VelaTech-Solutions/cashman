@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const InsuranceDataTable1 = () => {
+const InsuranceDataTable = () => {
   const maxRows = 14;
 
   // Function to create initial empty rows
@@ -106,4 +106,4 @@ const InsuranceDataTable1 = () => {
   );
 };
 
-export default InsuranceDataTable1;
+export default InsuranceDataTable;

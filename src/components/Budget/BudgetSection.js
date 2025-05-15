@@ -2,17 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// Firebase Imports
-import { getFirestore } from "firebase/firestore";
-
 // Component Imports
 import LoadClientData from "components/Common/LoadClientData";
-import PersonalBudgetView1 from "components/Budget/BudgetView/PersonalBudgetView1";
+import BudgetView from "components/Budget/Views/BudgetView";
 
 const BudgetSection = () => {
   const { id: clientId } = useParams();
   const [clientData, setClientData] = useState(null);
-  const db = getFirestore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +30,7 @@ const BudgetSection = () => {
 
       {/* Render the Budget View */}
       <div className="mt-6">
-        <PersonalBudgetView1 transactions={clientData.transactions} clientId={clientId} />
+        <BudgetView transactions={clientData.transactions} clientId={clientId} />
       </div>
     </div>
   );

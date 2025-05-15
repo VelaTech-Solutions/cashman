@@ -1,134 +1,67 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../firebase/firebase";
-import { LoadClientData, loadCategories, loadSubcategories } from "components/Common";
+import { LoadClientData } from "components/Common";
 
 // MUI Imports
-import { DataGrid } from "@mui/x-data-grid";
-import { Select, MenuItem, FormControl, InputLabel, Box } from "@mui/material";
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Button } from "@mui/material";
-
-
-const columns = [
-  { field: "date1", headerName: "Date", width: 150 },
-  { field: "description", headerName: "Description", width: 250 },
-  { field: "description2", headerName: "Description2", width: 250 },
-  { field: "credit_amount", headerName: "Credit", width: 120 },
-  { field: "debit_amount", headerName: "Debit", width: 120 },
-  { field: "balance_amount", headerName: "Balance", width: 120 },
-  { field: "category", headerName: "Category", width: 150 },
-  { field: "subcategory", headerName: "Subcategory", width: 150 },
-];
+import { 
+  Grid, 
+  Box, 
+  CircularProgress,
+  Typography, 
+  Button,
+  Stack, 
+  Chip, 
+  Divider  
+} from "@mui/material";
+import {
+  DataGrid,
+  GridActionsCellItem
+} from '@mui/x-data-grid';
+import DeleteIcon from "@mui/icons-material/Delete";
 
 
 const CategorizedTable = ({ clientId }) => {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [bankName, setBankName] = useState('');
-  const [category, setCategory] = useState('');
-  const [subcategory, setSubcategory] = useState('');
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
   const [error, setError] = useState(null);
-  const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-    },
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-          try {
-          const clientData = await LoadClientData(clientId);
-          setClientData(clientData);
-          setBankName(clientData.bankName || "Unknown");
-          setTransactions(clientData.transactions || []);
-
-          } catch (err) {
-          console.error("Error fetching data:", err.message);
-          setError("Failed to fetch Client Data.");
-          }
-      };
-  
-      fetchData();
-      }, [clientId]);
-
-  useEffect(() => {
-    const loadCats = async () => {
-      const cats = await loadCategories();
-      setCategories(cats);
-    };
-    loadCats();
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
   }, []);
 
   useEffect(() => {
-    const loadSubcats = async () => {
-      if (category) {
-        const subs = await loadSubcategories(category);
-        setSubcategories(subs);
-      } else {
-        setSubcategories([]);
+    const fetchData = async () => {
+      try {
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setTransactions(clientData.transactions || []);
+      } catch (err) {
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
       }
     };
-    loadSubcats();
-  }, [category]);
+    fetchData();
+  }, [clientId]);
 
-  
-
-  const Dropdown = ({ label, value, onChange, items, placeholder }) => (
-    <FormControl size="small" sx={{ minWidth: 150 }}>
-      <InputLabel sx={{ color: 'white' }}>{label}</InputLabel>
-      <Select
-        value={value}
-        label={label}
-        onChange={onChange}
-        sx={{
-          backgroundColor: '#333',
-          color: 'white',
-          '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
-          '&:hover': { backgroundColor: '#444' },
-          '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' },
-        }}
-      >
-        <MenuItem value="">{placeholder}</MenuItem>
-        {items.map((item) => (
-          <MenuItem key={item.id} value={item.id}>
-            {item.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  );
-
-  const handleCategorize = async (clientId, category, subcategory, transaction) => {
-    if (!clientId || !category || !subcategory || !transaction?.uid) {
-      console.error("Missing parameters for categorization");
-      return;
-    }
-    console.log("Categorizing transaction:", transaction);
+  const handleSingleResetClick = async (uid) => {
     try {
-      const clientRef = doc(db, "clients", clientId);
-      const clientDoc = await getDoc(clientRef);
-      const clientData = clientDoc.data();
+      const updated = transactions.map(txn =>
+        txn.uid === uid ? { ...txn, category: "", subcategory: "" } : txn
+      );
 
-      if (!clientData?.transactions) {
-        console.error("No transactions found for client.");
-        return;
-      }
+      setTransactions(updated);
 
-      const updatedTransactions = clientData.transactions.map((t) => {
-        if (t.uid === transaction.uid) {
-          return { ...t, category, subcategory };
-        }
-        return t;
+      await updateDoc(doc(db, "clients", clientId), {
+        transactions: updated,
       });
 
-      await updateDoc(clientRef, { transactions: updatedTransactions });
-      console.log(`✅ Transaction [UID: ${transaction.uid}] categorized.`);
+      console.log("Reset category and subcategory for one transaction");
     } catch (error) {
-      console.error("❌ Error categorizing transaction:", error);
+      console.error("Error updating transaction:", error);
     }
   };
 
@@ -153,85 +86,134 @@ const CategorizedTable = ({ clientId }) => {
     }
   };
 
+  const isCategorized = (txn) => txn.category && txn.subcategory;
+
+  const filteredTransactions = transactions.filter(isCategorized);
 
 
-  const handleSelectionModelChange = (selection) => {
-    const selected = transactions.filter((t) => selection.includes(t.uid));
-    setSelectedTransactions(selected);
-    console.log("🟡 Selected transactions:", selected);
-  };
+  const rows = filteredTransactions.map((tx) => ({
+    id: tx.uid,
+    ...tx,
+  }));
 
-  // Filter transactions based on category and subcategory but only display the trasactions that are categorized
-  const categorizedTransactions = transactions.filter(
-    (t) => t.category && t.subcategory
-  );
+  const columns = [
+    { field: "date1", headerName: "Date 1", width: 120, },
+    { field: "date2", headerName: "Date 2", width: 120, },
+    { field: "description", type: "string", headerName: "Description", width: 400, },
+    { field: "description2", type: "string", headerName: "Description +", width: 300, },
+    { field: "credit_amount", type: "number", headerName: "Credit Amount", width: 130, },
+    { field: "debit_amount", type: "number", headerName: "Debit Amount", width: 130, },
+    { field: "balance_amount", type: "number", headerName: "Balance Amount", width: 130, },
+    { field: "category", type: "string", headerName: "Category", width: 100, },
+    { field: "subcategory", type: "string", headerName: "Subcategory", width: 100, },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<DeleteIcon />}
+          label="Reset"
+          onClick={() => handleSingleResetClick(params.id)}
+        />
+      ],
+    },
+  ];
   
+   // Calculate progress
+  const categorizedCount = transactions.filter(transaction => transaction.category).length;
+  const totalTransactions = transactions.length;
+  const progress = (categorizedCount / totalTransactions) * 100;
+  
+  // Calculate category totals
+  const categoryTotals = {};
+  transactions.forEach(txn => {
+    const category = txn.category;
+    if (!category) return; // skip empty or undefined categories
+    if (!categoryTotals[category]) {
+      categoryTotals[category] = 0;
+    }
+    categoryTotals[category] += parseFloat(txn.debit_amount) || parseFloat(txn.credit_amount) || 0;
+  });
+
+
   if (error) return <div>{error}</div>;
 
-  return (
-    <ThemeProvider theme={darkTheme}>
-      <div className="flex gap-2 mb-4">
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
-          {/* <Dropdown
-            label="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            items={categories}
-            placeholder="Category"
-          />
-          <Dropdown
-            label="Subcategory"
-            value={subcategory}
-            onChange={(e) => setSubcategory(e.target.value)}
-            items={subcategories}
-            placeholder="Subcategory"
-          /> */}
-{/* 
-          <Button
-            variant="contained"
-            color="success"
-            size="small"
-            onClick={() => {
-              // Match All action
-            }}
-            startIcon={<span>📂</span>}
-          >
-            Match All
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => {
-              selectedTransactions.forEach((t) => {
-                handleCategorize(clientId, category, subcategory, t);
-              });
-            }}
-            startIcon={<span>📂</span>}
-          >
-            Categorize
-          </Button> */}
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={() => handleClearCategorized([])}
-            startIcon={<span>❌</span>}
-          >
-            Clear
-          </Button>
-        </Box>
-      </div>
+  const metricsSx = {
+    backgroundColor: "#424242",
+    color: 'white',
+  };
 
-      <div style={{ height: 600, width: '100%' }}>
-        <DataGrid
-          rows={categorizedTransactions.map((t) => ({ id: t.uid, ...t }))}
-          columns={columns}
-          checkboxSelection
-          // onSelectionModelChange={handleSelectionModelChange}
-        />
-      </div>
-    </ThemeProvider>
+  return (
+    <div>
+      <Grid container spacing={2} sx={{ mt: 4 }}>
+
+        <Grid size={12}>
+          <Stack spacing={1}>
+            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+              <Chip label={`Categorized: ${Math.round(progress)}%`} size="small" sx={metricsSx} />
+              <Chip label={`Categorized: ${filteredTransactions.length}/${transactions.length}`} size="small" sx={metricsSx} />
+              <Chip label={`Total: ${transactions.length}`} size="small" sx={metricsSx} />
+            </Stack>
+            <Divider sx={{ borderColor: "#555" }} />
+            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+              {Object.entries(categoryTotals)
+                .filter(([_, total]) => !isNaN(total) && total !== 0)
+                .map(([name, total]) => (
+                  <Chip
+                    key={name}
+                    label={`${name}: ${total.toFixed(2)}`}
+                    size="small"
+                    sx={metricsSx}
+                  />
+                ))}
+            </Stack>
+          </Stack>
+        </Grid>
+        
+        <Box sx={{ display: "flex", justifyContent: "flex", alignItems: "center", width: "100%", gap: 1 }}>
+       
+          <Button 
+            variant="contained" 
+            onClick={() => {
+              if (window.confirm("Are you sure you want to clear all categorized transactions?")) {
+                handleClearCategorized();
+              }
+            }} 
+            sx={{ backgroundColor: 'error.main', color: 'white' }}
+          >
+            Clear All
+          </Button>
+
+        </Box>
+
+        <Grid size={12}>
+        {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+              <CircularProgress />
+            </Box>
+          ) : rows.length === 0 ? (
+            <Typography sx={{ mt: 4 }} align="center">
+              No categorized transactions found.
+            </Typography>
+          ) : (
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              pageSizeOptions={[20, 50, 100]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 20, page: 0 } },
+              }}
+              sx={{
+                height: 690,
+                width: "100%",
+                overflow: "auto",
+              }}
+            />
+          )}
+        </Grid>
+      </Grid>
+    </div>
   );
 };
 
