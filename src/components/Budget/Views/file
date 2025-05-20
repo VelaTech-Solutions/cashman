@@ -1,0 +1,324 @@
+
+
+
+
+
+  const calculateBudget = async () => {
+    setLoading(true);
+    setMessage("");
+
+    let totals = {}, avgs = {};
+    categories.forEach(({ name, filter, key }) => {
+      const txns = transactions.filter(filter);
+      const total = txns.reduce((sum, t) => sum + (parseFloat(t[key]) || 0), 0);
+      const monthSet = new Set(txns.map(t => moment(t.date1, ["DD/MM/YYYY"]).format("MMM")));
+      const avg = monthSet.size > 0 ? total / monthSet.size : 0;
+      totals[name.toLowerCase()] = parseFloat(total.toFixed(2));
+      avgs[`${name.toLowerCase()}avg`] = parseFloat(avg.toFixed(2));
+    });
+
+    try {
+      const ref = doc(db, "clients", clientId);
+      await updateDoc(ref, { budgetData: { ...totals, ...avgs, timestamp: new Date().toISOString() } });
+      setMessage("✅ Budget calculated & saved successfully!");
+    } catch (err) {
+      console.error("🔥 Error saving budget:", err);
+      setMessage("❌ Failed to save budget.");
+    }
+
+    setLoading(false);
+  };
+
+
+    return (
+    <div className="p-4">
+      <button
+        onClick={calculateBudget}
+        className="px-6 py-3 mb-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg"
+        disabled={loading}
+      >
+        {loading ? "Calculating..." : "📊 Calculate & Save Budget"}
+      </button>
+
+
+{/* then i can create own type of looks ui design */}
+{/* //can we turn it into a standalone */}
+        {categories.map(({ name, filter, key }) => {
+        const rows = transactions.filter(filter).reduce((acc, t) => {
+          const m = moment(t.date1, ["DD/MM/YYYY"]).format("MMM");
+          const sub = t.subcategory || "Uncategorized";
+          if (!acc[sub]) acc[sub] = { total: 0 };
+          if (!acc[sub][m]) acc[sub][m] = 0;
+          acc[sub][m] += parseFloat(t[key]) || 0;
+          acc[sub].total += parseFloat(t[key]) || 0;
+          return acc;
+        }, {});
+
+        const monthTotals = months.reduce((acc, m) => {
+          acc[m] = Object.values(rows).reduce((s, r) => s + (r[m] || 0), 0);
+          return acc;
+        }, {});
+
+        const grandTotal = Object.values(monthTotals).reduce((s, v) => s + v, 0).toFixed(2);
+        const validMonths = Object.values(monthTotals).filter(v => v !== 0);
+        const grandAvg = validMonths.length ? (grandTotal / validMonths.length).toFixed(2) : "0.00";
+
+
+
+{/* between here i just want to add a quick debug
+display and count the transactions that are cateorgies add up the once whith the same dates
+remember the fiormat is dd/mm/yyyy
+ */}
+ <Box sx={{ mt: 2 }}>
+  <Typography variant="h6">Debug: Categorized Transaction Count by Date</Typography>
+  {Object.entries(
+    transactions
+      .filter(txn => txn.category) // only categorized
+      .reduce((acc, txn) => {
+        const date = txn.date1; // assuming date1 is in dd/mm/yyyy
+        if (date) acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {})
+  ).map(([date, count]) => (
+    <Typography key={date}>{date}: {count}</Typography>
+  ))}
+</Box>
+
+{/* here */}
+{/* now we count by month please */}
+<Box sx={{ mt: 2 }}>
+  <Typography variant="h6">Debug: Categorized Transaction Count by Month</Typography>
+  {Object.entries(
+    transactions
+      .filter(txn => txn.category)
+      .reduce((acc, txn) => {
+        const date = txn.date1; // format: dd/mm/yyyy
+        if (date) {
+          const [, month, year] = date.split("/");
+          const key = `${month}/${year}`;
+          acc[key] = (acc[key] || 0) + 1;
+        }
+        return acc;
+      }, {})
+  ).map(([month, count]) => (
+    <Typography key={month}>{month}: {count}</Typography>
+  ))}
+</Box>
+
+
+{/* here */}
+{/* next start counting the totals we will have a in / out credit_amount and debit_amount
+count by month as well  */}
+<Box sx={{ mt: 2 }}>
+  <Typography variant="h6">Debug: Credit/Debit Totals by Month</Typography>
+  {Object.entries(
+    transactions
+      .filter(txn => txn.category)
+      .reduce((acc, txn) => {
+        const date = txn.date1;
+        if (date) {
+          const [, month, year] = date.split("/");
+          const key = `${month}/${year}`;
+          acc[key] = acc[key] || { credit: 0, debit: 0 };
+          acc[key].credit += Number(txn.credit_amount || 0);
+          acc[key].debit += Number(txn.debit_amount || 0);
+        }
+        return acc;
+      }, {})
+  ).map(([month, { credit, debit }]) => (
+    <Typography key={month}>
+      {month}: In (Credit) = {credit.toFixed(2)} | Out (Debit) = {debit.toFixed(2)}
+    </Typography>
+  ))}
+</Box>
+{/* can you add some avg too  */}
+<Box sx={{ mt: 2 }}>
+  <Typography variant="h6">Debug: Credit/Debit Totals and Averages by Month</Typography>
+  {Object.entries(
+    transactions
+      .filter(txn => txn.category)
+      .reduce((acc, txn) => {
+        const date = txn.date1;
+        if (date) {
+          const [, month, year] = date.split("/");
+          const key = `${month}/${year}`;
+          acc[key] = acc[key] || { credit: 0, debit: 0, count: 0 };
+          acc[key].credit += Number(txn.credit_amount || 0);
+          acc[key].debit += Number(txn.debit_amount || 0);
+          acc[key].count += 1;
+        }
+        return acc;
+      }, {})
+  ).map(([month, { credit, debit, count }]) => (
+    <Typography key={month}>
+      {month}: In (Credit) = {credit.toFixed(2)} | Out (Debit) = {debit.toFixed(2)} |
+      Avg In = {(credit / count).toFixed(2)} | Avg Out = {(debit / count).toFixed(2)}
+    </Typography>
+  ))}
+</Box>
+
+
+<Box sx={{ mt: 2 }}>
+  <Typography variant="h6" sx={{}}>Debug: Credit/Debit Totals and Daily Averages by Month</Typography>
+  {Object.entries(
+    transactions
+      .filter(txn => txn.category)
+      .reduce((acc, txn) => {
+        const date = txn.date1;
+        if (date) {
+          const [day, month, year] = date.split("/");
+          const key = `${month}/${year}`;
+          acc[key] = acc[key] || { credit: 0, debit: 0, days: new Set(), count: 0 };
+          acc[key].credit += Number(txn.credit_amount || 0);
+          acc[key].debit += Number(txn.debit_amount || 0);
+          acc[key].days.add(date);
+          acc[key].count += 1;
+        }
+        return acc;
+      }, {})
+  ).map(([month, { credit, debit, days, count }]) => {
+    const numDays = days.size;
+    return (
+      <Box key={month} sx={{ mb: 2 }}>
+        <Typography variant="subtitle1">{month}</Typography>
+        <Typography>Transactions: {count}</Typography>
+        <Typography>Total In (Credit): {credit.toFixed(2)}</Typography>
+        <Typography>Total Out (Debit): {debit.toFixed(2)}</Typography>
+        <Typography>Avg In/Day: {(credit / numDays).toFixed(2)}</Typography>
+        <Typography>Avg Out/Day: {(debit / numDays).toFixed(2)}</Typography>
+        <Divider sx={{ mt:2, borderColor:'white'}} />
+      </Box>
+    );
+  })}
+</Box>
+
+<SimpleTreeView>
+  {processedTree.map((monthObj, i) => (
+<TreeItem 
+  key={`month-${i}`} 
+  itemId={`month-${i}`} 
+  label={
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 1 }}>
+      <Typography sx={{ fontWeight: 'bold', color: 'primary.white' }}>
+        {monthObj.month}
+      </Typography>
+      <Box sx={{ textAlign: 'right' }}>
+        <Typography sx={{ fontSize: 14, color: 'text.white' }}>
+          Total: {monthObj.total.toFixed(2)}
+        </Typography>
+        <Typography sx={{ fontSize: 14, color: 'text.white' }}>
+          Avg: {monthObj.avg.toFixed(2)}
+        </Typography>
+      </Box>
+    </Box>
+  }
+  sx={monthsSx}
+>
+
+      {monthObj.categories.map((cat, j) => (
+        <TreeItem 
+          key={`cat-${j}`} 
+          itemId={`cat-${j}`} 
+          label={
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 1 }}>
+              <Typography sx={{ fontWeight: 'bold', color: 'primary.white' }}>
+                {cat.name} ({transactions.filter(t => t.category === cat.name).length} Transactions)
+              </Typography>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography sx={{ fontSize: 14, color: 'text.white' }}>
+                  Total: {cat.total.toFixed(2)}
+                </Typography>
+                <Typography sx={{ fontSize: 14, color: 'text.white' }}>
+                  Avg: {cat.avg.toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+          }
+          sx={CategoryTreeSx}
+          >
+          {cat.subs.map((sub, k) => (
+            <TreeItem 
+              key={`sub-${k}`} 
+              itemId={`sub-${k}`} 
+              label={
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', pr: 1 }}>
+                  <Typography sx={{ color: 'text.white' }}>{sub.name}</Typography>
+                  <Typography sx={{ fontSize: 13, color: 'text.white' }}>
+                    {sub.total.toFixed(2)}
+                  </Typography>
+                </Box>
+              } 
+              sx={SubcategoryTreeSx} 
+              />
+          ))}
+          <TreeItem 
+            key={`total-${j}`} 
+            itemId={`total-${j}`} 
+            label={
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', pr: 1 }}>
+                <Typography sx={{ fontStyle: 'italic', color: 'red' }}>
+                  Total
+                </Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 'bold', color: 'text.white' }}>
+                  {cat.total.toFixed(2)}
+                </Typography>
+              </Box>
+            } 
+            sx={TotalsAvgTreeSx} 
+            />
+          <TreeItem 
+            key={`avg-${j}`} 
+            itemId={`avg-${j}`} 
+            label={
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', pr: 1 }}>
+                <Typography sx={{ fontStyle: 'italic', color: 'red' }}>
+                  Average
+                </Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 'bold', color: 'text.white' }}>
+                  {cat.avg.toFixed(2)}
+                </Typography>
+              </Box>
+            }
+            sx={TotalsAvgTreeSx} 
+            />
+        </TreeItem>
+      ))}
+    </TreeItem>
+  ))}
+</SimpleTreeView>
+
+
+
+// Global totals & averages
+const totalIncome = 0;           // total credit_amount
+const totalExpense = 0;          // total debit_amount
+const netTotal = totalIncome - totalExpense;
+const totalTransactionCount = 0;
+const activeTransactionDays = 0;
+const averageIncomePerDay = 0;
+const averageExpensePerDay = 0;
+const averageNetPerDay = 0;
+
+// Category-level aggregates
+const categoryIncomeTotals = {};        // { categoryName: total credit_amount }
+const categoryExpenseTotals = {};       // { categoryName: total debit_amount }
+const categoryNetTotals = {};           // { categoryName: income - expense }
+
+const categoryIncomeCounts = {};        // { categoryName: count of income txns }
+const categoryExpenseCounts = {};       // { categoryName: count of expense txns }
+const categoryTotalCounts = {};         // { categoryName: total count }
+
+const categoryIncomeAverages = {};      // { categoryName: avg income per day or per txn }
+const categoryExpenseAverages = {};     // { categoryName: avg expense per day or per txn }
+
+// Subcategory-level aggregates
+const subcategoryIncomeTotals = {};        // { subcategoryName: total credit_amount }
+const subcategoryExpenseTotals = {};       // { subcategoryName: total debit_amount }
+const subcategoryNetTotals = {};           // { subcategoryName: income - expense }
+
+const subcategoryIncomeCounts = {};        // { subcategoryName: count of income txns }
+const subcategoryExpenseCounts = {};       // { subcategoryName: count of expense txns }
+const subcategoryTotalCounts = {};         // { subcategoryName: total count }
+
+const subcategoryIncomeAverages = {};      // { subcategoryName: avg income per day or per txn }
+const subcategoryExpenseAverages = {};     // { subcategoryName: avg expense per day or per txn }

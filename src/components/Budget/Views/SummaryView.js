@@ -6,7 +6,7 @@ const SummaryView = ({ budgetData }) => {
     incomeavg: 0,
     savingsavg: 0,
     housingavg: 0,
-    transportavg: 0,
+    transportationavg: 0,
     expensesavg: 0,
     debtavg: 0,
   };
@@ -15,7 +15,7 @@ const SummaryView = ({ budgetData }) => {
     incomeavg,
     savingsavg,
     housingavg,
-    transportavg,
+    transportationavg,
     expensesavg,
     debtavg,
   } = { ...defaultValues, ...budgetData };
@@ -26,7 +26,7 @@ const SummaryView = ({ budgetData }) => {
   const parsedIncome = parseAmount(incomeavg);
   const parsedSavings = parseAmount(savingsavg);
   const parsedHousing = parseAmount(housingavg);
-  const parsedTransport = parseAmount(transportavg);
+  const parsedTransport = parseAmount(transportationavg);
   const parsedExpenses = parseAmount(expensesavg);
   const parsedDebt = parseAmount(debtavg);
 

@@ -5,6 +5,9 @@ import React, { useState } from "react";
 import { ViewSwitcher } from 'components/Common';
 
 import BudgetSettingView from "../Views/BudgetSettingView";
+import CategoryCellPlacement from "../Views/CategoryCellPlacement";
+import MonthCellPlacement from "../Views/MonthCellPlacement"
+import ExcelSheetSettings from "../Views/ExcelSheetSettings";
 
 const ContainerViews = ({ viewMode, setViewMode }) => {
   const [activeView, setActiveView] = useState("view1");
@@ -13,6 +16,21 @@ const ContainerViews = ({ viewMode, setViewMode }) => {
       key: "view1",
       label: "Budget Setting View",
       Component: <BudgetSettingView viewMode={viewMode} setViewMode={setViewMode} />
+    },
+    {
+      key: "view2",
+      label: "Category Cell Placement",
+      Component: <CategoryCellPlacement viewMode={viewMode} setViewMode={setViewMode} />
+    },
+    {
+      key: "view3",
+      label: "Month Cell Placement",
+      Component: <MonthCellPlacement viewMode={viewMode} setViewMode={setViewMode} />
+    },
+    {
+      key: "view4",
+      label: "Excel Sheet Settings",
+      Component: <ExcelSheetSettings viewMode={viewMode} setViewMode={setViewMode} />
     },
   ];
   return (

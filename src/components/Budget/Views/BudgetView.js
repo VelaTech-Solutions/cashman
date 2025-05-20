@@ -8,33 +8,34 @@ import {
   loadCategories, 
   LoadSubcategories,
  } from "components/Common";
-const BudgetView = ({ transactions, clientId }) => {
+const BudgetView = ({ clientId }) => {
 
     const [clientData, setClientData] = useState(null);
-    //const [transactions, setTransactions] = useState([]);
+    const [transactions, setTransactions] = useState([]);
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [category, setCategory] = useState('');
-    //const [subcategory, setSubcategory] = useState('');
-      const [categories, setCategories] = useState([]);
-    //const [subcategories, setSubcategories] = useState([]);
 
-  if (!transactions || transactions.length === 0) {
-    return <div className="text-center py-6">No transactions available</div>;
-  }
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const clientData = await LoadClientData(clientId);
-  //       setClientData(clientData);
-  //       setTransactions(clientData.transactions || []);
-  //     } catch (err) {
-  //       console.error("🔥 Error fetching client data:", err.message);
-  //       setError("Failed to fetch Client Data.");
-  //     }
-  //   };
-  //   fetchData();
-  // }, [clientId]);
+    const [category, setCategory] = useState('');
+    const [subcategory, setSubcategory] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setTransactions(clientData.transactions || []);
+      } catch (err) {
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
+      }
+    };
+    fetchData();
+  }, [clientId]);
 
   // Load categories subcategories
   useEffect(() => {
@@ -61,19 +62,6 @@ const BudgetView = ({ transactions, clientId }) => {
   //   };
   //   fetchSubs();
   // }, [category]);
-
-  // part of old code
-  // const categories = [
-  //   { name: "Income", filter: (t) => t.category === "Income", key: "credit_amount" },
-  //   { name: "Savings", filter: (t) => t.category === "Savings", key: "debit_amount" },
-  //   { name: "Housing", filter: (t) => t.category === "Housing", key: "debit_amount" },
-  //   { name: "Transport", filter: (t) => t.category === "Transportation", key: "debit_amount" },
-  //   { name: "Expenses", filter: (t) => t.category === "Expenses", key: "debit_amount" },
-  //   { name: "Debits", filter: (t) => t.category === "Debits", key: "debit_amount" },
-  // ];
-
-// so when we load the cat and subcat  only income is credit_amount
-//
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -104,15 +92,11 @@ const BudgetView = ({ transactions, clientId }) => {
     setLoading(false);
   };
 
-// things ill need
-// catname
-// subcatname
-// grandTotal
-// grandAvg
-// monthTotals
-// validMonths
   return (
     <div className="p-4">
+
+            {/* dont forget to click this button just state a reminder*/}
+      <p>Please click to save Data</p>
       <button
         onClick={calculateBudget}
         className="px-6 py-3 mb-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg"
@@ -120,11 +104,13 @@ const BudgetView = ({ transactions, clientId }) => {
       >
         {loading ? "Calculating..." : "📊 Calculate & Save Budget"}
       </button>
+      {message && <p className="text-center text-lg font-bold text-green-400">{message}</p>}
 
 
-{/* then i can create own type of looks ui design */}
-{/* //can we turn it into a standalone */}
-        {categories.map(({ name, filter, key }) => {
+
+
+
+      {categories.map(({ name, filter, key }) => {
         const rows = transactions.filter(filter).reduce((acc, t) => {
           const m = moment(t.date1, ["DD/MM/YYYY"]).format("MMM");
           const sub = t.subcategory || "Uncategorized";
@@ -143,9 +129,6 @@ const BudgetView = ({ transactions, clientId }) => {
         const grandTotal = Object.values(monthTotals).reduce((s, v) => s + v, 0).toFixed(2);
         const validMonths = Object.values(monthTotals).filter(v => v !== 0);
         const grandAvg = validMonths.length ? (grandTotal / validMonths.length).toFixed(2) : "0.00";
-
-{/* // can we turn it into a standalone */}
-
 
         return (
           <div key={name} className="mb-4 p-2 border border-gray-300 rounded-md text-xs">
@@ -196,10 +179,8 @@ const BudgetView = ({ transactions, clientId }) => {
             </div>
           </div>
         );
-              })}
-{/* then i can create own type of looks ui design */}
+      })}
     </div>
   );
 };
-
 export default BudgetView;

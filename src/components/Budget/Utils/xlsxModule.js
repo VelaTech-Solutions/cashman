@@ -11,6 +11,8 @@ export const generateBudgetReport = async (clientId) => {
     const response = await fetch(
       "https://us-central1-cashman-790ad.cloudfunctions.net/getBudgetTemplate"
     );
+
+    // "gs://cashman-790ad.firebasestorage.app/template/template.xlsx"
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
