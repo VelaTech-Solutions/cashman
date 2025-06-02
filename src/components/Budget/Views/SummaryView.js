@@ -1,145 +1,193 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../../firebase/firebase";
+import { LoadClientData, loadCategories, loadSubcategories } from "components/Common";
+export default function SummaryView({ clientId }) {
+  const [categoryRange, setCategoryRange] = useState({});
+  const [clientData, setClientData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [budgetTransactions, setBudgetTransactions] = useState([]);
+  // the eg const [otherSetting, setOtherSetting] = useState(null); // add as needed
+  const [categories, setCategories] = useState([]);
 
-const SummaryView = ({ budgetData }) => {
-  // Default values to avoid `NaN`
-  const defaultValues = {
-    incomeavg: 0,
-    savingsavg: 0,
-    housingavg: 0,
-    transportationavg: 0,
-    expensesavg: 0,
-    debtavg: 0,
-  };
+  // Load categories and subcategories
+  useEffect(() => {
+    const fetchCats = async () => {
+      const cats = await loadCategories();
+      setCategories(cats);
+    };
+    fetchCats();
+  }, []);
 
-  const {
-    incomeavg,
-    savingsavg,
-    housingavg,
-    transportationavg,
-    expensesavg,
-    debtavg,
-  } = { ...defaultValues, ...budgetData };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const clientData = await LoadClientData(clientId);
+        setClientData(clientData);
+        setTransactions(clientData.transactions || []);
+        setBudgetTransactions(clientData.budgetTransactions || []);
+      } catch (err) {
+        console.error("🔥 Error fetching client data:", err.message);
+        setError("Failed to fetch Client Data.");
+      }
+    };
+    fetchData();
+  }, [clientId]);
+  const configDoc = (docName) =>
+    doc(db, "settings", "budget", "config", docName);
 
-  // Ensure values are properly parsed
-  const parseAmount = (amount) => (!isNaN(amount) ? parseFloat(amount) : 0.0);
+  useEffect(() => {
+    const fetchConfigs = async () => {
+      const rangeSnap = await getDoc(configDoc("RangeSettings"));
+      if (rangeSnap.exists()) {
+        const data = rangeSnap.data();
+        setCategoryRange(data.categoryRange || {});
+      }
 
-  const parsedIncome = parseAmount(incomeavg);
-  const parsedSavings = parseAmount(savingsavg);
-  const parsedHousing = parseAmount(housingavg);
-  const parsedTransport = parseAmount(transportationavg);
-  const parsedExpenses = parseAmount(expensesavg);
-  const parsedDebt = parseAmount(debtavg);
+      // the eg
+      // const otherSnap = await getDoc(configDoc("OtherSettings"));
+      // if (otherSnap.exists()) {
+      //   setOtherSetting(otherSnap.data());
+      // }
 
-  // Calculate total expenses and disposable income
-  const totalExpenses = parsedSavings + parsedHousing + parsedTransport + parsedExpenses + parsedDebt;
-  const disposableIncome = parsedIncome - totalExpenses;
+      // repeat as needed for more
+    };
 
-  // Calculate percentage of total income
-  const getRangePercentage = (amount) =>
-    parsedIncome > 0 ? ((amount / parsedIncome) * 100).toFixed(2) : "0.00";
+    fetchConfigs();
+  }, []);
 
-  // Check if the spending is above the normal range
-  const isOutOfRange = (amount, allowed) => (amount > allowed ? "YES" : "NO");
+  const parseAmount = (val) => (!isNaN(val) ? parseFloat(val) : 0);
+  const parsedIncome = parseAmount(budgetTransactions?.Income?.avg || 0);
+
+  const budgetRows = Object.entries(budgetTransactions)
+    .filter(([key]) => key !== "Income") // exclude Income
+    .map(([category, data]) => {
+      const rangeEntry = categoryRange.find(c => c.category === category);
+      const range = parseFloat(rangeEntry?.range || 0);
+      const allowedAmount = parsedIncome * (range / 100);
+      const actual = parseAmount(data.avg);
+      const yourRange = parsedIncome > 0 ? ((actual / parsedIncome) * 100).toFixed(2) : "0.00";
+      const isOut = actual > allowedAmount;
+      return {
+        category,
+        range,
+        allowedAmount,
+        actual,
+        yourRange,
+        isOut,
+      };
+    });
+
+  const parsedCategories = Object.fromEntries(
+    Object.entries(budgetTransactions).map(([key, val]) => [
+      key,
+      parseAmount(val.avg),
+    ])
+  );
+
+  const income = parsedCategories["Income"] || 0;
+
+  const deductions = Object.entries(parsedCategories)
+    .filter(([key]) => key !== "Income")
+    .map(([name, amount]) => ({ name, amount }));
+
+  const disposableIncome = income - deductions.reduce((sum, d) => sum + d.amount, 0);
+
 
   return (
-    <div>
-      <div className="text-white text-lg font-bold mb-4">
-        Your current monthly expenditure is
-        <span className="text-blue-500 mx-2">out of</span>
-        bounds when compared to a financially planned budget.
-      </div>
-
-      <p className="text-gray-300 mb-4">
-        Your current funds need to be structured for your short, medium, and long-term needs as follows:
-      </p>
-
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-600 text-white">
-          <thead>
-            <tr className="bg-gray-700">
-              <th className="p-2 border border-gray-600">Category</th>
-              <th className="p-2 border border-gray-600">Normal Range</th>
-              <th className="p-2 border border-gray-600">Allowed Spending</th>
-              <th className="p-2 border border-gray-600">Your %</th>
-              <th className="p-2 border border-gray-600">Actual Spending</th>
-              <th className="p-2 border border-gray-600">In / Out of Range</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { name: "SAVINGS", range: 10, amount: parsedSavings },
-              { name: "HOUSING", range: 30, amount: parsedHousing },
-              { name: "TRANSPORTATION", range: 10, amount: parsedTransport },
-              { name: "EXPENSES", range: 20, amount: parsedExpenses },
-              { name: "DEBT", range: 10, amount: parsedDebt },
-            ].map((item, index) => {
-              const allowedAmount = (parsedIncome * (item.range / 100)).toFixed(2);
-              const yourRange = getRangePercentage(item.amount);
-
-              return (
-                <tr key={index} className="border border-gray-600">
-                  <td className="p-2">{item.name}</td>
-                  <td className="p-2">{item.range}%</td>
-                  <td className="p-2">R {Number(allowedAmount).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
-                  <td className="p-2">{yourRange}%</td>
-                  <td className="p-2">R {item.amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}</td>
-                  <td
-                    className={`p-2 font-bold ${
-                      isOutOfRange(item.amount, allowedAmount) === "YES"
-                        ? "text-red-500"
-                        : "text-green-500"
-                    }`}
-                  >
-                    {isOutOfRange(item.amount, allowedAmount)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="text-lg font-bold mt-4">
-        <h3 className="mb-2">INCOME</h3>
-        <div className="bg-gray-700 p-2 rounded flex justify-between">
-          <span>Income</span>
-          <span className="font-semibold text-green-400">
-            R {parsedIncome.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
-          </span>
-        </div>
-
-        <h3 className="mt-4">Minus:</h3>
-        <div className="space-y-2">
-          {[{ name: "SAVINGS", amount: parsedSavings },
-            { name: "HOUSING", amount: parsedHousing },
-            { name: "TRANSPORTATION", amount: parsedTransport },
-            { name: "EXPENSES", amount: parsedExpenses },
-            { name: "DEBT", amount: parsedDebt }].map((item, index) => (
-            <div key={index} className="flex justify-between bg-gray-700 p-2 rounded">
-              <span>{item.name}</span>
-              <span className="font-semibold text-red-400">
-                R {item.amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="text-lg font-bold mt-6 bg-gray-800 p-4 rounded-lg text-center">
-        <h3 className="text-xl mb-2 text-green-400">TOTAL DISPOSABLE CASH LEFT</h3>
-        <div className="bg-gray-700 p-3 rounded flex justify-between">
-          <span>Remaining Balance</span>
-          <span
-            className={`font-semibold ${
-              disposableIncome >= 0 ? "text-green-400" : "text-red-400"
-            }`}
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <TableContainer component={Paper}>
+          <MuiTable size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Category</TableCell>
+                <TableCell>Normal Range</TableCell>
+                <TableCell>Allowed Spending</TableCell>
+                <TableCell>Your %</TableCell>
+                <TableCell>Actual Spending</TableCell>
+                <TableCell>In/Out of Range</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {budgetRows.map((row, i) => (
+                <TableRow key={i}>
+                  <TableCell>{row.category}</TableCell>
+                  <TableCell>{row.range}%</TableCell>
+                  <TableCell>R {row.allowedAmount.toFixed(2)}</TableCell>
+                  <TableCell>{row.yourRange}%</TableCell>
+                  <TableCell>R {row.actual.toFixed(2)}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: row.isOut ? 'error.main' : 'success.main' }}>
+                    {row.isOut ? 'No' : 'Yes'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </MuiTable>
+        </TableContainer>
+        <Box>
+          <Stack spacing={0.5}>
+            <Paper sx={{ bgcolor: "grey.800", p: 2, display: "flex", justifyContent: "space-between", borderRadius: 2 }}>
+              <Typography>Income</Typography>
+              <Typography fontWeight={600} color="success.light">
+                R {income.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
+              </Typography>
+            </Paper>
+              {deductions.map((item, i) => (
+                <Paper
+                  key={i}
+                  sx={{
+                    bgcolor: "grey.800",
+                    p: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography>{item.name}</Typography>
+                  <Typography fontWeight={600} color="error.light">
+                    R {item.amount.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
+                  </Typography>
+                </Paper>
+              ))}
+          </Stack>
+        </Box>
+        <Box>
+          <Paper
+            sx={{
+              bgcolor: "grey.800",
+              p: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              borderRadius: 2,
+            }}
           >
-            R {disposableIncome.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
-          </span>
-        </div>
-      </div>
-    </div>
+            <Typography>Remaining Balance</Typography>
+            <Typography
+              fontWeight={600}
+              color={disposableIncome >= 0 ? "success.light" : "error.light"}
+            >
+              R {disposableIncome.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
+            </Typography>
+          </Paper>
+        </Box>
+      </Stack>
+    </Box>
   );
 };
-
-export default SummaryView;

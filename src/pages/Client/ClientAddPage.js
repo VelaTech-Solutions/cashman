@@ -1,6 +1,14 @@
 // src/pages/AddClient.js
 import React, { useState, useEffect } from "react";
 import "styles/tailwind.css";
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
+import { TextField, Button, Stack, Typography } from "@mui/material";
 
 // Firebase Imports
 import { db, storage, auth } from "../../firebase/firebase";
@@ -8,15 +16,9 @@ import { doc, setDoc, Doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
 
-// Component Imports
-import { Sidebar } from 'components/Common';
 
-const links = [
-  { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-  { path: "/viewclient", label: "View Client", icon: "ph-file-text" },
-];
+export default function ClientAddPage(props) {
 
-const ClientAddPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [clientDetails, setClientDetails] = useState({
@@ -179,89 +181,92 @@ const ClientAddPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Add Client" links={links} />
-      <div className="flex-1 p-8">
-        <div className="space-y-8">
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Capture Clients</h2>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Client Details
+        </Typography>
 
-            <input
-              type="text"
-              name="idNumber"
-              placeholder="ID Number"
-              value={clientDetails.idNumber}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
-            <input
-              type="text"
-              name="clientName"
-              placeholder="Client Name"
-              value={clientDetails.clientName}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
-            <input
-              type="text"
-              name="clientSurname"
-              placeholder="Client Surname"
-              value={clientDetails.clientSurname}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
+        <TextField
+          name="idNumber"
+          label="ID Number"
+          value={clientDetails.idNumber}
+          onChange={handleInputChange}
+          fullWidth
+        />
 
-            <select
-              name="bankName"
-              value={clientDetails.bankName}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            >
-              <option value="">Select Bank</option>
-              {bankNames.map((bank, index) => (
-                <option key={index} value={bank}>
-                  {bank}
-                </option>
-              ))}
-            </select>
+        <TextField
+          name="clientName"
+          label="Client Name"
+          value={clientDetails.clientName}
+          onChange={handleInputChange}
+          fullWidth
+        />
 
+        <TextField
+          name="clientSurname"
+          label="Client Surname"
+          value={clientDetails.clientSurname}
+          onChange={handleInputChange}
+          fullWidth
+        />
 
-            <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Upload Bank Statements</h2>
-            <input
-              type="file"
-              name="bankStatement"
-              accept=".pdf, .jpg, .jpeg, .png"
-              onChange={handleFileChange}
-              className="w-full p-2 rounded bg-gray-700 text-white shadow-inner"
-            />
+        <FormControl fullWidth>
+          <InputLabel id="bank-label">Bank Name</InputLabel>
+          <Select
+            labelId="bank-label"
+            name="bankName"
+            value={clientDetails.bankName}
+            onChange={handleInputChange}
+            input={<OutlinedInput label="Bank Name" />}
+          >
+            {bankNames.map((bank, index) => (
+              <MenuItem key={index} value={bank}>
+                {bank}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-            {uploadStatus && (
-              <p className="text-sm text-gray-300 italic mt-1">{uploadStatus}</p>
-            )}
+        <Button variant="outlined" component="label">
+          Upload Bank Statement
+          <input
+            type="file"
+            hidden
+            name="bankStatement"
+            accept=".pdf, .jpg, .jpeg, .png"
+            onChange={handleFileChange}
+          />
+        </Button>
 
-            <button
-              onClick={handleSubmit}
-              className={`w-full p-2 rounded ${
-                isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-              }`}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Saving..." : "Submit"}
-            </button>
+        {uploadStatus && (
+          <Typography variant="body2" color="text.secondary" fontStyle="italic">
+            {uploadStatus}
+          </Typography>
+        )}
 
-            {submitSuccess && (
-              <p className="text-green-400 text-lg mt-4">
-                🎉 Client details saved successfully!
-              </p>
-            )}
-            <p className="text-sm text-gray-400 italic mt-2">
-              Note: This feature currently supports processing a single PDF/image file at a time.
-            </p>
-          </section>
-        </div>
-      </div>
-    </div>
+        <Button
+          onClick={handleSubmit}
+          type="submit"
+          variant="contained"
+          color="success"
+          disabled={isSubmitting}
+          fullWidth
+        >
+          {isSubmitting ? "Saving..." : "Submit"}
+        </Button>
+
+        {submitSuccess && (
+          <Typography color="success.main" variant="body1">
+            🎉 Client details saved successfully!
+          </Typography>
+        )}
+
+        <Typography variant="body2" color="text.secondary" fontStyle="italic">
+          Note: This feature currently supports processing a single PDF/image file at a time.
+        </Typography>
+      </Stack>
+    </Box>
+
   );
 };
-
-export default ClientAddPage;

@@ -1,30 +1,42 @@
-import React, { useEffect, useState } from "react";
-import "styles/tailwind.css";
+import React, { useState, useEffect } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import TransactionsDatabase from "./Views/TransactionsDatabaseView";
 
-// Component Imports
-import { Sidebar } from 'components/Common';
-import ContainerViews from "./Containers/ContainerViews";
 
-const DatabaseSettingsPage = () => {
-
-  const [viewMode, setViewMode] = useState("overview1");
-  const [error, setError] = useState(null);
-
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-  ];
-
-  if (error) return <div className="text-red-500">Error: {error}</div>;
+export default function DatabaseSettingsPage() {
+  const [activeTable, setActiveTable] = useState("TransactionsDatabase");
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Database Settings" links={links} />
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Database Settings</h2>
-        <ContainerViews setViewMode={setViewMode} viewMode={viewMode} />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          {/* <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+            Database Settings
+          </Typography> */}
+            <Button 
+              variant={activeTable === "TransactionsDatabase" ? "contained" : "outlined"} 
+              onClick={() => setActiveTable("TransactionsDatabase")}
+            >
+              Transaction Database
+            </Button>
+        </Stack>
+        {activeTable === "TransactionsDatabase" && <TransactionsDatabase />}
+      </Stack>
+    </Box>
   );
-}
-export default DatabaseSettingsPage;
+};

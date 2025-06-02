@@ -1,113 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Paper, Typography, Button, Box } from "@mui/material";
-import Tooltip from '@mui/material/Tooltip';
-import { styled } from '@mui/material/styles';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import { Typography, TextField, Button, Box, CircularProgress, Stack } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
-import TextField from '@mui/material/TextField';
-import CancelIcon from '@mui/icons-material/Cancel';
-import InputAdornment from '@mui/material/InputAdornment';
 import {
-  DataGrid,
-  Toolbar,
-  ToolbarButton,
-  ColumnsPanelTrigger,
-  FilterPanelTrigger,
-  QuickFilter,
-  QuickFilterControl,
-  QuickFilterClear,
-  QuickFilterTrigger,
+  DataGrid
 } from '@mui/x-data-grid';
 import { handleDeleteClient } from "components/Client/ClientDelete";
-
-const StyledToolbarButton = styled(ToolbarButton)(({ theme }) => ({
-  marginLeft: theme.spacing(1),
-  marginRight: theme.spacing(1),
-}));
-
-const StyledQuickFilter = styled(QuickFilter)(() => ({
-  display: 'flex',
-  justifyContent: 'flex-end',
-  flexGrow: 1,
-  width: 'auto',
-}));
-
-const StyledTextField = styled('input')(({ theme }) => ({
-  padding: theme.spacing(1),
-  borderRadius: theme.shape.borderRadius,
-  border: '1px solid #ccc',
-}));
-
-const CustomToolbar = () => (
-  <Toolbar>  
-    <Tooltip title="Columns">
-      <StyledToolbarButton>
-        <ViewColumnIcon fontSize="small" />
-      </StyledToolbarButton>
-    </Tooltip>
-
-    <Tooltip title="Filter">
-      <StyledToolbarButton>
-        <FilterListIcon fontSize="small" />
-      </StyledToolbarButton>
-    </Tooltip>
-
-    <QuickFilter>
-      <StyledQuickFilter>
-        <QuickFilterTrigger
-          render={(triggerProps, state) => (
-            <Tooltip title="Search" enterDelay={0}>
-              <StyledToolbarButton
-                {...triggerProps}
-                ownerState={{ expanded: state.expanded }}
-                color="default"
-                aria-disabled={state.expanded}
-              >
-                <SearchIcon fontSize="small" />
-              </StyledToolbarButton>
-            </Tooltip>
-          )}
-        />
-        <QuickFilterControl
-          render={({ ref, ...controlProps }, state) => (
-            <StyledTextField
-              {...controlProps}
-              ownerState={{ expanded: state.expanded }}
-              inputRef={ref}
-              aria-label="Search"
-              placeholder="Search..."
-              size="small"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: state.value ? (
-                    <InputAdornment position="end">
-                      <QuickFilterClear
-                        edge="end"
-                        size="small"
-                        aria-label="Clear search"
-                        material={{ sx: { marginRight: -0.75 } }}
-                      >
-                        <CancelIcon fontSize="small" />
-                      </QuickFilterClear>
-                    </InputAdornment>
-                  ) : null,
-                },
-                ...controlProps.slotProps,
-              }}
-            />
-          )}
-        />
-      </StyledQuickFilter>
-    </QuickFilter>
-    
-  </Toolbar>
-);
 
 const getCategorizedColor = (categorized) => {
   const percentage = Math.min(Math.max(categorized, 0), 100); // Ensure it's between 0% and 100%
@@ -118,15 +15,31 @@ const getCategorizedColor = (categorized) => {
 
 
 
-const Table = ({ sortedClients }) => {
+const Table = ({ sortedClients, setSelectedClientId, setActivePage }) => {
+
 
   const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     setClients(sortedClients);
   }, [sortedClients]);
 
-  const rows = clients.map((client, index) => ({
+
+  const searchQueryClients = clients.filter((client) => {
+    const clientName = client.clientName?.toLowerCase() || "";
+    const clientid = client.idNumber?.toLowerCase() || "";
+    return clientName.includes(searchQuery.toLowerCase()) || clientid.includes(searchQuery.toLowerCase());
+  });
+
+  const rows = searchQueryClients.map((client, index) => ({
     id: client.id,// set the length just for this?
     clientName: client.clientName,
     clientSurname: client.clientSurname,
@@ -140,15 +53,14 @@ const Table = ({ sortedClients }) => {
 
   const columns = [
     { field: "id", headerName: "Client ID", width: 140 },
-    { field: "clientName", headerName: "Name", width: 130 },
-    { field: "clientSurname", headerName: "Surname", width: 130 },
-    { field: "bankName", headerName: "Bank Name", width: 115 },
-    { field: "status", headerName: "Status %", width: 130 },
-    //{ field: "categorized", headerName: "Categorized %", width: 130 },
+    { field: "clientName", headerName: "Name", flex: 1 },
+    { field: "clientSurname", headerName: "Surname", flex: 1 },
+    { field: "bankName", headerName: "Bank Name", flex: 1 },
+    { field: "status", headerName: "Status %", flex: 1 },
     {
       field: "categorized",
       headerName: "Categorized %",
-      width: 130,
+      flex: 1,
       renderCell: (params) => {
         const percentage = params.value || 0;
         const color = getCategorizedColor(percentage);
@@ -163,29 +75,33 @@ const Table = ({ sortedClients }) => {
         
       },
     },
-    { field: "number_of_transactions", headerName: "Transactions", width: 130 },
-    { field: "dateCreated", headerName: "Date Created", width: 120 },
-    { field: "userEmail", headerName: "Created By", width: 120 },
+    { field: "number_of_transactions", headerName: "Transactions", flex: 1 },
+    { field: "dateCreated", headerName: "Date Created", flex: 1 },
+    { field: "userEmail", headerName: "Created By", flex: 1 },
     // Action Button
     {
       field: "actions",
       headerName: "Actions",
-      width: 135,
+      flex: 1,
       renderCell: (params) => (
-        <Button
-          href={`/client/${params.row.id}`}
-          variant="text"
-          color="primary"
-        >
-          View Details
-        </Button>
+      <Button
+        variant="text"
+        color="primary"
+        onClick={() => {
+          setSelectedClientId(params.row.id);
+          setActivePage("ClientProfile");
+        }}
+      >
+        View
+      </Button>
+
       ),
     },
     // Delete Button
     {
       field: "delete",
       headerName: "Delete",
-      width: 135,
+      flex: 1,
       renderCell: (params) => (
         <Button
           variant="text"
@@ -209,16 +125,25 @@ const Table = ({ sortedClients }) => {
   ];
 
   return (
-    <Grid container spacing={2} sx={{ mt: 4 }}>
-      <Grid size={12}>
-        <Paper 
-          sx={{
-            p: 2, 
-            backgroundColor: "#1e1e1e" 
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+          {/* Search Bar */}
+          <TextField
+            sx={{ mb: 2 }}
+            InputProps={{
+              startAdornment: <SearchIcon />,
             }}
-          >
-          {rows.length === 0 ? (
-            <Typography color="text.secondary">No clients found.</Typography>
+            value={searchQuery}
+            fullWidth
+            variant="outlined"
+            label="Search by ID or Name"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        <Box>
+          {loading ? (
+              <CircularProgress />
+          ) : rows.length === 0 ? (
+            <CircularProgress />
           ) : (
               <DataGrid
                 rows={rows}
@@ -228,28 +153,15 @@ const Table = ({ sortedClients }) => {
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10, page: 0 } },
                 }}
-                slots={{ toolbar: CustomToolbar }}
-                showToolbar
                 sx={{
                   height: 690,
-                  width: '100%',
-                  overflow: 'auto',
-                  '& .MuiDataGrid-cell': {
-                    borderRight: '1px solid #444', // vertical border
-                  },
-                  '& .MuiDataGrid-row': {
-                    backgroundColor: '#1e1e1e',
-                    color: '#fff',
-                  },
-                  '& .MuiDataGrid-row:hover': {
-                    backgroundColor: '#2c2c2c',
-                  },
+                  width: '100%'
                 }}
               />
             )}  
-        </Paper>
-      </Grid>
-    </Grid>
+        </Box>
+      </Stack>
+    </Box>
   );
 };
 

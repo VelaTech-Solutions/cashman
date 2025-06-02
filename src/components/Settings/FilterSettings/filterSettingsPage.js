@@ -1,36 +1,44 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
-
-// Firebase Imports
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../../firebase/firebase";
-
-// Component Imports
-import { Sidebar } from 'components/Common';
-import ContainerViews from "./Containers/ContainerViews";
-
-function filterSettingsPage() {
-  const [viewMode, setViewMode] = useState("overview1");
-  const [error, setError] = useState(null);
-
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-    { path: "/HelpFilter", label: "Filter Help", icon: "ph-question" },
-  ];
-
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-
+import React, { useState, useEffect } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import IgnoredLines from "./Views/IgnoredLines";
+import FuzzyIgnoredLines from "./Views/FuzzyIgnoredLines";
+export default function filterSettingsPage() {
+  const [activeTable, setActiveTable] = useState("ignoredLines");
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Filter Settings" links={links} />
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Filter Settings</h2>
-        <ContainerViews setViewMode={setViewMode} viewMode={viewMode} />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "ignoredLines" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("ignoredLines")}
+          >
+            Ignored
+          </Button>
+          <Button 
+            variant={activeTable === "fuzzyIgnoredLines" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("fuzzyIgnoredLines")}
+          >
+            Fuzzy Ignored
+          </Button>
+        </Stack>
+        {activeTable === "ignoredLines" && <IgnoredLines />}
+        {activeTable === "fuzzyIgnoredLines" && <FuzzyIgnoredLines />}
+      </Stack>
+    </Box>
   );
-}
-
-export default filterSettingsPage;
+};

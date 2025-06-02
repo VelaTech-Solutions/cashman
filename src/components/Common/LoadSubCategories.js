@@ -4,6 +4,7 @@
 import { db } from "../../firebase/firebase";
 import { doc, updateDoc, arrayUnion, arrayRemove, getDoc, deleteDoc } from "firebase/firestore";
 
+import { v4 as uuidv4 } from 'uuid';
 // Load only subcategories for a specific category
 export const loadSubcategories = async (categoryId) => {
   if (!categoryId) return [];
@@ -26,6 +27,7 @@ export const addSubcategory = async (categoryId, subcategoryName) => {
   if (!categoryId || !subcategoryName.trim()) return;
 
   const subcategory = {
+    //     id: uuidv4(),
     id: Date.now().toString(),
     name: subcategoryName,
   };

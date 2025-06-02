@@ -1,0 +1,91 @@
+[
+    {
+        {
+            name: "Funeral & Life Cover (Risk)",
+            sheet: "Insurance breakdown",
+            titleCell: "A4",
+            startRow: 5,
+            endRow: 18,
+            columns: {
+            institution: "A",
+            type: "B",
+            amount: "C"
+            },
+            totalCell: "C19"
+        },
+
+        {
+            name: "Savings & Investments",
+            sheet: "Insurance breakdown",
+            titleCell: "E4",
+            startRow: 5,
+            endRow: 18,
+            columns: {
+            institution: "E",
+            type: "F",
+            amount: "G"
+            },
+            totalCell: "E19"
+        },
+
+        {
+            name: "Short Term Insurance",
+            sheet: "Insurance breakdown",
+            titleCell: "A23",
+            startRow: 24,
+            endRow: 37,
+            columns: {
+            institution: "A",
+            type: "B",
+            amount: "C"
+            },
+            totalCell: "C38"
+        },
+    }
+],
+
+[
+    {
+        {
+            name: "Funeral & Life Cover (Risk)",
+            sheet: "Insurance breakdown",
+            titleCell: "A51",
+            startRow: 52,
+            endRow: 65,
+            columns: {
+            institution: "A",
+            type: "B",
+            amount: "C"
+            },
+            totalCell: "C66"
+        },
+
+        {
+            name: "Savings & Investments",
+            sheet: "Insurance breakdown",
+            titleCell: "E51",
+            startRow: 52,
+            endRow: 65,
+            columns: {
+            institution: "E",
+            type: "F",
+            amount: "G"
+            },
+            totalCell: "G66"
+        },
+
+        {
+            name: "Short Term Insurance",
+            sheet: "Insurance breakdown",
+            titleCell: "A70",
+            startRow: 71,
+            endRow: 84,
+            columns: {
+            institution: "A",
+            type: "B",
+            amount: "C"
+            },
+            totalCell: "C85"
+        },
+    }
+],

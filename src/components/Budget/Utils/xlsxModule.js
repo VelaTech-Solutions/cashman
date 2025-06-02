@@ -1,173 +1,87 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import moment from "moment";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../firebase/firebase";
+import { LoadClientData } from "components/Common";
 
-export const generateBudgetReport = async (clientId) => {
+export async function generateBudgetReport({ clientId }) {
   try {
-    console.log("📥 Fetching budget template...");
+    const clientData = await LoadClientData(clientId);
+    const transactions = clientData.transactions || [];
 
-    // Fetch template
+    const configDoc = (name) => doc(db, "settings", "budget", "config", name);
+
+    const [mainSnap, monthsSnap] = await Promise.all([
+      getDoc(configDoc("main")),
+      getDoc(configDoc("months")),
+    ]);
+
+const subCategoryPlacements = mainSnap.exists()
+  ? mainSnap.data().subCategoryPlacements || []
+  : [];
+
+const subCategoryRowMap = {};
+subCategoryPlacements.forEach(({ subcategory, row }) => {
+  subCategoryRowMap[subcategory] = parseInt(row, 10);
+});
+
+
+    const monthToColumn = monthsSnap.exists()
+      ? monthsSnap.data().monthToColumn || {}
+      : {};
+
     const response = await fetch(
       "https://us-central1-cashman-790ad.cloudfunctions.net/getBudgetTemplate"
     );
+    if (!response.ok) throw new Error("Failed to fetch template");
 
-    // "gs://cashman-790ad.firebasestorage.app/template/template.xlsx"
-    const arrayBuffer = await response.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const buffer = await response.arrayBuffer();
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer);
 
-    // 🔒 Hardcoded sheet name
-    const worksheet = workbook.Sheets["Personal Budget"];
-    if (!worksheet) throw new Error("Sheet 'Personal Budget' not found");
+    const worksheet = workbook.getWorksheet("Personal Budget");
+    if (!worksheet) throw new Error("Worksheet 'Personal Budget' not found");
 
-    // Fetch transactions from Firestore
-    const db = getFirestore();
-    const clientRef = doc(db, "clients", clientId);
-    const clientSnap = await getDoc(clientRef);
-    const transactions = clientSnap.data().transactions || [];
+transactions.forEach(({ subcategory, credit_amount, debit_amount, date1 }) => {
+  if (!subcategory || !date1) return;
 
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthToColumn = {
-      Jan: "C", Feb: "D", Mar: "E", Apr: "F", May: "G", Jun: "H",
-      Jul: "I", Aug: "J", Sep: "K", Oct: "L", Nov: "M", Dec: "N",
-    };
+  const credit = parseFloat(credit_amount) || 0;
+  const debit = parseFloat(debit_amount) || 0;
+  const amount = Math.abs(credit - debit);
 
-    // Define the starting rows for each subcategory
-    const cellMap = {
-      Income: {
-        "Salary": 5,
-        "Rental Income": 6,
-        "Additional Income": 7,
-        "Pension": 8,
-        "Maintenance": 9,
-        "Other": 10,
-        "Minus Insurance Paid from Payslip": 11,
-        "Minus Utilities / Other Paid from Payslip": 12,
-      },
-      Savings: {
-        "Unit Trust": 19,
-        "Tax-Free Unit Trust": 20,
-        "Education": 21,
-        "Retirement": 22,
-        "Endowment": 23,
-        "Savings Plan/Account": 24,
-        "Other": 25,
-      },
-      Housing: {
-        "Home Loan": 32,
-        "Rent": 33,
-        "Levies": 34,
-        "Water/Rates": 35,
-        "Electricity": 36,
-        "Other": 37,
-      },
-      Transportation: {
-        "Car Payment": 44,
-        "Insurance": 45,
-        "Fuel": 46,
-        "Public Transport": 47,
-        "Parking": 47,
-        "Uber/Bolt": 48,
-        "Other": 49,
-      },
-      Expenses: {
-        "Groceries": 56,
-        "Airtime": 57,
-        "Phone Contracts/Telkom": 58,
-        "Phone Insurance": 59,
-        "Clothing": 60,
-        "Salon / Barber": 61,
-        "Pet Supplies": 62,
-        "School fees / Day Care": 63,
-        "Sports fees/Stationary/Supplies": 64,
-        "Cash Withdrawals": 65,
-        "Cash Send / e-Wallet": 66,
-        "Maintenance / 3rd Party Payments": 67,
-        "Miscellaneous Payments": 68,
-        "Rewards / Memberships": 69,
-        "Banking Fees": 70,
-        "Tithe/Donations": 71,
-        "Other": 72,
-        // (row 73 to 79) future placeholders
+  if (amount === 0) return;
 
-        // WELL-BEING / HEALTH (row 80) a placeholder
-        "Medical aid": 81,
-        "Pharmacy Expenses": 82,
-        // (row 83 to 87) future placeholders
+  const [day, month, year] = date1.split("/");
+  const monthKey = new Date(+year, +month - 1).toLocaleString("en-US", { month: "short" });
 
-        // ENTERTAINMENT (row 88) a placeholder
-        "Netflix": 89,
-        "Dine-Out/Take-aways": 90,
-        "Liquor/Alcohol": 91,
-        "Vacation/Holidays": 92,
-        "Other ": 93,
-
-        // (row 94 to 96) future placeholders
-        // "Other": 96, // last row for Expenses
-      },
-      Debt: {
-        "Personal Loans": 112,
-        "Credit Card": 113,
-        "Overdraft": 114,
-        "Student Loans": 115,
-        "Savings Plan/Account": 116,
-        "Other Paid from Payslip": 117,
-        "Minus Insurance Paid from Payslip": 118,
-        "Minus Utilities / Other Paid from Payslip": 119,
-        "Other": 120,
-      },
-    };
-
-    // Tally by category -> subcategory -> month
-    const categoryData = {};
-
-    transactions.forEach((txn) => {
-      const category = txn.category;
-      const subcategory = txn.subcategory;
-      const date = txn.date1;
-      const amount =
-        category === "Income"
-          ? parseFloat(txn.credit_amount || 0)
-          : parseFloat(txn.debit_amount || 0);
-      const month = date
-        ? months[moment(date, ["DD/MM/YYYY"]).month()]// convert date to month
-        : null;
-    
-      if (!category || !subcategory || !month) return;
-      if (!cellMap[category] || !cellMap[category][subcategory]) return;
-    
-      if (!categoryData[category]) categoryData[category] = {};
-      if (!categoryData[category][subcategory]) categoryData[category][subcategory] = {};
-      if (!categoryData[category][subcategory][month])
-        categoryData[category][subcategory][month] = 0;
-    
-      categoryData[category][subcategory][month] += amount;
-    });
-    
-
-
-    // Insert into Excel
-    Object.entries(categoryData).forEach(([category, subcats]) => {
-      Object.entries(subcats).forEach(([subcategory, monthValues]) => {
-        const startRow = cellMap[category]?.[subcategory];
-        if (!startRow) return;
-
-        Object.entries(monthValues).forEach(([month, amount]) => {
-          const col = monthToColumn[month];
-          const cell = `${col}${startRow}`;
-          worksheet[cell] = { t: "n", v: amount };
-        });
-      });
-    });
-
-    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([wbout], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `Budget_Report_${clientId}.xlsx`);
-    console.log("✅ Budget report generated successfully.");
-  } catch (err) {
-    console.error("❌ Failed to generate report:", err);
-    alert("Failed to generate budget report.");
+  const row = subCategoryRowMap[subcategory];
+  const col = monthToColumn[monthKey];
+  if (row && col) {
+    const cell = worksheet.getCell(`${col}${row}`);
+    cell.value = (cell.value || 0) + amount;
   }
-};
+});
+
+
+    const outputBuffer = await workbook.xlsx.writeBuffer();
+
+    const storage = getStorage();
+    const fileRef = ref(storage, `budgets/${clientId}.xlsx`);
+    await uploadBytes(
+      fileRef,
+      new Blob([outputBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      })
+    );
+
+    saveAs(
+      new Blob([outputBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `${clientId}-budget.xlsx`
+    );
+  } catch (error) {
+    console.error("Failed to generate budget report:", error);
+  }
+}

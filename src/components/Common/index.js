@@ -11,7 +11,8 @@ export { default as Loader } from './Loader';
 export { default as Sidebar } from './Sidebar';
 export { default as TemplateContext } from './TemplateContext';
 
+export { default as OverView } from './OverView';
+
 export * from './LoadCategories';
 export * from './LoadSubCategories';
-
 export * from './LoadTransactionDatebase';

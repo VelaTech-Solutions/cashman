@@ -1,41 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
-
+import { Box, TextField, Button, Paper, Stack, Typography, Grid} from "@mui/material";
 // Component Imports
-import { Sidebar, LoadClientData } from 'components/Common';
-import OverView from "../components/Transactions/TransactionsPage/OverViews/OverView";
+import { LoadClientData, OverView } from 'components/Common';
 
-const TransactionsPage = () => {
-  const { id: clientId } = useParams();
+export default function TransactionsPage({clientId}) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" },
-    {
-      path: `/client/${clientId}/view-transactions`,
-      label: "View Transactions",
-      icon: "ph-file-text",
-    },
-    {
-      path: `/client/${clientId}/edit-transactions`,
-      label: "Edit Transactions",
-      icon: "ph-file-text",
-    },
-    {
-      path: `/client/${clientId}/categorize-transactions`,
-      label: "Categorize Transactions",
-      icon: "ph-file-text",
-    },
-    {
-      path: `/client/${clientId}/extract-transactions`,
-      label: "Extract Transactions",
-      icon: "ph-file-text",
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,18 +23,14 @@ const TransactionsPage = () => {
   }, [clientId]);
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Client Profile" links={links} />
-      <div className="flex-1 p-8">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">Manage Transactions</h1>
-        </header>
-            <OverView transactions={transactions}
-            />
-        </div>
-      </div>
-
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        {/* <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Manage Transactions
+        </Typography>
+          <OverView transactions={transactions}/> */}
+      </Stack>
+    </Box>
   );
 };
 
-export default TransactionsPage;

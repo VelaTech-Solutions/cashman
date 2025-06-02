@@ -1,41 +1,54 @@
 // help/HelpBudget.js
 // Instructions to help the user with Budgeting
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  Stack,
+  Divider,
+} from "@mui/material";
 
-import React from "react";
+export default function HelpBudget() {
+  const [error, setError] = useState("");
 
-// Component Imports
-import { Sidebar } from 'components/Common';
+  if (error) return <Typography color="error">Error: {error}</Typography>;
 
-// You can adjust the links array according to your actual routes
-const links = [
-  { path: "javascript:void(0)", label: "Back", icon: "ph-home" },
-];
-
-const HelpBudget = () => {
+  const steps = [
+    {
+      title: "Step 1: Calculate & Save Budget",
+      desc: "Click the 'Calculate & Save Budget' button to process your data. This triggers backend calculations to create your budget.",
+    },
+    {
+      title: "Step 2: Update Insurance Information",
+      desc: "If needed, add or edit your insurance details in the insurance section to keep your budget accurate.",
+    },
+    {
+      title: "Step 3: Review Summary",
+      desc: "Head to the summary page to carefully review all budget data for correctness before finalizing.",
+    },
+    {
+      title: "Step 4: Download Budget Report",
+      desc: "Download your budget report for your records or to share with your financial advisor.",
+    },
+  ];
+  
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Help Budget" links={links} />
-
-      {/* Main content area */}
-      <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Budget Help</h2>
-        <p className="mb-4">
-          This page provides guidance on how to create, manage, and maintain your budgets effectively.
-        </p>
-        <ul className="list-disc list-inside">
-          <li>
-            <strong>Creating a Budget:</strong> Explanation goes here.
-          </li>
-          <li>
-            <strong>Managing Budget Categories:</strong> Explanation goes here.
-          </li>
-          <li>
-            <strong>Tracking Budget Progress:</strong> Explanation goes here.
-          </li>
-        </ul>
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+      <Typography variant="h3" gutterBottom>Budget Instructions</Typography>
+        <Paper sx={{ p: 3, bgcolor: "grey.800" }}>
+          <Stack spacing={3}>
+            {steps.map((step, i) => (
+              <Box key={i}>
+                <Typography variant="h6">{step.title}</Typography>
+                <Typography variant="body2">{step.desc}</Typography>
+                {i < steps.length - 1 && <Divider sx={{ my: 2, borderColor: "grey.700" }} />}
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
+      </Stack>
+    </Box>
   );
 };
-
-export default HelpBudget;

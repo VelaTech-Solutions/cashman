@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
 // Component Imports
 import { LoadClientData } from "components/Common";
 import OverViews from "./OverViews/OverView";
 import Tables from "./Tables/Table";
 
-const ArchivedData = () => {
-  const { id: clientId } = useParams();
+export default function ArchivedData({clientId}) {
   const [archiveData, setArchive] = useState([]);
   const [error, setError] = useState("");
 
@@ -28,13 +42,13 @@ const ArchivedData = () => {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div className="flex">
-      <div className="flex flex-col w-full p-6">
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
         <OverViews data={archiveData} />
         <Tables data={archiveData} />
-      </div>
-    </div>
+      </Stack>
+    </Box>
   );
 };
 
-export default ArchivedData;
+

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { doc, setDoc, getDoc, getDocs, updateDoc, collection } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 // import { Button } from "components/Common";
-import { Button, Select, MenuItem, Checkbox, TextField, FormControlLabel, Box, Switch } from "@mui/material";
+import { Button, Select, MenuItem, Checkbox, TextField, FormControlLabel, Box, Switch, Stack } from "@mui/material";
 
 export default function FuzzyLinesPage() {
   const [banks, setBanks] = useState([]);
@@ -80,9 +80,11 @@ export default function FuzzyLinesPage() {
 
 
   return (
-    <Box className="p-6 bg-gray-900 text-white rounded-lg shadow-md">
-      <h2 className="text-xl font-bold text-blue-400 mb-4">Bank Fuzzy Removal</h2>
-      
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      {/* <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Manage Subcategories
+      </Typography> */}
+      <Stack spacing={2} >
       {/* Select Bank Field */}
       <Select
         value={selectedBank}
@@ -93,7 +95,6 @@ export default function FuzzyLinesPage() {
         renderValue={(selected) => selected || "Select Bank"}
         sx={{
           mb: 2,
-          color: "white",
           "& .MuiOutlinedInput-notchedOutline": { borderColor: "gray" },
           "& .MuiSvgIcon-root": { color: "white" },
         }}
@@ -111,8 +112,6 @@ export default function FuzzyLinesPage() {
         fullWidth
         sx={{
           mb: 2,
-          input: { color: "white" },
-          label: { color: "white" },
           "& .MuiOutlinedInput-root": {
             "& fieldset": { borderColor: "gray" },
             "&:hover fieldset": { borderColor: "white" },
@@ -251,6 +250,7 @@ export default function FuzzyLinesPage() {
           </tbody>
         </table>
       </Box>
+      </Stack>
     </Box>
   );
-}
+};

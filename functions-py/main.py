@@ -452,7 +452,7 @@ def getBudgetTemplate(req: https_fn.Request) -> https_fn.Response:
 
     try:
         bucket = storage.bucket()
-        template_path = "template/template_budget.xlsx"
+        template_path = "template/template_budget_updated.xlsx"
         template_blob = bucket.blob(template_path)
 
         # Download template file into memory
@@ -461,7 +461,7 @@ def getBudgetTemplate(req: https_fn.Request) -> https_fn.Response:
         # Set response headers for XLSX file download
         response.set_data(template_data)
         response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        response.headers["Content-Disposition"] = f'attachment; filename="template_budget.xlsx"'
+        response.headers["Content-Disposition"] = f'attachment; filename="template_budget_updated.xlsx"'
 
         return response
 

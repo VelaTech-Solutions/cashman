@@ -60,16 +60,27 @@ import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 // settings cat excel cell placement
-
+import BudgetRangeSettings from "../Views/BudgetRangeSettings";
 
 export default function BudgetSettingsView() {
-
-
+  const [activeTable, setActiveTable] = useState("budgetRangeSettings");
   return (
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
       <Typography variant="h6" sx={{ mb: 2 }}>
         Budget Settings
       </Typography>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "budgetRangeSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("budgetRangeSettings")}
+          >
+            Range Settings
+          </Button>
+        </Stack>
+        {activeTable === "budgetRangeSettings" && <BudgetRangeSettings />}
 
+      </Stack>
+    </Box>
   );
-
 };

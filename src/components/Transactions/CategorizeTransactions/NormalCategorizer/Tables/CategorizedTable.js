@@ -5,14 +5,12 @@ import { LoadClientData } from "components/Common";
 
 // MUI Imports
 import { 
-  Grid, 
   Box, 
   CircularProgress,
   Typography, 
   Button,
   Stack, 
-  Chip, 
-  Divider  
+  Chip 
 } from "@mui/material";
 import {
   DataGrid,
@@ -20,8 +18,7 @@ import {
 } from '@mui/x-data-grid';
 import DeleteIcon from "@mui/icons-material/Delete";
 
-
-const CategorizedTable = ({ clientId }) => {
+export default function CategorizedTable({ clientId }) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
@@ -97,19 +94,19 @@ const CategorizedTable = ({ clientId }) => {
   }));
 
   const columns = [
-    { field: "date1", headerName: "Date 1", width: 120, },
-    { field: "date2", headerName: "Date 2", width: 120, },
-    { field: "description", type: "string", headerName: "Description", width: 400, },
-    { field: "description2", type: "string", headerName: "Description +", width: 300, },
-    { field: "credit_amount", type: "number", headerName: "Credit Amount", width: 130, },
-    { field: "debit_amount", type: "number", headerName: "Debit Amount", width: 130, },
-    { field: "balance_amount", type: "number", headerName: "Balance Amount", width: 130, },
-    { field: "category", type: "string", headerName: "Category", width: 100, },
-    { field: "subcategory", type: "string", headerName: "Subcategory", width: 100, },
+    { field: "date1", headerName: "Date 1", width: 100 },
+    { field: "description", type: "string", headerName: "Description", width: 350 },
+    { field: "description2", type: "string", headerName: "Description +", width: 200 },
+    { field: "credit_amount", type: "number", headerName: "Credit Amount", flex:1 },
+    { field: "debit_amount", type: "number", headerName: "Debit Amount", flex:1 },
+    { field: "balance_amount", type: "number", headerName: "Balance Amount", flex:1 },
+    { field: "category", type: "string", id: "category", headerName: "Category", flex:1 },
+    { field: "subcategory", type: "string", id: "subcategory", headerName: "Subcategory", flex:1 },
     {
       field: "actions",
       type: "actions",
       headerName: "Actions",
+      flex:1,
       getActions: (params) => [
         <GridActionsCellItem
           icon={<DeleteIcon />}
@@ -139,82 +136,65 @@ const CategorizedTable = ({ clientId }) => {
 
   if (error) return <div>{error}</div>;
 
-  const metricsSx = {
-    backgroundColor: "#424242",
-    color: 'white',
-  };
-
   return (
-    <div>
-      <Grid container spacing={2} sx={{ mt: 4 }}>
 
-        <Grid size={12}>
-          <Stack spacing={1}>
-            <Stack direction="row" spacing={0.5} flexWrap="wrap">
-              <Chip label={`Categorized: ${Math.round(progress)}%`} size="small" sx={metricsSx} />
-              <Chip label={`Categorized: ${filteredTransactions.length}/${transactions.length}`} size="small" sx={metricsSx} />
-              <Chip label={`Total: ${transactions.length}`} size="small" sx={metricsSx} />
-            </Stack>
-            <Divider sx={{ borderColor: "#555" }} />
-            <Stack direction="row" spacing={0.5} flexWrap="wrap">
-              {Object.entries(categoryTotals)
-                .filter(([_, total]) => !isNaN(total) && total !== 0)
-                .map(([name, total]) => (
-                  <Chip
-                    key={name}
-                    label={`${name}: ${total.toFixed(2)}`}
-                    size="small"
-                    sx={metricsSx}
-                  />
-                ))}
-            </Stack>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+          <Stack direction="row" spacing={1}>
+            <Chip label={`Categorized: ${Math.round(progress)}%`} size="small" />
+            <Chip label={`Categorized: ${filteredTransactions.length}/${transactions.length}`} size="small" />
+            <Chip label={`Total: ${transactions.length}`} size="small" />
+
+            {Object.entries(categoryTotals)
+              .filter(([_, total]) => !isNaN(total) && total !== 0)
+              .map(([name, total]) => (
+                <Chip
+                  key={name}
+                  label={`${name}: ${total.toFixed(2)}`}
+                  size="small"
+                />
+              ))}
           </Stack>
-        </Grid>
-        
-        <Box sx={{ display: "flex", justifyContent: "flex", alignItems: "center", width: "100%", gap: 1 }}>
-       
-          <Button 
-            variant="contained" 
-            onClick={() => {
-              if (window.confirm("Are you sure you want to clear all categorized transactions?")) {
-                handleClearCategorized();
-              }
-            }} 
-            sx={{ backgroundColor: 'error.main', color: 'white' }}
-          >
-            Clear All
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "flex", alignItems: "center", width: "100%", gap: 1 }}>
+            <Button 
+              variant="contained" 
+              onClick={() => {
+                if (window.confirm("Are you sure you want to clear all categorized transactions?")) {
+                  handleClearCategorized();
+                }
+              }} 
+              sx={{ backgroundColor: 'error.main', color: 'white' }}
+            >
+              Clear All
+            </Button>
+          </Box>
 
-        </Box>
+          <Box>
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                <CircularProgress />
+              </Box>
+            ) : rows.length === 0 ? (
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                <Typography variant="body1">No transactions found.</Typography>
+              </Box>
+            ) : (
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                pageSizeOptions={[20, 50, 100]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 20, page: 0 } },
+                }}
+                sx={{
+                  height: 500,
+                  width: "100%",
+                }}
+              />
+            )}
 
-        <Grid size={12}>
-        {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-              <CircularProgress />
-            </Box>
-          ) : rows.length === 0 ? (
-            <Typography sx={{ mt: 4 }} align="center">
-              No categorized transactions found.
-            </Typography>
-          ) : (
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              pageSizeOptions={[20, 50, 100]}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 20, page: 0 } },
-              }}
-              sx={{
-                height: 690,
-                width: "100%",
-                overflow: "auto",
-              }}
-            />
-          )}
-        </Grid>
-      </Grid>
-    </div>
+          </Box>
+      </Stack>
+    </Box>
   );
 };
-
-export default CategorizedTable;

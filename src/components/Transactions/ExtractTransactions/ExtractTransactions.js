@@ -1,83 +1,53 @@
 // src/components/Transactions/ExtractTransactions/ExtractTransactions.js
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
-
-// Component Imports
-import { Sidebar, LoadClientData } from 'components/Common';
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+ } from "@mui/material";
 
 import ExtractAutomatically from "./ExtractAutomatic/ExtractAutomatically";
 import ExtractManually from "./ExtractManual/ExtractManually";
-// import HelpExtract from "../help/HelpExtract";
 
-function ExtractTransactions() {
-  const { id: clientId } = useParams();
-  const [clientData, setClientData] = useState(null);
-  const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState("ExtractAutomatically");
-  const unverifiedCount = clientData?.transactions?.filter(tx => tx.verified === "✗").length || 0;
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${clientId}/transactionspage`, label: "Back to Tansactions", icon: "ph-file-text" },
-    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" },
-    {
-      path: `/client/${clientId}/edit-transactions`,
-      label: `Edit Transactions (${unverifiedCount})`,
-      icon: "ph-file-text",
-    },
-    { path: `/client/${clientId}/archive`,
-      label: "Archive Data",
-      icon: "ph-file-text",
-    },
-    { type: "divider" },
-    {
-      label: "Automatically",
-      icon: "ph-rocket-launch",
-      onClick: () => setActiveSection("ExtractAutomatically"),
-    },
-    {
-      label: "Manually",
-      icon: "ph-pencil",
-      onClick: () => setActiveSection("ExtractManually"),
-    },
-    { type: "divider" },
-    {
-      path: `/ExtractSettings/${clientId}`,
-      label: "Extract Settings",
-      icon: "ph-arrow-left",
-    },
-    { path: "/HelpExtract", label: "Extract Help", icon: "ph-arrow-left" },
-  ];
-  
-
-  // Fetch client data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Load client data using the reusable function
-        const clientData = await LoadClientData(clientId); // Assuming 'clientData' is the reusable function
-        setClientData(clientData);
-      } catch (err) {
-        console.error("Error fetching data:", err.message);
-        setError("Failed to fetch Client Data.");
-      }
-    };
-
-    fetchData();
-  }, [clientId]);
-
-  if (error) return <div>Error: {error}</div>;
-
+export default function ExtractTransactions({clientId}) {
+  const [activeTable, setActiveTable] = useState("Automatically");
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Extract Transactions" links={links} />
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Extract Transactions</h2>
-          {activeSection === "ExtractAutomatically" && <ExtractAutomatically />}
-          {activeSection === "ExtractManually" && <ExtractManually />}
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Extract Transactions
+        </Typography>
+        
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "Automatically" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("Automatically")}
+          >
+            Automatically
+          </Button>
+          <Button 
+            variant={activeTable === "Manually" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("Manually")}
+          >
+            Manually
+          </Button>
+        </Stack>
+
+        {activeTable === "Automatically" && <ExtractAutomatically clientId={clientId} />}
+        {activeTable === "Manually" && <ExtractManually clientId={clientId} />}
+      </Stack>
+    </Box>
   );
-}
-export default ExtractTransactions;
+};
+

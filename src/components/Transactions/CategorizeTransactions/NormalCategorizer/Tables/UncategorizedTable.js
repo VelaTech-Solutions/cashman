@@ -32,8 +32,7 @@ import {
 } from "@mui/material";
 
 
-
-const UncategorizedTableTest = ({ clientId }) => {
+export default function UncategorizedTable({ clientId }) {
   const [clientData, setClientData] = useState({});
   const [bankName, setBankName] = useState("");
   const [transactions, setTransactions] = useState([]);
@@ -147,92 +146,62 @@ const UncategorizedTableTest = ({ clientId }) => {
   });
 
   const columns = [
-    { field: "date1", headerName: "Date 1", width: 120, },
-    { field: "date2", headerName: "Date 2", width: 120, },
-    { field: "description", type: "string", headerName: "Description", width: 400, },
-    { field: "description2", type: "string", headerName: "Description +", width: 300, },
-    { field: "credit_amount", type: "number", headerName: "Credit Amount", width: 130, },
-    { field: "debit_amount", type: "number", headerName: "Debit Amount", width: 130, },
-    { field: "balance_amount", type: "number", headerName: "Balance Amount", width: 130, },
-    { field: "category", type: "string", id: "category", headerName: "Category", width: 100, },
-    { field: "subcategory", type: "string", id: "subcategory", headerName: "Subcategory", width: 100, },
-    // Matchings
-    { field: "mcategory", type: "string", id: "mcategory", headerName: "Matching Category", width: 100, },
-    { field: "msubcategory", type: "string", id: "msubcategory", headerName: "Matching Subcategory", width: 100, },
+    { field: "date1", headerName: "Date 1", width: 100 },
+    { field: "description", type: "string", headerName: "Description", width: 350 },
+    { field: "description2", type: "string", headerName: "Description +", width: 200 },
+    { field: "credit_amount", type: "number", headerName: "Credit Amount", flex:1 },
+    { field: "debit_amount", type: "number", headerName: "Debit Amount", flex:1 },
+    { field: "balance_amount", type: "number", headerName: "Balance Amount", flex:1 },
+    { field: "category", type: "string", id: "category", headerName: "Category", flex:1 },
+    { field: "subcategory", type: "string", id: "subcategory", headerName: "Subcategory", flex:1 },
+    { field: "mcategory", type: "string", id: "mcategory", headerName: "Matching Category", flex:1 },
+    { field: "msubcategory", type: "string", id: "msubcategory", headerName: "Matching Subcategory", flex:1 },
   ];
 
-  const handleSaveClick = async () => {
-    const selectedTxns = transactions.filter(txn => selectedTransactions.includes(txn.uid));
-    if (selectedTxns.length === 0) return;
-  
-    // Get category and subcategory names from selected ID
-    const selectedCategory = categories.find(cat => cat.id === category);
-    const selectedSubcategory = subcategories.find(sub => sub.id === subcategory);
-  
-    const payload = {
-      category: selectedCategory ? selectedCategory.name : "",  // Use name instead of id
-      subcategory: selectedSubcategory ? selectedSubcategory.name : "",  // Use name instead of id
-      description: selectedTxns[0].description || "",
-      createdAt: new Date().toISOString(),
-    };
-  
-    try {
-      // 1. Add to transaction database
-      await addTransactionDatabase(bankName, payload);
-  
-      // 2. Update client data locally
-      // For each transaction, check if it's selected or has the same description as a selected one.
-      // If yes, apply the selected category and subcategory.
-      const updated = transactions.map(txn => {
-        // Check if this transaction is explicitly selected by UID
-        const isSelected = selectedTransactions.includes(txn.uid);
+const handleSaveClick = async () => {
+  const selectedTxns = transactions.filter(txn => selectedTransactions.includes(txn.uid));
+  if (selectedTxns.length === 0) return;
 
-        // Check if this transaction's description matches any selected transaction (case-insensitive)
-        const isSameDescription = isSelected || selectedTransactions.some(uid => {
-          const selectedTxn = transactions.find(t => t.uid === uid);
-          return selectedTxn?.description?.trim().toLowerCase() === txn.description?.trim().toLowerCase();
-        });
+  const selectedCategory = categories.find(cat => cat.id === category)?.name || "";
+  const selectedSubcategory = subcategories.find(sub => sub.id === subcategory)?.name || "";
 
-        // If it's selected or matches description, apply category/subcategory
-        if (isSameDescription) {
-          return {
-            ...txn,
-            category: selectedCategory ? selectedCategory.name : "",
-            subcategory: selectedSubcategory ? selectedSubcategory.name : "",
-          };
-        }
-
-        // Otherwise, leave the transaction unchanged
-        return txn;
-      });
-
-
-      setTransactions(updated);
-
-      // 3. Update transactionDb (local or fetch from Firestore)
-      setTransactionDb(updated); // Ensure transactionDb is updated
-  
-      // 4. Save to Firestore
-      await updateDoc(doc(db, "clients", clientId), {
-        transactions: updated,
-      });
-
-      // 5. Calculate % categorized and update client document
-      const total = updated.length;
-      const categorizedCount = updated.filter(txn => txn.category && txn.subcategory).length;
-      const percentage = Math.round((categorizedCount / total) * 100);
-
-      await updateDoc(doc(db, "clients", clientId), {
-        categorized: percentage,
-      });
-
-
-      console.log("Updated selected transactions with:", payload);
-      
-    } catch (error) {
-      console.error("Error updating transactions:", error);
-    }
+  const payload = {
+    category: selectedCategory,
+    subcategory: selectedSubcategory,
+    description: selectedTxns[0].description || "",
+    createdAt: new Date().toISOString(),
   };
+
+  try {
+    await addTransactionDatabase(bankName, payload);
+
+    const updated = transactions.map(txn => {
+      const isSelected = selectedTransactions.includes(txn.uid);
+      const isSameDescription = isSelected || selectedTxns.some(sel =>
+        sel.description?.trim().toLowerCase() === txn.description?.trim().toLowerCase()
+      );
+
+      return isSameDescription
+        ? { ...txn, category: selectedCategory, subcategory: selectedSubcategory }
+        : txn;
+    });
+
+    setTransactions(updated);
+    setTransactionDb(updated);
+
+    const categorizedCount = updated.filter(txn => txn.category && txn.subcategory).length;
+    const percentage = Math.round((categorizedCount / updated.length) * 100);
+
+    await updateDoc(doc(db, "clients", clientId), {
+      transactions: updated,
+      categorized: percentage,
+    });
+
+    console.log("Updated selected transactions with:", payload);
+  } catch (error) {
+    console.error("Error updating transactions:", error);
+  }
+};
 
   const handleMatchClick = async () => {
     try {
@@ -291,9 +260,6 @@ const UncategorizedTableTest = ({ clientId }) => {
     categoryTotals[category] += parseFloat(txn.debit_amount) || parseFloat(txn.credit_amount) || 0;
   });
 
-  // Calculate Matching Transactions and Totals todo
-
-
   if (error) return <p className="text-red-500">{error}</p>;
 
   const selectSx = {
@@ -304,45 +270,24 @@ const UncategorizedTableTest = ({ clientId }) => {
     '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' }, // Focused state: dark background with a light blue border
   };
 
-  const metricsSx = {
-    backgroundColor: "#424242",
-    color: 'white',
-  };
-
   return (
-    <div>
-      <Grid container spacing={2} sx={{ mt: 4 }}>
-        <Grid size={12}>
-          <Stack spacing={1}>
-            <Stack direction="row" spacing={0.5} flexWrap="wrap">
-              <Chip label={`Categorized: ${Math.round(progress)}%`} size="small" sx={metricsSx} />
-              <Chip label={`Uncategorized: ${uncategorizedTransactions.length}/${transactions.length}`} size="small" sx={metricsSx} />
-              <Chip label={`Total: ${transactions.length}`} size="small" sx={metricsSx} />
-            </Stack>
-
-            {/* todo or to fix */}
-            {/* <Divider sx={{ borderColor: "#555" }} />
-            <Stack direction="row" spacing={0.5} flexWrap="wrap">
-              <Chip label={`Matching: ${categorizedCount}`} size="small" sx={metricsSx} />
-            </Stack> */}
-            <Divider sx={{ borderColor: "#555" }} />
-
-
-            <Stack direction="row" spacing={0.5} flexWrap="wrap">
-              {Object.entries(categoryTotals)
-                .filter(([_, total]) => !isNaN(total) && total !== 0)
-                .map(([name, total]) => (
-                  <Chip
-                    key={name}
-                    label={`${name}: ${total.toFixed(2)}`}
-                    size="small"
-                    sx={metricsSx}
-                  />
-                ))}
-            </Stack>
-          </Stack>
-        </Grid>
-
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={1}>
+          <Chip label={`Categorized: ${Math.round(progress)}%`} size="small" />
+          <Chip label={`Uncategorized: ${uncategorizedTransactions.length}/${transactions.length}`} size="small" />
+          <Chip label={`Total: ${transactions.length}`} size="small" />
+          
+          {Object.entries(categoryTotals)
+            .filter(([_, total]) => !isNaN(total) && total !== 0)
+            .map(([name, total]) => (
+              <Chip
+                key={name}
+                label={`${name}: ${total.toFixed(2)}`}
+                size="small"
+              />
+            ))}
+        </Stack>
         <Box sx={{ display: "flex", justifyContent: "flex", alignItems: "center", width: "100%", gap: 1 }}>
           {/* Category Selection */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -394,8 +339,6 @@ const UncategorizedTableTest = ({ clientId }) => {
             Match
           </Button>
         </Box>
-        {/* add a switch to turn on/off cat the same transactions */}
-
         {/* Progress Bar */}
         <Box sx={{ width: '100%' }}>
           <LinearProgress
@@ -409,9 +352,8 @@ const UncategorizedTableTest = ({ clientId }) => {
             }}
           />
         </Box>
-
-        <Grid size={12}>
-        {loading ? (
+        <Box>
+          {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
               <CircularProgress />
             </Box>
@@ -435,16 +377,13 @@ const UncategorizedTableTest = ({ clientId }) => {
                 pagination: { paginationModel: { pageSize: 20, page: 0 } },
               }}
               sx={{
-                height: 690,
+                height: 500,
                 width: "100%",
-                overflow: "auto",
               }}
             />
           )}
-        </Grid>
-      </Grid>
-    </div>
+        </Box>
+      </Stack>
+    </Box>
   );
 };
-
-export default UncategorizedTableTest;

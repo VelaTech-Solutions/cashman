@@ -20,7 +20,7 @@ const ClientActions1 = ({
       <div className="grid grid-cols-1 gap-3 justify-center">
         <div className="flex flex-wrap gap-2 mb-4 items-center">
           {/* Action Buttons */}
-          {actionLinks.map(({ label, path }) => (
+          {/* {actionLinks.map(({ label, path }) => (
             <Link
               key={path}
               to={path}
@@ -28,7 +28,7 @@ const ClientActions1 = ({
             >
               {label}
             </Link>
-          ))}
+          ))} */}
 
           {/* Notes Button with Speech Bubble */}
           <div className="relative">

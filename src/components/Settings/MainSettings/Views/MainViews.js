@@ -1,15 +1,30 @@
-// src/components/Settings/MainSettings/Views/MainViews.js
+// src/components/Settings
+import React, { useState } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
-import React from 'react';
-
-const MainViews = () => {
+export default function MainViews() {
   return (
-    <div className="p-4 bg-gray-900 rounded-md shadow text-white">
-      <h3 className="text-lg font-semibold mb-4">Main Settings</h3>
-
-
-    </div>
+     <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+         Main Settings
+       </Typography>
+       <Stack spacing={2}>
+       </Stack>
+     </Box>
   );
 };
-
-export default MainViews;

@@ -1,39 +1,46 @@
-// src/components/Transactions/CategorizeTransactions/NormalCategorizePage.js
+import React, { useState } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import UncategorizedTable from "./Tables/UncategorizedTable";
+import CategorizedTable from "./Tables/CategorizedTable";
+export default function NormalCategorizer({ clientId }) {
+  const [activeTable, setActiveTable] = useState("uncategorizedTable");
 
-import React, { useState, useEffect } from "react";
-// import Overview from "./OverViews/Overview";
-import ContainerTables from "./Containers/ContainerTables";
-
-const NormalCategorizer = ({ clientId }) => {
   return (
-    <div className="bg-gray-900 text-white p-8">
-      <h1 className="text-3xl font-bold mb-6">Categorize Transactions</h1>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "uncategorizedTable" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("uncategorizedTable")}
+          >
+            Uncategorized
+          </Button>
+          <Button 
+            variant={activeTable === "categorizedTable" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("categorizedTable")}
+          >
+            Categorized
+          </Button>
+        </Stack>
 
-      {/* <p className="text-sm text-gray-400 mb-4">
-        This is a short description for the user. Select one transaction and run the
-        <strong> Match All</strong> function or use the
-        <strong> Match All Transactions </strong>
-        button for the best results.
-      </p> */}
-
-      {/* Overview section */}
-      {/* <Overview 
-        transactions={transactions}
-      /> */}
-
-      {/* Action buttons */}
-      {/* <CategorizeActions
-        clientId={clientId}
-        selectedTransactions={selectedTransactions}
-        setSelectedTransactions={setSelectedTransactions}
-      /> */}
-
-      {/* Tables section */}
-      <ContainerTables
-        clientId={clientId}
-      />
-    </div>
+        {activeTable === "uncategorizedTable" && <UncategorizedTable clientId={clientId}/>}
+        {activeTable === "categorizedTable" && <CategorizedTable clientId={clientId}/>}
+      </Stack>
+    </Box>
   );
 };
-
-export default NormalCategorizer;

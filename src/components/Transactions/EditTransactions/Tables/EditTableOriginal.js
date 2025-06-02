@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // MUI Imports
 import Tooltip from '@mui/material/Tooltip';
-import { Grid, Box, CircularProgress,TextField, InputAdornment, Typography } from "@mui/material";
+import { Box, Stack, CircularProgress, TextField, InputAdornment, Typography } from "@mui/material";
 import {
   DataGrid,
   Toolbar,
@@ -104,8 +104,7 @@ const CustomToolbar = () => (
   </Toolbar>
 );
 
-// Rest of the EditTableOriginal component remains unchanged
-const EditTableOriginal = ({ clientId }) => {
+export default function EditTableOriginal({ clientId }) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
@@ -236,14 +235,14 @@ const EditTableOriginal = ({ clientId }) => {
       field: "description",
       type: "string",
       headerName: "Description",
-      width: 400,
+      flex:1,
       editable: (params) => params.row.id === editingRowId,
     },
     {
       field: "description2",
       type: "string",
       headerName: "Description +",
-      width: 300,
+      flex:1,
       editable: (params) => params.row.id === editingRowId,
     },
     {
@@ -257,20 +256,21 @@ const EditTableOriginal = ({ clientId }) => {
       field: "debit_amount",
       type: "number",
       headerName: "Debit Amount",
-      width: 130,
+      flex:1,
       editable: (params) => params.row.id === editingRowId,
     },
     {
       field: "balance_amount",
       type: "number",
       headerName: "Balance Amount",
-      width: 130,
+      flex:1,
       editable: (params) => params.row.id === editingRowId,
     },
     {
       field: "actions",
       type: "actions",
       headerName: "Actions",
+      flex:1,
       getActions: (params) => {
         const isInEditMode = rowModesModel[params.id]?.mode === GridRowModes.Edit;
         if (isInEditMode) {
@@ -313,15 +313,9 @@ const EditTableOriginal = ({ clientId }) => {
   ];
 
   return (
-    <div>
-      <Grid container spacing={2} sx={{ mt: 4 }}>
-
-        <Grid size={12}>
-          <Typography variant="h6"> All Transactions</Typography>
-        </Grid>
-
-
-        <Grid size={12}>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Box>
         {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
               <CircularProgress />
@@ -348,16 +342,13 @@ const EditTableOriginal = ({ clientId }) => {
               }}
               slots={{ toolbar: CustomToolbar }}
               sx={{
-                height: 690,
+                height: 500,
                 width: "100%",
-                overflow: "auto",
               }}
             />
           )}
-        </Grid>
-      </Grid>
-    </div>
+        </Box>
+      </Stack>
+    </Box>
   );
 };
-
-export default EditTableOriginal;

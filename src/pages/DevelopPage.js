@@ -9,8 +9,7 @@ import {
   Checkbox,
   List,
   ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
+  Stack,
   Paper,
 } from "@mui/material";
 import { doc, getDoc, setDoc  } from "firebase/firestore";
@@ -22,22 +21,16 @@ import { Sidebar } from 'components/Common';
 
 const configDoc = () => doc(db, "settings", "developnote");
 
-
-const DevelopPage = () => {
+export default function DevelopPage() {
   const [notesLines, setNotesLines] = useState([]);
   const [selectedNotes, setSelectedNotes] = useState(new Set());
-
   const [userEmail, setUserEmail] = useState("Unknown");
-  const links = [
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-    { path: "/Help", label: "Help", icon: "ph-question" },
-  ];
-useEffect(() => {
-const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (user) setUserEmail(user.email);
-});
-return () => unsubscribe();
-}, []);
+  useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) setUserEmail(user.email);
+  });
+  return () => unsubscribe();
+  }, []);
 
 
   useEffect(() => {
@@ -71,7 +64,6 @@ return () => unsubscribe();
     input.value = "";
   };
   
-
   const deleteSelectedLines = async () => {
     const updated = notesLines.filter((_, i) => !selectedNotes.has(i));
     await setDoc(configDoc(), { notesLines: updated }, { merge: true });
@@ -86,41 +78,48 @@ return () => unsubscribe();
   };
 
   return (
-        <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-          <Sidebar title="Category Settings" links={links} />
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>Development Notes</Typography>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Typography variant="h4" gutterBottom>Development Notes</Typography>
 
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <TextField id="notesLineInput" label="New Note" fullWidth />
-          <Button variant="contained" onClick={addNoteLine}>Add</Button>
-          <Button color="error" onClick={deleteSelectedLines}>Delete Selected</Button>
-        </Box>
-      </Paper>
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField id="notesLineInput" label="New Note" fullWidth />
+            <Button variant="contained" color="success" onClick={addNoteLine}>Send</Button>
+            <Button variant="contained" color="error" onClick={deleteSelectedLines}>Delete</Button>
+          </Box>
+        </Paper>
 
-      <Paper>
-        <List>
-        {notesLines.map((note, index) => (
-  <ListItem key={index} divider>
-    <Checkbox
-      edge="start"
-      checked={selectedNotes.has(index)}
-      onChange={() => toggleSelection(index)}
-    />
-    <ListItemText
-      primary={typeof note === "string" ? note : note.text}
-      secondary={note.user || "Unknown"}
-    />
-  </ListItem>
-))}
-
-        </List>
-      </Paper>
+        <Paper sx={{ p: 2, maxHeight: 500, overflow: "auto" }}>
+          <List>
+            {[...notesLines].reverse().map((note, index) => (
+              <ListItem key={index} disableGutters>
+                <Checkbox
+                  sx={{ mr: 1 }}
+                  checked={selectedNotes.has(index)}
+                  onChange={() => toggleSelection(index)}
+                />
+                <Box
+                  sx={{
+                    border: "1px solid #ccc",
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1,
+                    maxWidth: "80%",
+                  }}
+                >
+                  <Typography variant="body1">
+                    {typeof note === "string" ? note : note.text}
+                  </Typography>
+                  <Typography variant="caption" >
+                    {note.user || "Unknown"}
+                  </Typography>
+                </Box>
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
+      </Stack>
     </Box>
-
-        </div>
   );
 };
-
-export default DevelopPage;

@@ -1,33 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import { LoadClientData } from "components/Common";
+import OverView from "./OverViews/OverView";
+import EditTableOriginal from "./Tables/EditTableOriginal";
+import EditTableInvalid from "./Tables/EditTableInvalid";
+import EditTableMissingDescriptions from "./Tables/EditTableMissingDescriptions";
+import EditTableMissingDates from "./Tables/EditTableMissingDates";
+import EditTableMissingCreditDebitAmounts from "./Tables/EditTableMissingCreditDebitAmounts";
+import EditTableMissingBalanceAmounts from "./Tables/EditTableMissingBalanceAmounts";
+import EditTableMissingAllAmounts from "./Tables/EditTableMissingAllAmounts";
 
-// Component Imports
-import { Sidebar, LoadClientData } from 'components/Common';
-import OverViews from "../EditTransactions/OverViews/OverView";
-import ContainerTables from "../EditTransactions/Containers/ContainerTables";
-
-const EditTransactions = () => {
-  const { id: clientId } = useParams();
+export default function EditTransactions({ clientId }) {
+  const [activeTable, setActiveTable] = useState("tableOriginal");
   const [clientData, setClientData] = useState(null);
   const [bankName, setBankName] = useState("Unknown");
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${clientId}/transactionspage`, label: "Back to Transactions", icon: "ph-file-text" },
-    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-user" },
-    { type: "divider" },
-    {
-      path: `/EditSettings`,
-      label: "Edit Settings",
-      icon: "ph-arrow-left",
-    },
-    { 
-      path: "/HelpEdit", 
-      label: "Edit Help", 
-      icon: "ph-arrow-left" 
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +39,6 @@ const EditTransactions = () => {
         setClientData(clientData);
         setBankName(clientData.bankName || "Unknown");
         setTransactions(clientData.transactions || []);
-
       } catch (err) {
         console.error("🔥 Error fetching client data:", err.message);
         setError("Failed to fetch Client Data.");
@@ -48,19 +50,50 @@ const EditTransactions = () => {
   if (error) return <div className="text-red-500 p-8">{error}</div>;
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Edit Transactions" links={links} />
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Edit Transactions</h2>
-        <div className="flex justify-start items-center space-x-4 mb-4">
-          <OverViews transactions={clientData?.transactions || []} />
-        </div>
-        <div className="flex justify-start items-center space-x-4 mb-4">
-          <ContainerTables clientId={clientId} />
-        </div>
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Edit Transactions
+        </Typography>
+        <OverView transactions={transactions} />
+        <Stack direction="row" spacing={2} flexWrap="wrap">
+          <Button variant={activeTable === "tableOriginal" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableOriginal")}>
+              Original
+          </Button>
+          <Button variant={activeTable === "tableInvalid" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableInvalid")}>
+              Invalid
+          </Button>
+          <Button variant={activeTable === "tableMissingDescriptions" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableMissingDescriptions")}>
+            Missing Descriptions
+          </Button>
+          <Button variant={activeTable === "tableMissingDates" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableMissingDates")}>
+              Missing Dates
+          </Button>
+          <Button variant={activeTable === "tableMissingCreditDebitAmounts" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableMissingCreditDebitAmounts")}>
+              Missing Credit/Debit
+          </Button>
+          <Button variant={activeTable === "tableMissingBalanceAmounts" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableMissingBalanceAmounts")}>
+              Missing Balance
+          </Button>
+          <Button variant={activeTable === "tableMissingAllAmounts" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("tableMissingAllAmounts")}>
+              Missing All Amounts
+          </Button>
+        </Stack>
+        {activeTable === "tableOriginal" && <EditTableOriginal clientId={clientId} />}
+        {activeTable === "tableInvalid" && <EditTableInvalid clientId={clientId} />}
+        {activeTable === "tableMissingDescriptions" && <EditTableMissingDescriptions clientId={clientId} />}
+        {activeTable === "tableMissingDates" && <EditTableMissingDates clientId={clientId} />}
+        {activeTable === "tableMissingCreditDebitAmounts" && <EditTableMissingCreditDebitAmounts clientId={clientId} />}
+        {activeTable === "tableMissingBalanceAmounts" && <EditTableMissingBalanceAmounts clientId={clientId} />}
+        {activeTable === "tableMissingAllAmounts" && <EditTableMissingAllAmounts clientId={clientId} />}
+      </Stack>
+    </Box>
   );
 };
-
-export default EditTransactions;

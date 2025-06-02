@@ -1,43 +1,34 @@
-// src/components/Budget/InsuranceBreakdown.js
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-
-// Component Imports
-import LoadClientData from "components/Common/LoadClientData";
-import InsuranceDataTable from "./Tables/InsuranceDataTable";
-
-const InsuranceBreakdown = () => {
-  const { id: clientId } = useParams();
-  const [clientData, setClientData] = useState(null);
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const clientData = await LoadClientData(clientId);
-        setClientData(clientData);
-        setTransactions(clientData.transactions || []);
-      } catch (err) {
-        console.error("🔥 Error fetching client data:", err.message);
-        setError("Failed to fetch Client Data.");
-      }
-    };
-    fetchData();
-  }, [clientId]);
-
-
-  if (!clientData) return <div className="text-center py-10 text-gray-400">Loading client data...</div>;
-
+import React, { useState } from "react";
+// Mui Imports
+import { 
+  Box, 
+  Button, 
+  Stack
+} from "@mui/material";
+import InsuranceCurrentDataTable from "./Tables/InsuranceCurrentDataTable";
+import InsuranceRestructureDataTable from "./Tables/InsuranceRestructureDataTable";
+export default function InsuranceBreakdown({clientId}) {
+  const [activeTable, setActiveTable] = useState("InsuranceCurrentDataTable");
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl text-white font-bold mb-4">Insurance Breakdown</h2>
-
-      {/* Render the Insurance Table */}
-      <div className="mt-6">
-        <InsuranceDataTable insurance={clientData.insurance} />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "InsuranceCurrentDataTable" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("InsuranceCurrentDataTable")}
+          >
+            Current Insurance
+          </Button>
+          <Button 
+            variant={activeTable === "InsuranceRestructureDataTable" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("InsuranceRestructureDataTable")}
+          >
+            Restructure Insurance
+          </Button>
+        </Stack>
+        {activeTable === "InsuranceCurrentDataTable" && <InsuranceCurrentDataTable clientId={clientId} />}
+        {activeTable === "InsuranceRestructureDataTable" && <InsuranceRestructureDataTable clientId={clientId} />}
+      </Stack>
+    </Box>
   );
 };
-
-export default InsuranceBreakdown;

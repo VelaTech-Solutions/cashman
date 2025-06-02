@@ -1,115 +1,98 @@
-// src/pages/ExtractSettings.js
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
+// src/pages/Settings.js
 
-// Firebase Imports
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import React, { useState, useEffect } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
-// Component Imports
-import { Sidebar } from 'components/Common';
-import MainSettings from "../components/Settings/MainSettings/Containers/ContainerViews";
-import DatabaseSettings from "../components/Settings/DatabaseSettings/Containers/ContainerViews";
-import FilterSettings from "../components/Settings/FilterSettings/Containers/ContainerViews";
-import CategorySettings from "../components/Settings/CategorySettings/Containers/ContainerViews";
-import ExtractSettings from "../components/Settings/ExtractSettings/Containers/ContainerViews";
-import BudgetSettings from "../components/Settings/BudgetSettings/Containers/ContainerViews";
-// import EditSettings from "../components/Settings/EditSettings/EditSettings";
-// import ViewSettings from "../components/Settings/ViewSettings/ViewSettings";
+import MainSettings from "../components/Settings/MainSettings/MainSettings";
+import DatabaseSettings from "../components/Settings/DatabaseSettings/DatabaseSettingsPage";
+import FilterSettings from "../components/Settings/FilterSettings/filterSettingsPage";
+import CategorySettings from "../components/Settings/CategorySettings/CategorySettingsPage";
+import ExtractSettings from "../components/Settings/ExtractSettings/ExtractSettingsPage";
+import BudgetSettings from "../components/Settings/BudgetSettings/BudgetSettingsPage";
+import EditSettings from "../components/Settings/EditSettings/EditSettings";
+import ViewSettings from "../components/Settings/ViewSettings/ViewSettings";
 
-// import ContainerViews from "./Containers/ContainerViews";
-// import ContainerOverViews from "./Containers/ContainerOverViews";
-
-
-
-function SettingsPage() {
-  const [viewMode, setViewMode] = useState("mainSettings");
-  const [error, setError] = useState(null);
-
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-    { path: "/HelpExtract", label: "Extract Help", icon: "ph-question" },
-  ];
-
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-
+export default function SettingsPage() {
+  const [activeTable, setActiveTable] = useState("mainSettings");
   return (
-
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Settings" links={links} />
-      {/*  */}
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Settings</h2>
-        
-        {/* Button Group for Navigation */}
-        <div className="flex space-x-4 mb-6">
-          <button 
-            onClick={() => setViewMode("mainSettings")}
-            className={`px-4 py-2 rounded ${viewMode === "mainSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "mainSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("mainSettings")}
           >
             Main Settings
-          </button>
-
-          <button 
-            onClick={() => setViewMode("databaseSettings")}
-            className={`px-4 py-2 rounded ${viewMode === "databaseSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "databaseSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("databaseSettings")}
           >
             Database Settings
-          </button>
-
-          <button
-            onClick={() => setViewMode("budgetsettings")}
-            className={`px-4 py-2 rounded ${viewMode === "budgetsettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "budgetSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("budgetSettings")}
           >
             Budget Settings
-          </button>
-
-          <button 
-            onClick={() => setViewMode("categorySettings")}
-            className={`px-4 py-2 rounded ${viewMode === "categorySettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "categorySettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("categorySettings")}
           >
             Category Settings
-          </button>
-          <button
-            onClick={() => setViewMode("filterSettings")}
-            className={`px-4 py-2 rounded ${viewMode === "filterSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "filterSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("filterSettings")}
           >
             Filter Settings
-          </button>
-          <button 
-            onClick={() => setViewMode("extractSettings")}
-            className={`px-4 py-2 rounded ${viewMode === "extractSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "extractSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("extractSettings")}
           >
             Extract Settings
-          </button>
-          <button 
-            onClick={() => setViewMode("editSettings")}
-            className={`px-4 py-2 rounded ${viewMode === "editSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "editSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("editSettings")}
           >
             Edit Settings
-          </button>
-          <button 
-            onClick={() => setViewMode("viewSettings")}
-            className={`px-4 py-2 rounded ${viewMode === "viewSettings" ? "bg-blue-500" : "bg-gray-700"}`}
+          </Button>
+          <Button 
+            variant={activeTable === "viewSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("viewSettings")}
           >
             View Settings
-          </button>
-        </div>
-        
-        {/* Conditional Rendering Based on Active Section */}
-        {viewMode === "mainSettings" && <MainSettings />}
-        {viewMode === "databaseSettings" && <DatabaseSettings />}
-        {viewMode === "budgetsettings" && <BudgetSettings />}
-        {viewMode === "filterSettings" && <FilterSettings />}
-        {viewMode === "categorySettings" && <CategorySettings />}
-        {viewMode === "extractSettings" && <ExtractSettings />}
-        {viewMode === "editSettings" && <EditSettings />}
-        {viewMode === "viewSettings" && <ViewSettings />}
-      </div>
-    </div>
-  );
-}
+          </Button>
+        </Stack>
 
-export default SettingsPage;
+        {activeTable === "mainSettings" && <MainSettings />}
+        {activeTable === "databaseSettings" && <DatabaseSettings />}
+        {activeTable === "budgetSettings" && <BudgetSettings />}
+        {activeTable === "filterSettings" && <FilterSettings />}
+        {activeTable === "categorySettings" && <CategorySettings />}        
+        {activeTable === "extractSettings" && <ExtractSettings />}
+        {activeTable === "editSettings" && <EditSettings />}
+        {activeTable === "viewSettings" && <ViewSettings />}      
+
+      </Stack>
+    </Box>
+  );
+};

@@ -6,32 +6,42 @@ import "styles/tailwind.css";
 import { db } from "../../firebase/firebase";
 import { doc, getDoc, updateDoc, } from "firebase/firestore";
 
+
 // Component Imports
-import { Sidebar, LoadClientData } from 'components/Common';
-import OverviewProfile from "components/Client/ClientProfile/OverviewProfile";
-import ClientActions1 from "components/Client/ClientProfile/Actions/ClientActions1";
+import Table from "components/Client/ClientView/Tables/Table";
+import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
+import { Box, TextField, Button, Paper, Stack, Typography, Grid} from "@mui/material";
+// Component Imports
+import { LoadClientData, OverView } from 'components/Common';
+
+
+// import ClientActions1 from "components/Client/ClientProfile/Actions/ClientActions1";
+// import CategorySettingsTransactions from "components/Settings/CategorySettings/Views/TransactionsDatabaseView";
 
 
 
 
-const ClientProfilePage = () => {
-  const { id: clientId } = useParams();
+export default function ClientProfilePage({clientId}) {
   const [clientData, setClientData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
-  const [note, setNote] = useState(""); // State for the new note
-  const [notes, setNotes] = useState([]); // State for notes history
-
+  const [note, setNote] = useState(""); 
+  const [notes, setNotes] = useState([]); 
 
   // Fetch client data, Fetch client notes
   useEffect(() => {
     const fetchData = async () => {
       try {
         const clientData = await LoadClientData(clientId);
-        
         setClientData(clientData);
+        setTransactions(clientData.transactions || []);
         setNotes(clientData.notes || []); 
 
-  
       } catch (err) {
         console.error("Error fetching data:", err.message);
         setError("Failed to fetch Client Data.");
@@ -106,41 +116,56 @@ const ClientProfilePage = () => {
     }
   };
 
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "/viewclient", label: "View Clients", icon: "ph-file-text" },
-    {},
-  ];
-  const actionLinks = clientId ? [
-    { label: "Budget", path: `/budget/${clientId}` },
-    { label: "Transactions", path: `/client/${clientId}/transactionspage` },
-    { label: "Archives", path: `/client/${clientId}/archive` },
-  ]
-: [];
+  return (
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Client Profile
+        </Typography>
 
-return (
-  <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-    <Sidebar title="Client Profile" links={links} />
-    <div className="flex-1 p-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-blue-400">Client Profile</h1>
-      </header>
+        <OverView transactions={transactions} />
 
-      <OverviewProfile clientData={clientData} />
+        {/* ID */}
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          ID: {clientData && clientData.idNumber}
+        </Typography>
+        {/* Name */}
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Name: {clientData && clientData.clientName}
+        </Typography>
+        {/* Surname */}
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Surname: {clientData && clientData.clientSurname}
+        </Typography>
+        {/* Email */}
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Email: {clientData && clientData.clientEmail}
+        </Typography>
+        {/* Bank Name */}
+        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+          Bank Name: {clientData && clientData.bankName}
+        </Typography>
 
-      <div className="mt-6">
-        <ClientActions1
-          actionLinks={actionLinks}
-          notes={notes}
-          setNote={setNote}
-          note={note}
-          handleAddNote={handleAddNote}
-          deleteNote={deleteNote}
-          deleteAllNotes={deleteAllNotes}
-        />
-      </div>
-    </div>
-  </div>
-);
+        {/* Notes Box */}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Notes:
+          </Typography>
+          <TextField
+            label="Add Note"
+            variant="outlined"
+            fullWidth
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <Button variant="contained" onClick={handleAddNote}>
+            Add Note
+          </Button>
+        </Box>
+
+      </Stack>
+    </Box>
+  );
 };
-export default ClientProfilePage;
+
+

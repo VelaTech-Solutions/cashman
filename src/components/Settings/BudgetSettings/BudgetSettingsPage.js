@@ -1,30 +1,73 @@
-import React, { useEffect, useState } from "react";
-import "styles/tailwind.css";
+import React, { useState, useEffect } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
-// Component Imports
-import { Sidebar } from 'components/Common';
-import ContainerViews from "./Containers/ContainerViews";
+import BudgetSettingView from "./Views/BudgetSettingView"
+import CategoryCellPlacement from "./Views/CategoryCellPlacement"
+import MonthCellPlacement from "./Views/MonthCellPlacement"
+import InsuranceBreakdown from "./Views/InsuranceBreakdownSettings";
+import ExcelSheetSettings from "./Views/ExcelSheetSettings";
 
-const BudgetSettingsPage = () => {
-
-  const [viewMode, setViewMode] = useState("overview1");
-  const [error, setError] = useState(null);
-
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-  ];
-
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-
+export default function BudgetSettingsPage() {
+  const [activeTable, setActiveTable] = useState("BudgetSettingView");
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Budget Settings" links={links} />
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Budget Settings</h2>
-        <ContainerViews setViewMode={setViewMode} viewMode={viewMode} />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      {/* <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Budget Settings
+      </Typography> */}
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "BudgetSettingView" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("BudgetSettingView")}
+          >
+            Settings
+          </Button>
+          <Button 
+            variant={activeTable === "CategoryCellPlacement" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("CategoryCellPlacement")}
+          >
+            Category Cell Placement
+          </Button>
+          <Button 
+            variant={activeTable === "MonthCellPlacement" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("MonthCellPlacement")}
+          >
+            Month Cell Placement
+          </Button>
+          <Button 
+            variant={activeTable === "InsuranceBreakdown" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("InsuranceBreakdown")}
+          >
+            Insurance Breakdown
+          </Button>
+          <Button 
+            variant={activeTable === "ExcelSheetSettings" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("ExcelSheetSettings")}
+          >
+            Excel Sheet Settings
+          </Button>
+        </Stack>
+        {activeTable === "BudgetSettingView" && <BudgetSettingView />}
+        {activeTable === "CategoryCellPlacement" && <CategoryCellPlacement />}
+        {activeTable === "MonthCellPlacement" && <MonthCellPlacement />}
+        {activeTable === "InsuranceBreakdown" && <InsuranceBreakdown />}
+        {activeTable === "ExcelSheetSettings" && <ExcelSheetSettings />}
+      </Stack>
+    </Box>
   );
-}
-export default BudgetSettingsPage;
+};

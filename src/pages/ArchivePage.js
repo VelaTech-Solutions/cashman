@@ -1,23 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
-
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 // Component Imports
-import { Sidebar, LoadClientData } from 'components/Common';
-import ArchivedData from "../components/ArchivedData/ArchivedData";
+import { LoadClientData } from 'components/Common';
+//import ArchivedData from "../components/ArchivedData/ArchivedData";
 
-const ArchivePage = () => {
-  const { id: clientId } = useParams();
+
+
+export default function ArchivePage({clientId}) {
   const [archive, setArchive] = useState([]);
   const [error, setError] = useState("");
   
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: `/client/${clientId}`, label: "Back to Profile", icon: "ph-file-text" },
-    { type: "divider" },
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,16 +40,11 @@ const ArchivePage = () => {
   }, [clientId]);
   
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Client Profile" links={links} />
-      <div className="flex-1 p-8">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-400">Manage Archive Data</h1>
-        </header>
-        <ArchivedData archiveData={archive} />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        {/* <ArchivedData clientId={clientId}/> */}
+      </Stack>
+    </Box>
   );
 };
 
-export default ArchivePage;

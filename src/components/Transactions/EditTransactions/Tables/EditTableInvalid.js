@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // MUI Imports
 import Tooltip from '@mui/material/Tooltip';
-import { Grid, Box, CircularProgress,TextField, InputAdornment, Typography } from "@mui/material";
+import { Box, Stack, CircularProgress,TextField, InputAdornment, Typography } from "@mui/material";
 import {
   DataGrid,
   Toolbar,
@@ -103,8 +103,7 @@ const CustomToolbar = () => (
     </QuickFilter>
   </Toolbar>
 );
-
-const EditTableInvalid = ({ clientId }) => {
+export default function EditTableInvalid({ clientId }) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
@@ -131,111 +130,6 @@ const EditTableInvalid = ({ clientId }) => {
     };
     fetchData();
   }, [clientId]);
-
-  // this needs to change all fields reminder
-  const isInvalidDate = (date) => {
-    return !date || date === "None" || date === "null" || date === "";
-  };
-  
-  const filteredTransactions = transactions.filter(tx => isInvalidDate(tx.date1) && isInvalidDate(tx.date2));
-  
-  const rows = filteredTransactions.map((tx) => ({
-    id: tx.uid || uuidv4(),
-    ...tx,
-  }));
-
-  const columns = [
-    {
-      field: "date1",
-      headerName: "Date 1",
-      width: 120,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "date2",
-      headerName: "Date 2",
-      width: 120,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "description",
-      type: "string",
-      headerName: "Description",
-      width: 400,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "description2",
-      type: "string",
-      headerName: "Description +",
-      width: 300,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "credit_amount",
-      type: "number",
-      headerName: "Credit Amount",
-      width: 130,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "debit_amount",
-      type: "number",
-      headerName: "Debit Amount",
-      width: 130,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "balance_amount",
-      type: "number",
-      headerName: "Balance Amount",
-      width: 130,
-      editable: (params) => params.row.id === editingRowId,
-    },
-    {
-      field: "actions",
-      type: "actions",
-      headerName: "Actions",
-      getActions: (params) => {
-        const isInEditMode = rowModesModel[params.id]?.mode === GridRowModes.Edit;
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              onClick={() => setRowModesModel({ [params.id]: { mode: GridRowModes.View } })}
-            />,
-            <GridActionsCellItem
-              icon={<CancelIcon />}
-              label="Cancel"
-              onClick={() =>
-                setRowModesModel({
-                  [params.id]: { mode: GridRowModes.View, ignoreModifications: true },
-                })
-              }
-            />,
-          ];
-        }
-        return [
-          <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit"
-            onClick={() => setRowModesModel({ [params.id]: { mode: GridRowModes.Edit } })}
-          />,
-          <GridActionsCellItem
-            icon={<AddIcon />}
-            label="Add"
-            onClick={() => handleCreateClick(params.id)}
-          />,
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={() => handleDeleteClick(params.id)}
-          />,
-        ];
-      },
-    },
-  ];
 
   const processRowUpdate = async (newRow, oldRow) => {
     const updated = [...transactions];
@@ -317,22 +211,123 @@ const EditTableInvalid = ({ clientId }) => {
       console.error("Failed to create transaction:", err);
     }
   };
+  // this needs to change all fields reminder
+  const isInvalidDate = (date) => {
+    return !date || date === "None" || date === "null" || date === "";
+  };
+  
+  const filteredTransactions = transactions.filter(tx => isInvalidDate(tx.date1) && isInvalidDate(tx.date2));
+  
+  const rows = filteredTransactions.map((tx) => ({
+    id: tx.uid || uuidv4(),
+    ...tx,
+  }));
+
+  const columns = [
+    {
+      field: "date1",
+      headerName: "Date 1",
+      width: 120,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "date2",
+      headerName: "Date 2",
+      width: 120,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "description",
+      type: "string",
+      headerName: "Description",
+      flex:1,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "description2",
+      type: "string",
+      headerName: "Description +",
+      flex:1,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "credit_amount",
+      type: "number",
+      headerName: "Credit Amount",
+      width: 130,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "debit_amount",
+      type: "number",
+      headerName: "Debit Amount",
+      flex:1,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "balance_amount",
+      type: "number",
+      headerName: "Balance Amount",
+      flex:1,
+      editable: (params) => params.row.id === editingRowId,
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      flex:1,
+      getActions: (params) => {
+        const isInEditMode = rowModesModel[params.id]?.mode === GridRowModes.Edit;
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={() => setRowModesModel({ [params.id]: { mode: GridRowModes.View } })}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              onClick={() =>
+                setRowModesModel({
+                  [params.id]: { mode: GridRowModes.View, ignoreModifications: true },
+                })
+              }
+            />,
+          ];
+        }
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            onClick={() => setRowModesModel({ [params.id]: { mode: GridRowModes.Edit } })}
+          />,
+          <GridActionsCellItem
+            icon={<AddIcon />}
+            label="Add"
+            onClick={() => handleCreateClick(params.id)}
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(params.id)}
+          />,
+        ];
+      },
+    },
+  ];
 
   return (
-    <div>
-      <Grid container spacing={2} sx={{ mt: 4 }}>
-
-        <Grid size={12}>
-          <Typography variant="h6"> Invalid Transactions</Typography>
-        </Grid>
-        <Grid size={12}>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Box>
         {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
               <CircularProgress />
             </Box>
           ) : rows.length === 0 ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-              <Typography variant="body1">No invalid transactions found.</Typography>
+              <Typography variant="body1">No transactions found.</Typography>
             </Box>
           ) : (
             <DataGrid
@@ -352,16 +347,13 @@ const EditTableInvalid = ({ clientId }) => {
               }}
               slots={{ toolbar: CustomToolbar }}
               sx={{
-                height: 690,
+                height: 500,
                 width: "100%",
-                overflow: "auto",
               }}
             />
           )}
-        </Grid>
-      </Grid>
-    </div>
+        </Box>
+      </Stack>
+    </Box>
   );
 };
-
-export default EditTableInvalid;

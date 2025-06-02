@@ -1,39 +1,54 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
+import React, { useState, useEffect } from "react";
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
-// Firebase Imports
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../../firebase/firebase";
+import ExtractAlignmentView from "./Views/ExtractAlignmentView";
+import ExtractDescriptionView from "./Views/ExtractDescriptionView";
+import ExtractDatesView from "./Views/ExtractDatesView";
 
-// Component Imports
-import { Sidebar } from 'components/Common';
-import ContainerViews from "./Containers/ContainerViews";
-import ContainerOverViews from "./Containers/ContainerOverViews";
-
-
-
-function ExtractSettingsPage() {
-  const [viewMode, setViewMode] = useState("overview1");
-  const [error, setError] = useState(null);
-
-  const links = [
-    { path: "/dashboard", label: "Back to Dashboard", icon: "ph-home" },
-    { path: "goBack", label: "Back", icon: "ph-arrow-left" },
-    { path: "/HelpExtract", label: "Extract Help", icon: "ph-question" },
-  ];
-
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-
+export default function ExtractSettingsPage() {
+  const [activeTable, setActiveTable] = useState("extractAlignmentView");
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
-      <Sidebar title="Extract Settings" links={links} />
-      <div className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-4">Extract Settings</h2>
-        <ContainerViews setViewMode={setViewMode} viewMode={viewMode} />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant={activeTable === "extractAlignmentView" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("extractAlignmentView")}
+          >
+            Alignment
+          </Button>
+          <Button 
+            variant={activeTable === "extractDescriptionView" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("extractDescriptionView")}
+          >
+            Description
+          </Button>
+          <Button 
+            variant={activeTable === "extractDatesView" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("extractDatesView")}
+          >
+            Dates
+          </Button>
+        </Stack>
+        {activeTable === "extractAlignmentView" && <ExtractAlignmentView />}
+        {activeTable === "extractDescriptionView" && <ExtractDescriptionView />}
+        {activeTable === "extractDatesView" && <ExtractDatesView />}
+      </Stack>
+    </Box>
   );
-}
-
-export default ExtractSettingsPage;
+};

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
-import { Button, Select, MenuItem, Checkbox, TextField, FormControlLabel, Box, Switch } from "@mui/material";
+import { Button, Select, MenuItem, Checkbox, TextField, FormControlLabel, Box, Switch, Stack } from "@mui/material";
 
 export default function IgnoredLinesPage() {
   const [banks, setBanks] = useState([]);
@@ -104,8 +104,11 @@ export default function IgnoredLinesPage() {
   };
 
   return (
-    <Box className="p-6 bg-gray-900 text-white rounded-lg shadow-md">
-      <h2 className="text-xl font-bold text-blue-400 mb-4">Bank Ignored Lines</h2>
+    <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
+      {/* <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Manage Subcategories
+      </Typography> */}
+      <Stack spacing={2} >
 
       {/* Select Bank Field */}
       <Select
@@ -117,7 +120,6 @@ export default function IgnoredLinesPage() {
         renderValue={(selected) => selected || "Select Bank"}
         sx={{
           mb: 2,
-          color: "white",
           "& .MuiOutlinedInput-notchedOutline": { borderColor: "gray" },
           "& .MuiSvgIcon-root": { color: "white" },
         }}
@@ -135,8 +137,7 @@ export default function IgnoredLinesPage() {
         fullWidth
         sx={{
           mb: 2,
-          input: { color: "white" },
-          label: { color: "white" },
+
           "& .MuiOutlinedInput-root": {
             "& fieldset": { borderColor: "gray" },
             "&:hover fieldset": { borderColor: "white" },
@@ -219,6 +220,8 @@ export default function IgnoredLinesPage() {
           </tbody>
         </table>
       </Box>
+
+      </Stack>
     </Box>
   );
 }
