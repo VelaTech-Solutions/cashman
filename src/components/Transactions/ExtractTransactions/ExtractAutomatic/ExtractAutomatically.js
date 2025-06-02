@@ -26,7 +26,16 @@ import { db } from "../../../../firebase/firebase";
 import { LoadClientData } from 'components/Common';
 import OverView from "./OverViews/OverView";
 import ProgressView from "./Views/ProgressView";
-import AutomaticActions from "./Actions/AutomaticActions";
+//import AutomaticActions from "./Actions/AutomaticActions";
+import { resetClientDb } from "./Utils";
+import { extractAbsaData } from './Banks/Absa/Controller';
+import { extractCapitecData } from './Banks/Capitec/Controller'; // this is not ready
+import { extractFnbData } from './Banks/Fnb/Controller'; // this is not ready
+import { extractNedData } from './Banks/Ned/Controller'; // this is not ready
+import { extractStandardData } from './Banks/Standard/Controller'; // this is not ready
+import { extractTymeData } from './Banks/Tyme/Controller'; // this is not ready
+
+
 
 export default function ExtractAutomatically({clientId}) {
   const [clientData, setClientData] = useState(null);
@@ -73,6 +82,18 @@ export default function ExtractAutomatically({clientId}) {
     fetchProgress();
   }, [clientId]);
 
+// lets create the selector here to which bank we want to extract
+
+const extractors = {
+  "Absa Bank": extractAbsaData,
+  "Capitec Bank": extractCapitecData,
+  "Fnb Bank": extractFnbData,
+  "Ned Bank": extractNedData,
+  "Standard Bank": extractStandardData,
+  "Tyme Bank": extractTymeData,
+};
+
+
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -84,14 +105,54 @@ export default function ExtractAutomatically({clientId}) {
           bankName={bankName} 
         />
 
-        <AutomaticActions
+        {/* <AutomaticActions
           clientId={clientId}
           bankName={bankName}
           clientData={clientData}
           setClientData={setClientData}
           setIsProcessing={setIsProcessing}
           setExtractionStatus={setExtractionStatus}
-        />
+        /> */}
+
+        <Button
+          variant="contained"
+          color="success"
+          onClick={async () => {
+            setIsProcessing(true);
+            const extractorFn = extractors[bankName] || null;
+            let success = false;
+
+            if (extractorFn) {
+              success = await extractorFn(clientId, clientData, bankName, 'pdfparser');
+            }
+
+            setIsProcessing(false);
+            setExtractionStatus(success 
+              ? { success: 'Extraction started' } 
+              : { error: 'Extraction failed or unsupported bank' });
+          }}
+        >
+          Extract
+        </Button>
+
+
+        <Button
+          variant="contained"
+          color="error"
+          onClick={async () => {
+            setIsProcessing(true);
+            const success = await resetClientDb(clientId);
+            setIsProcessing(false);
+            if (!success) {
+              setExtractionStatus({ error: 'Reset failed' });
+            } else {
+              setExtractionStatus({ success: 'Reset started' });
+            }
+          }}
+        >
+          Reset
+        </Button>
+
 
         <ProgressView 
           progressData={progressData}

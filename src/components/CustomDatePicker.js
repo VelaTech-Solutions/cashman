@@ -38,20 +38,21 @@ function ButtonField(props) {
 }
 
 export default function CustomDatePicker() {
-  const [value, setValue] = React.useState(dayjs('2023-04-17'));
+  const today = dayjs();
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker
-        value={value}
-        label={value == null ? null : value.format('MMM DD, YYYY')}
-        onChange={(newValue) => setValue(newValue)}
+        value={today}
+        label={today.format('MMM DD, YYYY')}
+        onChange={() => {}}
         slots={{ field: ButtonField }}
         slotProps={{
           nextIconButton: { size: 'small' },
           previousIconButton: { size: 'small' },
         }}
         views={['day', 'month', 'year']}
+        readOnly
       />
     </LocalizationProvider>
   );

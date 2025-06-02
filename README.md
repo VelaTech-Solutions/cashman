@@ -162,7 +162,7 @@ tree -a -I 'node_modules|objects|build|venv|__pycache__|venvtest' > trash/direct
 ## Backup Project
 
 ```bash
-zip -r /home/ubuntu/cashman/cashman_v2.2_backup.zip /home/ubuntu/cashman
+zip -r /home/ubuntu/cashman/cashman_v2.3_backup.zip /home/ubuntu/cashman
 
 ```
 

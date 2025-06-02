@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import AppNavbar from '../components/AppNavbar';
 import Header from '../components/Header';
 import MainGrid from '../components/MainGrid';
+import MainGrid2 from '../components/MainGrid2';
 import SideMenu from '../components/SideMenu';
 import AppTheme from '../pages/shared-theme/AppTheme';
 import {
@@ -60,10 +61,10 @@ export default function Dashboard(props) {
   const [activePage, setActivePage] = useState("Home");
   const [activeSubPage, setActiveSubPage] = useState(null);
   const [selectedClientId, setSelectedClientId] = useState(null);
-  console.log("thePage", activePage)
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
-      <CssBaseline enableColorScheme />
+    <AppTheme >
+    {/* <AppTheme {...props} themeComponents={xThemeComponents}> */}
+      {/* <CssBaseline enableColorScheme /> */}
       <Box sx={{ display: 'flex', color: 'text.primary' }}>
         <SideMenu 
         setActivePage={setActivePage} 
@@ -95,7 +96,7 @@ export default function Dashboard(props) {
           >
             <Header />
             {/* <MainGrid /> */}
-            {activePage === 'Home' && <MainGrid />}
+            {activePage === 'Home' && <MainGrid2 />}
             {activePage === 'Add Client' && <AddClient />}
             {activePage === 'Clients' && (
               <ViewClient 

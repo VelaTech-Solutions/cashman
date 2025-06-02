@@ -4,7 +4,7 @@
 // Step 1: Create Database Structure
 export { default as createDatabaseStructure } from './createDatabaseStructure';
 
-
+export { default as resetClientDb } from './resetClientDb';
 export { default as filterStatement } from './filterStatement';
 
 // Step 2: Clean Statement
