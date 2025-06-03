@@ -7,6 +7,9 @@ import {
   Button, 
   Paper, 
   Stack, 
+  Select, 
+  MenuItem,
+  CircularProgress,
   Typography, 
   Grid, 
   Table as MuiTable,
@@ -15,18 +18,16 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  LinearProgress,
  } from "@mui/material";
  
 
 // Firebase Imports
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 
 // Component Imports
 import { LoadClientData } from 'components/Common';
-import OverView from "./OverViews/OverView";
-import ProgressView from "./Views/ProgressView";
-//import AutomaticActions from "./Actions/AutomaticActions";
 import { resetClientDb } from "./Utils";
 import { extractAbsaData } from './Banks/Absa/Controller';
 import { extractCapitecData } from './Banks/Capitec/Controller'; // this is not ready
@@ -63,67 +64,80 @@ export default function ExtractAutomatically({clientId}) {
   }, [clientId]);
 
   useEffect(() => {
-    if (!clientId) return;
-    const fetchProgress = async () => {
-      try {
-        const clientRef = doc(db, "clients", clientId);
-        const clientSnap = await getDoc(clientRef);
+  if (!clientId) return;
 
-        if (clientSnap.exists()) {
-          const data = clientSnap.data();
-          const progress = data.extractProgress || {};
-          setProgressData(progress);
-        }
-      } catch (error) {
-        console.error("🔥 Error fetching progress:", error);
-      }
-    };
+  const unsub = onSnapshot(doc(db, "clients", clientId), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setProgressData(data.extractProgress || {});
+      setTransactions(data.transactions || []); // 👈 Add this line
+    }
+  });
 
-    fetchProgress();
-  }, [clientId]);
+  return () => unsub(); // cleanup on unmount
+}, [clientId]);
 
-// lets create the selector here to which bank we want to extract
+  // lets create the selector here to which bank we want to extract
 
-const extractors = {
-  "Absa Bank": extractAbsaData,
-  "Capitec Bank": extractCapitecData,
-  "Fnb Bank": extractFnbData,
-  "Ned Bank": extractNedData,
-  "Standard Bank": extractStandardData,
-  "Tyme Bank": extractTymeData,
-};
+  const extractors = {
+    "Absa Bank": extractAbsaData,
+    "Capitec Bank": extractCapitecData,
+    "Fnb Bank": extractFnbData,
+    "Ned Bank": extractNedData,
+    "Standard Bank": extractStandardData,
+    "Tyme Bank": extractTymeData,
+  };
 
+  const totalDebit = transactions.reduce(
+    (sum, txn) => sum + (txn.debit_amount ? parseFloat(txn.debit_amount) : 0),
+    0
+  ).toFixed(2);
+
+  const totalCredit = transactions.reduce(
+    (sum, txn) => sum + (txn.credit_amount ? parseFloat(txn.credit_amount) : 0),
+    0
+  ).toFixed(2);
+
+  const verifiedTransactions = transactions.filter(
+    (txn) => txn.verified === "✓"
+  ).length;
+
+  const unverifiedTransactions = transactions.filter(
+    (txn) => txn.verified === "✗"
+  ).length;
 
   if (error) return <div>Error: {error}</div>;
 
   return (
     <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
       <Stack spacing={2}>
-
-        <OverView 
-          transactions={transactions}
-          bankName={bankName} 
-        />
-
-        {/* <AutomaticActions
-          clientId={clientId}
-          bankName={bankName}
-          clientData={clientData}
-          setClientData={setClientData}
-          setIsProcessing={setIsProcessing}
-          setExtractionStatus={setExtractionStatus}
-        /> */}
-
+        <Box>
+          <Paper sx={{ p: 2, width: "100%" }}>
+            <Stack direction="row" flexWrap="wrap" spacing={3}>
+              <Typography variant="body2">Total Debits: <strong>{totalDebit}</strong></Typography>
+              <Typography variant="body2">Total Credits: <strong>{totalCredit}</strong></Typography>
+              <Typography variant="body2">Total Verified: <strong>{verifiedTransactions}</strong></Typography>
+              <Typography variant="body2">Total Unverified: <strong>{unverifiedTransactions}</strong></Typography>
+              <Typography variant="body2">Bank Name: <strong>{bankName}</strong></Typography>
+            </Stack>
+          </Paper>
+        </Box>
         <Button
           variant="contained"
           color="success"
+          disabled={isProcessing}
           onClick={async () => {
             setIsProcessing(true);
             const extractorFn = extractors[bankName] || null;
             let success = false;
 
             if (extractorFn) {
-              success = await extractorFn(clientId, clientData, bankName, 'pdfparser');
+              success = await extractorFn(
+                clientId, 
+                clientData, 
+                setClientData,
+                bankName, 
+                'pdfparser');
             }
 
             setIsProcessing(false);
@@ -132,36 +146,50 @@ const extractors = {
               : { error: 'Extraction failed or unsupported bank' });
           }}
         >
-          Extract
+        {isProcessing ? <CircularProgress size={24} color="inherit" /> : "Extract"}
         </Button>
 
 
-        <Button
-          variant="contained"
-          color="error"
-          onClick={async () => {
-            setIsProcessing(true);
-            const success = await resetClientDb(clientId);
-            setIsProcessing(false);
-            if (!success) {
-              setExtractionStatus({ error: 'Reset failed' });
-            } else {
-              setExtractionStatus({ success: 'Reset started' });
-            }
-          }}
-        >
-          Reset
-        </Button>
+<Button
+  variant="contained"
+  color="error"
+  onClick={async () => {
+    setIsProcessing(true);
+    const success = await resetClientDb(clientId);
+    if (!success) {
+      setExtractionStatus({ error: 'Reset failed' });
+      setIsProcessing(false);
+      return;
+    }
+
+    setExtractionStatus({ success: 'Reset successful' });
+    setClientData(null);
+    setTransactions([]);
+    setIsProcessing(false);
+  }}
+>
+  Reset
+</Button>
 
 
-        <ProgressView 
-          progressData={progressData}
-          setProgressData={setProgressData}
-          isProcessing={isProcessing}
-          setIsProcessing={setIsProcessing}
-          extractionStatus={extractionStatus}
-          setExtractionStatus={setExtractionStatus}
-        />
+        <Box>
+          <Paper elevation={2} sx={{ p: 2 }}>
+            <Typography variant="h6">Extraction Progress</Typography>
+            <Stack spacing={1} mt={1}>
+              {Object.entries(progressData).map(([step, status]) => (
+                <Box key={step}>
+                  <Typography variant="body2">{step}</Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={status === "done" ? 100 : status === "pending" ? 50 : 0}
+                    color={status === "done" ? "success" : "primary"}
+                  />
+                </Box>
+              ))}
+            </Stack>
+          </Paper>
+        </Box>
+
       </Stack>
     </Box>
   );

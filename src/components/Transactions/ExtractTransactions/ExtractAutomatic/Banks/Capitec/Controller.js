@@ -27,7 +27,7 @@ import verifyDatabase  from './verifyDatabase';
 
 
 // export with your preferred name
-const extractAbsaData = async (clientId, clientData, setClientData, bankName, method) => {
+const extractCapitecData = async (clientId, clientData, setClientData, bankName, method) => {
   if (!clientId || !clientData || !bankName || !method) {
     console.error("❌ Missing required parameters");
     return false;
@@ -70,5 +70,4 @@ const extractAbsaData = async (clientId, clientData, setClientData, bankName, me
 
 };
 
-
-export { extractAbsaData };
+export { extractCapitecData };

@@ -5,8 +5,6 @@ import { db } from "../../../../../../firebase/firebase";
 // Component Imports
 import ProgressUtils from "../../Utils/ProgressUtils";
 
-// Step2
-
 // 🔁 Helper to align transactions
 const handleAlignTransactions = async (data) => {
   const amountRegex = /\d+\.\d{2}/;
@@ -51,15 +49,12 @@ const hasDate = (line, pattern) => {
   return pattern.test(line);
 };
 
-
-
-const fliterandclean = async ({ clientId, bankName }) => {
-
+// ✅ Clean statement main function
+const cleanStatement = async ({ clientId, bankName }) => {
   if (!clientId || !bankName) {
     console.error("❌ Missing ID or Bank Name");
     return;
   }
-console.log(`🧪 fliterandclean triggered for ${clientId} / ${bankName}`);
 
   const clientRef = doc(db, "clients", clientId);
   const bankRef = doc(db, "banks", bankName);
@@ -110,21 +105,21 @@ console.log(`🧪 fliterandclean triggered for ${clientId} / ${bankName}`);
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
 
-    // filteredData = filteredData.filter((line) => {
-    //   const hasMatch = hasDate(line, datePattern);
-    //   if (
-    //     !hasMatch ||
-    //     (shouldRemove &&
-    //       (ignoredLines.includes(line.trim()) ||
-    //         fuzzyIgnoredLines.some((ignored) =>
-    //           line.toLowerCase().includes(ignored.toLowerCase())
-    //         )))
-    //   ) {
-    //     initialLinesToArchive.push({ content: line, source: archiveSourceField });
-    //     return false;
-    //   }
-    //   return true;
-    // });
+    filteredData = filteredData.filter((line) => {
+      const hasMatch = hasDate(line, datePattern);
+      if (
+        !hasMatch ||
+        (shouldRemove &&
+          (ignoredLines.includes(line.trim()) ||
+            fuzzyIgnoredLines.some((ignored) =>
+              line.toLowerCase().includes(ignored.toLowerCase())
+            )))
+      ) {
+        initialLinesToArchive.push({ content: line, source: archiveSourceField });
+        return false;
+      }
+      return true;
+    });
 
     console.log("📦 Lines to archive:", initialLinesToArchive.length);
 
@@ -181,8 +176,8 @@ console.log(`🧪 fliterandclean triggered for ${clientId} / ${bankName}`);
     console.log("✔️ Clean Statement completed successfully");
   } catch (error) {
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "failed");
-    console.error("🔥 Error in fliterandclean:", error);
+    console.error("🔥 Error in cleanStatement:", error);
   }
 };
 
-export default fliterandclean;
+export default cleanStatement;
