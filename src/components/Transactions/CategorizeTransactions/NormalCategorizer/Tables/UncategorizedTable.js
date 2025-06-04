@@ -260,6 +260,23 @@ const handleSaveClick = async () => {
     categoryTotals[category] += parseFloat(txn.debit_amount) || parseFloat(txn.credit_amount) || 0;
   });
 
+  // Calculate the incorrectly categorized transactions
+  function isIncorrectlyCategorized(txn) {
+    if (!txn || !txn.category) return false;
+
+      const isIncome = txn.category === "Income";
+      const hasDebit = parseFloat(txn.debit_amount) > 0;
+      const hasCredit = parseFloat(txn.credit_amount) > 0;
+
+      // Income should only have credit
+      if (isIncome) return hasDebit;
+
+      // All other categories should only have debit
+      return hasCredit;
+    }
+
+  const incorrectlyCategorized = transactions.filter(txn => isIncorrectlyCategorized(txn));
+
   if (error) return <p className="text-red-500">{error}</p>;
 
   const selectSx = {
@@ -277,7 +294,7 @@ const handleSaveClick = async () => {
           <Chip label={`Categorized: ${Math.round(progress)}%`} size="small" />
           <Chip label={`Uncategorized: ${uncategorizedTransactions.length}/${transactions.length}`} size="small" />
           <Chip label={`Total: ${transactions.length}`} size="small" />
-          
+          <Chip label={`Incorrect: ${incorrectlyCategorized.length}`} size="small" color="error" />
           {Object.entries(categoryTotals)
             .filter(([_, total]) => !isNaN(total) && total !== 0)
             .map(([name, total]) => (

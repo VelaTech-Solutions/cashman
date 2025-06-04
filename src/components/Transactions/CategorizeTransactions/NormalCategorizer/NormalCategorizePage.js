@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import UncategorizedTable from "./Tables/UncategorizedTable";
 import CategorizedTable from "./Tables/CategorizedTable";
+import CategorizedIssuesTable from "./Tables/CategorizedIssuesTable";
 export default function NormalCategorizer({ clientId }) {
   const [activeTable, setActiveTable] = useState("uncategorizedTable");
 
@@ -36,10 +37,18 @@ export default function NormalCategorizer({ clientId }) {
           >
             Categorized
           </Button>
+          <Button 
+            variant={activeTable === "categorizedIssuesTable" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("categorizedIssuesTable")}
+          >
+            Categorized Issues
+          </Button>
         </Stack>
 
         {activeTable === "uncategorizedTable" && <UncategorizedTable clientId={clientId}/>}
         {activeTable === "categorizedTable" && <CategorizedTable clientId={clientId}/>}
+        {activeTable === "categorizedIssuesTable" && <CategorizedIssuesTable clientId={clientId}/>}
+
       </Stack>
     </Box>
   );

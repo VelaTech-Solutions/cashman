@@ -143,9 +143,18 @@ export default function SummaryView({ clientId }) {
         </TableContainer>
         <Box>
           <Stack spacing={0.5}>
-            <Paper sx={{ bgcolor: "grey.800", p: 2, display: "flex", justifyContent: "space-between", borderRadius: 2 }}>
+            <Paper sx={{ 
+                // bgcolor: "grey.800", 
+                p: 2, display: "flex", 
+                justifyContent: "space-between", 
+                borderRadius: 2 
+                }}
+            >
               <Typography>Income</Typography>
-              <Typography fontWeight={600} color="success.light">
+              <Typography 
+                fontWeight={600} 
+                color="success.light"
+                >
                 R {income.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
               </Typography>
             </Paper>
@@ -153,7 +162,7 @@ export default function SummaryView({ clientId }) {
                 <Paper
                   key={i}
                   sx={{
-                    bgcolor: "grey.800",
+                    // bgcolor: "grey.800",
                     p: 2,
                     display: "flex",
                     justifyContent: "space-between",
@@ -171,7 +180,7 @@ export default function SummaryView({ clientId }) {
         <Box>
           <Paper
             sx={{
-              bgcolor: "grey.800",
+              // bgcolor: "grey.800",
               p: 2,
               display: "flex",
               justifyContent: "space-between",

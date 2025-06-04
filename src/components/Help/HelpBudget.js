@@ -37,13 +37,13 @@ export default function HelpBudget() {
     <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
       <Stack spacing={2}>
       <Typography variant="h3" gutterBottom>Budget Instructions</Typography>
-        <Paper sx={{ p: 3, bgcolor: "grey.800" }}>
+        <Paper sx={{ p: 3 }}>
           <Stack spacing={3}>
             {steps.map((step, i) => (
               <Box key={i}>
                 <Typography variant="h6">{step.title}</Typography>
                 <Typography variant="body2">{step.desc}</Typography>
-                {i < steps.length - 1 && <Divider sx={{ my: 2, borderColor: "grey.700" }} />}
+                {i < steps.length - 1 && <Divider sx={{ my: 2 }} />}
               </Box>
             ))}
           </Stack>

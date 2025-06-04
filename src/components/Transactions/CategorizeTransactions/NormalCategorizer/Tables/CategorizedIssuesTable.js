@@ -18,7 +18,7 @@ import {
 } from '@mui/x-data-grid';
 import DeleteIcon from "@mui/icons-material/Delete";
 
-export default function CategorizedTable({ clientId }) {
+export default function CategorizedIssuesTable({ clientId }) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
@@ -100,9 +100,27 @@ export default function CategorizedTable({ clientId }) {
     }
   };
 
-  const isCategorized = (txn) => txn.category && txn.subcategory;
 
-  const filteredTransactions = transactions.filter(isCategorized);
+  // we need to change the filter here 
+  // so we need to fileter like this now
+  // Icome should only be credit_amount
+  // all other categroies should be debit_amount
+  // so this sript will point out the transactions that are incorrectly categroiesed
+  const isIncorrectlyCategorized = (txn) => {
+    if (!txn.category || !txn.subcategory) return false;
+
+    const isIncome = txn.category === "Income";
+    const hasDebit = parseFloat(txn.debit_amount) > 0;
+    const hasCredit = parseFloat(txn.credit_amount) > 0;
+
+    // Income should only have credit
+    if (isIncome) return hasDebit;
+
+    // All other categories should only have debit
+    return hasCredit;
+  };
+
+  const filteredTransactions = transactions.filter(isIncorrectlyCategorized);
 
 
   const rows = filteredTransactions.map((tx) => ({
@@ -149,21 +167,6 @@ export default function CategorizedTable({ clientId }) {
     }
     categoryTotals[category] += parseFloat(txn.debit_amount) || parseFloat(txn.credit_amount) || 0;
   });
-
-  // Calculate the incorrectly categorized transactions
-  function isIncorrectlyCategorized(txn) {
-    if (!txn || !txn.category) return false;
-
-      const isIncome = txn.category === "Income";
-      const hasDebit = parseFloat(txn.debit_amount) > 0;
-      const hasCredit = parseFloat(txn.credit_amount) > 0;
-
-      // Income should only have credit
-      if (isIncome) return hasDebit;
-
-      // All other categories should only have debit
-      return hasCredit;
-    }
 
   const incorrectlyCategorized = transactions.filter(txn => isIncorrectlyCategorized(txn));
 

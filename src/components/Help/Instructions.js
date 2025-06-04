@@ -43,7 +43,7 @@ export default function Instructions() {
     <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
       <Stack spacing={2}>
       <Typography variant="h3" gutterBottom>How to Use This App</Typography>
-      <Paper sx={{ p: 3, bgcolor: "grey.800" }}>
+      <Paper sx={{ p: 3 }}>
         <Stack spacing={3}>
           {steps.map((step, i) => (
             <Box key={i}>
