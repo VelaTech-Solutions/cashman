@@ -35,13 +35,10 @@ import HelpBudget from '../components/Help/HelpBudget';
 
 import TransactionsPage from '../pages/TransactionsPage';
 import ViewTransactions from '../components/Transactions/ViewTransactions/ViewTransactions';
-// import HelpView from '../components/Help/HelpView';
 import EditTransactions from '../components/Transactions/EditTransactions/EditTransactions';
-// import HelpEdit from '../components/Help/HelpEdit';
 import CategorizeTransactions from '../components/Transactions/CategorizeTransactions/CategorizeTransactions';
-// import HelpCategory from '../components/Help/HelpCategory';
 import ExtractTransactions from '../components/Transactions/ExtractTransactions/ExtractTransactions';
-// import HelpExtract from '../components/Help/HelpExtract';
+import HelpTransactions from '../components/Help/HelpTransactions';
 
 import ArchivePage from '../pages/ArchivePage';
 import ArchivedData from '../components/ArchivedData/ArchivedData';
@@ -70,7 +67,7 @@ export default function Dashboard(props) {
         setActivePage={setActivePage} 
         setActiveSubPage={setActiveSubPage}
         activePage={activePage}
-        setSelectedClientId={setSelectedClientId}
+        selectedClientId={selectedClientId}
         />
         <AppNavbar />
         {/* Main content */}
@@ -135,13 +132,8 @@ export default function Dashboard(props) {
                 {activeSubPage === 'View' && <ViewTransactions clientId={selectedClientId} />}
                 {activeSubPage === 'Edit' && <EditTransactions clientId={selectedClientId} />}
                 {activeSubPage === 'Categorize' && <CategorizeTransactions clientId={selectedClientId} />}
-                {/* {activeSubPage === 'Categorize' && (
-                  <>
-                    <CategorizeTransactions clientId={selectedClientId} />
-                    <HelpCategory />
-                  </>
-                )} */}
                 {activeSubPage === 'Extract' && <ExtractTransactions clientId={selectedClientId} />}
+                {activeSubPage === 'Help' && <HelpTransactions />}
               </>
             )}
 
@@ -172,3 +164,5 @@ export default function Dashboard(props) {
     </AppTheme>
   );
 }
+
+

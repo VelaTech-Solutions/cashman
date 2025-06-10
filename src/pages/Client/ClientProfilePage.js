@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "styles/tailwind.css";
 
 // Firebase imports
 import { db } from "../../firebase/firebase";
 import { doc, getDoc, updateDoc, } from "firebase/firestore";
 
+// Mui Imports
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Stack, 
+  Typography, 
+  Grid, 
+  Table, 
+  InputLabel, 
+  OutlinedInput,
+  MenuItem,
+  FormControl,
+  Select,
+} from "@mui/material";
 
-// Component Imports
-import Table from "components/Client/ClientView/Tables/Table";
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-
-import { Box, TextField, Button, Paper, Stack, Typography, Grid} from "@mui/material";
 // Component Imports
 import { LoadClientData, OverView } from 'components/Common';
 
@@ -145,7 +150,20 @@ export default function ClientProfilePage({clientId}) {
         <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
           Bank Name: {clientData && clientData.bankName}
         </Typography>
-
+        {/* Bank Statment */}
+        {clientData?.bankStatementURL && (
+          <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+            Bank Statement:&nbsp;
+            <a
+              href={clientData.bankStatementURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "#1976d2", fontWeight: 500 }}
+            >
+              Download Statement
+            </a>
+          </Typography>
+        )}
         {/* Notes Box */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>

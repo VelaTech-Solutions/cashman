@@ -28,9 +28,14 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
-export default function SideMenu({ setActivePage, activePage, setActiveSubPage }) {
+export default function SideMenu({ 
+  setActivePage, 
+  activePage, 
+  setActiveSubPage,
+  activeSubPage,
+  selectedClientId,  }) {
   const [userEmail, setUserEmail] = useState("Not logged in"); 
-  const [selectedClientId, setSelectedClientId] = useState(null);
+  // const [selectedClientId, setSelectedClientId] = useState(null);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,6 +43,7 @@ export default function SideMenu({ setActivePage, activePage, setActiveSubPage }
     });
     return () => unsubscribe();
   }, []);
+
 
   return (
     <Drawer
@@ -67,11 +73,16 @@ export default function SideMenu({ setActivePage, activePage, setActiveSubPage }
           flexDirection: 'column',
         }}
       >
+     
+      {/* MenuContent */}
       <MenuContent
         setActivePage={setActivePage}
         activePage={activePage}
         setActiveSubPage={setActiveSubPage}
+        activeSubPage={activeSubPage}
+        selectedClientId={selectedClientId !== null} // or however you determine selection
       />
+
 
         {/* <CardAlert /> */}
       </Box>

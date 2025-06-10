@@ -16,6 +16,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
 } from "@mui/material";
 import { LoadClientData } from "components/Common";
 
@@ -24,16 +25,29 @@ import { generateBudgetReport } from "./Utils/xlsxModule";
 
 import SummaryView from "./Views/SummaryView";
 export default function BudgetSummary({clientId}) {
+  const [loading, setLoading] = useState(false);
+  const handleDownload = async () => {
+    setLoading(true);
+    try {
+      await generateBudgetReport({ clientId });
+    } catch (err) {
+      console.error("Error generating report:", err);
+    }
+    setLoading(false);
+  };
   return (
     <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
       <Stack spacing={2}>
         <SummaryView clientId={clientId} />
+        {/* adding loading here too please */}
         <Button
           variant="contained"
           color="success"
-          onClick={() => generateBudgetReport({ clientId })}
+          onClick={handleDownload}
+          disabled={loading}
+          startIcon={loading && <CircularProgress size={20} />}
         >
-          Download Report
+          {loading ? "Generating..." : "Download Report"}
         </Button>
       </Stack>
     </Box>

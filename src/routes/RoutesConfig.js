@@ -37,10 +37,7 @@ import DatabaseSettings from "components/Settings/DatabaseSettings/DatabaseSetti
 import BudgetSettingsPage from "components/Settings/BudgetSettings/BudgetSettingsPage";
 
 // Help Pages
-import HelpView from "components/Help/HelpView";
-import HelpEdit from "components/Help/HelpEdit";
-import HelpCategory from "components/Help/HelpCategory"
-import HelpExtract from "components/Help/HelpExtract";
+import HelpTransactions from "components/Help/HelpTransactions";
 import HelpBudget from "components/Help/HelpBudget";
 
 
@@ -85,10 +82,7 @@ const RoutesConfig = () => {
             {/* Help pages */}
             <Route path="/DevelopPage" element={<DevelopPage />} />
             {/* <Route path="/Help/instructions" element={<Instructions />} /> */}
-            <Route path="/HelpView" element={<HelpView />} />
-            <Route path="/HelpEdit" element={<HelpEdit />} />   
-            <Route path="/HelpCategory" element={<HelpCategory />} />
-            <Route path="/HelpExtract" element={<HelpExtract />} />
+            <Route path="/HelpTransactions" element={<HelpTransactions />} />
             <Route path="/HelpBudget" element={<HelpBudget />} />
           </Route>
         </Route>

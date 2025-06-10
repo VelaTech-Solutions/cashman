@@ -44,19 +44,21 @@ const thirdListItems = [
 ];
 
 const helpListItems = [
-  { text: 'Help Budget', icon: <QuestionMarkIcon /> },
-  { text: 'Help Extract', icon: <QuestionMarkIcon /> },
-  { text: 'Help View', icon: <QuestionMarkIcon /> },
-  { text: 'Help Category', icon: <QuestionMarkIcon /> },
-  { text: 'Help Transaction', icon: <QuestionMarkIcon /> },
-  { text: 'Help Archive', icon: <QuestionMarkIcon /> },
   { text: 'Help Add Client', icon: <QuestionMarkIcon /> },
-
+  { text: 'Help Budget', icon: <QuestionMarkIcon /> },
+  { text: 'Help Transactions', icon: <QuestionMarkIcon /> },
+  { text: 'Help Archive', icon: <QuestionMarkIcon /> },
 ];
 
-export default function MenuContent({ setActivePage, activePage, setActiveSubPage, activeSubPage }) {
+export default function MenuContent({
+    setActivePage, 
+    activePage, 
+    setActiveSubPage, 
+    activeSubPage,
+    selectedClientId }) {
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
+      {/* Main navigation */}
       <List dense>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
@@ -67,28 +69,29 @@ export default function MenuContent({ setActivePage, activePage, setActiveSubPag
           </ListItem>
         ))}
       </List>
+
       <Divider />
-      {activePage === "ClientProfile" && (
-        <List dense>
-          {secondaryListItems.map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton onClick={() => setActivePage(item.text)}>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      )}
-      {/* Budget Selected */}
+
+            {/* Only show these if a client is selected */}
+      {selectedClientId && (
+        <>
+
+      {/* Always show these 3 sections */}
+      <List dense>
+        {secondaryListItems.map((item, index) => (
+          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+            <ListItemButton onClick={() => setActivePage(item.text)}>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+
+      {/* Budget Sub-pages */}
       {activePage === "Budget Report" && (
         <List dense>
-          {[
-            "View",
-            "Insurance",
-            "Summary",
-            "Help",
-          ].map((text, index) => (
+          {["View", "Insurance", "Summary", "Help"].map((text, index) => (
             <ListItem key={index} disablePadding sx={{ display: 'block' }}>
               <ListItemButton onClick={() => setActiveSubPage(text)}>
                 <ListItemIcon><SummarizeIcon /></ListItemIcon>
@@ -98,14 +101,11 @@ export default function MenuContent({ setActivePage, activePage, setActiveSubPag
           ))}
         </List>
       )}
+
+      {/* Transactions Sub-pages */}
       {activePage === "Transactions" && (
         <List dense>
-          {[
-            "View",
-            "Edit",
-            "Categorize",
-            "Extract",
-          ].map((text, index) => (
+          {["View", "Edit", "Categorize", "Extract", "Help"].map((text, index) => (
             <ListItem key={index} disablePadding sx={{ display: 'block' }}>
               <ListItemButton onClick={() => setActiveSubPage(text)}>
                 <ListItemIcon><PaidIcon /></ListItemIcon>
@@ -115,13 +115,11 @@ export default function MenuContent({ setActivePage, activePage, setActiveSubPag
           ))}
         </List>
       )}
-      {/* Archive */}
+
+      {/* Archive Data Sub-pages */}
       {activePage === "Archive Data" && (
         <List dense>
-          {[
-            "View",
-            "Extract",
-          ].map((text, index) => (
+          {["View", "Extract", "Help"].map((text, index) => (
             <ListItem key={index} disablePadding sx={{ display: 'block' }}>
               <ListItemButton onClick={() => setActiveSubPage(text)}>
                 <ListItemIcon><SourceIcon /></ListItemIcon>
@@ -132,42 +130,11 @@ export default function MenuContent({ setActivePage, activePage, setActiveSubPag
         </List>
       )}
 
-      <Divider />
-      {/* {activePage === "Transactions" && activeSubPage === "Categorize" && (
-        <List dense sx={{ pl: 3 }}>
-          {["NormalCategorizer", "SmartCategorizer", "AICategorizer"].map((text, index) => (
-            <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton onClick={() => setActiveSubPage(text)}>
-                <ListItemText primary={text.replace("Categorizer", " Categorizer")} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      )} */}
+         <Divider />
+        </>
+      )}
 
-      {/* {activePage === "Budget Report" && (
-        <List dense>
-          <ListItem disablePadding sx={{ display: 'block' }}>
-            <ListItemButton onClick={() => setActiveSubPage("Help Budget")}>
-              <ListItemIcon><QuestionMarkIcon /></ListItemIcon>
-              <ListItemText primary="Help Budget" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      )} */}
-
-      <Divider />
-      {/* <List dense>
-        {helpListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton onClick={() => setActivePage(item.text)}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary="Help Budget"  />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List> */}
-      <Divider />
+      {/* Always visible: Settings, About, Feedback */}
       <List dense>
         {thirdListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
