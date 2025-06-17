@@ -9,13 +9,13 @@ import { v4 as uuidv4 } from "uuid";
 // Component Imports
 import ProgressUtils from './ProgressUtils';
 
-const createDatabaseStructure = async (id) => {
-  if (!id) {
+const createDatabaseStructure = async (clientId) => {
+  if (!clientId) {
     console.error("❌ Missing Client ID");
     return;
   }
 
-  const clientRef = doc(db, "clients", id);
+  const clientRef = doc(db, "clients", clientId);
   const clientSnap = await getDoc(clientRef);
 
   const defaultTransaction = {
@@ -36,29 +36,12 @@ const createDatabaseStructure = async (id) => {
     credit_debit_amount: 0.0,
     balance_amount: 0.0,
   };
-  const defaultBudgetData = {
-    income: 0,
-    incomeavg: 0,
-    expenses: 0,
-    expensesavg: 0,
-    savings: 0,
-    savingsavg: 0,
-    housing: 0,
-    housingavg: 0,
-    transport: 0,
-    transportavg: 0,
-    debt: 0,
-    debtavg: 0,
-    timestamp: new Date().toISOString(),
-  };
-
   try {
-    await ProgressUtils.updateProgress(id, "Creating database structure", "processing");
+    await ProgressUtils.updateProgress(clientId, "Creating database structure", "processing");
 
     if (!clientSnap.exists()) {
       await setDoc(clientRef, {
         transactions: [defaultTransaction],
-        budgetData: defaultBudgetData,
         archive: [], 
         processedReports: [],
         extractProgress: {},
@@ -73,21 +56,18 @@ const createDatabaseStructure = async (id) => {
           ...defaultTransaction 
           }))
         : [defaultTransaction];
-    
-      const updatedBudgetData = data.budgetData ?? defaultBudgetData;
-
+  
       await updateDoc(clientRef, {
         transactions: updatedTransactions,
-        budgetData: updatedBudgetData,
         archive: data.archive ?? [],
         processedReports: data.processedReports ?? [],
         extractProgress: data.extractProgress ?? {},
       });
     }
 
-    await ProgressUtils.updateProgress(id, "Creating database structure", "success");
+    await ProgressUtils.updateProgress(clientId, "Creating database structure", "success");
   } catch (error) {
-    await ProgressUtils.updateProgress(id, "Creating database structure", "failed");
+    await ProgressUtils.updateProgress(clientId, "Creating database structure", "failed");
     console.error("🔥 Error initializing Firestore:", error);
   }
 };

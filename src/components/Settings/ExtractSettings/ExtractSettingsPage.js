@@ -19,6 +19,7 @@ import {
 import ExtractAlignmentView from "./Views/ExtractAlignmentView";
 import ExtractDescriptionView from "./Views/ExtractDescriptionView";
 import ExtractDatesView from "./Views/ExtractDatesView";
+import ExtractAmountsView from "./Views/ExtractAmountsView";
 
 export default function ExtractSettingsPage() {
   const [activeTable, setActiveTable] = useState("extractAlignmentView");
@@ -44,10 +45,18 @@ export default function ExtractSettingsPage() {
           >
             Dates
           </Button>
+          <Button 
+            variant={activeTable === "extractAmountsView" ? "contained" : "outlined"} 
+            onClick={() => setActiveTable("extractAmountsView")}
+          >
+            Amounts
+          </Button>
+          
         </Stack>
         {activeTable === "extractAlignmentView" && <ExtractAlignmentView />}
         {activeTable === "extractDescriptionView" && <ExtractDescriptionView />}
         {activeTable === "extractDatesView" && <ExtractDatesView />}
+        {activeTable === "extractAmountsView" && <ExtractAmountsView />}
       </Stack>
     </Box>
   );

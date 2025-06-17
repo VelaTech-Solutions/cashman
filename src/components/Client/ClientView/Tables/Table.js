@@ -49,6 +49,7 @@ const Table = ({ sortedClients, setSelectedClientId, setActivePage }) => {
     number_of_transactions: client.number_of_transactions,
     dateCreated: client.dateCreated ? client.dateCreated.toDate().toLocaleDateString("en-GB") : "",
     userEmail: client.userEmail,
+    bankType: client.bankType,
   }));
 
   const columns = [
@@ -121,6 +122,10 @@ const Table = ({ sortedClients, setSelectedClientId, setActivePage }) => {
           Delete
         </Button>
       )
+    },
+    // bank type
+    {
+      field: "bankType", headerName: "Type", flex: 1 
     },
   ];
 

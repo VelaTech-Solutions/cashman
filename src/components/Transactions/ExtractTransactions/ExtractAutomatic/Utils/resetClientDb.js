@@ -23,6 +23,7 @@ const resetClientDb = async (clientId) => {
         extractProgress: {},
         archive: [],
         progress: {},
+        categorized: 0,
         number_of_transactions: 0,
       });
     } else {
@@ -32,6 +33,7 @@ const resetClientDb = async (clientId) => {
         extractProgress: {},
         archive: [],
         progress: {},
+        categorized: 0,
         number_of_transactions: 0,
       });
     }

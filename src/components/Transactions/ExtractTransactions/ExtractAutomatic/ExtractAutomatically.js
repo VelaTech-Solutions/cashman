@@ -122,56 +122,57 @@ export default function ExtractAutomatically({clientId}) {
             </Stack>
           </Paper>
         </Box>
-        <Button
-          variant="contained"
-          color="success"
-          disabled={isProcessing}
-          onClick={async () => {
-            setIsProcessing(true);
-            const extractorFn = extractors[bankName] || null;
-            let success = false;
-
-            if (extractorFn) {
-              success = await extractorFn(
-                clientId, 
-                clientData, 
-                setClientData,
-                bankName, 
-                'pdfparser');
-            }
-
-            setIsProcessing(false);
-            setExtractionStatus(success 
-              ? { success: 'Extraction started' } 
-              : { error: 'Extraction failed or unsupported bank' });
-          }}
-        >
-        {isProcessing ? <CircularProgress size={24} color="inherit" /> : "Extract"}
-        </Button>
-
-
+        {/* can you make its just give a small feedback like all metrics met */}
 <Button
   variant="contained"
-  color="error"
+  color="success"
+  disabled={isProcessing}
   onClick={async () => {
     setIsProcessing(true);
-    const success = await resetClientDb(clientId);
-    if (!success) {
-      setExtractionStatus({ error: 'Reset failed' });
-      setIsProcessing(false);
-      return;
+    const extractorFn = extractors[bankName] || null;
+    let success = false;
+
+    if (extractorFn) {
+      success = await extractorFn(
+        clientId,
+        clientData,
+        bankName,
+        'pdfparser'
+      );
     }
 
-    setExtractionStatus({ success: 'Reset successful' });
-    setClientData(null);
-    setTransactions([]);
     setIsProcessing(false);
+    setExtractionStatus(
+      success
+        ? { success: '✅ All metrics met' }
+        : { error: '❌ Extraction failed or unsupported bank' }
+    );
   }}
 >
-  Reset
+  {isProcessing ? <CircularProgress size={24} color="inherit" /> : "Extract"}
 </Button>
 
 
+        <Button
+          variant="contained"
+          color="error"
+          onClick={async () => {
+            setIsProcessing(true);
+            const success = await resetClientDb(clientId);
+            if (!success) {
+              setExtractionStatus({ error: 'Reset failed' });
+              setIsProcessing(false);
+              return;
+            }
+
+            setExtractionStatus({ success: 'Reset successful' });
+            setClientData(null);
+            setTransactions([]);
+            setIsProcessing(false);
+          }}
+        >
+          Reset
+        </Button>
         <Box>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Typography variant="h6">Extraction Progress</Typography>
@@ -189,7 +190,6 @@ export default function ExtractAutomatically({clientId}) {
             </Stack>
           </Paper>
         </Box>
-
       </Stack>
     </Box>
   );

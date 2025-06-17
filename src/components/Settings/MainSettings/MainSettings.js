@@ -21,6 +21,8 @@ import {
 
 import MainViews from "./Views/MainViews";
 import BankSettings from "./Views/BankSettings";
+import BankOptions from "./Views/BankOptions";
+import Template from "./Views/Template";
 
 export default function MainSettings() {
   const [activeTable, setActiveTable] = useState("MainSettings");
@@ -41,10 +43,25 @@ export default function MainSettings() {
           >
             Bank Settings
           </Button>
+          <Button
+            variant={activeTable === "BankOptions" ? "contained" : "outlined"}
+            onClick={() => setActiveTable("BankOptions")}
+          >
+            Bank Options
+          </Button>
+          <Button
+            variant={activeTable === "Template" ? "contained" : "outlined"}
+            onClick={() => setActiveTable("Template")}
+          >
+            Template
+          </Button>
+          
         </Stack>
 
         {activeTable === "MainSettings" && <MainViews/>}
-        {activeTable === "BankSettings" && <BankSettings/>}
+        {activeTable === "BankSettings" && <BankSettings />}
+        {activeTable === "BankOptions" && <BankOptions />}
+        {activeTable === "Template" && <Template />}
       </Stack>
     </Box>
   );

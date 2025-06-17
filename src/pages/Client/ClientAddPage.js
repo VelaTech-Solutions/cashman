@@ -26,12 +26,15 @@ export default function ClientAddPage(props) {
     clientName: "",
     clientSurname: "",
     bankName: "",
+    bankType: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [bankNames, setBankNames] = useState([]);
+  const [bankOptions, setBankOptions] = useState([]);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -60,11 +63,34 @@ export default function ClientAddPage(props) {
   
     fetchBanks();
   }, []);
+
+  useEffect(() => {
+    const fetchBankOptions = async () => {
+      try {
+        const docRef = doc(db, "settings", "bankOptions");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const bankData = docSnap.data().banks;
+          setBankOptions(bankData);
+        }
+      } catch (error) {
+        console.error("Error fetching bank options:", error);
+      }
+    };
+
+    fetchBankOptions();
+  }, []);
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setClientDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
+    setClientDetails((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "bankName" ? { bankType: "" } : {})  // Reset type if bank changes
+    }));
   };
+
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -154,6 +180,7 @@ export default function ClientAddPage(props) {
           clientName,
           clientSurname,
           bankName,
+          bankType: clientDetails.bankType, // ✅ Add this line
           bankStatementURL: fileURL,
           userEmail,
           timestamp: new Date(),
@@ -211,23 +238,63 @@ export default function ClientAddPage(props) {
           fullWidth
         />
 
+        {/* Bank Dropdown - from settings/banks */}
         <FormControl fullWidth>
           <InputLabel id="bank-label">Bank Name</InputLabel>
-          <Select
-            labelId="bank-label"
-            name="bankName"
-            value={clientDetails.bankName}
-            onChange={handleInputChange}
-            input={<OutlinedInput label="Bank Name" />}
-          >
-            {bankNames.map((bank, index) => (
-              <MenuItem key={index} value={bank}>
-                {bank}
-              </MenuItem>
-            ))}
-          </Select>
+            <Select
+              labelId="bank-label"
+              name="bankName"
+              value={clientDetails.bankName}
+              onChange={handleInputChange}
+              input={<OutlinedInput label="Bank Name" />}
+            >
+              {bankNames.map((bank, index) => (
+                <MenuItem key={index} value={bank}>
+                  {bank}
+                </MenuItem>
+              ))}
+            </Select>
         </FormControl>
 
+        {/* Type Dropdown - from settings/bankOptions (filtered by selected bank) */}
+        {clientDetails.bankName && (
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel id="bank-type-label">Bank Type</InputLabel>
+              <Select
+                labelId="bank-type-label"
+                name="bankType"
+                value={clientDetails.bankType}
+                onChange={handleInputChange}
+                input={<OutlinedInput label="Bank Type" />}
+              >
+                {bankOptions
+                  .filter(opt => opt.name.toLowerCase().trim() === clientDetails.bankName.toLowerCase().trim())
+                  .map(opt => opt.type) // Get only the type field
+                  .filter((type, index, self) => self.indexOf(type) === index) // Remove duplicates
+                  .map((type, idx) => (
+                    <MenuItem key={idx} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+              </Select>
+          </FormControl>
+        )}
+
+        {clientDetails.bankName && clientDetails.bankType && (
+          <Box sx={{ mt: 2 }}>
+            <img
+              src={
+                bankOptions.find(
+                  (b) =>
+                    b.name.toLowerCase().trim() === clientDetails.bankName.toLowerCase().trim() &&
+                    b.type === clientDetails.bankType
+                )?.imageUrl
+              }
+              alt={`${clientDetails.bankName} ${clientDetails.bankType}`}
+              style={{ width: 100, height: 100, objectFit: "contain" }}
+            />
+          </Box>
+        )}
         <Button variant="outlined" component="label">
           Upload Bank Statement
           <input

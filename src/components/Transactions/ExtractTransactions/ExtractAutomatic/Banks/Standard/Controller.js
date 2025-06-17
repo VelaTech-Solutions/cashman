@@ -1,74 +1,96 @@
-//  Import  Component and Functions
-// Banks/ /Controller.js
+//Controller.js
 
 // Firebase Imports
 import { doc, getDoc, setDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../../../../firebase/firebase";
 
-
 import { createDatabaseStructure } from '../../Utils';
 
-import { extractRawData } from './Step1';
+import { extractRawData as extractRawDataA } from './TypeA/Step1';
+import { extractRawData as extractRawDataB } from './TypeB/Step1';
 
-import filterStatement  from './filterStatement';
-import cleanStatement  from './cleanStatement';
+import filterStatementA from './TypeA/filterStatement';
+import filterStatementB from './TypeB/filterStatement';
 
-import extractDates  from './extractDates';
-import extractDatesVerify  from './extractDatesVerify';
+import cleanStatementA from './TypeA/cleanStatement';
+import cleanStatementB from './TypeB/cleanStatement';
 
-import extractAmounts  from './extractAmounts';
-import extractAmountsVerify  from './extractAmountsVerify';
-import extractAmountsVerify2  from './extractAmountsVerify2';
+import extractDatesA from './TypeA/extractDates';
+import extractDatesB from './TypeB/extractDates';
 
-import extractDescription  from './extractDescription';
-import extractDescriptionVerify  from './extractDescriptionVerify';
+import extractDatesVerifyA from './TypeA/extractDatesVerify';
+import extractDatesVerifyB from './TypeB/extractDatesVerify';
 
-import verifyDatabase  from './verifyDatabase';
+import extractAmountsA from './TypeA/extractAmounts';
+import extractAmountsB from './TypeB/extractAmounts';
+
+import extractAmountsVerifyA from './TypeA/extractAmountsVerify';
+import extractAmountsVerifyB from './TypeB/extractAmountsVerify';
+
+import extractAmountsVerify2A from './TypeA/extractAmountsVerify2';
+import extractAmountsVerify2B from './TypeB/extractAmountsVerify2';
+
+import extractDescriptionA from './TypeA/extractDescription';
+import extractDescriptionB from './TypeB/extractDescription';
+
+import extractDescriptionVerifyA from './TypeA/extractDescriptionVerify';
+import extractDescriptionVerifyB from './TypeB/extractDescriptionVerify';
+
+import verifyDatabaseA from './TypeA/verifyDatabase';
+import verifyDatabaseB from './TypeB/verifyDatabase';
 
 
 // export with your preferred name
-const extractStandardData = async (clientId, clientData, setClientData, bankName, method) => {
-  if (!clientId || !clientData || !bankName || !method) {
+const extractStandardData = async (clientId, clientData, bankName, method) => {
+  const type = clientData?.bankType;
+
+  if (!clientId || !clientData || !bankName || !method || !type) {
     console.error("❌ Missing required parameters");
     return false;
   }
-  // console.log(clientId);
+
+  console.log("Type", type)
+
   await createDatabaseStructure(clientId);
 
-  // Check if rawData already exists inside clientData
-  if (!clientData.rawData) {
-    const success = await extractRawData(clientId, bankName, method);
-    if (success) {
-      console.log('✅ Extraction started successfully');
-    } else {
+  const extractRawDataFn = type === 'TypeA' ? extractRawDataA : extractRawDataB;
+  const filterStatementFn = type === 'TypeA' ? filterStatementA : filterStatementB;
+  const cleanStatementFn = type === 'TypeA' ? cleanStatementA : cleanStatementB;
+  const extractDatesFn = type === 'TypeA' ? extractDatesA : extractDatesB;
+  const extractDatesVerifyFn = type === 'TypeA' ? extractDatesVerifyA : extractDatesVerifyB;
+  const extractAmountsFn = type === 'TypeA' ? extractAmountsA : extractAmountsB;
+  const extractAmountsVerifyFn = type === 'TypeA' ? extractAmountsVerifyA : extractAmountsVerifyB;
+  const extractAmountsVerify2Fn = type === 'TypeA' ? extractAmountsVerify2A : extractAmountsVerify2B;
+  const extractDescriptionFn = type === 'TypeA' ? extractDescriptionA : extractDescriptionB;
+  const extractDescriptionVerifyFn = type === 'TypeA' ? extractDescriptionVerifyA : extractDescriptionVerifyB;
+  const verifyDatabaseFn = type === 'TypeA' ? verifyDatabaseA : verifyDatabaseB;
+  
+  if (!clientData?.rawData) {
+    const success = await extractRawDataFn(clientId, bankName, method);
+    console.log('extractRawData result:', success);
+    if (!success) {
       console.error('❌ Extraction failed');
+      return;
     }
   } else {
     console.log("⚠️ rawData already exists. Skipping raw extraction step.");
-    await updateDoc(doc(db, "clients", clientId), { filteredData: clientData.rawData });
+    try {
+      await updateDoc(doc(db, "clients", clientId), { filteredData: clientData.rawData });
+    } catch (error) {
+      console.error('❌ Failed to update document:', error);
+    }
   }
 
-  await filterStatement({ clientId, bankName});
-
-  await cleanStatement({ clientId, bankName });
-
-  await extractDates(clientId, bankName);
-
-  await extractDatesVerify(clientId, bankName);
-
-  await extractAmounts(clientId, bankName);
-
-  await extractAmountsVerify(clientId, bankName);
-
-  await extractAmountsVerify2(clientId, bankName);
-  
-  await extractDescription(clientId, bankName);
-
-  await extractDescriptionVerify(clientId, bankName);
-
-  await verifyDatabase(clientId, bankName);
-
+  await filterStatementFn({ clientId, bankName });
+  await cleanStatementFn({ clientId, bankName });
+  await extractDatesFn(clientId, bankName);
+  await extractDatesVerifyFn(clientId, bankName);
+  await extractAmountsFn(clientId, bankName);
+  await extractAmountsVerifyFn(clientId, bankName);
+  await extractAmountsVerify2Fn(clientId, bankName);
+  await extractDescriptionFn(clientId, bankName);
+  await extractDescriptionVerifyFn(clientId, bankName);
+  await verifyDatabaseFn(clientId, bankName);
 };
-
 
 export { extractStandardData };
