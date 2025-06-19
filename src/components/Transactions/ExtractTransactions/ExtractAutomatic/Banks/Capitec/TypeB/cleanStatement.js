@@ -144,8 +144,6 @@ const cleanStatement = async ({ clientId, bankName }) => {
       console.log("✔️ Cleaned lines archived for", bankName);
     }
 
-
-
     // ✅ Remove ignored lines
     if (shouldRemove) {
       filteredData = filteredData.filter((line) => {

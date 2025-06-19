@@ -1,8 +1,14 @@
-# Welcome to Cloud Functions for Firebase for Python!
-# To get started, simply uncomment the below code or create your own.
-# Deploy with `firebase deploy`
+import os
+import re
+import json
+import requests
+import tempfile
 
-# functions-py/main.py
+from pdf.pdf_parser import parse_pdf
+from pdf.pdf_ocr import ocr_pdf
+
+# Your custom CORS handler
+from utils.cors_handler import handle_cors
 
 # Import Firebase Admin SDK
 from firebase_functions import https_fn
@@ -11,19 +17,6 @@ from firebase_admin import initialize_app, firestore, storage
 # env variables
 from config import API_KEY, PROJECT_ID, STORAGE_BUCKET
 
-# Import necessary libraries
-import os
-import re
-import json
-import requests
-import tempfile
-
-# Import PDF parsing functions
-from pdf.pdf_parser import parse_pdf
-from pdf.pdf_ocr import ocr_pdf
-
-# Your custom CORS handler
-from utils.cors_handler import handle_cors
 
 # Initialize Firebase Admin SDK
 initialize_app()
@@ -76,30 +69,6 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
             response.headers["Content-Type"] = "application/json"
             return response
         
-
-        # extracted_text = extracted_text.replace("#", "").replace("*", " ").strip()
-        # # extracted_text = clean_description(extracted_text)
-        # # Clean statement based on bank name
-        # clean_amounts = {
-        #     "Absa Bank": clean_amounts_in_string,
-        #     "Capitec Bank": clean_amounts_in_string,
-        #     "Fnb Bank": None,  # Skip cleaning
-        #     "Ned Bank": None,  # Skip cleaning
-        #     "Standard Bank": clean_amounts_in_string,
-        #     "Tyme Bank": clean_amounts_in_string,
-        # }
-
-        # # Skip cleaning if bank is not in the dictionary OR if its function is None
-        # if bank_name not in clean_amounts or clean_amounts[bank_name] is None:
-        #     print(f"Skipping amount cleaning: Bank '{bank_name}' not found or has no cleaning function.")
-        # else:
-        #     # Clean extracted text only if there's a function for this bank
-        #     extracted_text = clean_amounts[bank_name](extracted_text)
-
-        # Apply additional cleaning (remove "," and "*")
-        # extracted_text = extracted_text.replace(",", "").replace("*", " ").strip()
-
-
         # Convert rawData to Array
         raw_data_array = extracted_text.split("\n")  # Convert the string into an array of lines
 
@@ -128,7 +97,6 @@ def handleExtractData(req: https_fn.Request) -> https_fn.Response:
     except Exception as e:
         print(f"ERROR: {e}")
         return error_response(response, "An error occurred while processing the bank statement.", 500)
-
 
 # Helper Functions
 def error_response(response, message, status_code):

@@ -27,9 +27,6 @@ import extractAmountsB from './TypeB/extractAmounts';
 import extractAmountsVerifyA from './TypeA/extractAmountsVerify';
 import extractAmountsVerifyB from './TypeB/extractAmountsVerify';
 
-import extractAmountsVerify2A from './TypeA/extractAmountsVerify2';
-import extractAmountsVerify2B from './TypeB/extractAmountsVerify2';
-
 import extractDescriptionA from './TypeA/extractDescription';
 import extractDescriptionB from './TypeB/extractDescription';
 
@@ -40,7 +37,6 @@ import verifyDatabaseA from './TypeA/verifyDatabase';
 import verifyDatabaseB from './TypeB/verifyDatabase';
 
 const extractAbsaData = async (clientId, clientData, bankName, method) => {
-  // const type = clientData?.bankType;
   const type = clientData?.bankType?.replace(/\s/g, ''); // 'Type A' -> 'TypeA'
   if (!clientId || !clientData || !bankName || !method || !type) {
     console.error("❌ Missing required parameters");
@@ -58,7 +54,6 @@ const extractAbsaData = async (clientId, clientData, bankName, method) => {
   const extractDatesVerifyFn = type === 'TypeA' ? extractDatesVerifyA : extractDatesVerifyB;
   const extractAmountsFn = type === 'TypeA' ? extractAmountsA : extractAmountsB;
   const extractAmountsVerifyFn = type === 'TypeA' ? extractAmountsVerifyA : extractAmountsVerifyB;
-  const extractAmountsVerify2Fn = type === 'TypeA' ? extractAmountsVerify2A : extractAmountsVerify2B;
   const extractDescriptionFn = type === 'TypeA' ? extractDescriptionA : extractDescriptionB;
   const extractDescriptionVerifyFn = type === 'TypeA' ? extractDescriptionVerifyA : extractDescriptionVerifyB;
   const verifyDatabaseFn = type === 'TypeA' ? verifyDatabaseA : verifyDatabaseB;
@@ -85,7 +80,6 @@ const extractAbsaData = async (clientId, clientData, bankName, method) => {
   await extractDatesVerifyFn( clientId, bankName, type );
   await extractAmountsFn( clientId, bankName, type );
   await extractAmountsVerifyFn( clientId, bankName, type );
-  // await extractAmountsVerify2Fn( clientId, bankName, type );
   await extractDescriptionFn( clientId, bankName, type );
   await extractDescriptionVerifyFn( clientId, bankName, type );
   await verifyDatabaseFn( clientId, bankName, type );

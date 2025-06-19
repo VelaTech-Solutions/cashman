@@ -31,7 +31,7 @@ const extractAmounts = async (clientId, bankName, type) => {
       console.warn("⚠️ No filtered data found, skipping Amount extraction.");
       return;
     }
-    
+
     // Normalize type (e.g., "TypeA" → "typeA")
     console.log("typebefore", type)
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
@@ -92,10 +92,11 @@ const extractAmounts = async (clientId, bankName, type) => {
       const credit_debit_amount = extracted[0] || "0.00";
       const balance_amount = extracted[1] || "0.00";
 
-      // strip the letter or word from both amounts
-      const credit_debit_amountStripped = credit_debit_amount.replace(/[a-zA-Z]/g, "");
-      const balance_amountStripped = balance_amount.replace(/[a-zA-Z]/g, "");
-      // we get in
+      // strip the letter words spaces from both amounts
+      const credit_debit_amountStripped = credit_debit_amount.replace(/[a-zA-Z\s]/g, "");
+      const balance_amountStripped = balance_amount.replace(/[a-zA-Z\s]/g, "");
+
+
 
       // Strip all matched amounts from the line
       const strippedLine = extracted.reduce(

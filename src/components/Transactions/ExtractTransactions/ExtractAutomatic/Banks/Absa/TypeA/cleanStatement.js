@@ -111,7 +111,7 @@ const cleanStatement = async ({ clientId, bankName }) => {
       console.log("✔️ Transactions aligned");
     }
 
-
+    // ✅ Remove ignored lines
     const shouldRemove = await shouldRunCleanStatement(bankName);
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
