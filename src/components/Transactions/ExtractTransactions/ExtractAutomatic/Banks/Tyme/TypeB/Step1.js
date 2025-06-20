@@ -5,7 +5,7 @@
 export const extractRawData = async (clientId, bankName, processingMethod) => {
     try {
       const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractDataManual",
+        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractData",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

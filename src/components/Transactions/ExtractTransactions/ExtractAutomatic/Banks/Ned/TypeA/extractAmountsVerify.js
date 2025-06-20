@@ -1,41 +1,39 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmountsVerify.js
+// extractAmountsVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
+import ProgressUtils from "../../../Utils/ProgressUtils";
 
-const extractAmountsVerify = async (id) => {
-  if (!id) {
+const extractAmountsVerify = async (clientId, bankName, type) => {
+  if (!clientId) {
     console.error("❌ Missing Client ID");
     return;
   }
 
   try {
     console.log(`🔄 Verifying transactions...`);
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "processing");
 
-    // Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", id);
-    await updateDoc(clientRef, {
-      "extractProgress.Amounts Verifed Step 1": "processing",
-    });
-
-    // Fetch client data
-    let clientSnap = await getDoc(clientRef);
+    // Step 1: Get client data
+    const clientRef = doc(db, "clients", clientId);
+    const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
-      });
       return;
     }
 
     let { transactions = [] } = clientSnap.data();
+    
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
-      });
+      await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
       return;
     }
+
+    // Normalize type (e.g., "TypeA" → "typeA")
+    console.log("typebefore", type)
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
+    console.log("typeKey",typeKey);
 
     let correctedTransactions = [];
     let totalCredits = 0;
@@ -43,33 +41,28 @@ const extractAmountsVerify = async (id) => {
 
     transactions.forEach((tx, index) => {
       try {
-        let fees = parseFloat(tx.fees_amount) || 0;
+
         let cd = parseFloat(tx.credit_debit_amount) || 0;
         let prevBalance = index > 0 ? parseFloat(transactions[index - 1].balance_amount) : 0;
         let currBalance = parseFloat(tx.balance_amount) || 0;
 
         let credit = 0;
         let debit = 0;
-        let verified = "✗"; // Default to unverified
 
         // Compare balances to determine debit or credit
         if (currBalance > prevBalance) {
           credit = Math.abs(cd);
           totalCredits++;
-          verified = "✓";
         } else if (currBalance < prevBalance) {
           debit = Math.abs(cd);
           totalDebits++;
-          verified = "✓";
         }
 
         correctedTransactions.push({
           ...tx,
-          fees_amount: fees.toFixed(2),
           credit_debit_amount: cd.toFixed(2),
           credit_amount: credit.toFixed(2),
           debit_amount: debit.toFixed(2),
-          verified,
         });
 
       } catch (error) {
@@ -78,21 +71,22 @@ const extractAmountsVerify = async (id) => {
     });
 
     // Log total counts for debugging
-    console.log(`📊 Total Credits: ${totalCredits}, Total Debits: ${totalDebits}`);
+
 
     // Update Firestore
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
       number_of_transactions: correctedTransactions.length,
-      "extractProgress.Amounts Verifed Step 1": "success",
+      "extractProgress.Verify Amounts": "success",
     });
-
-    console.log("✅ Transactions verified successfully.");
+    console.log(`✅ Total Credits: ${totalCredits}, Total Debits: ${totalDebits}`);
+    console.log("🎉 Transactions verified successfully.");
+    
   } catch (error) {
     console.error("🔥 Error verifying transactions:", error);
     try {
       await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
+        "extractProgress.Verify Amounts": "failed",
       });
     } catch (updateError) {
       console.error("❌ Failed to update Firestore after error:", updateError);

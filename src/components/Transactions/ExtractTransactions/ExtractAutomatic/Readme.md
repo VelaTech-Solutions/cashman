@@ -1,16 +1,16 @@
-Absa Type A
+Absa Type A working needs filtering on decs
 Date Transaction Description Amount Balance
 
-Absa Type B
+Absa Type B still an issue
 Date Transaction Description Charge Debit Amount Credit Amount Balance
 
-Capitec Type A
+Capitec Type A still not finished
 PostingDate Transaction Date Description MoneyIn(R) MoneyOut(R) Balance(R)
 
-Capitec Type B
+Capitec Type B working
 Date Description Category Money In Money Out Fee* Balance
 
-Fnb Type A
+Fnb Type A problem with finding transactions , in the decsription if the decsrition starts with a # the pdfplumder cant find the decsritpion 
 Date Description Amount Balance Accrued Bank Charges
 
 Ned Type A

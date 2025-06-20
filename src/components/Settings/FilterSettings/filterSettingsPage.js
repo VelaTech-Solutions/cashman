@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@mui/material";
 import HeaderFilter from "./Views/HeaderFilter";
+import FooterFilter from "./Views/FooterFilter"
 import HeaderFooterFilter from "./Views/HeaderFooterFilter"
 import IgnoredLines from "./Views/IgnoredLines";
 import FuzzyIgnoredLines from "./Views/FuzzyIgnoredLines";
@@ -30,6 +31,12 @@ export default function filterSettingsPage() {
             onClick={() => setActiveTable("headerFilter")}
           >
             Header Filter
+          </Button>
+          <Button
+            variant={activeTable === "footerFilter" ? "contained" : "outlined"}
+            onClick={() => setActiveTable("footerFilter")}
+          >
+            Footer Filter
           </Button>
           <Button
             variant={activeTable === "headerFooterFilter" ? "contained" : "outlined"}
@@ -51,6 +58,7 @@ export default function filterSettingsPage() {
           </Button>
         </Stack>
         {activeTable === "headerFilter" && <HeaderFilter />}
+        {activeTable === "footerFilter" && <FooterFilter />}
         {activeTable === "headerFooterFilter" && <HeaderFooterFilter />}
         {activeTable === "ignoredLines" && <IgnoredLines />}
         {activeTable === "fuzzyIgnoredLines" && <FuzzyIgnoredLines />}

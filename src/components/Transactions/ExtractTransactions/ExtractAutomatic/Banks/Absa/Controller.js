@@ -79,10 +79,10 @@ const extractAbsaData = async (clientId, clientData, bankName, method) => {
   await extractDatesFn( clientId, bankName, type );
   await extractDatesVerifyFn( clientId, bankName, type );
   await extractAmountsFn( clientId, bankName, type );
-  await extractAmountsVerifyFn( clientId, bankName, type );
-  await extractDescriptionFn( clientId, bankName, type );
-  await extractDescriptionVerifyFn( clientId, bankName, type );
-  await verifyDatabaseFn( clientId, bankName, type );
+  // await extractAmountsVerifyFn( clientId, bankName, type );
+  // await extractDescriptionFn( clientId, bankName, type );
+  // await extractDescriptionVerifyFn( clientId, bankName, type );
+  // await verifyDatabaseFn( clientId, bankName, type );
 };
 
 export { extractAbsaData };

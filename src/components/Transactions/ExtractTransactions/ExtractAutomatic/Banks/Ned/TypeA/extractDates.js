@@ -5,22 +5,18 @@ import { db } from "../../../../../../../firebase/firebase";
 // Component Imports
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
-const extractDates = async (clientId, bankName) => {
-  if (!clientId || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
+const extractDates = async (clientId, bankName, type) => {
+  if (!clientId || !bankName || !type) {
+    console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
     console.log(`🔄 Dates Extracted for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Dates Extracted", "processing");
-    // Get date rules for this bank
-    const bankRef = doc(db, "settings", "dates", bankName, "config");
-
-    // Step 1: Set Firestore progress to "processing"
+    
+    // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
-
-    // Step 2: Fetch client data
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
@@ -34,36 +30,53 @@ const extractDates = async (clientId, bankName) => {
       return;
     }
 
-    // Step 3: Fetch date rules from Firestore
-    const dateRulesSnap = await getDoc(bankRef);
-    if (!dateRulesSnap.exists()) {
-      console.warn(`⚠️ No date extraction rules found for bank: ${bankName}`);
-    }
-    const dateRules = dateRulesSnap.data() || {};
+    console.log("typebefore", type)
 
-    // Step 4: Process lines
+    // Normalize type (e.g., "TypeA" → "typeA")
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
+    console.log("typeKey",typeKey);
+
+    // Step 2: Fetch config for this bank and type
+    const configRef = doc(db, "settings", "bankOptions", bankName, "config");
+    const configSnap = await getDoc(configRef);
+    if (!configSnap.exists()) {
+      console.warn(`⚠️ No config found for bank: ${bankName}`);
+      return;
+    }
+
+    const configData = configSnap.data();
+    const dateRegex = configData?.[typeKey]?.dateRegex;
+
+    if (!dateRegex) {
+      console.warn(`⚠️ No dateRegex found for type "${typeKey}" in bank "${bankName}"`);
+      return;
+    }
+
+    // Step 3: Extractor
+    const extractDatesFromText = (text) => {
+      const matches = [];
+      try {
+        const regex = new RegExp(dateRegex, "g");
+        const found = text.match(regex);
+        if (found) matches.push(...found);
+      } catch (e) {
+        console.warn(`❌ Invalid regex:`, e.message);
+      }
+      return matches;
+    };
+
+    // Count the Matches and console log it
+    let totalMatches = 0;
+    filteredData.forEach((line) => {
+      const matches = extractDatesFromText(line);
+      totalMatches += matches.length;
+    });
+    console.log("Total Match Dates:", totalMatches);
+
+    // Step 4: Process each line
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
     let totalDateLinesProcessed = 0;
-
-    const extractDatesFromText = (text) => {
-      const matches = [];
-
-      for (const key in dateRules) {
-        const rule = dateRules[key];
-        if (rule?.pattern) {
-          try {
-            const regex = new RegExp(rule.pattern, "g");
-            const found = text.match(regex);
-            if (found) matches.push(...found);
-          } catch (e) {
-            console.warn(`❌ Invalid regex for key "${key}":`, e.message);
-          }
-        }
-      }
-
-      return matches;
-    };
 
     filteredData.forEach((line, index) => {
       if (!line) return;

@@ -101,17 +101,7 @@ const cleanStatement = async ({ clientId, bankName }) => {
       return;
     }
 
-    // ✅ Alignment logic
-    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
-    const shouldAlign = alignmentSettings[bankName] ?? false;
-    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
-
-    if (shouldAlign) {
-      filteredData = await handleAlignTransactions(filteredData);
-      console.log("✔️ Transactions aligned");
-    }
-
-
+    // ✅ Remove lines that don't have a date
     const shouldRemove = await shouldRunCleanStatement(bankName);
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
@@ -165,6 +155,17 @@ const cleanStatement = async ({ clientId, bankName }) => {
       });
       console.log("✔️ Ignored lines removed");
     }
+
+    // ✅ Alignment logic
+    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
+    const shouldAlign = alignmentSettings[bankName] ?? false;
+    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
+
+    if (shouldAlign) {
+      filteredData = await handleAlignTransactions(filteredData);
+      console.log("✔️ Transactions aligned");
+    }
+
 
     // ✅ Update filtered data in Firestore
     await updateDoc(clientRef, {

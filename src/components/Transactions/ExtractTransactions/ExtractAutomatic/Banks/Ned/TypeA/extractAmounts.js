@@ -1,120 +1,120 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmounts.js
+// Firebase Imports
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
-import BankAmountsRules from "../../../../../../Rules/bankAmountsRules"; // ✅ Ensure correct import
 
-const extractAmounts = async (id, bankName) => {
-  if (!id || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
+// Component Imports
+import ProgressUtils from "../../../Utils/ProgressUtils";
+
+const extractAmounts = async (clientId, bankName, type) => {
+  if (!clientId || !bankName || !type) {
+    console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
-    console.log(`🔄 Amounts Extracted for Client: ${id} | Bank: ${bankName}`);
+    console.log(`🔄 Starting Amount Extraction | Client: ${clientId} | Bank: ${bankName} | Type: ${type}`);
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "processing");
 
-    // Step 1: Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", id);
-    await updateDoc(clientRef, {
-      "extractProgress.Amounts Extracted": "processing",
-    });
-
-    // Step 2: Fetch client data
+    // Step 1: Fetch client data
+    const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Extracted": "failed",
-      });
       return;
     }
 
     let { filteredData = [], transactions = [] } = clientSnap.data();
 
-    if (filteredData.length === 0) {
-      console.warn("⚠️ No filtered data found, skipping amount extraction.");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Extracted": "failed",
-      });
+    if (!filteredData.length) {
+      console.warn("⚠️ No filtered data available. Skipping amount extraction.");
       return;
     }
-    const stripAmountsFromLine = (line, amounts) => {
-      let strippedLine = line;
-      
-      amounts.forEach((rawAmount) => {
-        if (!rawAmount || rawAmount === "0.00") return;
-    
-        // Build possible variants to remove
-        const clean = rawAmount.replace(/[^\d.-]/g, "");
-        const variations = [
-          clean,
-          parseFloat(clean).toFixed(2),
-          `-${Math.abs(clean)}`,
-          `R ${clean}`,
-          `R${clean}`,
-          clean.replace("-", ""),
-        ];
-    
-        variations.forEach((variant) => {
-          const regex = new RegExp(variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g");
-          strippedLine = strippedLine.replace(regex, "").trim();
-        });
-      });
-    
-      return strippedLine;
+
+    // Normalize type casing
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
+
+    // Step 2: Fetch config
+    const configRef = doc(db, "settings", "bankOptions", bankName, "config");
+    const configSnap = await getDoc(configRef);
+    if (!configSnap.exists()) {
+      console.warn(`⚠️ Config not found for bank: ${bankName}`);
+      return;
+    }
+
+    const configData = configSnap.data();
+    const amountRegex = configData?.[typeKey]?.amountRegex;
+
+    if (!amountRegex) {
+      console.warn(`⚠️ No amountRegex for "${typeKey}" in bank "${bankName}"`);
+      return;
+    }
+
+    // Step 3: Amount extractor
+    const extractAmountsFromText = (text) => {
+      const matches = [];
+      try {
+        const regex = new RegExp(amountRegex, "g");
+        const found = text.match(regex);
+        if (found) matches.push(...found);
+      } catch (e) {
+        console.warn(`❌ Invalid regex:`, e.message);
+      }
+      return matches;
     };
-    
 
-    // Initialize a counter for processed lines
-    let totalLinesProcessed = 0;
-
-    // Step 3: Process each line in filteredData
-    const updatedFilteredData = [...filteredData];
+    let totalAmountsLinesProcessed = 0;
+    const updatedFilteredData = [];
     const updatedTransactions = [...transactions];
 
     filteredData.forEach((line, index) => {
-        if (!line) return;
+      const extracted = extractAmountsFromText(line);
+      if (extracted.length === 0) {
+        updatedFilteredData.push(line);
+        return;
+      }
 
-        const extractedAmounts =
-            BankAmountsRules[bankName](line) || ["0.00", "0.00", "0.00"];
+      totalAmountsLinesProcessed++;
 
-        const [fees_amount, credit_debit_amount, balance_amount] =
-            extractedAmounts.map((amount) => amount || "0.00");
+      let fees = "0.00";
+      let credit = "0.00";
+      let balance = "0.00";
 
-        totalLinesProcessed++;
+      if (extracted.length === 1) {
+        balance = extracted[0]; // Treat single amount as opening balance
+      } else if (extracted.length === 2) {
+        [credit, balance] = extracted;
+      } else if (extracted.length >= 3) {
+        [fees, credit, balance] = extracted;
+      }
 
-        const strippedLine = stripAmountsFromLine(line, extractedAmounts);
+      // Clean values
+      const clean = (val) => val.replace(/[a-zA-Z\s,]/g, "");
 
-        updatedFilteredData[index] = strippedLine;
+      // Remove extracted values from the line
+      const cleanedLine = extracted.reduce((txt, amt) => txt.replace(amt, "").trim(), line);
 
-        if (!updatedTransactions[index]) {
-            updatedTransactions[index] = {};
-        }
+      updatedFilteredData.push(cleanedLine);
 
-        updatedTransactions[index] = {
-            ...updatedTransactions[index],
-            fees_amount,
-            credit_debit_amount,
-            balance_amount,
-        };
+      updatedTransactions[index] = {
+        ...(updatedTransactions[index] || {}),
+        fees_amount: clean(fees),
+        credit_debit_amount: clean(credit),
+        balance_amount: clean(balance),
+      };
     });
 
-    // Log total lines processed
-    console.log(`✅ Total Lines Processed: ${totalLinesProcessed}`);
-    console.log("✅ Amounts Extracted:");
-
-
-
-    // Step 4: Update Firestore with both the updated transactions AND the stripped filteredData
+    // Step 5: Save results
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      filteredData: updatedFilteredData, // Store stripped lines
+      filteredData: updatedFilteredData,
       "extractProgress.Amounts Extracted": "success",
     });
 
-    console.log("🎉 Amount Extraction Completed!");
+    console.log(`✅ Amount Extraction Completed: ${totalAmountsLinesProcessed} lines processed.`);
+
   } catch (error) {
-    console.error("🔥 Error Amounts Extracted:", error);
-    await updateDoc(clientRef, {
+    console.error("🔥 Error during Amounts Extraction:", error);
+    await updateDoc(doc(db, "clients", clientId), {
       "extractProgress.Amounts Extracted": "failed",
     });
   }

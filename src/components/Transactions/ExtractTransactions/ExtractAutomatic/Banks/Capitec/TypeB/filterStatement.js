@@ -11,8 +11,6 @@ const filterStatement = async ({ clientId, bankName, type }) => {
     return;
   }
 
-  console.log("typebefore", type);
-
   try {
     console.log("🔄 Starting Filtering Statement...");
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "processing");
@@ -37,6 +35,7 @@ const filterStatement = async ({ clientId, bankName, type }) => {
     let filteredOut = [];
 
     // Step 2: Use original case for type
+    console.log("typebefore", type);
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1); // Keep casing as in Firestore (e.g. "typeA")
     console.log("🧽 Using type key:", typeKey);
 
@@ -68,102 +67,82 @@ const filterStatement = async ({ clientId, bankName, type }) => {
       }
     }
 
-   // === CASE 2: HeaderFooter Filter ===
-const headerFooterRef = doc(db, "settings", "headerFooterFilter", bankName, "config");
-const headerFooterSnap = await getDoc(headerFooterRef);
+    // === CASE 2: HeaderFooter Filter ===
+    const headerFooterRef = doc(db, "settings", "headerFooterFilter", bankName, "config");
+    const headerFooterSnap = await getDoc(headerFooterRef);
 
-if (headerFooterSnap.exists()) {
-  const typeConfigs = headerFooterSnap.data();
-  const config = typeConfigs?.[typeKey];
-  console.log("🔍 headerFooter config for typeKey:", config);
+    if (headerFooterSnap.exists()) {
+      const typeConfigs = headerFooterSnap.data();
+      const config = typeConfigs?.[typeKey];
+      console.log("🔍 headerFooter config for typeKey:", config);
 
-  if (
-    config?.headerFooterFilterEnabled &&
-    typeof config.headerStart === "string" &&
-    config.headerStart.trim() &&
-    typeof config.headerEnd === "string" &&
-    config.headerEnd.trim()
-  ) {
-    const headerStart = config.headerStart.trim().toLowerCase();
-    const headerEnd = config.headerEnd.trim().toLowerCase();
+      if (
+        config?.headerFooterFilterEnabled &&
+        typeof config.headerStart === "string" &&
+        config.headerStart.trim() &&
+        typeof config.headerEnd === "string" &&
+        config.headerEnd.trim()
+      ) {
+        const headerStart = config.headerStart.trim().toLowerCase();
+        const headerEnd = config.headerEnd.trim().toLowerCase();
 
-    const newFilteredData = [];
-    let isBlocking = false;
-    let blockBuffer = [];
-    let blockCount = 0;
+        const newFilteredData = [];
+        let isBlocking = false;
+        let blockBuffer = [];
+        let blockCount = 0;
 
-    for (let i = 0; i < filteredData.length; i++) {
-      const line = filteredData[i];
-      const lineLower = line.toLowerCase();
+        for (let i = 0; i < filteredData.length; i++) {
+          const line = filteredData[i];
+          const lineLower = line.toLowerCase();
 
-      if (!isBlocking && lineLower.includes(headerStart)) {
-        isBlocking = true;
-        blockBuffer.push(line);
-        continue;
-      }
+          if (!isBlocking && lineLower.includes(headerStart)) {
+            isBlocking = true;
+            blockBuffer.push(line);
+            continue;
+          }
 
-      if (isBlocking) {
-        blockBuffer.push(line);
+          if (isBlocking) {
+            blockBuffer.push(line);
 
-        if (lineLower.includes(headerEnd)) {
+            if (lineLower.includes(headerEnd)) {
+              filteredOut.push(
+                ...blockBuffer.map(l => ({
+                  reason: `headerFooter: "${config.headerStart}" → "${config.headerEnd}"`,
+                  line: l,
+                }))
+              );
+              isBlocking = false;
+              blockBuffer = [];
+              blockCount++;
+              continue;
+            }
+            continue;
+          }
+
+          // Not blocking, keep line
+          newFilteredData.push(line);
+        }
+
+        // If block was never closed
+        if (blockBuffer.length > 0) {
           filteredOut.push(
             ...blockBuffer.map(l => ({
-              reason: `headerFooter: "${config.headerStart}" → "${config.headerEnd}"`,
+              reason: `headerFooter: "${config.headerStart}" → "${config.headerEnd}" (unclosed)`,
               line: l,
             }))
           );
-          isBlocking = false;
-          blockBuffer = [];
           blockCount++;
-          continue;
         }
-        continue;
+
+        filteredData = newFilteredData;
+
+        console.log(`📦 Archived ${blockCount} headerFooter blocks`);
+      } else {
+        console.warn("⚠️ headerFooter config not enabled or missing valid start/end");
       }
-
-      // Not blocking, keep line
-      newFilteredData.push(line);
+    } else {
+      console.warn("❌ headerFooterSnap does not exist");
     }
-
-    // If block was never closed
-    if (blockBuffer.length > 0) {
-      filteredOut.push(
-        ...blockBuffer.map(l => ({
-          reason: `headerFooter: "${config.headerStart}" → "${config.headerEnd}" (unclosed)`,
-          line: l,
-        }))
-      );
-      blockCount++;
-    }
-
-    filteredData = newFilteredData;
-
-    console.log(`📦 Archived ${blockCount} headerFooter blocks`);
-  } else {
-    console.warn("⚠️ headerFooter config not enabled or missing valid start/end");
-  }
-} else {
-  console.warn("❌ headerFooterSnap does not exist");
-}
-
-    // its kinda not getting the blocks correct why?
-//     ✅ Progress updated: Filter Statement = success
-// ProgressUtils.js:17 ✅ Progress updated: Reset database structure = success
-// Controller.js:50 Type TypeB
-// ProgressUtils.js:17 ✅ Progress updated: Creating database structure = processing
-// ProgressUtils.js:17 ✅ Progress updated: Creating database structure = success
-// Controller.js:74 ⚠️ rawData already exists. Skipping raw extraction step.
-// filterStatement.js:14 typebefore TypeB
-// filterStatement.js:17 🔄 Starting Filtering Statement...
-// ProgressUtils.js:17 ✅ Progress updated: Filter Statement = processing
-// filterStatement.js:41 🧽 Using type key: typeB
-// filterStatement.js:54 🔍 Header filtering enabled, searching for headerEnd: "date description category money in money out fee* balance"
-// filterStatement.js:64 📦 Archived 61 header lines
-// filterStatement.js:78 🔍 headerFooter config for typeKey: {headerEnd: 'date description category money in money out fee* balance', headerFooterFilterEnabled: true, headerStart: '* includes vat at '}
-// filterStatement.js:151 📦 Archived 1 headerFooter blocks
-// filterStatement.js:177 ⚪ Line filtering is disabled
-// filterStatement.js:183 ⚪ Fuzzy filtering is disabled
-// filterStatement.js:209 ✔️ Filtered and archived lines updated.
-// ProgressUtils.js:17 ✅ Progress updated: Filter Statement = success
 
     // === CASE 3: Line Filtering ===
     // Assuming you have a config for this bank and type
@@ -211,7 +190,6 @@ if (headerFooterSnap.exists()) {
     await updateDoc(clientRef, {
       filteredData,
       archive: [...archive, ...filteredOut],
-      "extractProgress.Filter Statement": "success",
     });
 
     console.log("✔️ Filtered and archived lines updated.");

@@ -123,36 +123,36 @@ export default function ExtractAutomatically({clientId}) {
           </Paper>
         </Box>
         {/* can you make its just give a small feedback like all metrics met */}
-<Button
-  variant="contained"
-  color="success"
-  disabled={isProcessing}
-  onClick={async () => {
-    setIsProcessing(true);
-    const extractorFn = extractors[bankName] || null;
-    let success = false;
 
-    if (extractorFn) {
-      success = await extractorFn(
-        clientId,
-        clientData,
-        bankName,
-        'pdfparser'
-      );
-    }
+        <Button
+          variant="contained"
+          color="success"
+          disabled={isProcessing}
+          onClick={async () => {
+            setIsProcessing(true);
+            const extractorFn = extractors[bankName] || null;
+            let success = false;
 
-    setIsProcessing(false);
-    setExtractionStatus(
-      success
-        ? { success: '✅ All metrics met' }
-        : { error: '❌ Extraction failed or unsupported bank' }
-    );
-  }}
->
-  {isProcessing ? <CircularProgress size={24} color="inherit" /> : "Extract"}
-</Button>
+            if (extractorFn) {
+              success = await extractorFn(
+                clientId,
+                clientData,
+                bankName,
+                'pdfparser'
+              );
+            }
 
-
+            setIsProcessing(false);
+            setExtractionStatus(
+              success
+                ? { success: '✅ All metrics met' }
+                : { error: '❌ Extraction failed or unsupported bank' }
+            );
+          }}
+        >
+          {isProcessing ? <CircularProgress size={24} color="inherit" /> : "Extract"}
+        </Button>
+        
         <Button
           variant="contained"
           color="error"

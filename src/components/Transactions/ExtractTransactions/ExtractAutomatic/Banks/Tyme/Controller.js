@@ -27,9 +27,6 @@ import extractAmountsB from './TypeB/extractAmounts';
 import extractAmountsVerifyA from './TypeA/extractAmountsVerify';
 import extractAmountsVerifyB from './TypeB/extractAmountsVerify';
 
-import extractAmountsVerify2A from './TypeA/extractAmountsVerify2';
-import extractAmountsVerify2B from './TypeB/extractAmountsVerify2';
-
 import extractDescriptionA from './TypeA/extractDescription';
 import extractDescriptionB from './TypeB/extractDescription';
 
@@ -58,7 +55,6 @@ const extractTymeData = async (clientId, clientData, bankName, method) => {
   const extractDatesVerifyFn = type === 'TypeA' ? extractDatesVerifyA : extractDatesVerifyB;
   const extractAmountsFn = type === 'TypeA' ? extractAmountsA : extractAmountsB;
   const extractAmountsVerifyFn = type === 'TypeA' ? extractAmountsVerifyA : extractAmountsVerifyB;
-  const extractAmountsVerify2Fn = type === 'TypeA' ? extractAmountsVerify2A : extractAmountsVerify2B;
   const extractDescriptionFn = type === 'TypeA' ? extractDescriptionA : extractDescriptionB;
   const extractDescriptionVerifyFn = type === 'TypeA' ? extractDescriptionVerifyA : extractDescriptionVerifyB;
   const verifyDatabaseFn = type === 'TypeA' ? verifyDatabaseA : verifyDatabaseB;
@@ -85,7 +81,6 @@ const extractTymeData = async (clientId, clientData, bankName, method) => {
   await extractDatesVerifyFn(clientId, bankName);
   await extractAmountsFn(clientId, bankName);
   await extractAmountsVerifyFn(clientId, bankName);
-  await extractAmountsVerify2Fn(clientId, bankName);
   await extractDescriptionFn(clientId, bankName);
   await extractDescriptionVerifyFn(clientId, bankName);
   await verifyDatabaseFn(clientId, bankName);

@@ -79,7 +79,7 @@ export const ManualActions1 = ({
   
     try {
       const response = await fetch(
-        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractDataManual",
+        "https://us-central1-cashman-790ad.cloudfunctions.net/handleExtractData",
         {
           method: "POST",
           headers: {

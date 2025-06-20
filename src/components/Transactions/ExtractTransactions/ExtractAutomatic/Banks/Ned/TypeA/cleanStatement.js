@@ -101,6 +101,17 @@ const cleanStatement = async ({ clientId, bankName }) => {
       return;
     }
 
+    // ✅ Alignment logic
+    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
+    const shouldAlign = alignmentSettings[bankName] ?? false;
+    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
+
+    if (shouldAlign) {
+      filteredData = await handleAlignTransactions(filteredData);
+      console.log("✔️ Transactions aligned");
+    }
+
+    // ✅ Remove ignored lines
     const shouldRemove = await shouldRunCleanStatement(bankName);
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
@@ -133,17 +144,6 @@ const cleanStatement = async ({ clientId, bankName }) => {
       console.log("✔️ Cleaned lines archived for", bankName);
     }
 
-    // ✅ Alignment logic
-    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
-    const shouldAlign = alignmentSettings[bankName] ?? false;
-    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
-
-    if (shouldAlign) {
-      filteredData = await handleAlignTransactions(filteredData);
-      console.log("✔️ Transactions aligned");
-    }
-
-
     // ✅ Remove ignored lines
     if (shouldRemove) {
       filteredData = filteredData.filter((line) => {
@@ -169,11 +169,11 @@ const cleanStatement = async ({ clientId, bankName }) => {
     // ✅ Update filtered data in Firestore
     await updateDoc(clientRef, {
       filteredData: filteredData,
-      "extractProgress.Clean Statement": "success",
     });
 
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "success");
     console.log("✔️ Clean Statement completed successfully");
+    
   } catch (error) {
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "failed");
     console.error("🔥 Error in cleanStatement:", error);
