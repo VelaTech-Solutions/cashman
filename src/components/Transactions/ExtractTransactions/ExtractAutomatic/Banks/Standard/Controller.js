@@ -36,12 +36,9 @@ import extractDescriptionVerifyB from './TypeB/extractDescriptionVerify';
 import verifyDatabaseA from './TypeA/verifyDatabase';
 import verifyDatabaseB from './TypeB/verifyDatabase';
 
-
-// export with your preferred name
 const extractStandardData = async (clientId, clientData, bankName, method) => {
-  const type = clientData?.bankType;
-
-  if (!clientId || !clientData || !bankName || !method || !type) {
+  const type = clientData?.bankType?.replace(/\s/g, ''); // 'Type A' -> 'TypeA'
+  if (!clientId || !clientData || !bankName || !method || !type ) {
     console.error("❌ Missing required parameters");
     return false;
   }
@@ -60,7 +57,7 @@ const extractStandardData = async (clientId, clientData, bankName, method) => {
   const extractDescriptionFn = type === 'TypeA' ? extractDescriptionA : extractDescriptionB;
   const extractDescriptionVerifyFn = type === 'TypeA' ? extractDescriptionVerifyA : extractDescriptionVerifyB;
   const verifyDatabaseFn = type === 'TypeA' ? verifyDatabaseA : verifyDatabaseB;
-  
+
   if (!clientData?.rawData) {
     const success = await extractRawDataFn(clientId, bankName, method);
     console.log('extractRawData result:', success);
@@ -77,15 +74,15 @@ const extractStandardData = async (clientId, clientData, bankName, method) => {
     }
   }
 
-  await filterStatementFn({ clientId, bankName });
-  await cleanStatementFn({ clientId, bankName });
-  await extractDatesFn(clientId, bankName);
-  await extractDatesVerifyFn(clientId, bankName);
-  await extractAmountsFn(clientId, bankName);
-  await extractAmountsVerifyFn(clientId, bankName);
-  await extractDescriptionFn(clientId, bankName);
-  await extractDescriptionVerifyFn(clientId, bankName);
-  await verifyDatabaseFn(clientId, bankName);
+  await filterStatementFn({ clientId, bankName, type });
+  await cleanStatementFn({ clientId, bankName, type });
+  await extractDatesFn(clientId, bankName, type);
+  await extractDatesVerifyFn(clientId, bankName, type);
+  await extractAmountsFn(clientId, bankName, type);
+  await extractAmountsVerifyFn(clientId, bankName, type);
+  await extractDescriptionFn(clientId, bankName, type);
+  await extractDescriptionVerifyFn(clientId, bankName, type);
+  await verifyDatabaseFn(clientId, bankName, type);
 };
 
 export { extractStandardData };

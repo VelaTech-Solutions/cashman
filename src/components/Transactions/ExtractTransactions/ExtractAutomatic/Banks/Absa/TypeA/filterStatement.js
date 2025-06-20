@@ -203,7 +203,6 @@ const filterStatement = async ({ clientId, bankName, type }) => {
     await updateDoc(clientRef, {
       filteredData,
       archive: [...archive, ...filteredOut],
-      "extractProgress.Filter Statement": "success",
     });
 
     console.log("✔️ Filtered and archived lines updated.");

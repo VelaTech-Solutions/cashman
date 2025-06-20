@@ -1,119 +1,213 @@
 // Firebase Imports
-import { doc, setDoc,getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
 // Component Imports
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
-const filterStatement = async ({ clientId, bankName }) => {
-    if (!clientId || !bankName) {
-      console.error("Missing clientId or bankName");
+const filterStatement = async ({ clientId, bankName, type }) => {
+  if (!clientId || !bankName) {
+    console.error("❌ Missing clientId or bankName");
+    return;
+  }
+
+  console.log("typebefore", type);
+
+  try {
+    console.log("🔄 Starting Filtering Statement...");
+    await ProgressUtils.updateProgress(clientId, "Filter Statement", "processing");
+
+    // Step 1: Load client data
+    const clientRef = doc(db, "clients", clientId);
+    const clientSnap = await getDoc(clientRef);
+
+    if (!clientSnap.exists()) {
+      console.error("❌ No client data found");
       return;
     }
-  
-    try {
-      console.log("🔄 Starting Filtering Statement...");
-      await ProgressUtils.updateProgress(clientId, "Filter Statement", "processing");
-    
-      const configDoc = (bank) => doc(db, "settings", "filter", bank, "config");
-      const clientRef = doc(db, "clients", clientId);
-      const filterSettingRef = configDoc(bankName);
-  
-      // Ensure filter settings exist
-      let filterSnap = await getDoc(filterSettingRef);
-      if (!filterSnap.exists()) {
-        console.log("⚙️ Creating default filter settings for bank:", bankName);
-        await setDoc(filterSettingRef, {
-          startBlock: [],
-          endBlock: [],
-          ignoredLines: [],
-          fuzzyIgnoredLines: [],
-          blockEnabled: false,
-          ignoredEnabled: false,
-          fuzzyEnabled: false,
-        });
-        filterSnap = await getDoc(filterSettingRef);
-      }
-  
-      const clientSnap = await getDoc(clientRef);
-      if (!clientSnap.exists()) {
-        console.error("❌ No client data found");
-        return;
-      }
-  
-      const clientData = clientSnap.data();
-      const originalData = clientData.filteredData || [];
-  
-      const {
-        startBlock = [],
-        endBlock = [],
-        ignoredLines = [],
-        fuzzyIgnoredLines = [],
-        blockEnabled = false,
-        ignoredEnabled = false,
-        fuzzyEnabled = false,
-      } = filterSnap.data();
-  
-      const archive = [];
-      let filteredData = [...originalData];
 
-    // === Block Filtering ===
-    // Log if block filtering is enabled or disabled
-    if (blockEnabled) {
-      console.log("🔲 Block filtering is enabled");
-    } else {
-      console.log("⚪ Block filtering is disabled");
+    const clientData = clientSnap.data();
+    let { filteredData = [], archive = [] } = clientData;
+
+    if (filteredData.length === 0) {
+      console.warn("⚠️ No filtered data found, skipping filtering.");
+      return;
     }
-    // Apply block filtering
-    let blockCount = 0; // count blocks filtered
-    if (blockEnabled && startBlock.length && endBlock.length) {
-      const newFilteredData = [];
-      let isBlocking = false;
-      let currentBlockStart = null;
-      let blockBuffer = [];
-      for (let i = 0; i < filteredData.length; i++) {
-        const line = filteredData[i];
-        const trimmed = line.trim();
-        if (!isBlocking && startBlock.some((start) => trimmed.includes(start))) {
-          isBlocking = true;
-          currentBlockStart = trimmed;
-          blockBuffer.push(line);
-          continue;
+    
+    let filteredOut = [];
+
+    // Step 2: Use original case for type
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1); // Keep casing as in Firestore (e.g. "typeA")
+    console.log("🧽 Using type key:", typeKey);
+
+
+    // === CASE 1: Header Filter ===
+    const headerRef = doc(db, "settings", "headerFilter", bankName, "config");
+    const headerSnap = await getDoc(headerRef);
+
+    if (headerSnap.exists()) {
+      const typeConfigs = headerSnap.data();
+      const config = typeConfigs[typeKey];
+
+      if (config?.headerFilterEnabled && config?.headerEnd) {
+        const { headerEnd } = config;
+        console.log(`🔍 Header filtering enabled, searching for headerEnd: "${headerEnd}"`);
+
+        const index = filteredData.findIndex(line => line.includes(headerEnd));
+
+        if (index !== -1) {
+          filteredOut = filteredData.slice(0, index + 1).map(line => ({
+            reason: `headerEnd: "${headerEnd}"`,
+            line,
+          }));
+          filteredData = filteredData.slice(index + 1);
+          console.log(`📦 Archived ${filteredOut.length} header lines`);
+        } else {
+          console.warn(`⚠️ headerEnd "${headerEnd}" not found`);
         }
-        if (isBlocking) {
-          blockBuffer.push(line);
-          if (endBlock.some((end) => trimmed.includes(end))) {
-            archive.push(
-              ...blockBuffer.map((l) => ({ content: l, source: `block ${blockCount + 1}` }))
-            );
-            isBlocking = false;
-            blockBuffer = [];
-            currentBlockStart = null;
-            blockCount++;  // increment block count here
+      }
+    }
+
+
+    // === CASE : Footer Filter ===
+    // this has to start checking at the end of the array upwards
+    const footerRef = doc(db, "settings", "footerFilter", bankName, "config");
+    const footerSnap = await getDoc(footerRef);
+
+    if (footerSnap.exists()) {
+      const typeConfigs = footerSnap.data();
+      const config = typeConfigs[typeKey];
+
+      if (config?.footerFilterEnabled && config?.footerEnd) {
+        const { footerEnd } = config;
+        console.log(`🔍 Footer filtering enabled, searching for footerEnd: "${footerEnd}"`);
+
+        // Search from bottom up using findLastIndex
+        const index = [...filteredData].reverse().findIndex(line => line.includes(footerEnd));
+
+        if (index !== -1) {
+          // Convert index from reversed array to original
+          const actualIndex = filteredData.length - 1 - index;
+
+          const footerLines = filteredData.slice(actualIndex);
+          filteredOut.push(
+            ...footerLines.map(line => ({
+              reason: `footerEnd: "${footerEnd}"`,
+              line,
+            }))
+          );
+
+          filteredData = filteredData.slice(0, actualIndex);
+          console.log(`📦 Archived ${footerLines.length} footer lines`);
+        } else {
+          console.warn(`⚠️ footerEnd "${footerEnd}" not found`);
+        }
+      }
+    }
+    
+    // === CASE 2: HeaderFooter Filter ===
+    const headerFooterRef = doc(db, "settings", "headerFooterFilter", bankName, "config");
+    const headerFooterSnap = await getDoc(headerFooterRef);
+
+    if (headerFooterSnap.exists()) {
+      const typeConfigs = headerFooterSnap.data();
+      const config = typeConfigs?.[typeKey];
+      console.log("🔍 headerFooter config for typeKey:", config);
+
+      if (
+        config?.headerFooterFilterEnabled &&
+        typeof config.headerStart === "string" &&
+        config.headerStart.trim() &&
+        typeof config.headerEnd === "string" &&
+        config.headerEnd.trim()
+      ) {
+        const headerStart = config.headerStart.trim();
+        const headerEnd = config.headerEnd.trim();
+
+        // Helpers for matching either regex or plain
+        const matchWithFallback = (pattern, line) => {
+          try {
+            // Unescape backslashes so "\\s" becomes "\s"
+            const unescaped = pattern.replace(/\\\\/g, "\\");
+            const regex = new RegExp(unescaped, "i");
+            return regex.test(line);
+          } catch (err) {
+            // If invalid regex, fallback to normal includes
+            return line.toLowerCase().includes(pattern.toLowerCase());
           }
-          continue;
-        }
-        if (!isBlocking) {
+        };
+        const newFilteredData = [];
+        let isBlocking = false;
+        let blockBuffer = [];
+        let blockCount = 0;
+
+        for (let i = 0; i < filteredData.length; i++) {
+          const line = filteredData[i];
+
+          if (!isBlocking && matchWithFallback(headerStart, line)) {
+            isBlocking = true;
+            blockBuffer.push(line);
+            continue;
+          }
+
+          if (isBlocking) {
+            blockBuffer.push(line);
+
+            if (matchWithFallback(headerEnd, line)) {
+              filteredOut.push(
+                ...blockBuffer.map(l => ({
+                  reason: `headerFooter: "${config.headerStart}" → "${config.headerEnd}"`,
+                  line: l,
+                }))
+              );
+              isBlocking = false;
+              blockBuffer = [];
+              blockCount++;
+              continue;
+            }
+            continue;
+          }
+
+          // Not blocking, keep line
           newFilteredData.push(line);
         }
+
+        // If block was never closed
+        if (blockBuffer.length > 0) {
+          filteredOut.push(
+            ...blockBuffer.map(l => ({
+              reason: `headerFooter: "${config.headerStart}" → "${config.headerEnd}" (unclosed)`,
+              line: l,
+            }))
+          );
+          blockCount++;
+        }
+
+        filteredData = newFilteredData;
+
+        console.log(`📦 Archived ${blockCount} headerFooter blocks`);
+      } else {
+        console.warn("⚠️ headerFooter config not enabled or missing valid start/end");
       }
-      // If block was not closed
-      if (blockBuffer.length > 0) {
-        archive.push(
-          ...blockBuffer.map((l) => ({ content: l, source: `block ${blockCount + 1} (unclosed)` }))
-        );
-        blockCount++;
-      }
-      filteredData = newFilteredData;
+    } else {
+      console.warn("❌ headerFooterSnap does not exist");
     }
 
-    console.log(`📦 Total blocks filtered and archived: ${blockCount}`);
 
+    // === CASE 3: Line Filtering ===
+    // Assuming you have a config for this bank and type
+    const configDoc = doc(db, "settings", "filter", bankName, "config");
+    const configSnap = await getDoc(configDoc);
+    const config = configSnap.exists() ? configSnap.data() : {};
 
-    // === Line Filtering ===
+    // Define your filtering settings from config or defaults
+    const ignoredEnabled = config?.ignoredEnabled ?? false;
+    const ignoredLines = config?.ignoredLines ?? [];
+    const fuzzyEnabled = config?.fuzzyEnabled ?? false;
+    const fuzzyIgnoredLines = config?.fuzzyIgnoredLines ?? [];
+
     const keptLines = [];
 
-    // Log if line filtering is enabled or disabled
     if (ignoredEnabled) {
       console.log("🔲 Line filtering is enabled");
     } else {
@@ -140,15 +234,17 @@ const filterStatement = async ({ clientId, bankName }) => {
       }
     });
 
-    // === Update Firestore ===
+    filteredData = keptLines;
+    
+    // === Save result to Firestore ===
     await updateDoc(clientRef, {
-      filteredData: keptLines,
-      archive: [...(clientData.archive || []), ...archive],
-      "extractProgress.Filter Statement": "success",
+      filteredData,
+      archive: [...archive, ...filteredOut],
     });
 
     console.log("✔️ Filtered and archived lines updated.");
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "success");
+
   } catch (error) {
     console.error("🔥 Error in filterStatement:", error);
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");

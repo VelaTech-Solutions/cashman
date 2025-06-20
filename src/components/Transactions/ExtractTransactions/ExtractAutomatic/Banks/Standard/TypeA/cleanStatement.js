@@ -101,7 +101,6 @@ const cleanStatement = async ({ clientId, bankName }) => {
       return;
     }
 
-
     // ✅ Alignment logic
     const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
     const shouldAlign = alignmentSettings[bankName] ?? false;
@@ -112,9 +111,7 @@ const cleanStatement = async ({ clientId, bankName }) => {
       console.log("✔️ Transactions aligned");
     }
 
-
-
-
+    // ✅ Remove ignored lines
     const shouldRemove = await shouldRunCleanStatement(bankName);
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
@@ -146,8 +143,6 @@ const cleanStatement = async ({ clientId, bankName }) => {
       });
       console.log("✔️ Cleaned lines archived for", bankName);
     }
-
-
 
     // ✅ Remove ignored lines
     if (shouldRemove) {
