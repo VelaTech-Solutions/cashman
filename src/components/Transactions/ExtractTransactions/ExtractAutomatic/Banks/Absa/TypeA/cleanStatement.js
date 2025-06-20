@@ -51,10 +51,7 @@ const hasDate = (line, pattern) => {
 
 // ✅ Clean statement main function
 const cleanStatement = async ({ clientId, bankName }) => {
-  if (!clientId || !bankName) {
-    console.error("❌ Missing ID or Bank Name");
-    return;
-  }
+  if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
   const clientRef = doc(db, "clients", clientId);
   const bankRef = doc(db, "banks", bankName);
@@ -62,7 +59,7 @@ const cleanStatement = async ({ clientId, bankName }) => {
   const bankDateRef = doc(db, "settings", "dates", bankName, "config");
 
   try {
-    console.log("🔄 Starting Clean Statement...");
+    console.log(`🔄 Starting Clean Statement for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "processing");
 
     const [bankSnap, filteredSnap, alignmentSnap, bankDateSnap] = await Promise.all([
@@ -74,9 +71,7 @@ const cleanStatement = async ({ clientId, bankName }) => {
 
     if (!filteredSnap.exists()) {
       console.error("❌ No filtered data found");
-      await updateDoc(clientRef, {
-        "extractProgress.Clean Statement": "failed",
-      });
+      await ProgressUtils.updateProgress(clientId, "Clean Statement", "failed");
       return;
     }
 
@@ -134,6 +129,7 @@ const cleanStatement = async ({ clientId, bankName }) => {
 
     console.log("📦 Lines to archive:", initialLinesToArchive.length);
 
+    // ✅ Archive lines
     if (initialLinesToArchive.length > 0) {
       const existingArchive = filteredSnap.data().archive || [];
       const updatedArchive = [...existingArchive, ...initialLinesToArchive];
@@ -169,12 +165,13 @@ const cleanStatement = async ({ clientId, bankName }) => {
     // ✅ Update filtered data in Firestore
     await updateDoc(clientRef, {
       filteredData: filteredData,
-      "extractProgress.Clean Statement": "success",
     });
 
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "success");
-    console.log("✔️ Clean Statement completed successfully");
+    console.log("🎉 Clean Extraction Completed!");
+
   } catch (error) {
+
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "failed");
     console.error("🔥 Error in cleanStatement:", error);
   }

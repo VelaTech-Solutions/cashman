@@ -1,13 +1,8 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
-
+import ProgressUtils from "../../../Utils/ProgressUtils";
 import { parse, format, isValid } from "date-fns";
 
-
-// this script runs for absa
-// the config lkooks like this
-//label: "2020-01-01 or 01/01/2020"
-//pattern: "\b(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{2}\/\d{4})\b"
 const extractDatesVerify = async (clientId, bankName) => {
   if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
@@ -16,9 +11,7 @@ const extractDatesVerify = async (clientId, bankName) => {
 
   try {
     console.log(`🔍 Verifying Dates for Client: ${clientId} | Bank: ${bankName}`);
-    await updateDoc(clientRef, {
-      "extractProgress.Verifying Extracted Dates": "processing",
-    });
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "processing");
 
     const [clientSnap, bankSnap] = await Promise.all([
       getDoc(clientRef),
@@ -50,7 +43,6 @@ const extractDatesVerify = async (clientId, bankName) => {
       return inputDate;
     };
     
-
     // Step 1: Only process the transactions with extracted date fields
     updatedTransactions.forEach((transaction, index) => {
       if (!transaction || !transaction.date1) return;
@@ -71,21 +63,18 @@ const extractDatesVerify = async (clientId, bankName) => {
       }
     });
 
-    console.log(`✅ Total verified and updated date lines: ${totalDateLinesProcessed}`);
-
-
     // Step 4: Update Firestore with the updated transactions
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      "extractProgress.Verifying Extracted Dates": "success",
     });
+    
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "success");
+    console.log("🎉 Date verification complete!");
 
-    console.log("🎉 Date verification and normalization complete!");
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "failed");
     console.error("🔥 Error verifying dates:", error);
-    await updateDoc(clientRef, {
-      "extractProgress.Verifying Extracted Dates": "failed",
-    });
   }
 };
 

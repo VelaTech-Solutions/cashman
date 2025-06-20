@@ -10,10 +10,8 @@ const extractAmounts = async (clientId, bankName, type) => {
     return;
   }
 
-  console.log("typebefore", type);
   try {
     console.log(`🔄 Amounts Extracted for Client: ${clientId} | Bank: ${bankName}`);
-
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "processing");
     
     // Step 1: Get client data
@@ -24,7 +22,6 @@ const extractAmounts = async (clientId, bankName, type) => {
       return;
     }
 
-
     let { filteredData = [], transactions = [] } = clientSnap.data();
 
     if (filteredData.length === 0) {
@@ -33,9 +30,7 @@ const extractAmounts = async (clientId, bankName, type) => {
     }
 
     // Normalize type (e.g., "TypeA" → "typeA")
-    console.log("typebefore", type)
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    console.log("typeKey",typeKey);
 
     // Step 2: Fetch config for this bank and type
     const configRef = doc(db, "settings", "bankOptions", bankName, "config");
@@ -72,7 +67,6 @@ const extractAmounts = async (clientId, bankName, type) => {
       const matches = extractAmountsFromText(line);
       totalMatches += matches.length;
     });
-    console.log("Total Match Amounts:", totalMatches);
 
     // Step 4: Process each line in filteredData
     const updatedFilteredData = [...filteredData];
@@ -95,8 +89,6 @@ const extractAmounts = async (clientId, bankName, type) => {
       // strip the letter words spaces from both amounts
       const credit_debit_amountStripped = credit_debit_amount.replace(/[a-zA-Z\s]/g, "");
       const balance_amountStripped = balance_amount.replace(/[a-zA-Z\s]/g, "");
-
-
 
       // Strip all matched amounts from the line
       const strippedLine = extracted.reduce(
@@ -121,17 +113,16 @@ const extractAmounts = async (clientId, bankName, type) => {
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
-      "extractProgress.Amounts Extracted": "success",
     });
 
-    console.log(`✅ Total Lines Processed: ${totalAmountsLinesProcessed}`);
+    
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "success");
     console.log("🎉 Amount Extraction Completed!");
-  
+
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "failed");
     console.error("🔥 Error Dates Extracted:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Amounts Extracted": "failed",
-    });
   }
 };
 

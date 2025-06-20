@@ -11,7 +11,7 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
   }
 
   try {
-    console.log(`🔄 Verifying transactions...`);
+    console.log(`🔄 Verifying transactions for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Verify Amounts", "processing");
     
     // Step 1: Get client data
@@ -26,20 +26,14 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     let { transactions = [] } = clientSnap.data();
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
-      });
+      await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
       return;
     }
 
     // Normalize type (e.g., "TypeA" → "typeA")
-    console.log("typebefore", type)
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    console.log("typeKey",typeKey);
-    
+
     let correctedTransactions = [];
-    let totalCredits = 0;
-    let totalDebits = 0;
 
     transactions.forEach((tx, index) => {
       try {
@@ -67,78 +61,19 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
       }
     });
 
-
-
-
     // Step : Save results to Firestore
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
-      "extractProgress.Verify Amounts": "success",
     });
 
-    console.log(`✅ Total Credits: ${totalCredits}, Total Debits: ${totalDebits}`);
-    console.log("🎉 Transactions verified successfully.");
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "success");
+    console.log("🎉 Amounts verified successfully.");
 
   } catch (error) {
-    console.error("🔥 Error Dates Extracted:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Verify Amounts": "failed",
-    });
+
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
+    console.error("🔥 Error amount verifying:", error);
   }
 };
 
 export default extractAmountsVerify;
-
-
-
-    // let { transactions = [] } = clientSnap.data();
-    // if (transactions.length === 0) {
-    //   console.warn("⚠️ No transactions found, skipping verification.");
-    //   await updateDoc(clientRef, {
-    //     "extractProgress.Amounts Verifed Step 1": "failed",
-    //   });
-    //   return;
-    // }
-
-    // // Normalize type (e.g., "TypeA" → "typeA")
-    // console.log("typebefore", type)
-    // const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    // console.log("typeKey",typeKey);
-    
-    // let correctedTransactions = [];
-    // let totalCredits = 0;
-    // let totalDebits = 0;
-
-    // transactions.forEach((tx, index) => {
-    //   try {
-    //     let cd = parseFloat(tx.credit_debit_amount) || 0;
-    //     let prevBalance = index > 0 ? parseFloat(transactions[index - 1].balance_amount) : 0;
-    //     let currBalance = parseFloat(tx.balance_amount) || 0;
-
-    //     let credit = 0;
-    //     let debit = 0;
-    //     let verified = "✗"; // Default to unverified
-
-    //     // Compare balances to determine debit or credit
-    //     if (currBalance > prevBalance) {
-    //       credit = Math.abs(cd);
-    //       totalCredits++;
-    //       verified = "✓";
-    //     } else if (currBalance < prevBalance) {
-    //       debit = Math.abs(cd);
-    //       totalDebits++;
-    //       verified = "✓";
-    //     }
-
-    //     correctedTransactions.push({
-    //       ...tx,
-    //       credit_debit_amount: cd.toFixed(2),
-    //       credit_amount: credit.toFixed(2),
-    //       debit_amount: debit.toFixed(2),
-    //       verified,
-    //     });
-
-    //   } catch (error) {
-    //     console.error(`❌ Error processing transaction ${index + 1}, skipping...`, error);
-    //   }
-    // });

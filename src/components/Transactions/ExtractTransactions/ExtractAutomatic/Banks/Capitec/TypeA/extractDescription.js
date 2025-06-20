@@ -1,43 +1,30 @@
 // src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescription.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
+import ProgressUtils from "../../../Utils/ProgressUtils";
 
-const extractDescription = async (id, bankName) => {
-  if (!id || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
-    return;
-  }
+const extractDescription = async (clientId, bankName) => {
+  if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
   try {
-    console.log(
-      `🔄 Extracting Descriptions for Client: ${id} | Bank: ${bankName}`
-    );
+    console.log(`🔄 Extracting Descriptions for Client: ${clientId} | Bank: ${bankName}`);
+    await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "processing");
 
     // Step 1: Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", id);
-    await updateDoc(clientRef, {
-      "extractProgress.Descriptions Extracted": "processing",
-    });
-
+    const clientRef = doc(db, "clients", clientId);
     // Step 2: Fetch client data
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
-      console.error("❌ No client data found");
-      await updateDoc(clientRef, {
-        "extractProgress.Descriptions Extracted": "failed",
-      });
+      console.error("❌ No Client data found");
+      await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "failed");
       return;
     }
 
     let { filteredData = [], transactions = [] } = clientSnap.data();
 
     if (filteredData.length === 0) {
-      console.warn(
-        "⚠️ No filtered data found, skipping description extraction."
-      );
-      await updateDoc(clientRef, {
-        "extractProgress.Descriptions Extracted": "failed",
-      });
+      console.error("❌ No filtered data found");
+      await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "failed");
       return;
     }
 
@@ -77,24 +64,20 @@ const extractDescription = async (id, bankName) => {
         };
     });
 
-    // Log total lines processed for descriptions
-    console.log(`✅ Total Lines with Descriptions Processed: ${totalDescriptionLinesProcessed}`);
-    console.log("✅ Descriptions Extracted:");
-
-
     // Step 4: Update Firestore with the updated transactions and stripped filteredData
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
-      "extractProgress.Descriptions Extracted": "success",
     });
 
+
+    await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "success");
     console.log("🎉 Description Extraction Completed!");
+
   } catch (error) {
-    console.error("🔥 Error extracting description:", error);
-    await updateDoc(clientRef, {
-      "extractProgress.Descriptions Extracted": "failed",
-    });
+
+    await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "failed");
+    console.error("🔥 Error verifying dates:", error);
   }
 };
 

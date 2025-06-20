@@ -30,11 +30,8 @@ const extractDates = async (clientId, bankName, type) => {
       return;
     }
 
-    console.log("typebefore", type)
-
     // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    console.log("typeKey",typeKey);
 
     // Step 2: Fetch config for this bank and type
     const configRef = doc(db, "settings", "bankOptions", bankName, "config");
@@ -71,7 +68,6 @@ const extractDates = async (clientId, bankName, type) => {
       const matches = extractDatesFromText(line);
       totalMatches += matches.length;
     });
-    console.log("Total Match Dates:", totalMatches);
 
     // Step 4: Process each line
     const updatedFilteredData = [...filteredData];
@@ -108,22 +104,19 @@ const extractDates = async (clientId, bankName, type) => {
       };
     });
 
-
     // Step 5: Save results to Firestore
     await updateDoc(clientRef, {
       filteredData: updatedFilteredData,
       transactions: updatedTransactions,
-      "extractProgress.Dates Extracted": "success",
     });
 
-    console.log(`✅ Total Lines with Dates Processed: ${totalDateLinesProcessed}`);
+    await ProgressUtils.updateProgress(clientId, "Dates Extracted", "success");
     console.log("🎉 Date Extraction Completed!");
 
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Dates Extracted", "failed");
     console.error("🔥 Error Dates Extracted:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Dates Extracted": "failed",
-    });
   }
 };
 
