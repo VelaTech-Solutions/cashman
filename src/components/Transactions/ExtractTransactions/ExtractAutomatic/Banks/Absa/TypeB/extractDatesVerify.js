@@ -3,32 +3,22 @@ import { db } from "../../../../../../../firebase/firebase";
 
 import { parse, format, isValid } from "date-fns";
 
+import ProgressUtils from "../../../Utils/ProgressUtils";
 
-// this script runs for absa
-// the config lkooks like this
-//label: "2020-01-01 or 01/01/2020"
-//pattern: "\b(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{2}\/\d{4})\b"
 const extractDatesVerify = async (clientId, bankName) => {
   if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
   const clientRef = doc(db, "clients", clientId);
-  const bankRef = doc(db, "settings", "dates", bankName, "config");
 
   try {
     console.log(`🔍 Verifying Dates for Client: ${clientId} | Bank: ${bankName}`);
-    await updateDoc(clientRef, {
-      "extractProgress.Verifying Extracted Dates": "processing",
-    });
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "processing");
 
-    const [clientSnap, bankSnap] = await Promise.all([
+    const [clientSnap] = await Promise.all([
       getDoc(clientRef),
-      getDoc(bankRef),
     ]);
 
     if (!clientSnap.exists()) throw new Error("Client not found.");
-    if (!bankSnap.exists()) throw new Error("Bank rules not found.");
-    
-    const dateRules = bankSnap.data();
 
     let { transactions = [] } = clientSnap.data();
     if (!transactions.length) throw new Error("No transactions to verify.");
@@ -70,22 +60,19 @@ const extractDatesVerify = async (clientId, bankName) => {
         totalDateLinesProcessed++; // Count as processed if we amended anything
       }
     });
-
-    console.log(`✅ Total verified and updated date lines: ${totalDateLinesProcessed}`);
-
-
-    // Step 4: Update Firestore with the updated transactions
+    
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      "extractProgress.Verifying Extracted Dates": "success",
     });
+    
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "success");
+    console.log("🎉 Date verification complete!");
 
-    console.log("🎉 Date verification and normalization complete!");
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "failed");
     console.error("🔥 Error verifying dates:", error);
-    await updateDoc(clientRef, {
-      "extractProgress.Verifying Extracted Dates": "failed",
-    });
   }
 };
 

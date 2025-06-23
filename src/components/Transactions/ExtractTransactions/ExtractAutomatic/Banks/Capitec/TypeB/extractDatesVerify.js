@@ -1,31 +1,24 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
-import { parse, format } from "date-fns";
 
-const extractDatesVerify = async (id, bankName) => {
-  if (!id || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
-    return;
-  }
+import { parse, format, isValid } from "date-fns";
 
-  const clientRef = doc(db, "clients", id);
-  const bankRef = doc(db, "settings", "dates", bankName, "config");
+import ProgressUtils from "../../../Utils/ProgressUtils";
+
+const extractDatesVerify = async (clientId, bankName) => {
+  if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
+
+  const clientRef = doc(db, "clients", clientId);
 
   try {
-    console.log(`🔍 Verifying Dates for Client: ${id} | Bank: ${bankName}`);
-    await updateDoc(clientRef, {
-      "extractProgress.Verifying Extracted Dates": "processing",
-    });
+    console.log(`🔍 Verifying Dates for Client: ${clientId} | Bank: ${bankName}`);
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "processing");
 
-    const [clientSnap, bankSnap] = await Promise.all([
+    const [clientSnap] = await Promise.all([
       getDoc(clientRef),
-      getDoc(bankRef),
     ]);
 
     if (!clientSnap.exists()) throw new Error("Client not found.");
-    if (!bankSnap.exists()) throw new Error("Bank rules not found.");
-
-    const dateRules = bankSnap.data();
 
     let { transactions = [] } = clientSnap.data();
     if (!transactions.length) throw new Error("No transactions to verify.");
@@ -33,13 +26,6 @@ const extractDatesVerify = async (id, bankName) => {
     const updatedTransactions = [...transactions];
     let totalDateLinesProcessed = 0;
 
-
-    // we can use the bank rules to normalize the dates the daterules  contains the regex to find the dates  but we can use that to 
-    //  find the dates in the field transactions, date1 and date2 
-    // basically we are going to use the regex to find the dates in the field transactions, date1 and date2
-    // then convert the date to the format dd/mm/yyyy
-    // if the date has no yyyy the date will be converted to the current year or thinking we can make a setting for it to choose the year
-    // the date that we are looking for to be normalized should be in the format dd/mm/yyyy
     const normalizeDate = (inputDate) => {
       const currentYear = new Date().getFullYear();
     
@@ -59,7 +45,7 @@ const extractDatesVerify = async (id, bankName) => {
     };
     
 
-        // Step 1: Only process the transactions with extracted date fields
+    // Step 1: Only process the transactions with extracted date fields
     updatedTransactions.forEach((transaction, index) => {
       if (!transaction || !transaction.date1) return;
 
@@ -79,20 +65,18 @@ const extractDatesVerify = async (id, bankName) => {
       }
     });
 
-    console.log(`✅ Total verified and updated date lines: ${totalDateLinesProcessed}`);
-
-    // Step 4: Update Firestore with the updated transactions
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      "extractProgress.Verifying Extracted Dates": "success",
     });
+    
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "success");
+    console.log("🎉 Date verification complete!");
 
-    console.log("🎉 Date verification and normalization complete!");
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Verify Dates", "failed");
     console.error("🔥 Error verifying dates:", error);
-    await updateDoc(clientRef, {
-      "extractProgress.Verifying Extracted Dates": "failed",
-    });
   }
 };
 

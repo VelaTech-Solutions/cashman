@@ -61,7 +61,7 @@ const extractDatesVerify = async (clientId, bankName) => {
       }
     });
 
-    // Step 4: Update Firestore with the updated transactions
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
     });
