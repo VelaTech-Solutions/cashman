@@ -1,41 +1,39 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmountsVerify.js
+// extractAmountsVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
+import ProgressUtils from "../../../Utils/ProgressUtils";
 
-const extractAmountsVerify = async (id) => {
-  if (!id) {
-    console.error("❌ Missing Client ID");
+const extractAmountsVerify = async (clientId, bankName, type) => {
+  if (!clientId || !bankName || !type) {
+    console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
-    console.log(`🔄 Verifying transactions...`);
+    console.log(`🔄 Verifying transactions for Client: ${clientId} | Bank: ${bankName}`);
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "processing");
+    
+    // Step 1: Get client data
+    const clientRef = doc(db, "clients", clientId);
+    const clientSnap = await getDoc(clientRef);
 
-    // Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", id);
-    await updateDoc(clientRef, {
-      "extractProgress.Amounts Verifed Step 1": "processing",
-    });
-
-    // Fetch client data
-    let clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
-      });
       return;
     }
 
+    // 
     let { transactions = [] } = clientSnap.data();
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
-      });
+      await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
       return;
     }
+
+    // Normalize type (e.g., "TypeA" → "typeA")
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
+
 
     let correctedTransactions = [];
     let totalCredits = 0;
@@ -50,17 +48,14 @@ const extractAmountsVerify = async (id) => {
 
         let credit = 0;
         let debit = 0;
-        let verified = "✗"; // Default to unverified
 
         // Compare balances to determine debit or credit
         if (currBalance > prevBalance) {
           credit = Math.abs(cd);
           totalCredits++;
-          verified = "✓";
         } else if (currBalance < prevBalance) {
           debit = Math.abs(cd);
           totalDebits++;
-          verified = "✓";
         }
 
         correctedTransactions.push({
@@ -69,34 +64,25 @@ const extractAmountsVerify = async (id) => {
           credit_debit_amount: cd.toFixed(2),
           credit_amount: credit.toFixed(2),
           debit_amount: debit.toFixed(2),
-          verified,
         });
 
       } catch (error) {
-        console.error(`❌ Error processing transaction ${index + 1}, skipping...`, error);
+        console.error(`Error processing transaction ${index + 1}`, error);
       }
     });
 
-    // Log total counts for debugging
-    console.log(`📊 Total Credits: ${totalCredits}, Total Debits: ${totalDebits}`);
-
-    // Update Firestore
+    // Step : Save results to Firestore
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
-      number_of_transactions: correctedTransactions.length,
-      "extractProgress.Amounts Verifed Step 1": "success",
     });
 
-    console.log("✅ Transactions verified successfully.");
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "success");
+    console.log("🎉 Amounts verified successfully.");
+
   } catch (error) {
-    console.error("🔥 Error verifying transactions:", error);
-    try {
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Verifed Step 1": "failed",
-      });
-    } catch (updateError) {
-      console.error("❌ Failed to update Firestore after error:", updateError);
-    }
+
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
+    console.error("🔥 Error amount verifying:", error);
   }
 };
 

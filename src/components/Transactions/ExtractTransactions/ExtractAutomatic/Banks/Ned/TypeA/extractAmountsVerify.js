@@ -5,25 +5,26 @@ import { db } from "../../../../../../../firebase/firebase";
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
 const extractAmountsVerify = async (clientId, bankName, type) => {
-  if (!clientId) {
-    console.error("❌ Missing Client ID");
+  if (!clientId || !bankName || !type) {
+    console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
-    console.log(`🔄 Verifying transactions...`);
+    console.log(`🔄 Verifying transactions for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Verify Amounts", "processing");
-
+    
     // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
+
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       return;
     }
 
+    // 
     let { transactions = [] } = clientSnap.data();
-    
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
       await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
@@ -31,9 +32,7 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     }
 
     // Normalize type (e.g., "TypeA" → "typeA")
-    console.log("typebefore", type)
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    console.log("typeKey",typeKey);
 
     let correctedTransactions = [];
     let totalCredits = 0;
@@ -66,32 +65,26 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
         });
 
       } catch (error) {
-        console.error(`❌ Error processing transaction ${index + 1}, skipping...`, error);
+        console.error(`Error processing transaction ${index + 1}`, error);
       }
     });
 
     // Log total counts for debugging
 
-
-    // Update Firestore
+    // Step : Save results to Firestore
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
-      number_of_transactions: correctedTransactions.length,
-      "extractProgress.Verify Amounts": "success",
     });
-    console.log(`✅ Total Credits: ${totalCredits}, Total Debits: ${totalDebits}`);
-    console.log("🎉 Transactions verified successfully.");
-    
+
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "success");
+    console.log("🎉 Amounts verified successfully.");
+
   } catch (error) {
-    console.error("🔥 Error verifying transactions:", error);
-    try {
-      await updateDoc(clientRef, {
-        "extractProgress.Verify Amounts": "failed",
-      });
-    } catch (updateError) {
-      console.error("❌ Failed to update Firestore after error:", updateError);
-    }
+
+    await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
+    console.error("🔥 Error amount verifying:", error);
   }
 };
+
 
 export default extractAmountsVerify;

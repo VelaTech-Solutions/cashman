@@ -17,12 +17,13 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
+
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
       return;
     }
 
-
+    // 
     let { transactions = [] } = clientSnap.data();
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
