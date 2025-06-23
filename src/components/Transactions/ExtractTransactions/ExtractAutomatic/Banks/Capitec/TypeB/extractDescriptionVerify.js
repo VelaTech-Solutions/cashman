@@ -1,48 +1,37 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescriptionVerify.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
-const extractDescriptionVerify = async (id, bankName) => {
-  if (!id || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
-    return;
-  }
+import ProgressUtils from "../../../Utils/ProgressUtils";
+
+const extractDescriptionVerify = async (clientId, bankName) => {
+  if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
   try {
-    const clientRef = doc(db, "clients", id);
+    console.log(`🔄 Verifying Descriptions for Client: ${clientId} | Bank: ${bankName}`);
+    await ProgressUtils.updateProgress(clientId, "Descriptions Verified", "processing");
+
+    // Step 1: Set Firestore progress to "processing"
+    const clientRef = doc(db, "clients", clientId);
     const settingsRef = doc(db, "settings", "description", bankName, "config");
     
-
-    await updateDoc(clientRef, {
-      "extractProgress.Descriptions Verified": "processing",
-    });
-
     const [clientSnap, settingsSnap] = await Promise.all([
       getDoc(clientRef),
       getDoc(settingsRef),
     ]);
 
     if (!clientSnap.exists()) {
-      await updateDoc(clientRef, {
-        "extractProgress.Descriptions Verified": "failed",
-      });
+      console.error("❌ No Client data found");
+      await ProgressUtils.updateProgress(clientId, "Descriptions Verified", "failed");
       return;
     }
 
     const { transactions = [] } = clientSnap.data();
     if (transactions.length === 0) {
-      await updateDoc(clientRef, {
-        "extractProgress.Descriptions Verified": "failed",
-      });
+      console.error("❌ No filtered data found");
+      await ProgressUtils.updateProgress(clientId, "Descriptions Verified", "failed");
       return;
     }
 
-
-    // inside the settingsRef ok we have 
-    // enabled = true/false this is the regex switch
-    // pattern = "the regex" 
-    // deletion = true/false does not save too description2
-    // future feild to come
     const settingsData = settingsSnap.exists() ? settingsSnap.data() : {};
     console.log("📋 Description Settings Selected:");
     Object.entries(settingsData).forEach(([key, val]) => {
@@ -56,19 +45,7 @@ const extractDescriptionVerify = async (id, bankName) => {
       deletion: val.deletion || false,
     }));
   
-
     const updatedTransactions = [...transactions];
-
-    // if (activePatterns.length === 0) {
-    //   // No regex selected, just clean and copy
-    //   transactions.forEach((txn, index) => {
-    //     updatedTransactions[index] = {
-    //       ...txn,
-    //       description: txn.description?.trim() || "",
-    //       description2: "",
-    //     };
-    //   });
-    // } else {
 
     // Apply regex patterns
     transactions.forEach((txn, index) => {
@@ -98,16 +75,18 @@ const extractDescriptionVerify = async (id, bankName) => {
         description2: description2.length ? description2.join(" | ") : "",
       };
     });    
-    // }
 
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      "extractProgress.Descriptions Verified": "success",
     });
+
+    await ProgressUtils.updateProgress(clientId, "Descriptions Verified", "success");
+    console.log("🎉 Descriptions verified successfully.");
+
   } catch (error) {
-    await updateDoc(doc(db, "clients", id), {
-      "extractProgress.Descriptions Verified": "failed",
-    });
+
+    await ProgressUtils.updateProgress(clientId, "Descriptions Verified", "failed");
     console.error("🔥 Error verifying descriptions:", error);
   }
 };

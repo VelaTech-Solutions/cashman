@@ -1,6 +1,8 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
+
 import ProgressUtils from "../../../Utils/ProgressUtils";
+
 const extractDescriptionVerify = async (clientId, bankName) => {
   if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
@@ -43,7 +45,6 @@ const extractDescriptionVerify = async (clientId, bankName) => {
       deletion: val.deletion || false,
     }));
   
-
     const updatedTransactions = [...transactions];
 
     // Apply regex patterns
@@ -75,6 +76,7 @@ const extractDescriptionVerify = async (clientId, bankName) => {
       };
     });    
 
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
     });
