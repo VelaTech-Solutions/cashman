@@ -1,4 +1,4 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDates.js
+// extractDates.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
@@ -104,14 +104,14 @@ const extractDates = async (clientId, bankName, type) => {
       };
     });
 
-    // Step 5: Save results to Firestore
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       filteredData: updatedFilteredData,
       transactions: updatedTransactions,
     });
 
     await ProgressUtils.updateProgress(clientId, "Dates Extracted", "success");
-    console.log("🎉 Date Extraction Completed!");
+    console.log("🎉 Dates Extraction Completed!");
 
   } catch (error) {
 

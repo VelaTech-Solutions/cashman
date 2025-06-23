@@ -1,4 +1,4 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDates.js
+// extractDates.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
@@ -30,11 +30,8 @@ const extractDates = async (clientId, bankName, type) => {
       return;
     }
 
-    console.log("typebefore", type)
-
     // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    console.log("typeKey",typeKey);
 
     // Step 2: Fetch config for this bank and type
     const configRef = doc(db, "settings", "bankOptions", bankName, "config");
@@ -108,22 +105,19 @@ const extractDates = async (clientId, bankName, type) => {
       };
     });
 
-
-    // Step 5: Save results to Firestore
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       filteredData: updatedFilteredData,
       transactions: updatedTransactions,
-      "extractProgress.Dates Extracted": "success",
     });
 
-    console.log(`✅ Total Lines with Dates Processed: ${totalDateLinesProcessed}`);
-    console.log("🎉 Date Extraction Completed!");
+    await ProgressUtils.updateProgress(clientId, "Dates Extracted", "success");
+    console.log("🎉 Dates Extraction Completed!");
 
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Dates Extracted", "failed");
     console.error("🔥 Error Dates Extracted:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Dates Extracted": "failed",
-    });
   }
 };
 

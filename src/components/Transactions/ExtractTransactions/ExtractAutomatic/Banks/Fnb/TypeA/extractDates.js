@@ -1,26 +1,22 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDates.js
+// extractDates.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
 // Component Imports
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
-const extractDates = async (clientId, bankName) => {
-  if (!clientId || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
+const extractDates = async (clientId, bankName, type) => {
+  if (!clientId || !bankName || !type) {
+    console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
     console.log(`🔄 Dates Extracted for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Dates Extracted", "processing");
-    // Get date rules for this bank
-    const bankRef = doc(db, "settings", "dates", bankName, "config");
-
-    // Step 1: Set Firestore progress to "processing"
+    
+    // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
-
-    // Step 2: Fetch client data
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
@@ -33,6 +29,9 @@ const extractDates = async (clientId, bankName) => {
       console.warn("⚠️ No filtered data found, skipping date extraction.");
       return;
     }
+
+    // Normalize type (e.g., "TypeA" → "typeA")
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
     // Step 3: Fetch date rules from Firestore
     const dateRulesSnap = await getDoc(bankRef);
@@ -95,23 +94,21 @@ const extractDates = async (clientId, bankName) => {
       };
     });
 
-
-    // Step 5: Save results to Firestore
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       filteredData: updatedFilteredData,
       transactions: updatedTransactions,
-      "extractProgress.Dates Extracted": "success",
     });
 
-    console.log(`✅ Total Lines with Dates Processed: ${totalDateLinesProcessed}`);
-    console.log("🎉 Date Extraction Completed!");
+    await ProgressUtils.updateProgress(clientId, "Dates Extracted", "success");
+    console.log("🎉 Dates Extraction Completed!");
 
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Dates Extracted", "failed");
     console.error("🔥 Error Dates Extracted:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Dates Extracted": "failed",
-    });
   }
 };
+
 
 export default extractDates;
