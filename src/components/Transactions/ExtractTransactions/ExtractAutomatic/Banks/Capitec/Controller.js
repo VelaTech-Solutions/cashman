@@ -38,13 +38,11 @@ import verifyDatabaseB from './TypeB/verifyDatabase';
 
 const extractCapitecData = async (clientId, clientData, bankName, method) => {
   const type = clientData?.bankType?.replace(/\s/g, ''); // 'Type A' -> 'TypeA'
-  if (!clientId || !clientData || !bankName || !method || !type ) {
+  if (!clientId || !clientData || !bankName || !method || !type) {
     console.error("❌ Missing required parameters");
     return false;
   }
-
-  console.log("Type", type)
-
+  
   await createDatabaseStructure(clientId);
 
   const extractRawDataFn = type === 'TypeA' ? extractRawDataA : extractRawDataB;

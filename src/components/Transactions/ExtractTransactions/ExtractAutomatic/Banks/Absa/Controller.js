@@ -42,9 +42,7 @@ const extractAbsaData = async (clientId, clientData, bankName, method) => {
     console.error("❌ Missing required parameters");
     return false;
   }
-
-  console.log("Type", type)
-
+  
   await createDatabaseStructure(clientId);
 
   const extractRawDataFn = type === 'TypeA' ? extractRawDataA : extractRawDataB;

@@ -37,14 +37,11 @@ import verifyDatabaseA from './TypeA/verifyDatabase';
 import verifyDatabaseB from './TypeB/verifyDatabase';
 
 const extractTymeData = async (clientId, clientData, bankName, method) => {
-  const type = clientData?.bankType;
-
+  const type = clientData?.bankType?.replace(/\s/g, ''); // 'Type A' -> 'TypeA'
   if (!clientId || !clientData || !bankName || !method || !type) {
     console.error("❌ Missing required parameters");
     return false;
   }
-
-  console.log("Type", type)
 
   await createDatabaseStructure(clientId);
 
@@ -75,15 +72,15 @@ const extractTymeData = async (clientId, clientData, bankName, method) => {
     }
   }
 
-  await filterStatementFn({ clientId, bankName });
-  await cleanStatementFn({ clientId, bankName });
-  await extractDatesFn(clientId, bankName);
-  await extractDatesVerifyFn(clientId, bankName);
-  await extractAmountsFn(clientId, bankName);
-  await extractAmountsVerifyFn(clientId, bankName);
-  await extractDescriptionFn(clientId, bankName);
-  await extractDescriptionVerifyFn(clientId, bankName);
-  await verifyDatabaseFn(clientId, bankName);
+  await filterStatementFn({ clientId, bankName, type });
+  await cleanStatementFn({ clientId, bankName, type });
+  await extractDatesFn( clientId, bankName, type );
+  await extractDatesVerifyFn( clientId, bankName, type );
+  await extractAmountsFn( clientId, bankName, type );
+  await extractAmountsVerifyFn( clientId, bankName, type );
+  await extractDescriptionFn( clientId, bankName, type );
+  await extractDescriptionVerifyFn( clientId, bankName, type );
+  await verifyDatabaseFn( clientId, bankName, type );
 };
 
 export { extractTymeData };
