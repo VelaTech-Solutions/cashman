@@ -38,12 +38,12 @@ export default function UncategorizedTable({ clientId }) {
   const [transactions, setTransactions] = useState([]);
   const [transactionDb, setTransactionDb] = useState([]);
   const [error, setError] = useState("");
-  const [sortModel, setSortModel] = React.useState([
-    {
-      field: 'description',
-      sort: 'asc',
-    },
-  ]);
+  // const [sortModel, setSortModel] = React.useState([
+  //   {
+  //     field: 'description',
+  //     sort: 'asc',
+  //   },
+  // ]);
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [categories, setCategories] = useState([]);
@@ -410,7 +410,7 @@ export default function UncategorizedTable({ clientId }) {
                 const ids = Array.from(selectionModel?.ids || []);
                 setSelectedTransactions(ids);
               }}
-              sortModel={sortModel}
+              // sortModel={sortModel}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 20, page: 0 } },

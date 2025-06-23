@@ -1,27 +1,24 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
-import ProgressUtils from "../../../Utils/ProgressUtils";
+
 import { parse, format, isValid } from "date-fns";
+
+import ProgressUtils from "../../../Utils/ProgressUtils";
 
 const extractDatesVerify = async (clientId, bankName) => {
   if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
   const clientRef = doc(db, "clients", clientId);
-  const bankRef = doc(db, "settings", "dates", bankName, "config");
 
   try {
     console.log(`🔍 Verifying Dates for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Verify Dates", "processing");
 
-    const [clientSnap, bankSnap] = await Promise.all([
+    const [clientSnap] = await Promise.all([
       getDoc(clientRef),
-      getDoc(bankRef),
     ]);
 
     if (!clientSnap.exists()) throw new Error("Client not found.");
-    if (!bankSnap.exists()) throw new Error("Bank rules not found.");
-    
-    const dateRules = bankSnap.data();
 
     let { transactions = [] } = clientSnap.data();
     if (!transactions.length) throw new Error("No transactions to verify.");
@@ -29,23 +26,20 @@ const extractDatesVerify = async (clientId, bankName) => {
     const updatedTransactions = [...transactions];
     let totalDateLinesProcessed = 0;
 
-    // the date looks like this 2025-07-02
-    // but this script incorerectly making the dates to be like this 02/01/2025 its not getting the months right
+    const normalizeDate = (inputDate) => {
+      try {
+        // Try parsing with ISO format first
+        let parsed = parse(inputDate, "yyyy-MM-dd", new Date());
+        if (isValid(parsed)) return format(parsed, "dd/MM/yyyy");
 
-const normalizeDate = (inputDate) => {
-  try {
-    // Try parsing with ISO format first
-    let parsed = parse(inputDate, "yyyy-MM-dd", new Date());
-    if (isValid(parsed)) return format(parsed, "dd/MM/yyyy");
-
-    // Then try parsing with common dd/MM/yyyy format
-    parsed = parse(inputDate, "dd/MM/yyyy", new Date());
-    if (isValid(parsed)) return format(parsed, "dd/MM/yyyy");
-  } catch {
-    return inputDate;
-  }
-  return inputDate;
-};
+        // Then try parsing with common dd/MM/yyyy format
+        parsed = parse(inputDate, "dd/MM/yyyy", new Date());
+        if (isValid(parsed)) return format(parsed, "dd/MM/yyyy");
+      } catch {
+        return inputDate;
+      }
+      return inputDate;
+    };
 
     // Step 1: Only process the transactions with extracted date fields
     updatedTransactions.forEach((transaction, index) => {
