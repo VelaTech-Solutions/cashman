@@ -1,33 +1,34 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractDescription.js
+// extractDescription.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
+
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
 const extractDescription = async (clientId, bankName) => {
   if (!clientId || !bankName) return console.error("❌ Missing Client ID or Bank Name");
 
+  const clientRef = doc(db, "clients", clientId);
+  
   try {
     console.log(`🔄 Extracting Descriptions for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "processing");
-
-    // Step 1: Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", clientId);
-    // Step 2: Fetch client data
+    
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
-      console.error("❌ No Client data found");
+      console.error("❌ No client data found");
       await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "failed");
       return;
     }
 
     let { filteredData = [], transactions = [] } = clientSnap.data();
-
     if (filteredData.length === 0) {
-      console.error("❌ No filtered data found");
+      console.warn(
+        "⚠️ No filtered data found, skipping description extraction."
+      );
       await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "failed");
       return;
     }
-
+    
     // Step 3: Process each line in filteredData
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
@@ -64,20 +65,19 @@ const extractDescription = async (clientId, bankName) => {
         };
     });
 
-    // Step 4: Update Firestore with the updated transactions and stripped filteredData
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
     });
 
-
     await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "success");
     console.log("🎉 Description Extraction Completed!");
 
   } catch (error) {
-
+    
     await ProgressUtils.updateProgress(clientId, "Descriptions Extracted", "failed");
-    console.error("🔥 Error extracting descriptions:", error);
+    console.error("🔥 Error Extracting Description:", error);
   }
 };
 
