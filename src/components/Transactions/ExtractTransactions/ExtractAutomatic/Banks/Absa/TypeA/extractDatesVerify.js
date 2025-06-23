@@ -29,20 +29,24 @@ const extractDatesVerify = async (clientId, bankName) => {
     const updatedTransactions = [...transactions];
     let totalDateLinesProcessed = 0;
 
-    const normalizeDate = (inputDate) => {
-      try {
-        
-        let parsed = parse(inputDate, "yyyy-mm-dd", new Date());
-        if (!isNaN(parsed)) return format(parsed, "dd/MM/yyyy");
-    
-        parsed = parse(inputDate, "dd/mm/yyyy", new Date());
-        if (!isNaN(parsed)) return format(parsed, "dd/MM/yyyy");
-      } catch {
-        return inputDate;
-      }
-      return inputDate;
-    };
-    
+    // the date looks like this 2025-07-02
+    // but this script incorerectly making the dates to be like this 02/01/2025 its not getting the months right
+
+const normalizeDate = (inputDate) => {
+  try {
+    // Try parsing with ISO format first
+    let parsed = parse(inputDate, "yyyy-MM-dd", new Date());
+    if (isValid(parsed)) return format(parsed, "dd/MM/yyyy");
+
+    // Then try parsing with common dd/MM/yyyy format
+    parsed = parse(inputDate, "dd/MM/yyyy", new Date());
+    if (isValid(parsed)) return format(parsed, "dd/MM/yyyy");
+  } catch {
+    return inputDate;
+  }
+  return inputDate;
+};
+
     // Step 1: Only process the transactions with extracted date fields
     updatedTransactions.forEach((transaction, index) => {
       if (!transaction || !transaction.date1) return;

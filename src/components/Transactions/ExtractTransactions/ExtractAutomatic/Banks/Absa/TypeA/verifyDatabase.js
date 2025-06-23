@@ -59,6 +59,13 @@ const verifyDatabase = async (clientId) => {
           return updatedTx;
         });
 
+
+        // Update the number_of_transactions field
+        await updateDoc(clientRef, {
+          number_of_transactions: updatedTransactions.length,
+        });
+
+
         await updateDoc(clientRef, {
           transactions: updatedTransactions,
         });

@@ -53,6 +53,8 @@ export default function UncategorizedTable({ clientId }) {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [categoryWarning, setCategoryWarning] = useState("");
+
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -158,22 +160,36 @@ export default function UncategorizedTable({ clientId }) {
     { field: "msubcategory", type: "string", id: "msubcategory", headerName: "Matching Subcategory", flex:1 },
   ];
 
-const handleSaveClick = async () => {
-  const selectedTxns = transactions.filter(txn => selectedTransactions.includes(txn.uid));
-  if (selectedTxns.length === 0) return;
+  const handleSaveClick = async () => {
+    const selectedTxns = transactions.filter(txn => selectedTransactions.includes(txn.uid));
+    if (selectedTxns.length === 0) return;
 
-  const selectedCategory = categories.find(cat => cat.id === category)?.name || "";
-  const selectedSubcategory = subcategories.find(sub => sub.id === subcategory)?.name || "";
+    const selectedCategoryObj = categories.find(cat => cat.id === category);
+    const selectedCategoryName = selectedCategoryObj?.name || "";
 
-  const payload = {
-    category: selectedCategory,
-    subcategory: selectedSubcategory,
-    description: selectedTxns[0].description || "",
-    createdAt: new Date().toISOString(),
-  };
+    // Warning check
+    const hasIncomeMismatch = selectedCategoryName === "Income" && selectedTxns.some(txn => parseFloat(txn.debit_amount) > 0);
 
-  try {
-    await addTransactionDatabase(bankName, payload);
+    if (hasIncomeMismatch) {
+      setCategoryWarning("⚠️ You're assigning an 'Income' category to a debit transaction. Please double-check.");
+      return;
+    } else {
+      setCategoryWarning("");
+    }
+
+    const selectedSubcategory = subcategories.find(sub => sub.id === subcategory)?.name || "";
+
+    const payload = {
+      category: selectedCategoryName,
+      subcategory: selectedSubcategory,
+      description: selectedTxns[0].description || "",
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      await addTransactionDatabase(bankName, payload);
+      // rest of the code...
+
 
     const updated = transactions.map(txn => {
       const isSelected = selectedTransactions.includes(txn.uid);
@@ -356,6 +372,12 @@ const handleSaveClick = async () => {
             Match
           </Button>
         </Box>
+        {categoryWarning && (
+          <Typography color="error" sx={{ mt: 1 }}>
+            {categoryWarning}
+          </Typography>
+        )}
+
         {/* Progress Bar */}
         <Box sx={{ width: '100%' }}>
           <LinearProgress
