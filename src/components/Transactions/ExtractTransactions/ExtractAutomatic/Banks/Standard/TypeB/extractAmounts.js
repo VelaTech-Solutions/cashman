@@ -1,42 +1,38 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmounts.js
+// extractAmounts.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
-import BankAmountsRules from "../../../../../../Rules/bankAmountsRules"; // ✅ Ensure correct import
+import BankAmountsRules from "../../../../../../Rules/bankAmountsRules"; 
 
-const extractAmounts = async (id, bankName) => {
-  if (!id || !bankName) {
-    console.error("❌ Missing Client ID or Bank Name");
+import ProgressUtils from "../../../Utils/ProgressUtils";
+
+const extractAmounts = async (clientId, bankName, type) => {
+  if (!clientId || !bankName || !type) {
+    console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
-    console.log(`🔄 Amounts Extracted for Client: ${id} | Bank: ${bankName}`);
-
-    // Step 1: Set Firestore progress to "processing"
-    const clientRef = doc(db, "clients", id);
-    await updateDoc(clientRef, {
-      "extractProgress.Amounts Extracted": "processing",
-    });
-
-    // Step 2: Fetch client data
+    console.log(`🔄 Amounts Extracted for Client: ${clientId} | Bank: ${bankName}`);
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "processing");
+    
+    // Step 1: Get client data
+    const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Extracted": "failed",
-      });
       return;
     }
 
     let { filteredData = [], transactions = [] } = clientSnap.data();
 
     if (filteredData.length === 0) {
-      console.warn("⚠️ No filtered data found, skipping amount extraction.");
-      await updateDoc(clientRef, {
-        "extractProgress.Amounts Extracted": "failed",
-      });
+      console.warn("⚠️ No filtered data found, skipping Amount extraction.");
       return;
     }
+
+    // Normalize type (e.g., "TypeA" → "typeA")
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
+
     const stripAmountsFromLine = (line, amounts) => {
       let strippedLine = line;
       
@@ -97,26 +93,20 @@ const extractAmounts = async (id, bankName) => {
             balance_amount,
         };
     });
-
-    // Log total lines processed
-    console.log(`✅ Total Lines Processed: ${totalLinesProcessed}`);
-    console.log("✅ Amounts Extracted:");
-
-
-
-    // Step 4: Update Firestore with both the updated transactions AND the stripped filteredData
+    
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
-      filteredData: updatedFilteredData, // Store stripped lines
-      "extractProgress.Amounts Extracted": "success",
+      filteredData: updatedFilteredData,
     });
 
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "success");
     console.log("🎉 Amount Extraction Completed!");
+
   } catch (error) {
+
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "failed");
     console.error("🔥 Error Amounts Extracted:", error);
-    await updateDoc(clientRef, {
-      "extractProgress.Amounts Extracted": "failed",
-    });
   }
 };
 

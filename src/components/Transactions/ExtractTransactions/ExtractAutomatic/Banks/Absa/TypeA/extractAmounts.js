@@ -1,4 +1,4 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmounts.js
+// extractAmounts.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
@@ -109,20 +109,19 @@ const extractAmounts = async (clientId, bankName, type) => {
       };
     });
 
-    // Step 5: Save results to Firestore
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
     });
 
-    
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "success");
     console.log("🎉 Amount Extraction Completed!");
 
   } catch (error) {
 
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "failed");
-    console.error("🔥 Error Dates Extracted:", error);
+    console.error("🔥 Error Amounts Extracted:", error);
   }
 };
 

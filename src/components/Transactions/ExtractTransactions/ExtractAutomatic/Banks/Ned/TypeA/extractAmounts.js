@@ -1,8 +1,7 @@
-// Firebase Imports
+// extractAmounts.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
-// Component Imports
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
 const extractAmounts = async (clientId, bankName, type) => {
@@ -12,10 +11,10 @@ const extractAmounts = async (clientId, bankName, type) => {
   }
 
   try {
-    console.log(`🔄 Starting Amount Extraction | Client: ${clientId} | Bank: ${bankName} | Type: ${type}`);
+    console.log(`🔄 Amounts Extracted for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "processing");
-
-    // Step 1: Fetch client data
+    
+    // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
@@ -25,12 +24,12 @@ const extractAmounts = async (clientId, bankName, type) => {
 
     let { filteredData = [], transactions = [] } = clientSnap.data();
 
-    if (!filteredData.length) {
-      console.warn("⚠️ No filtered data available. Skipping amount extraction.");
+    if (filteredData.length === 0) {
+      console.warn("⚠️ No filtered data found, skipping Amount extraction.");
       return;
     }
 
-    // Normalize type casing
+    // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
     // Step 2: Fetch config
@@ -103,20 +102,20 @@ const extractAmounts = async (clientId, bankName, type) => {
       };
     });
 
-    // Step 5: Save results
+
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
-      "extractProgress.Amounts Extracted": "success",
     });
 
-    console.log(`✅ Amount Extraction Completed: ${totalAmountsLinesProcessed} lines processed.`);
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "success");
+    console.log("🎉 Amount Extraction Completed!");
 
   } catch (error) {
-    console.error("🔥 Error during Amounts Extraction:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Amounts Extracted": "failed",
-    });
+
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "failed");
+    console.error("🔥 Error Amounts Extracted:", error);
   }
 };
 

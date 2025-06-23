@@ -1,4 +1,4 @@
-// src/components/Transactions/ExtractTransactions/ExtractAutomatic/Utils/extractAmounts.js
+// extractAmounts.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
 
@@ -10,10 +10,8 @@ const extractAmounts = async (clientId, bankName, type) => {
     return;
   }
 
-  console.log("typebefore", type);
   try {
     console.log(`🔄 Amounts Extracted for Client: ${clientId} | Bank: ${bankName}`);
-
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "processing");
     
     // Step 1: Get client data
@@ -24,7 +22,6 @@ const extractAmounts = async (clientId, bankName, type) => {
       return;
     }
 
-
     let { filteredData = [], transactions = [] } = clientSnap.data();
 
     if (filteredData.length === 0) {
@@ -33,9 +30,7 @@ const extractAmounts = async (clientId, bankName, type) => {
     }
 
     // Normalize type (e.g., "TypeA" → "typeA")
-    console.log("typebefore", type)
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    console.log("typeKey",typeKey);
 
     // Step 2: Fetch config for this bank and type
     const configRef = doc(db, "settings", "bankOptions", bankName, "config");
@@ -118,21 +113,19 @@ const extractAmounts = async (clientId, bankName, type) => {
       };
     });
 
-    // Step 5: Save results to Firestore
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
-      "extractProgress.Amounts Extracted": "success",
     });
 
-    console.log(`✅ Total Lines Processed: ${totalAmountsLinesProcessed}`);
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "success");
     console.log("🎉 Amount Extraction Completed!");
-  
+
   } catch (error) {
-    console.error("🔥 Error Dates Extracted:", error);
-    await updateDoc(doc(db, "clients", clientId), {
-      "extractProgress.Amounts Extracted": "failed",
-    });
+
+    await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "failed");
+    console.error("🔥 Error Amounts Extracted:", error);
   }
 };
 
