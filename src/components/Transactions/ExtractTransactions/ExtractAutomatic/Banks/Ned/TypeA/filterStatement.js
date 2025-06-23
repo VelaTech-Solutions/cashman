@@ -6,15 +6,12 @@ import { db } from "../../../../../../../firebase/firebase";
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
 const filterStatement = async ({ clientId, bankName, type }) => {
-  if (!clientId || !bankName) {
-    console.error("❌ Missing clientId or bankName");
+  if (!clientId || !bankName || !type) {console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
-  console.log("typebefore", type);
-
   try {
-    console.log("🔄 Starting Filtering Statement...");
+    console.log(`🔄 Starting Filtering Statement for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "processing");
 
     // Step 1: Load client data
@@ -23,6 +20,7 @@ const filterStatement = async ({ clientId, bankName, type }) => {
 
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
+      await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");
       return;
     }
 
@@ -31,15 +29,12 @@ const filterStatement = async ({ clientId, bankName, type }) => {
 
     if (filteredData.length === 0) {
       console.warn("⚠️ No filtered data found, skipping filtering.");
+      await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");
       return;
     }
 
-    // Step 2: Use original case for type
-    const typeKey = type.charAt(0).toLowerCase() + type.slice(1); // Keep casing as in Firestore (e.g. "typeA")
-    console.log("🧽 Using type key:", typeKey);
-
-
-
+    // Normalize type (e.g., "TypeA" → "typeA")
+    const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
     // so nedbanks filter we can fin the line with dates and move the other data/line to archive
 
@@ -57,8 +52,6 @@ const filterStatement = async ({ clientId, bankName, type }) => {
       console.warn(`⚠️ No dateRegex found for type "${typeKey}" in bank "${bankName}"`);
       return;
     }
-
-
 
     // === CASE: Keep only lines that match dateRegex ===
     let filteredOut = [];
@@ -240,23 +233,19 @@ const filterStatement = async ({ clientId, bankName, type }) => {
 
     filteredData = keptLines;
 
-    console.log(`🧼 Final kept lines: ${filteredData.length}`);
-    console.log(`📦 Total archived lines: ${filteredOut.length}`);
-        
-
-
-    // === Save result to Firestore ===
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       filteredData,
       archive: [...archive, ...filteredOut],
     });
 
-    console.log("✔️ Filtered and archived lines updated.");
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "success");
+    console.log("🎉 Filtered and archived successfully.");
 
   } catch (error) {
-    console.error("🔥 Error in filterStatement:", error);
+
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");
+    console.error("🔥 Error in Filtering Statement:", error);
   }
 };
 

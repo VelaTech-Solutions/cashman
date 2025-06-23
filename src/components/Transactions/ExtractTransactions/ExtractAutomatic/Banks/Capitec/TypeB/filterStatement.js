@@ -6,13 +6,12 @@ import { db } from "../../../../../../../firebase/firebase";
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
 const filterStatement = async ({ clientId, bankName, type }) => {
-  if (!clientId || !bankName) {
-    console.error("❌ Missing clientId or bankName");
+  if (!clientId || !bankName || !type) {console.error("❌ Missing Client ID, Bank Name or Type");
     return;
   }
 
   try {
-    console.log("🔄 Starting Filtering Statement...");
+    console.log(`🔄 Starting Filtering Statement for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "processing");
 
     // Step 1: Load client data
@@ -21,6 +20,7 @@ const filterStatement = async ({ clientId, bankName, type }) => {
 
     if (!clientSnap.exists()) {
       console.error("❌ No client data found");
+      await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");
       return;
     }
 
@@ -29,16 +29,14 @@ const filterStatement = async ({ clientId, bankName, type }) => {
 
     if (filteredData.length === 0) {
       console.warn("⚠️ No filtered data found, skipping filtering.");
+      await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");
       return;
     }
     
     let filteredOut = [];
 
-    // Step 2: Use original case for type
-    console.log("typebefore", type);
+    // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1); // Keep casing as in Firestore (e.g. "typeA")
-    console.log("🧽 Using type key:", typeKey);
-
 
     // === CASE 1: Header Filter ===
     const headerRef = doc(db, "settings", "headerFilter", bankName, "config");
@@ -186,18 +184,19 @@ const filterStatement = async ({ clientId, bankName, type }) => {
 
     filteredData = keptLines;
     
-    // === Save result to Firestore ===
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       filteredData,
       archive: [...archive, ...filteredOut],
     });
 
-    console.log("✔️ Filtered and archived lines updated.");
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "success");
+    console.log("🎉 Filtered and archived successfully.");
 
   } catch (error) {
-    console.error("🔥 Error in filterStatement:", error);
+
     await ProgressUtils.updateProgress(clientId, "Filter Statement", "failed");
+    console.error("🔥 Error in Filtering Statement:", error);
   }
 };
 
