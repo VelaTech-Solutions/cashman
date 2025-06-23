@@ -23,7 +23,6 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
       return;
     }
 
-    // 
     let { transactions = [] } = clientSnap.data();
     if (transactions.length === 0) {
       console.warn("⚠️ No transactions found, skipping verification.");
@@ -69,9 +68,7 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
       }
     });
 
-    // Log total counts for debugging
-
-    // Step : Save results to Firestore
+    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: correctedTransactions,
     });
@@ -82,7 +79,7 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
   } catch (error) {
 
     await ProgressUtils.updateProgress(clientId, "Verify Amounts", "failed");
-    console.error("🔥 Error amount verifying:", error);
+    console.error("🔥 Error Amounts verifying:", error);
   }
 };
 

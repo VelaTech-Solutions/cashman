@@ -10,11 +10,10 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     return;
   }
 
-
   try {
     console.log(`🔄 Verifying transactions for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Verify Amounts", "processing");
-
+    
     // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
