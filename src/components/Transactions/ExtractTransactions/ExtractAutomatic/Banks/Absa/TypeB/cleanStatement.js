@@ -170,12 +170,13 @@ const cleanStatement = async ({ clientId, bankName }) => {
     // ✅ Update filtered data in Firestore
     await updateDoc(clientRef, {
       filteredData: filteredData,
-      "extractProgress.Clean Statement": "success",
     });
 
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "success");
-    console.log("✔️ Clean Statement completed successfully");
+    console.log("🎉 Clean Extraction Completed!");
+
   } catch (error) {
+
     await ProgressUtils.updateProgress(clientId, "Clean Statement", "failed");
     console.error("🔥 Error in cleanStatement:", error);
   }
