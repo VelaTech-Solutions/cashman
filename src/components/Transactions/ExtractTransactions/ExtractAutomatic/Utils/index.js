@@ -5,6 +5,7 @@
 export { default as createDatabaseStructure } from './createDatabaseStructure';
 
 export { default as resetClientDb } from './resetClientDb';
+export { default as hardResetClientDb } from './hardResetClientDb';
 export { default as filterStatement } from './filterStatement';
 
 // Step 2: Clean Statement

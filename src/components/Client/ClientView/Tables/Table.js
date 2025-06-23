@@ -6,6 +6,8 @@ import {
 } from '@mui/x-data-grid';
 import { handleDeleteClient } from "components/Client/ClientDelete";
 
+import { hardResetClientDb } from "components/Transactions/ExtractTransactions/ExtractAutomatic/Utils";
+
 const getCategorizedColor = (categorized) => {
   const percentage = Math.min(Math.max(categorized, 0), 100); // Ensure it's between 0% and 100%
   const red = Math.floor((100 - percentage) * 2.55);  // Red decreases as the percentage increases
@@ -127,6 +129,34 @@ const Table = ({ sortedClients, setSelectedClientId, setActivePage }) => {
     {
       field: "bankType", headerName: "Type", flex: 1 
     },
+    // hard Reset
+    {
+      field: "hardReset",
+      headerName: "Hard Reset",
+      flex: 1,
+      renderCell: (params) => (
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={async () => {
+            const confirmed = window.confirm("⚠️ Are you sure you want to hard reset this client?");
+            if (!confirmed) return;
+
+            try {
+              await hardResetClientDb(params.row.id);
+              alert("✅ Hard reset successful");
+            } catch (err) {
+              console.error("❌ Hard reset failed", err);
+              alert("❌ Hard reset failed");
+            }
+          }}
+        >
+          Hard Reset
+        </Button>
+      )
+    },
+
+
   ];
 
   return (
