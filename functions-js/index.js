@@ -17,3 +17,14 @@
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+// index.js
+import { onRequest } from 'firebase-functions/v2/https';
+import { getAdviceFromText } from './ai/advisor.js';
+
+export const advise = onRequest(async (req, res) => {
+  const input = req.query.text || 'What is Bitcoin?';
+  const result = await getAdviceFromText(input);
+  res.send(result);
+});
+

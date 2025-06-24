@@ -1,0 +1,604 @@
+.
+├── .env
+├── .firebase
+│   ├── hosting.YnVpbGQ.cache
+│   ├── hosting.cHVibGlj.cache
+│   └── logs
+│       └── vsce-debug.log
+├── .firebaserc
+├── .git
+│   ├── COMMIT_EDITMSG
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── ORIG_HEAD
+│   ├── branches
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               ├── HEAD
+│   │               └── main
+│   ├── packed-refs
+│   └── refs
+│       ├── heads
+│       │   └── main
+│       ├── remotes
+│       │   └── origin
+│       │       ├── HEAD
+│       │       └── main
+│       └── tags
+├── .github
+│   └── workflows
+│       ├── firebase-hosting-merge.yml
+│       └── firebase-hosting-pull-request.yml
+├── .gitignore
+├── .vscode
+│   └── settings.json
+├── LICENSE
+├── README.md
+├── apphosting.yaml
+├── config
+│   └── firestore.indexes.json
+├── cors.json
+├── deploy.sh
+├── directory_structure.txt
+├── firebase.json
+
+can w please the ai functions here? dont want to break my -py 
+├── functions-js
+│   ├── .eslintrc.js
+│   ├── .gitignore
+│   ├── index.js
+│   ├── package-lock.json
+│   └── package.json
+
+├── functions-py
+│   ├── .gcloudignore
+│   ├── .gitignore
+│   ├── config.py
+│   ├── firebase_credentials.json
+│   ├── main.py
+│   ├── pdf
+│   │   ├── __init__.py
+│   │   ├── pdf_ocr.py
+│   │   └── pdf_parser.py
+│   ├── requirements.txt
+│   └── utils
+│       ├── __init__.py
+│       ├── chunk.py
+│       ├── cleaning_router.py
+│       ├── cors_handler.py
+│       ├── data_cleaner.py
+│       ├── firestore_handler.py
+│       ├── method_handler.py
+│       ├── request_validator.py
+│       └── response_validator.py
+├── jsconfig.json
+├── logs
+│   └── deploy.log
+├── package-lock.json
+├── package.json
+├── public
+│   ├── assets
+│   │   ├── avatar-100.png
+│   │   └── runner.gif
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo100.png
+│   ├── manifest.json
+│   └── robots.txt
+├── rules
+│   ├── firestore.rules
+│   ├── fullacc.rules
+│   ├── otherfirestore.rules
+│   └── storage.rules
+├── src
+│   ├── App.css
+│   ├── App.js
+│   ├── assets
+│   │   ├── avatar-100.png
+│   │   └── runner.gif
+│   ├── components
+│   │   ├── AppNavbar.js
+│   │   ├── ArchivedData
+│   │   │   ├── ArchivedData.js
+│   │   │   ├── OverViews
+│   │   │   │   └── OverView.js
+│   │   │   ├── Tables
+│   │   │   │   └── Table.js
+│   │   │   ├── Utils
+│   │   │   └── Views
+│   │   ├── Budget
+│   │   │   ├── Budget.js
+│   │   │   ├── BudgetSummary.js
+│   │   │   ├── InsuranceBreakdown.js
+│   │   │   ├── Tables
+│   │   │   │   ├── InsuranceCurrentDataTable.js
+│   │   │   │   └── InsuranceRestructureDataTable.js
+│   │   │   ├── Utils
+│   │   │   │   ├── xlsxModule copy 2.js
+│   │   │   │   ├── xlsxModule copy.js
+│   │   │   │   └── xlsxModule.js
+│   │   │   └── Views
+│   │   │       ├── BudgetView.js
+│   │   │       └── SummaryView.js
+│   │   ├── CardAlert.js
+│   │   ├── ChartUserByCountry.js
+│   │   ├── Client
+│   │   │   ├── ClientAdd
+│   │   │   │   ├── Actions
+│   │   │   │   ├── Forms
+│   │   │   │   ├── Tables
+│   │   │   │   └── Views
+│   │   │   ├── ClientDelete.js
+│   │   │   ├── ClientEdit
+│   │   │   │   ├── Actions
+│   │   │   │   ├── Tables
+│   │   │   │   └── Views
+│   │   │   ├── ClientList
+│   │   │   │   ├── Actions
+│   │   │   │   ├── Tables
+│   │   │   │   └── Views
+│   │   │   ├── ClientProfile
+│   │   │   │   ├── Actions
+│   │   │   │   │   └── ClientActions1.js
+│   │   │   │   ├── ClientOverview.js
+│   │   │   │   ├── OverView.js
+│   │   │   │   ├── OverviewProfile.js
+│   │   │   │   ├── Tables
+│   │   │   │   │   └── ClientTable.js
+│   │   │   │   └── Views
+│   │   │   └── ClientView
+│   │   │       ├── Actions
+│   │   │       ├── Tables
+│   │   │       │   └── Table.js
+│   │   │       └── Views
+│   │   ├── ClientViewsBarChart.js
+│   │   ├── Common
+│   │   │   ├── AppLayout.js
+│   │   │   ├── Button.js
+│   │   │   ├── CategoryColor.js
+│   │   │   ├── Input.js
+│   │   │   ├── LoadCategories.js
+│   │   │   ├── LoadClientData.js
+│   │   │   ├── LoadSubCategories.js
+│   │   │   ├── LoadTransactionDatebase.js
+│   │   │   ├── LoadTransactions.js
+│   │   │   ├── Loader.js
+│   │   │   ├── OverView.js
+│   │   │   ├── ProtectedRoute.js
+│   │   │   ├── Sidebar.js
+│   │   │   ├── Table.js
+│   │   │   ├── TemplateContext.js
+│   │   │   ├── ViewSwitcher.js
+│   │   │   └── index.js
+│   │   ├── CustomDatePicker.js
+│   │   ├── CustomizedTreeView.js
+│   │   ├── Header.js
+│   │   ├── Help
+│   │   │   ├── HelpBudget.js
+│   │   │   ├── HelpCategory.js
+│   │   │   ├── HelpEdit.js
+│   │   │   ├── HelpTransactions.js
+│   │   │   ├── HelpView.js
+│   │   │   └── Instructions.js
+│   │   ├── HighlightedCard.js
+│   │   ├── MainGrid.js
+│   │   ├── MenuButton.js
+│   │   ├── MenuContent.js
+│   │   ├── NavbarBreadcrumbs.js
+│   │   ├── OptionsMenu.js
+│   │   ├── Progress
+│   │   │   ├── capturedProgress.js
+│   │   │   ├── categorizedProgress.js
+│   │   │   ├── completedProgress.js
+│   │   │   └── extractedProgress.js
+│   │   ├── Reports
+│   │   │   └── generateReport.js
+│   │   ├── Rules
+│   │   │   ├── BankCleanRules.js
+│   │   │   ├── BankDatesRules.js
+│   │   │   └── bankAmountsRules.js
+│   │   ├── Search.js
+│   │   ├── SelectContent.js
+│   │   ├── SessionsChart.js
+│   │   ├── Settings
+│   │   │   ├── BudgetSettings
+│   │   │   │   ├── BudgetSettingsPage.js
+│   │   │   │   ├── Tables
+│   │   │   │   │   ├── CellMap.json
+│   │   │   │   │   ├── CurrentSettings.js
+│   │   │   │   │   └── RestructureSettings.js
+│   │   │   │   ├── Utils
+│   │   │   │   └── Views
+│   │   │   │       ├── BudgetRangeSettings.js
+│   │   │   │       ├── BudgetSettingView.js
+│   │   │   │       ├── CategoryCellPlacement.js
+│   │   │   │       ├── ExcelSheetSettings.js
+│   │   │   │       ├── InsuranceBreakdownSettings.js
+│   │   │   │       └── MonthCellPlacement.js
+│   │   │   ├── CategorySettings
+│   │   │   │   ├── CategorySettingsPage.js
+│   │   │   │   ├── Utils
+│   │   │   │   └── Views
+│   │   │   │       ├── AddCategorySettings.js
+│   │   │   │       └── AddSubcategorySettings.js
+│   │   │   ├── DatabaseSettings
+│   │   │   │   ├── DatabaseSettingsPage.js
+│   │   │   │   ├── Utils
+│   │   │   │   └── Views
+│   │   │   │       └── TransactionsDatabaseView.js
+│   │   │   ├── EditSettings
+│   │   │   │   ├── EditSettings.js
+│   │   │   │   ├── Utils
+│   │   │   │   └── Views
+│   │   │   ├── ExtractSettings
+│   │   │   │   ├── ExtractSettingsPage.js
+│   │   │   │   ├── Utils
+│   │   │   │   └── Views
+│   │   │   │       ├── ExtractAlignmentView.js
+│   │   │   │       ├── ExtractAmountsView.js
+│   │   │   │       ├── ExtractDatesView.js
+│   │   │   │       ├── ExtractDescriptionView.js
+│   │   │   │       └── ExtractRemovalView.js
+│   │   │   ├── FilterSettings
+│   │   │   │   ├── Utils
+│   │   │   │   ├── Views
+│   │   │   │   │   ├── FooterFilter.js
+│   │   │   │   │   ├── FuzzyIgnoredLines.js
+│   │   │   │   │   ├── HeaderFilter copy.js
+│   │   │   │   │   ├── HeaderFilter.js
+│   │   │   │   │   ├── HeaderFooterFilter.js
+│   │   │   │   │   └── IgnoredLines.js
+│   │   │   │   └── filterSettingsPage.js
+│   │   │   ├── MainSettings
+│   │   │   │   ├── MainSettings.js
+│   │   │   │   ├── Utils
+│   │   │   │   └── Views
+│   │   │   │       ├── BankOptions.js
+│   │   │   │       ├── BankSettings copy.js
+│   │   │   │       ├── BankSettings.js
+│   │   │   │       ├── MainViews.js
+│   │   │   │       └── Template.js
+│   │   │   └── ViewSettings
+│   │   │       ├── Utils
+│   │   │       ├── ViewSettings.js
+│   │   │       └── Views
+│   │   ├── SideMenu.js
+│   │   ├── SideMenuMobile.js
+│   │   ├── StatCard.js
+│   │   └── Transactions
+│   │       ├── CategorizeTransactions
+│   │       │   ├── CategorizeTransactions.js
+│   │       │   └── NormalCategorizer
+│   │       │       ├── NormalCategorizePage.js
+│   │       │       ├── Tables
+│   │       │       │   ├── CategorizedIssuesTable.js
+│   │       │       │   ├── CategorizedTable.js
+│   │       │       │   └── UncategorizedTable.js
+│   │       │       └── Utils
+│   │       │           ├── Transactiondatabase.js
+│   │       │           ├── index.js
+│   │       │           ├── saveCategorizedTransaction.js
+│   │       │           ├── tableUtils.js
+│   │       │           └── transactionUtils.js
+│   │       ├── EditTransactions
+│   │       │   ├── EditTransactions.js
+│   │       │   ├── OverViews
+│   │       │   │   └── OverView.js
+│   │       │   ├── Tables
+│   │       │   │   ├── EditTableInvalid.js
+│   │       │   │   ├── EditTableMissingAllAmounts.js
+│   │       │   │   ├── EditTableMissingBalanceAmounts.js
+│   │       │   │   ├── EditTableMissingCreditDebitAmounts.js
+│   │       │   │   ├── EditTableMissingDates.js
+│   │       │   │   ├── EditTableMissingDescriptions.js
+│   │       │   │   └── EditTableOriginal.js
+│   │       │   └── Utils
+│   │       │       ├── BaseTable.js
+│   │       │       ├── FirestoreHelper.js
+│   │       │       └── index.js
+│   │       ├── ExtractTransactions
+│   │       │   ├── ExtractAutomatic
+│   │       │   │   ├── Actions
+│   │       │   │   │   └── AutomaticActions.js
+│   │       │   │   ├── Banks
+│   │       │   │   │   ├── Absa
+│   │       │   │   │   │   ├── Controller.js
+│   │       │   │   │   │   ├── TypeA
+│   │       │   │   │   │   │   ├── Readme.md
+│   │       │   │   │   │   │   ├── Step1.js
+│   │       │   │   │   │   │   ├── cleanStatement.js
+│   │       │   │   │   │   │   ├── extractAmounts.js
+│   │       │   │   │   │   │   ├── extractAmountsVerify.js
+│   │       │   │   │   │   │   ├── extractDates.js
+│   │       │   │   │   │   │   ├── extractDatesVerify.js
+│   │       │   │   │   │   │   ├── extractDescription.js
+│   │       │   │   │   │   │   ├── extractDescriptionVerify.js
+│   │       │   │   │   │   │   ├── filterStatement.js
+│   │       │   │   │   │   │   └── verifyDatabase.js
+│   │       │   │   │   │   └── TypeB
+│   │       │   │   │   │       ├── Readme.md
+│   │       │   │   │   │       ├── Step1.js
+│   │       │   │   │   │       ├── cleanStatement.js
+│   │       │   │   │   │       ├── extractAmounts.js
+│   │       │   │   │   │       ├── extractAmountsVerify.js
+│   │       │   │   │   │       ├── extractDates.js
+│   │       │   │   │   │       ├── extractDatesVerify.js
+│   │       │   │   │   │       ├── extractDescription.js
+│   │       │   │   │   │       ├── extractDescriptionVerify.js
+│   │       │   │   │   │       ├── filterStatement.js
+│   │       │   │   │   │       └── verifyDatabase.js
+│   │       │   │   │   ├── Capitec
+│   │       │   │   │   │   ├── Controller.js
+│   │       │   │   │   │   ├── TypeA
+│   │       │   │   │   │   │   ├── Readme.md
+│   │       │   │   │   │   │   ├── Step1.js
+│   │       │   │   │   │   │   ├── cleanStatement.js
+│   │       │   │   │   │   │   ├── extractAmounts.js
+│   │       │   │   │   │   │   ├── extractAmountsVerify.js
+│   │       │   │   │   │   │   ├── extractDates.js
+│   │       │   │   │   │   │   ├── extractDatesVerify.js
+│   │       │   │   │   │   │   ├── extractDescription.js
+│   │       │   │   │   │   │   ├── extractDescriptionVerify.js
+│   │       │   │   │   │   │   ├── filterStatement.js
+│   │       │   │   │   │   │   └── verifyDatabase.js
+│   │       │   │   │   │   └── TypeB
+│   │       │   │   │   │       ├── Readme.md
+│   │       │   │   │   │       ├── Step1.js
+│   │       │   │   │   │       ├── cleanStatement.js
+│   │       │   │   │   │       ├── extractAmounts.js
+│   │       │   │   │   │       ├── extractAmountsVerify.js
+│   │       │   │   │   │       ├── extractDates.js
+│   │       │   │   │   │       ├── extractDatesVerify.js
+│   │       │   │   │   │       ├── extractDescription.js
+│   │       │   │   │   │       ├── extractDescriptionVerify.js
+│   │       │   │   │   │       ├── filterStatement.js
+│   │       │   │   │   │       └── verifyDatabase.js
+│   │       │   │   │   ├── Fnb
+│   │       │   │   │   │   ├── Controller.js
+│   │       │   │   │   │   ├── TypeA
+│   │       │   │   │   │   │   ├── Readme.md
+│   │       │   │   │   │   │   ├── Step1.js
+│   │       │   │   │   │   │   ├── cleanStatement.js
+│   │       │   │   │   │   │   ├── extractAmounts.js
+│   │       │   │   │   │   │   ├── extractAmountsVerify.js
+│   │       │   │   │   │   │   ├── extractDates.js
+│   │       │   │   │   │   │   ├── extractDatesVerify.js
+│   │       │   │   │   │   │   ├── extractDescription.js
+│   │       │   │   │   │   │   ├── extractDescriptionVerify.js
+│   │       │   │   │   │   │   ├── filterStatement.js
+│   │       │   │   │   │   │   └── verifyDatabase.js
+│   │       │   │   │   │   └── TypeB
+│   │       │   │   │   │       ├── Step1.js
+│   │       │   │   │   │       ├── cleanStatement.js
+│   │       │   │   │   │       ├── extractAmounts.js
+│   │       │   │   │   │       ├── extractAmountsVerify.js
+│   │       │   │   │   │       ├── extractDates.js
+│   │       │   │   │   │       ├── extractDatesVerify.js
+│   │       │   │   │   │       ├── extractDescription.js
+│   │       │   │   │   │       ├── extractDescriptionVerify.js
+│   │       │   │   │   │       ├── filterStatement.js
+│   │       │   │   │   │       └── verifyDatabase.js
+│   │       │   │   │   ├── Ned
+│   │       │   │   │   │   ├── Controller.js
+│   │       │   │   │   │   ├── TypeA
+│   │       │   │   │   │   │   ├── Readme.md
+│   │       │   │   │   │   │   ├── Step1.js
+│   │       │   │   │   │   │   ├── cleanStatement.js
+│   │       │   │   │   │   │   ├── extractAmounts.js
+│   │       │   │   │   │   │   ├── extractAmountsVerify.js
+│   │       │   │   │   │   │   ├── extractDates.js
+│   │       │   │   │   │   │   ├── extractDatesVerify.js
+│   │       │   │   │   │   │   ├── extractDescription.js
+│   │       │   │   │   │   │   ├── extractDescriptionVerify.js
+│   │       │   │   │   │   │   ├── filterStatement.js
+│   │       │   │   │   │   │   └── verifyDatabase.js
+│   │       │   │   │   │   └── TypeB
+│   │       │   │   │   │       ├── Step1.js
+│   │       │   │   │   │       ├── cleanStatement.js
+│   │       │   │   │   │       ├── extractAmounts.js
+│   │       │   │   │   │       ├── extractAmountsVerify.js
+│   │       │   │   │   │       ├── extractDates.js
+│   │       │   │   │   │       ├── extractDatesVerify.js
+│   │       │   │   │   │       ├── extractDescription.js
+│   │       │   │   │   │       ├── extractDescriptionVerify.js
+│   │       │   │   │   │       ├── filterStatement.js
+│   │       │   │   │   │       └── verifyDatabase.js
+│   │       │   │   │   ├── Standard
+│   │       │   │   │   │   ├── Controller.js
+│   │       │   │   │   │   ├── TypeA
+│   │       │   │   │   │   │   ├── Readme.md
+│   │       │   │   │   │   │   ├── Step1.js
+│   │       │   │   │   │   │   ├── cleanStatement.js
+│   │       │   │   │   │   │   ├── extractAmounts.js
+│   │       │   │   │   │   │   ├── extractAmountsVerify.js
+│   │       │   │   │   │   │   ├── extractDates.js
+│   │       │   │   │   │   │   ├── extractDatesVerify.js
+│   │       │   │   │   │   │   ├── extractDescription.js
+│   │       │   │   │   │   │   ├── extractDescriptionVerify.js
+│   │       │   │   │   │   │   ├── filterStatement.js
+│   │       │   │   │   │   │   └── verifyDatabase.js
+│   │       │   │   │   │   └── TypeB
+│   │       │   │   │   │       ├── Step1.js
+│   │       │   │   │   │       ├── cleanStatement.js
+│   │       │   │   │   │       ├── extractAmounts.js
+│   │       │   │   │   │       ├── extractAmountsVerify.js
+│   │       │   │   │   │       ├── extractDates.js
+│   │       │   │   │   │       ├── extractDatesVerify.js
+│   │       │   │   │   │       ├── extractDescription.js
+│   │       │   │   │   │       ├── extractDescriptionVerify.js
+│   │       │   │   │   │       ├── filterStatement.js
+│   │       │   │   │   │       └── verifyDatabase.js
+│   │       │   │   │   └── Tyme
+│   │       │   │   │       ├── Controller.js
+│   │       │   │   │       ├── TypeA
+│   │       │   │   │       │   ├── Readme.md
+│   │       │   │   │       │   ├── Step1.js
+│   │       │   │   │       │   ├── cleanStatement.js
+│   │       │   │   │       │   ├── extractAmounts.js
+│   │       │   │   │       │   ├── extractAmountsVerify.js
+│   │       │   │   │       │   ├── extractDates.js
+│   │       │   │   │       │   ├── extractDatesVerify.js
+│   │       │   │   │       │   ├── extractDescription.js
+│   │       │   │   │       │   ├── extractDescriptionVerify.js
+│   │       │   │   │       │   ├── filterStatement.js
+│   │       │   │   │       │   └── verifyDatabase.js
+│   │       │   │   │       └── TypeB
+│   │       │   │   │           ├── Step1.js
+│   │       │   │   │           ├── cleanStatement.js
+│   │       │   │   │           ├── extractAmounts.js
+│   │       │   │   │           ├── extractAmountsVerify.js
+│   │       │   │   │           ├── extractDates.js
+│   │       │   │   │           ├── extractDatesVerify.js
+│   │       │   │   │           ├── extractDescription.js
+│   │       │   │   │           ├── extractDescriptionVerify.js
+│   │       │   │   │           ├── filterStatement.js
+│   │       │   │   │           └── verifyDatabase.js
+│   │       │   │   ├── ExtractAutomatically.js
+│   │       │   │   ├── OverViews
+│   │       │   │   │   └── OverView.js
+│   │       │   │   ├── Readme.md
+│   │       │   │   ├── Utils
+│   │       │   │   │   ├── ProgressUtils.js
+│   │       │   │   │   ├── ReadMe.md
+│   │       │   │   │   ├── cleanStatement.js
+│   │       │   │   │   ├── createDatabaseStructure.js
+│   │       │   │   │   ├── extractAmounts.js
+│   │       │   │   │   ├── extractAmountsVerify.js
+│   │       │   │   │   ├── extractAmountsVerify2.js
+│   │       │   │   │   ├── extractDates.js
+│   │       │   │   │   ├── extractDatesVerify.js
+│   │       │   │   │   ├── extractDescription.js
+│   │       │   │   │   ├── extractDescriptionVerify.js
+│   │       │   │   │   ├── extractionController.js
+│   │       │   │   │   ├── filterStatement.js
+│   │       │   │   │   ├── hardResetClientDb.js
+│   │       │   │   │   ├── index.js
+│   │       │   │   │   ├── removeNotTransactions.js
+│   │       │   │   │   ├── resetClientDb.js
+│   │       │   │   │   └── verifyDatabase.js
+│   │       │   │   └── Views
+│   │       │   │       └── ProgressView.js
+│   │       │   ├── ExtractManual
+│   │       │   │   ├── Actions
+│   │       │   │   │   ├── EditTransactionsActions.js
+│   │       │   │   │   └── ManualActions1.js
+│   │       │   │   ├── Containers
+│   │       │   │   │   ├── ContainerActions.js
+│   │       │   │   │   ├── ContainerOverViews.js
+│   │       │   │   │   └── ContainerTables.js
+│   │       │   │   ├── ExtractManually.js
+│   │       │   │   ├── Forms
+│   │       │   │   ├── OverViews
+│   │       │   │   │   ├── ExtractOverView1.js
+│   │       │   │   │   ├── ExtractOverView2.js
+│   │       │   │   │   ├── ExtractOverView3.js
+│   │       │   │   │   └── ExtractOverView4.js
+│   │       │   │   ├── Tables
+│   │       │   │   │   ├── EditTransactions.js
+│   │       │   │   │   ├── ShowFilteredData.js
+│   │       │   │   │   ├── ShowRawData.js
+│   │       │   │   │   ├── ShowTransactions.js
+│   │       │   │   │   └── ViewTransactions.js
+│   │       │   │   ├── Utils
+│   │       │   │   │   ├── ExtractAmounts.js
+│   │       │   │   │   ├── ExtractDates.js
+│   │       │   │   │   ├── ExtractDescription.js
+│   │       │   │   │   ├── VerifyTransactions.js
+│   │       │   │   │   └── extractionFilter.js
+│   │       │   │   └── Views
+│   │       │   └── ExtractTransactions.js
+│   │       ├── TransactionsPage
+│   │       │   ├── Actions
+│   │       │   ├── Containers
+│   │       │   ├── Forms
+│   │       │   ├── OverViews
+│   │       │   │   └── OverView.js
+│   │       │   ├── Tables
+│   │       │   ├── Utils
+│   │       │   └── Views
+│   │       └── ViewTransactions
+│   │           ├── Tables
+│   │           │   └── ViewTransactionsTable.js
+│   │           └── ViewTransactions.js
+│   ├── firebase
+│   │   ├── firebase.js
+│   │   └── firebase_stuff.txt
+│   ├── index.css
+│   ├── index.js
+│   ├── logo.svg
+│   ├── pages
+│   │   ├── .prettierrc
+│   │   ├── AIAdvisorPage.js
+│   │   ├── ArchivePage.js
+│   │   ├── BudgetPage.js
+│   │   ├── Client
+│   │   │   ├── ClientAddPage copy.js
+│   │   │   ├── ClientAddPage.js
+│   │   │   ├── ClientEditPage.js
+│   │   │   ├── ClientListPage.js
+│   │   │   ├── ClientProfilePage.js
+│   │   │   ├── ClientViewPage.js
+│   │   │   └── ViewEditclient.js
+│   │   ├── Dashboard.js
+│   │   ├── DevelopPage.js
+│   │   ├── Login.js
+│   │   ├── Reports
+│   │   │   └── ViewReports.js
+│   │   ├── SettingsPage.js
+│   │   ├── TransactionsPage.js
+│   │   ├── internals
+│   │   │   └── components
+│   │   │       ├── Copyright.js
+│   │   │       └── CustomIcons.js
+│   │   ├── shared-theme
+│   │   │   ├── AppTheme.js
+│   │   │   ├── ColorModeIconDropdown.js
+│   │   │   ├── ColorModeSelect.js
+│   │   │   ├── customizations
+│   │   │   │   ├── dataDisplay.js
+│   │   │   │   ├── feedback.js
+│   │   │   │   ├── inputs.js
+│   │   │   │   ├── navigation.js
+│   │   │   │   └── surfaces.js
+│   │   │   └── themePrimitives.js
+│   │   └── theme
+│   │       └── customizations
+│   │           ├── charts.js
+│   │           ├── dataGrid.js
+│   │           ├── datePickers.js
+│   │           ├── index.js
+│   │           └── treeView.js
+│   ├── reportWebVitals.js
+│   ├── routes
+│   │   └── RoutesConfig.js
+│   ├── services
+│   │   └── apiService.js
+│   └── styles
+│       └── tailwind.css
+└── tailwind.config.js
+
+159 directories, 440 files

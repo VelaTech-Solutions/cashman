@@ -26,6 +26,8 @@ import ClientProfilePage from '../pages/Client/ClientProfilePage';
 import DevelopPage from '../pages/DevelopPage';
 import Instructions from '../components/Help/Instructions'
 
+import AIAdvisorPage from '../pages/AIAdvisorPage';
+
 import BudgetPage from '../pages/BudgetPage';
 import Budget from '../components/Budget/Budget';
 import InsuranceBreakdown from '../components/Budget/InsuranceBreakdown';
@@ -106,6 +108,15 @@ export default function Dashboard(props) {
             {activePage === 'ClientProfile' && selectedClientId && (
               <ClientProfilePage clientId={selectedClientId} />
               )}
+
+            {/* render this if AIAdvisorPage is selected */}
+            {activePage === 'AI Advisor' && (
+              <>
+                <AIAdvisorPage
+                  clientId={selectedClientId}
+                />
+              </>
+            )}
 
             {/* render this if Budget Report is selected */}
             {activePage === 'Budget Report' && (

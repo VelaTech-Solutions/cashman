@@ -228,3 +228,8 @@ helloFlow('Chris');
 rather havee thing that can be deceraed in the setting 
 
 first get the bank names set in the setting 
+
+Genkit api key
+AIzaSyCpertYSwmw8CUCxfh54-LaWYYxgxjSOUg
+
+export GOOGLE_GENAI_API_KEY=AIzaSyCpertYSwmw8CUCxfh54-LaWYYxgxjSOUg

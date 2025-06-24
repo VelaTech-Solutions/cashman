@@ -20,6 +20,7 @@ import SourceIcon from '@mui/icons-material/Source';
 import CodeIcon from '@mui/icons-material/Code';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon /> },
@@ -32,6 +33,7 @@ const mainListItems = [
 ];
 
 const secondaryListItems = [
+  { text: 'AI Advisor', icon: <SmartToyIcon />},
   { text: 'Budget Report', icon: <SummarizeIcon /> },
   { text: 'Transactions', icon: <PaidIcon /> },
   { text: 'Archive Data', icon: <SourceIcon /> },
