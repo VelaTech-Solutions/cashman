@@ -53,6 +53,8 @@ export default function UncategorizedTable({ clientId }) {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [autoApplyToMatches, setAutoApplyToMatches] = useState(true);
+
   const [categoryWarning, setCategoryWarning] = useState("");
 
   useEffect(() => {
@@ -188,19 +190,18 @@ export default function UncategorizedTable({ clientId }) {
 
     try {
       await addTransactionDatabase(bankName, payload);
-      // rest of the code...
-
-
+    
     const updated = transactions.map(txn => {
       const isSelected = selectedTransactions.includes(txn.uid);
-      const isSameDescription = isSelected || selectedTxns.some(sel =>
+      const isSameDescription = autoApplyToMatches && selectedTxns.some(sel =>
         sel.description?.trim().toLowerCase() === txn.description?.trim().toLowerCase()
       );
 
-      return isSameDescription
+      return (isSelected || isSameDescription)
         ? { ...txn, category: selectedCategory, subcategory: selectedSubcategory }
         : txn;
     });
+
 
     setTransactions(updated);
     setTransactionDb(updated);
@@ -297,7 +298,7 @@ export default function UncategorizedTable({ clientId }) {
 
   const selectSx = {
     backgroundColor: '#333', // Dark background for the select input
-    color: 'white', // White text color
+    color: 'white', // Text color
     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' }, // Darker border for the input outline
     '&:hover': { backgroundColor: '#444' }, // Darker background on hover
     '&.Mui-focused': { backgroundColor: '#444', borderColor: '#6cace4' }, // Focused state: dark background with a light blue border
@@ -371,7 +372,22 @@ export default function UncategorizedTable({ clientId }) {
           <Button variant="contained" onClick={handleMatchClick}>
             Match
           </Button>
+
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography>Auto-apply to similar</Typography>
+            <Switch
+              checked={autoApplyToMatches}
+              onChange={() => setAutoApplyToMatches(prev => !prev)}
+              color="primary"
+            />
+          </Stack>
+
         </Box>
+
+        {/* here where i want add a thing that can turn on and off if transactions must use the matching cat way  */}
+        {/* if the user wants to cat a transaction and not auto mark the others */}
+
+
         {categoryWarning && (
           <Typography color="error" sx={{ mt: 1 }}>
             {categoryWarning}
