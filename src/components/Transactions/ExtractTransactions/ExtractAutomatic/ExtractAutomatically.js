@@ -18,6 +18,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Switch,
   LinearProgress,
  } from "@mui/material";
  
@@ -42,7 +43,9 @@ export default function ExtractAutomatically({clientId}) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [bankName, setBankName] = useState("");
+  const [bankType, setBankType] = useState("");
   const [extractionStatus, setExtractionStatus] = useState({});
+  const [extractionMethod, setExtractionMethod] = useState("pdfparser");
   const [progressData, setProgressData] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
@@ -54,6 +57,7 @@ export default function ExtractAutomatically({clientId}) {
         setClientData(clientData);
         setTransactions(clientData.transactions || []);
         setBankName(clientData.bankName || "Unknown");
+        setBankType(clientData.bankType || "Unknown");
 
       } catch (err) {
         console.error("🔥 Error fetching client data:", err.message);
@@ -98,14 +102,6 @@ export default function ExtractAutomatically({clientId}) {
     0
   ).toFixed(2);
 
-  const verifiedTransactions = transactions.filter(
-    (txn) => txn.verified === "✓"
-  ).length;
-
-  const unverifiedTransactions = transactions.filter(
-    (txn) => txn.verified === "✗"
-  ).length;
-
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -116,14 +112,22 @@ export default function ExtractAutomatically({clientId}) {
             <Stack direction="row" flexWrap="wrap" spacing={3}>
               <Typography variant="body2">Total Debits: <strong>{totalDebit}</strong></Typography>
               <Typography variant="body2">Total Credits: <strong>{totalCredit}</strong></Typography>
-              <Typography variant="body2">Total Verified: <strong>{verifiedTransactions}</strong></Typography>
-              <Typography variant="body2">Total Unverified: <strong>{unverifiedTransactions}</strong></Typography>
               <Typography variant="body2">Bank Name: <strong>{bankName}</strong></Typography>
+              <Typography variant="body2">Bank Type: <strong>{bankType}</strong></Typography>
             </Stack>
           </Paper>
         </Box>
-        {/* can you make its just give a small feedback like all metrics met */}
-
+        {/* Switch for pdfparser and OCR here */}
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="body2">Parser</Typography>
+          <Switch
+            checked={extractionMethod === "ocr"}
+            onChange={(e) =>
+              setExtractionMethod(e.target.checked ? "ocr" : "pdfparser")
+            }
+          />
+          <Typography variant="body2">OCR</Typography>
+        </Stack>
         <Button
           variant="contained"
           color="success"
@@ -138,10 +142,9 @@ export default function ExtractAutomatically({clientId}) {
                 clientId,
                 clientData,
                 bankName,
-                'pdfparser'
+                extractionMethod
               );
             }
-
             setIsProcessing(false);
             setExtractionStatus(
               success

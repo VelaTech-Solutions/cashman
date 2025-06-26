@@ -42,6 +42,7 @@ const extractFnbData = async (clientId, clientData, bankName, method) => {
     console.error("❌ Missing required parameters");
     return false;
   }
+  console.log(method)
   
   await createDatabaseStructure(clientId);
 

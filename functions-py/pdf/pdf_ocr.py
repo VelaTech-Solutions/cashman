@@ -36,4 +36,9 @@ def ocr_pdf(file_path):
         raise
     
     return text
+# 2025-06-26T09:27:02.244992Z ? handleextractdata: Client ID: 6304230220089, Bank Name: Fnb Bank, Method: OCR
+# 2025-06-26T09:27:02.332908Z ? handleextractdata: Error during OCR processing: Unable to get page count. Is poppler installed and in PATH?
+# 2025-06-26T09:27:02.333041Z ? handleextractdata: ERROR: Unable to get page count. Is poppler installed and in PATH?
 
+
+#  im in the python folder with the functions-py folder and venv is activated yerts fix
