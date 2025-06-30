@@ -17,12 +17,12 @@ import { onAuthStateChanged } from "firebase/auth";
 
 // ✅ Hardcoded types per bank
 const hardcodedBankOptions = {
-  "Absa Bank": ["typeA", "typeB"],
-  "Capitec Bank": ["typeA", "typeB"],
-  "Fnb Bank": ["typeA", "typeB"],
-  "Ned Bank": ["typeA"],
-  "Standard Bank": ["typeA", "typeB"],
-  "Tyme Bank": ["typeA"],
+  "Absa Bank": ["Type A", "Type B"],
+  "Capitec Bank": ["Type A", "Type B"],
+  "Fnb Bank": ["Type A"],
+  "Ned Bank": ["Type A"],
+  "Standard Bank": ["Type A"],
+  "Tyme Bank": ["Type A"],
 };
 
 export default function ClientAddPage() {
