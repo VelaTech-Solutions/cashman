@@ -98,6 +98,17 @@ const cleanStatement = async ({ clientId, bankName }) => {
       return;
     }
 
+    // ✅ Alignment logic
+    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
+    const shouldAlign = alignmentSettings[bankName] ?? false;
+    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
+
+    if (shouldAlign) {
+      filteredData = await handleAlignTransactions(filteredData);
+      console.log("✔️ Transactions aligned");
+    }
+
+    // ✅ Remove ignored lines
     const shouldRemove = await shouldRunCleanStatement(bankName);
     const archiveSourceField = "filtered Extract";
     const initialLinesToArchive = [];
@@ -129,17 +140,6 @@ const cleanStatement = async ({ clientId, bankName }) => {
       });
       console.log("✔️ Cleaned lines archived for", bankName);
     }
-
-    // ✅ Alignment logic
-    const alignmentSettings = alignmentSnap.exists() ? alignmentSnap.data() : {};
-    const shouldAlign = alignmentSettings[bankName] ?? false;
-    console.log(`Alignment for ${bankName}: ${shouldAlign ? "Enabled" : "Disabled"}`);
-
-    if (shouldAlign) {
-      filteredData = await handleAlignTransactions(filteredData);
-      console.log("✔️ Transactions aligned");
-    }
-
 
     // ✅ Remove ignored lines
     if (shouldRemove) {

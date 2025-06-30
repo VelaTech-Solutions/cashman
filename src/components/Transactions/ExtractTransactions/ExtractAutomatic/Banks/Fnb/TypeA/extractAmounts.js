@@ -1,7 +1,6 @@
 // extractAmounts.js
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../../../../firebase/firebase";
-import BankAmountsRules from "../../../../../../Rules/bankAmountsRules"; // ✅ Ensure correct import
 
 import ProgressUtils from "../../../Utils/ProgressUtils";
 
@@ -33,66 +32,103 @@ const extractAmounts = async (clientId, bankName, type) => {
     // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
-    const stripAmountsFromLine = (line, amounts) => {
-      let strippedLine = line;
-      
-      amounts.forEach((rawAmount) => {
-        if (!rawAmount || rawAmount === "0.00") return;
-    
-        // Build possible variants to remove
-        const clean = rawAmount.replace(/[^\d.-]/g, "");
-        const variations = [
-          clean,
-          parseFloat(clean).toFixed(2),
-          `-${Math.abs(clean)}`,
-          `R ${clean}`,
-          `R${clean}`,
-          clean.replace("-", ""),
-        ];
-    
-        variations.forEach((variant) => {
-          const regex = new RegExp(variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g");
-          strippedLine = strippedLine.replace(regex, "").trim();
-        });
-      });
-    
-      return strippedLine;
+    // Step 2: Fetch config for this bank and type
+    const configRef = doc(db, "settings", "bankOptions", bankName, "config");
+    const configSnap = await getDoc(configRef);
+    if (!configSnap.exists()) {
+      console.warn(`⚠️ No config found for bank: ${bankName}`);
+      return;
+    }
+
+    const configData = configSnap.data();
+    const amountRegex = configData?.[typeKey]?.amountRegex;
+
+    if (!amountRegex) {
+      console.warn(`⚠️ No amountRegex found for type "${typeKey}" in bank "${bankName}"`);
+      return;
+    }
+
+    // Step 3: Extractor
+    const extractAmountsFromText = (text) => {
+      const matches = [];
+      try{
+        const regex = new RegExp(amountRegex, "g");
+        const found = text.match(regex);
+        console.log(found)
+        if (found) matches.push(...found);
+      } catch (e) {
+        console.warn(`❌ Invalid regex:`, e.message);
+      }
+      return matches;
     };
     
+    // Count the Matches and console log it
+    let totalMatches = 0;
+    filteredData.forEach((line) => {
+      const matches = extractAmountsFromText(line);
+      totalMatches += matches.length;
+    });
 
-    // Initialize a counter for processed lines
-    let totalLinesProcessed = 0;
-
-    // Step 3: Process each line in filteredData
+    // Step 4: Process each line in filteredData
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
+    let totalAmountsLinesProcessed = 0;
 
-    filteredData.forEach((line, index) => {
-        if (!line) return;
+filteredData.forEach((line, index) => {
+  if (!line) return;
 
-        const extractedAmounts =
-            BankAmountsRules[bankName](line) || ["0.00", "0.00", "0.00"];
+  // quick filter remove the , in each line then run normal
+  line = line.replace(/,/g, "");
+  
+  const extracted = extractAmountsFromText(line);
 
-        const [fees_amount, credit_debit_amount, balance_amount] =
-            extractedAmounts.map((amount) => amount || "0.00");
+  if (extracted.length !== 2 && extracted.length !== 3) {
+    // Only process lines with exactly 2 or 3 amounts
+    return;
+  }
 
-        totalLinesProcessed++;
+  totalAmountsLinesProcessed++;
 
-        const strippedLine = stripAmountsFromLine(line, extractedAmounts);
+  let credit_debit_amount = "0.00";
+  let balance_amount = "0.00";
+  let fees_amount = "0.00";
 
-        updatedFilteredData[index] = strippedLine;
+  if (extracted.length === 2) {
+    // [credit/debit, balance]
+    credit_debit_amount = extracted[0];
+    balance_amount = extracted[1];
+  } else if (extracted.length === 3) {
+    // [credit/debit, balance, fees]
+    credit_debit_amount = extracted[0];
+    balance_amount = extracted[1];
+    fees_amount = extracted[2];
+  }
 
-        if (!updatedTransactions[index]) {
-            updatedTransactions[index] = {};
-        }
+  // Strip letters and spaces
+  const credit_debit_amountStripped = credit_debit_amount.replace(/[a-zA-Z\s]/g, "");
+  const balance_amountStripped = balance_amount.replace(/[a-zA-Z\s]/g, "");
+  const fees_amountStripped = fees_amount.replace(/[a-zA-Z\s]/g, "");
 
-        updatedTransactions[index] = {
-            ...updatedTransactions[index],
-            fees_amount,
-            credit_debit_amount,
-            balance_amount,
-        };
-    });
+  // Remove all matched amounts from the original line
+  const strippedLine = extracted.reduce(
+    (acc, amount) => acc.replace(amount, "").trim(),
+    line
+  );
+
+  updatedFilteredData[index] = strippedLine || line;
+
+  if (!updatedTransactions[index]) {
+    updatedTransactions[index] = {};
+  }
+
+  updatedTransactions[index] = {
+    ...updatedTransactions[index],
+    credit_debit_amount: credit_debit_amountStripped,
+    balance_amount: balance_amountStripped,
+    fees_amount: fees_amountStripped,
+  };
+});
+
 
     // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {

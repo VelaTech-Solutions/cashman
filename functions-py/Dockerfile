@@ -17,4 +17,5 @@ COPY . /app
 RUN pip install -r requirements.txt
 
 # Run main.py when container starts
-CMD ["python", "main.py"]
+CMD ["python", "cloudrun_main.py"]
+

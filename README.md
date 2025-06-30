@@ -233,3 +233,116 @@ Genkit api key
 AIzaSyCpertYSwmw8CUCxfh54-LaWYYxgxjSOUg
 
 export GOOGLE_GENAI_API_KEY=AIzaSyCpertYSwmw8CUCxfh54-LaWYYxgxjSOUg
+
+
+
+27/06/2025
+
+Absolutely — here’s a detailed summary of what we did with Docker and OCR integration so you can switch context confidently:
+
+🔧 Objective
+You wanted to containerize your Python backend (OCR + PDF parsing) using Docker and deploy it to Google Cloud Run, removing reliance on Google Vision OCR by using Tesseract OCR instead.
+
+✅ Steps We Took
+1. Prepare the App Locally
+Your code structure had main.py, utils/, pdf/, config.py, requirements.txt, and a custom ocr_pdf() function using Tesseract.
+
+Firebase Admin SDK was initialized, and the OCR logic could fallback between parser or Tesseract-based OCR.
+
+2. Write Dockerfile
+A Dockerfile was created with:
+
+python:3.11-slim as base.
+
+Installed dependencies including:
+
+poppler-utils (for pdftotext)
+
+tesseract-ocr (for local OCR)
+
+Copied all code into /app
+
+Installed Python dependencies from requirements.txt
+
+Docker container was built with:
+
+bash
+Copy
+Edit
+sudo docker build -t python-functions .
+3. Push to Google Artifact Registry
+Tagged the image:
+
+bash
+Copy
+Edit
+sudo docker tag python-functions europe-west1-docker.pkg.dev/cashman-790ad/python-functions/python-functions:latest
+Configured Docker authentication:
+
+bash
+Copy
+Edit
+gcloud auth configure-docker europe-west1-docker.pkg.dev
+Pushed the image:
+
+bash
+Copy
+Edit
+sudo docker push europe-west1-docker.pkg.dev/cashman-790ad/python-functions/python-functions:latest
+4. Deploy to Google Cloud Run
+Deployed using:
+
+bash
+Copy
+Edit
+gcloud run deploy python-functions \
+  --image europe-west1-docker.pkg.dev/cashman-790ad/python-functions/python-functions:latest \
+  --region europe-west1 \
+  --platform managed \
+  --allow-unauthenticated
+Deployment succeeded. You got a public URL like:
+
+arduino
+Copy
+Edit
+https://python-functions-106033459495.europe-west1.run.app
+5. Test OCR Endpoint
+You tested with:
+
+bash
+Copy
+Edit
+curl -X POST https://.../extract \
+  -H "Content-Type: application/json" \
+  -d '{ "clientId": "...", "bankName": "...", "method": "ocr" }'
+Response showed:
+
+json
+Copy
+Edit
+{"error": "An error occurred while processing the bank statement."}
+✅ This confirmed:
+
+Cloud Run deployed and running.
+
+But the OCR path may not be working yet — likely issues with how Tesseract runs inside the container (we will debug this next time).
+
+🛠️ What’s Pending
+Ensure /usr/bin/tesseract is available and works inside container runtime.
+
+Add logs inside ocr_pdf() or wrapper to debug.
+
+Validate Tesseract has required language packs (e.g. eng).
+
+Optionally remove ocr_with_google_vision() if you fully switch to local OCR.
+
+Let me know when you're ready to continue, and we can pick up from here.
+
+
+
+
+
+
+
+
+
