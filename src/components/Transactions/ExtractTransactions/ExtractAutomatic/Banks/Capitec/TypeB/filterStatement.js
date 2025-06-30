@@ -65,6 +65,42 @@ const filterStatement = async ({ clientId, bankName, type }) => {
       }
     }
 
+    // === CASE : Footer Filter ===
+    // this has to start checking at the end of the array upwards
+    const footerRef = doc(db, "settings", "footerFilter", bankName, "config");
+    const footerSnap = await getDoc(footerRef);
+
+    if (footerSnap.exists()) {
+      const typeConfigs = footerSnap.data();
+      const config = typeConfigs[typeKey];
+
+      if (config?.footerFilterEnabled && config?.footerEnd) {
+        const { footerEnd } = config;
+        console.log(`🔍 Footer filtering enabled, searching for footerEnd: "${footerEnd}"`);
+
+        // Search from bottom up using findLastIndex
+        const index = [...filteredData].reverse().findIndex(line => line.includes(footerEnd));
+
+        if (index !== -1) {
+          // Convert index from reversed array to original
+          const actualIndex = filteredData.length - 1 - index;
+
+          const footerLines = filteredData.slice(actualIndex);
+          filteredOut.push(
+            ...footerLines.map(line => ({
+              reason: `footerEnd: "${footerEnd}"`,
+              line,
+            }))
+          );
+
+          filteredData = filteredData.slice(0, actualIndex);
+          console.log(`📦 Archived ${footerLines.length} footer lines`);
+        } else {
+          console.warn(`⚠️ footerEnd "${footerEnd}" not found`);
+        }
+      }
+    }
+
     // === CASE 2: HeaderFooter Filter ===
     const headerFooterRef = doc(db, "settings", "headerFooterFilter", bankName, "config");
     const headerFooterSnap = await getDoc(headerFooterRef);

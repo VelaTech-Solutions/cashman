@@ -32,6 +32,7 @@ const extractDates = async (clientId, bankName, type) => {
 
     // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
+    console.log(typeKey);
 
     // Step 2: Fetch config for this bank and type
     const configRef = doc(db, "settings", "bankOptions", bankName, "config");
@@ -68,7 +69,6 @@ const extractDates = async (clientId, bankName, type) => {
       const matches = extractDatesFromText(line);
       totalMatches += matches.length;
     });
-    console.log("Total Match Dates:", totalMatches);
 
     // Step 4: Process each line
     const updatedFilteredData = [...filteredData];
