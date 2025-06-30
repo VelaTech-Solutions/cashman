@@ -34,36 +34,28 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
     let correctedTransactions = [];
-    let totalCredits = 0;
-    let totalDebits = 0;
 
     transactions.forEach((tx, index) => {
       try {
-        let fees = parseFloat(tx.fees_amount) || 0;
-        let cd = parseFloat(tx.credit_debit_amount) || 0;
-        let prevBalance = index > 0 ? parseFloat(transactions[index - 1].balance_amount) : 0;
-        let currBalance = parseFloat(tx.balance_amount) || 0;
+        const amount = parseFloat(tx.credit_debit_amount) || 0;
 
         let credit = 0;
         let debit = 0;
 
-        // Compare balances to determine debit or credit
-        if (currBalance > prevBalance) {
-          credit = Math.abs(cd);
-          totalCredits++;
-        } else if (currBalance < prevBalance) {
-          debit = Math.abs(cd);
-          totalDebits++;
+        if (amount < 0) {
+          debit = Math.abs(amount);
+        } else {
+          credit = amount;
         }
+
+        // You can later verify balance changes here (next step)
 
         correctedTransactions.push({
           ...tx,
-          fees_amount: fees.toFixed(2),
-          credit_debit_amount: cd.toFixed(2),
           credit_amount: credit.toFixed(2),
           debit_amount: debit.toFixed(2),
+          // verified: "pending", // for example, you can add verification later
         });
-
       } catch (error) {
         console.error(`Error processing transaction ${index + 1}`, error);
       }
@@ -83,6 +75,5 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     console.error("🔥 Error Amounts verifying:", error);
   }
 };
-
 
 export default extractAmountsVerify;

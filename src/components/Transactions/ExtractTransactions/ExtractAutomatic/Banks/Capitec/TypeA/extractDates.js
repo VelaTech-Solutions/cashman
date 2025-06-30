@@ -33,36 +33,46 @@ const extractDates = async (clientId, bankName, type) => {
     // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
-    // Step 3: Fetch date rules from Firestore
-    const dateRulesSnap = await getDoc(bankRef);
-    if (!dateRulesSnap.exists()) {
-      console.warn(`⚠️ No date extraction rules found for bank: ${bankName}`);
+    // Step 2: Fetch config for this bank and type
+    const configRef = doc(db, "settings", "bankOptions", bankName, "config");
+    const configSnap = await getDoc(configRef);
+    if (!configSnap.exists()) {
+      console.warn(`⚠️ No config found for bank: ${bankName}`);
+      return;
     }
-    const dateRules = dateRulesSnap.data() || {};
 
-    // Step 4: Process lines
+    const configData = configSnap.data();
+    const dateRegex = configData?.[typeKey]?.dateRegex;
+
+    if (!dateRegex) {
+      console.warn(`⚠️ No dateRegex found for type "${typeKey}" in bank "${bankName}"`);
+      return;
+    }
+
+    // Step 3: Extractor
+    const extractDatesFromText = (text) => {
+      const matches = [];
+      try {
+        const regex = new RegExp(dateRegex, "g");
+        const found = text.match(regex);
+        if (found) matches.push(...found);
+      } catch (e) {
+        console.warn(`❌ Invalid regex:`, e.message);
+      }
+      return matches;
+    };
+
+    // Count the Matches and console log it
+    let totalMatches = 0;
+    filteredData.forEach((line) => {
+      const matches = extractDatesFromText(line);
+      totalMatches += matches.length;
+    });
+
+    // Step 4: Process each line
     const updatedFilteredData = [...filteredData];
     const updatedTransactions = [...transactions];
     let totalDateLinesProcessed = 0;
-
-    const extractDatesFromText = (text) => {
-      const matches = [];
-
-      for (const key in dateRules) {
-        const rule = dateRules[key];
-        if (rule?.pattern) {
-          try {
-            const regex = new RegExp(rule.pattern, "g");
-            const found = text.match(regex);
-            if (found) matches.push(...found);
-          } catch (e) {
-            console.warn(`❌ Invalid regex for key "${key}":`, e.message);
-          }
-        }
-      }
-
-      return matches;
-    };
 
     filteredData.forEach((line, index) => {
       if (!line) return;
