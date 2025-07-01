@@ -5,7 +5,7 @@ import {
   DataGrid
 } from '@mui/x-data-grid';
 import { handleDeleteClient } from "components/Client/ClientDelete";
-
+import { handleCloneClient } from "components/Client/ClientView/Utils/CloneClient";
 import { hardResetClientDb } from "components/Transactions/ExtractTransactions/ExtractAutomatic/Utils";
 
 const getCategorizedColor = (categorized) => {
@@ -155,6 +155,34 @@ const Table = ({ sortedClients, setSelectedClientId, setActivePage }) => {
         </Button>
       )
     },
+// Clone Button
+{
+  field: "clone",
+  headerName: "Clone",
+  flex: 1,
+  renderCell: (params) => (
+    <Button
+      variant="text"
+      color="secondary"
+      onClick={async () => {
+        const confirmed = window.confirm(
+          `Are you sure you want to clone this client ${params.row.id}?`
+        );
+        if (!confirmed) return;
+
+        try {
+          await handleCloneClient(params.row.id);
+          alert(`✅ Client ${params.row.id} cloned successfully`);
+        } catch (error) {
+          console.error("❌ Clone failed", error);
+          alert("❌ Clone failed");
+        }
+      }}
+    >
+      Clone
+    </Button>
+  ),
+},
 
 
   ];

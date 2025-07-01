@@ -342,6 +342,9 @@ Let me know when you're ready to continue, and we can pick up from here.
 
 
 
+make sure dates are correct for all banks
+
+
 
 
 
