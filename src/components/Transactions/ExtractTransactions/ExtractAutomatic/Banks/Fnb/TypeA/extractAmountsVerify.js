@@ -32,36 +32,61 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
 
     // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
-    
+
     let correctedTransactions = [];
     let totalCredits = 0;
     let totalDebits = 0;
 
+// to help check and verify the amounts i have left the cr in the amount
+// so in credit_debit_amount if a amount has the \w{2} its a credit if not its a debit once checked remove the \w{2}
+// in the balance amount if it cr the w\{2} that means its a normal balance amount but if it has no \w{2} that means its in the negitivae so u need to please a - infornt the amount
+
+
     transactions.forEach((tx, index) => {
       try {
-        let fees = parseFloat(tx.fees_amount) || 0;
-        let cd = parseFloat(tx.credit_debit_amount) || 0;
-        let prevBalance = index > 0 ? parseFloat(transactions[index - 1].balance_amount) : 0;
-        let currBalance = parseFloat(tx.balance_amount) || 0;
+        let cdRaw = tx.credit_debit_amount || "";
+        let balanceRaw = tx.balance_amount || "";
 
         let credit = 0;
         let debit = 0;
 
-        // Compare balances to determine debit or credit
-        if (currBalance > prevBalance) {
-          credit = Math.abs(cd);
-          totalCredits++;
-        } else if (currBalance < prevBalance) {
-          debit = Math.abs(cd);
-          totalDebits++;
+        // --- Process credit_debit_amount ---
+        const cdMatch = cdRaw.match(/([\d,.]+\.\d{2})(\w{2})?$/);
+        let cdAmount = 0;
+        if (cdMatch) {
+          cdAmount = parseFloat(cdMatch[1].replace(/,/g, "")) || 0;
+          const suffix = cdMatch[2] ? cdMatch[2].toLowerCase() : "";
+
+          if (suffix) {
+            // Treat any suffix as credit
+            credit = cdAmount;
+            totalCredits++;
+          } else {
+            // No suffix means debit
+            debit = cdAmount;
+            totalDebits++;
+          }
+        }
+
+        // --- Process balance_amount ---
+        const balanceMatch = balanceRaw.match(/([\d,.]+\.\d{2})(\w{2})?$/);
+        let balanceAmount = 0;
+        if (balanceMatch) {
+          balanceAmount = parseFloat(balanceMatch[1].replace(/,/g, "")) || 0;
+          const suffix = balanceMatch[2] ? balanceMatch[2].toLowerCase() : "";
+
+          if (!suffix) {
+            // No suffix means it's negative
+            balanceAmount = balanceAmount * -1;
+          }
         }
 
         correctedTransactions.push({
           ...tx,
-          fees_amount: fees.toFixed(2),
-          credit_debit_amount: cd.toFixed(2),
+          credit_debit_amount: cdAmount.toFixed(2),
           credit_amount: credit.toFixed(2),
           debit_amount: debit.toFixed(2),
+          balance_amount: balanceAmount.toFixed(2)
         });
 
       } catch (error) {
@@ -83,5 +108,6 @@ const extractAmountsVerify = async (clientId, bankName, type) => {
     console.error("🔥 Error Amounts verifying:", error);
   }
 };
+
 
 export default extractAmountsVerify;

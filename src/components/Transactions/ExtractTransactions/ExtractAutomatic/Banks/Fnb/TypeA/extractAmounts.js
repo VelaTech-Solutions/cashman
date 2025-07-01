@@ -14,7 +14,6 @@ const extractAmounts = async (clientId, bankName, type) => {
     console.log(`🔄 Amounts Extracted for Client: ${clientId} | Bank: ${bankName}`);
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "processing");
     
-    // Step 1: Get client data
     const clientRef = doc(db, "clients", clientId);
     const clientSnap = await getDoc(clientRef);
     if (!clientSnap.exists()) {
@@ -22,17 +21,17 @@ const extractAmounts = async (clientId, bankName, type) => {
       return;
     }
 
-    let { filteredData = [], transactions = [] } = clientSnap.data();
+    let { filteredData = [] } = clientSnap.data();
+    // ALWAYS start fresh transactions array
+    let updatedTransactions = [];
 
     if (filteredData.length === 0) {
       console.warn("⚠️ No filtered data found, skipping Amount extraction.");
       return;
     }
 
-    // Normalize type (e.g., "TypeA" → "typeA")
     const typeKey = type.charAt(0).toLowerCase() + type.slice(1);
 
-    // Step 2: Fetch config for this bank and type
     const configRef = doc(db, "settings", "bankOptions", bankName, "config");
     const configSnap = await getDoc(configRef);
     if (!configSnap.exists()) {
@@ -48,89 +47,78 @@ const extractAmounts = async (clientId, bankName, type) => {
       return;
     }
 
-    // Step 3: Extractor
     const extractAmountsFromText = (text) => {
       const matches = [];
-      try{
+      try {
         const regex = new RegExp(amountRegex, "g");
         const found = text.match(regex);
-        console.log(found)
+        console.log(found);
         if (found) matches.push(...found);
       } catch (e) {
         console.warn(`❌ Invalid regex:`, e.message);
       }
       return matches;
     };
-    
-    // Count the Matches and console log it
-    let totalMatches = 0;
-    filteredData.forEach((line) => {
-      const matches = extractAmountsFromText(line);
-      totalMatches += matches.length;
+
+    const updatedFilteredData = [...filteredData];
+
+    filteredData.forEach((line, index) => {
+      if (!line) {
+        updatedTransactions[index] = {
+          credit_debit_amount: null,
+          balance_amount: null,
+          fees_amount: null,
+        };
+        return;
+      }
+
+      line = line.replace(/,/g, "");
+
+      const extracted = extractAmountsFromText(line);
+
+      if (extracted.length !== 2 && extracted.length !== 3) {
+        updatedTransactions[index] = {
+          credit_debit_amount: null,
+          balance_amount: null,
+          fees_amount: null,
+        };
+        return;
+      }
+
+      let credit_debit_amount = extracted[0];
+      let balance_amount = extracted[1];
+      let fees_amount = extracted.length === 3 ? extracted[2] : "0.00";
+
+      // const credit_debit_amountStripped = credit_debit_amount?.replace(/[a-zA-Z\s]/g, "") || null;
+      // const balance_amountStripped = balance_amount?.replace(/[a-zA-Z\s]/g, "") || null;
+      // const fees_amountStripped = fees_amount?.replace(/[a-zA-Z\s]/g, "") || null;
+
+      const strippedLine = extracted.reduce(
+        (acc, amount) => acc.replace(amount, "").trim(),
+        line
+      );
+
+      updatedFilteredData[index] = strippedLine || line;
+
+      updatedTransactions[index] = {
+        credit_debit_amount: credit_debit_amount,
+        balance_amount: balance_amount,
+        fees_amount: fees_amount,
+      };
     });
 
-    // Step 4: Process each line in filteredData
-    const updatedFilteredData = [...filteredData];
-    const updatedTransactions = [...transactions];
-    let totalAmountsLinesProcessed = 0;
+    // Firestore-safe: make sure array is never sparse & never has undefined
+    updatedTransactions = updatedTransactions.map((txn) => {
+      if (!txn) {
+        return {
+          credit_debit_amount: null,
+          balance_amount: null,
+          fees_amount: null,
+        };
+      }
+      return txn;
+    });
 
-filteredData.forEach((line, index) => {
-  if (!line) return;
-
-  // quick filter remove the , in each line then run normal
-  line = line.replace(/,/g, "");
-  
-  const extracted = extractAmountsFromText(line);
-
-  if (extracted.length !== 2 && extracted.length !== 3) {
-    // Only process lines with exactly 2 or 3 amounts
-    return;
-  }
-
-  totalAmountsLinesProcessed++;
-
-  let credit_debit_amount = "0.00";
-  let balance_amount = "0.00";
-  let fees_amount = "0.00";
-
-  if (extracted.length === 2) {
-    // [credit/debit, balance]
-    credit_debit_amount = extracted[0];
-    balance_amount = extracted[1];
-  } else if (extracted.length === 3) {
-    // [credit/debit, balance, fees]
-    credit_debit_amount = extracted[0];
-    balance_amount = extracted[1];
-    fees_amount = extracted[2];
-  }
-
-  // Strip letters and spaces
-  const credit_debit_amountStripped = credit_debit_amount.replace(/[a-zA-Z\s]/g, "");
-  const balance_amountStripped = balance_amount.replace(/[a-zA-Z\s]/g, "");
-  const fees_amountStripped = fees_amount.replace(/[a-zA-Z\s]/g, "");
-
-  // Remove all matched amounts from the original line
-  const strippedLine = extracted.reduce(
-    (acc, amount) => acc.replace(amount, "").trim(),
-    line
-  );
-
-  updatedFilteredData[index] = strippedLine || line;
-
-  if (!updatedTransactions[index]) {
-    updatedTransactions[index] = {};
-  }
-
-  updatedTransactions[index] = {
-    ...updatedTransactions[index],
-    credit_debit_amount: credit_debit_amountStripped,
-    balance_amount: balance_amountStripped,
-    fees_amount: fees_amountStripped,
-  };
-});
-
-
-    // Step ✅: Save results to Firestore
     await updateDoc(clientRef, {
       transactions: updatedTransactions,
       filteredData: updatedFilteredData,
@@ -140,10 +128,22 @@ filteredData.forEach((line, index) => {
     console.log("🎉 Amount Extraction Completed!");
 
   } catch (error) {
-
     await ProgressUtils.updateProgress(clientId, "Amounts Extracted", "failed");
     console.error("🔥 Error Amounts Extracted:", error);
   }
 };
 
 export default extractAmounts;
+
+// the regex im using im settings
+// (\s\d*?\,?\d*\.\d{2}\w{2}?)
+
+// 23
+// "schedule trf to invest r500.00-9868-savings savings account 500.00 22,957.99cr"
+// (string)
+// its finding this 500.00 and i dont want
+
+// 24
+// "scheduled trf to r1,000.00-9126-money money on call 1,000.00 21,957.99cr"
+// (string)
+// its finding this 1,000.00 and i dont want
