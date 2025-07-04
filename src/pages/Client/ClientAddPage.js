@@ -65,34 +65,53 @@ export default function ClientAddPage() {
     fetchBanks();
   }, []);
 
-  useEffect(() => {
-    const fetchImageURL = async () => {
-      if (clientDetails.bankName && clientDetails.bankType) {
-        // turn the Type A into typeA
-        clientDetails.bankType = clientDetails.bankType.replace(/\s/g, '');
-        try {
-          const configDocRef = doc(db, "settings", "bankOptions", clientDetails.bankName, "config");
-          const configSnap = await getDoc(configDocRef);
-          if (configSnap.exists()) {
-            const data = configSnap.data();
-            const selectedType = data[clientDetails.bankType];
-            if (selectedType?.imageURL) {
-              setImageURL(selectedType.imageURL);
-            } else {
-              setImageURL(""); // fallback
-            }
+  const formatBankTypeKey = (rawType) => {
+  const noSpaces = rawType.replace(/\s+/g, '');
+  // Convert "Type A" -> "typeA"
+  if (noSpaces.toLowerCase().startsWith('type') && noSpaces.length > 4) {
+    return 'type' + noSpaces[4].toUpperCase() + noSpaces.slice(5);
+  }
+  return noSpaces;
+};
+
+useEffect(() => {
+  const fetchImageURL = async () => {
+    if (clientDetails.bankName && clientDetails.bankType) {
+      const typeKey = formatBankTypeKey(clientDetails.bankType);
+
+      try {
+        const configDocRef = doc(
+          db,
+          "settings",
+          "bankOptions",
+          clientDetails.bankName,
+          "config"
+        );
+        const configSnap = await getDoc(configDocRef);
+
+        if (configSnap.exists()) {
+          const data = configSnap.data();
+          const selectedType = data[typeKey];
+
+          if (selectedType?.imageURL) {
+            setImageURL(selectedType.imageURL);
+          } else {
+            setImageURL("");
           }
-        } catch (error) {
-          console.error("Error fetching image URL:", error);
-          setImageURL("");
         }
-      } else {
+      } catch (error) {
+        console.error("Error fetching image URL:", error);
         setImageURL("");
       }
-    };
+    } else {
+      setImageURL("");
+    }
+  };
 
-    fetchImageURL();
-  }, [clientDetails.bankName, clientDetails.bankType]);
+  fetchImageURL();
+}, [clientDetails.bankName, clientDetails.bankType]);
+
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
-// Mui Imports
 import { 
   Box, 
-  TextField, 
   Button, 
-  Paper, 
   Stack, 
   Typography, 
-  Grid, 
-  Table as MuiTable,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Table,
   TableFooter,
 } from "@mui/material";
 import moment from "moment";
@@ -24,24 +19,23 @@ import { db } from "../../../firebase/firebase";
 import { 
   LoadClientData,
   loadCategories, 
-  LoadSubcategories,
- } from "components/Common";
+} from "components/Common";
 
- 
 export default function BudgetView({ clientId }) {
   const [clientData, setClientData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
 
-  const [category, setCategory] = useState('');
-  const [subcategory, setSubcategory] = useState('');
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [hasCalculated, setHasCalculated] = useState(false);
+
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  // ✅ helper to round UP to 2 decimals
+  const ceil2 = (num) => Math.ceil(num * 100) / 100;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,10 +51,9 @@ export default function BudgetView({ clientId }) {
     fetchData();
   }, [clientId]);
 
-  // Load categories subcategories
   useEffect(() => {
     const fetchCats = async () => {
-      const cats = await loadCategories(); // assuming this returns [{ name, subcategories }]
+      const cats = await loadCategories();
       const enriched = cats.map(cat => ({
         ...cat,
         key: cat.name === "Income" ? "credit_amount" : "debit_amount",
@@ -68,7 +61,6 @@ export default function BudgetView({ clientId }) {
       }));
       setCategories(enriched);
     };
-
     fetchCats();
   }, []);
 
@@ -85,8 +77,8 @@ export default function BudgetView({ clientId }) {
       const avg = monthSet.size > 0 ? total / monthSet.size : 0;
 
       budgetTransactions[name] = {
-        total: parseFloat(total.toFixed(2)),
-        avg: parseFloat(avg.toFixed(2))
+        total: ceil2(total),
+        avg: ceil2(avg)
       };
     });
 
@@ -107,14 +99,11 @@ export default function BudgetView({ clientId }) {
     setLoading(false);
   };
 
-
   return (
     <Box sx={{ width: '100%', maxWidth: '1700px', mx: 'auto' }}>
       <Stack spacing={2}>
-
         <Stack direction="row" spacing={2} alignItems="center">
           <Button
-            type="submit"
             onClick={calculateBudget}
             variant="contained"
             color="success"
@@ -130,7 +119,7 @@ export default function BudgetView({ clientId }) {
             {hasCalculated ? message : "Don't forget to click to calculate!"}
           </Typography>
         </Stack>
-        
+
         {categories.map(({ name, filter, key }) => {
           const rows = transactions.filter(filter).reduce((acc, t) => {
             const m = moment(t.date1, ["DD/MM/YYYY"]).format("MMM");
@@ -147,14 +136,15 @@ export default function BudgetView({ clientId }) {
             return acc;
           }, {});
 
-          const grandTotal = Object.values(monthTotals).reduce((s, v) => s + v, 0).toFixed(2);
+          const grandTotalRaw = Object.values(monthTotals).reduce((s, v) => s + v, 0);
+          const grandTotal = ceil2(grandTotalRaw);
           const validMonths = Object.values(monthTotals).filter(v => v !== 0);
-          const grandAvg = validMonths.length ? (grandTotal / validMonths.length).toFixed(2) : "0.00";
+          const grandAvg = validMonths.length ? ceil2(grandTotalRaw / validMonths.length) : 0;
 
           return (
-            <Box>
+            <Box key={name}>
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                {name} (Total: R {grandTotal} | Avg: R {grandAvg})
+                {name} (Total: R {grandTotal.toFixed(2)} | Avg: R {grandAvg.toFixed(2)})
               </Typography>
               <Box sx={{ overflowX: "auto", mt: 2 }}>
                 <Table size="small" sx={{ minWidth: 650, border: "1px solid #ccc" }}>
@@ -173,36 +163,38 @@ export default function BudgetView({ clientId }) {
                         <TableCell sx={{ fontWeight: 600 }}>{sub}</TableCell>
                         {months.map(m => (
                           <TableCell key={m} align="right">
-                            {mdata[m] ? `R ${mdata[m].toFixed(2)}` : "-"}
+                            {mdata[m] ? `R ${ceil2(mdata[m]).toFixed(2)}` : "-"}
                           </TableCell>
                         ))}
-                        <TableCell align="right" >
-                          R {mdata.total.toFixed(2)}
+                        <TableCell align="right">
+                          R {ceil2(mdata.total).toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
-                  <TableFooter >
-                    <TableRow >
+                  <TableFooter>
+                    <TableRow>
                       <TableCell>TOTAL</TableCell>
                       {months.map(m => (
                         <TableCell key={m} align="right">
-                          {monthTotals[m] ? `R ${monthTotals[m].toFixed(2)}` : "-"}
+                          {monthTotals[m] ? `R ${ceil2(monthTotals[m]).toFixed(2)}` : "-"}
                         </TableCell>
                       ))}
                       <TableCell align="right">
-                        R {grandTotal}
+                        R {grandTotal.toFixed(2)}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell >AVERAGE</TableCell>
+                      <TableCell>AVERAGE</TableCell>
                       {months.map(m => (
                         <TableCell key={m} align="right">
-                          {monthTotals[m] ? `R ${(monthTotals[m] / validMonths.length).toFixed(2)}` : "-"}
+                          {monthTotals[m]
+                            ? `R ${ceil2(monthTotals[m] / validMonths.length).toFixed(2)}`
+                            : "-"}
                         </TableCell>
                       ))}
                       <TableCell align="right">
-                        R {grandAvg}
+                        R {grandAvg.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   </TableFooter>
