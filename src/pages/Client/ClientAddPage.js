@@ -68,6 +68,8 @@ export default function ClientAddPage() {
   useEffect(() => {
     const fetchImageURL = async () => {
       if (clientDetails.bankName && clientDetails.bankType) {
+        // turn the Type A into typeA
+        clientDetails.bankType = clientDetails.bankType.replace(/\s/g, '');
         try {
           const configDocRef = doc(db, "settings", "bankOptions", clientDetails.bankName, "config");
           const configSnap = await getDoc(configDocRef);
