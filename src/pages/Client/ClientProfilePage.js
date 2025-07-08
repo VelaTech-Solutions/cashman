@@ -185,47 +185,47 @@ export default function ClientProfilePage({clientId}) {
           </Button>
         </Box>
 
-{/* just for now i need to add the field bankType to the clientData create a something for me to add an type the type */}
-{clientData && (
-  <Box sx={{ mb: 2 }}>
-    <Typography variant="h6" sx={{ mb: 1 }}>
-      Bank Type: for Debug only
-    </Typography>
-    <FormControl fullWidth>
-      <InputLabel id="bank-type-label">Select Bank Type</InputLabel>
-      <Select
-        labelId="bank-type-label"
-        value={clientData.bankType || ""}
-        onChange={(e) =>
-          setClientData((prev) => ({
-            ...prev,
-            bankType: e.target.value,
-          }))
-        }
-        input={<OutlinedInput label="Select Bank Type" />}
-      >
-        <MenuItem value="Type A">Type A</MenuItem>
-        <MenuItem value="Type B">Type B</MenuItem>
-      </Select>
-    </FormControl>
-    <Button
-      variant="contained"
-      sx={{ mt: 1 }}
-      onClick={async () => {
-        try {
-          const clientRef = doc(db, "clients", clientId);
-          await updateDoc(clientRef, { bankType: clientData.bankType });
-          alert("Bank type updated!");
-        } catch (err) {
-          console.error("Failed to update bankType:", err);
-          alert("Error updating bank type.");
-        }
-      }}
-    >
-      Save Bank Type
-    </Button>
-  </Box>
-)}
+        {/* just for now i need to add the field bankType to the clientData create a something for me to add an type the type */}
+        {/* {clientData && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              Bank Type: for Debug only
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel id="bank-type-label">Select Bank Type</InputLabel>
+              <Select
+                labelId="bank-type-label"
+                value={clientData.bankType || ""}
+                onChange={(e) =>
+                  setClientData((prev) => ({
+                    ...prev,
+                    bankType: e.target.value,
+                  }))
+                }
+                input={<OutlinedInput label="Select Bank Type" />}
+              >
+                <MenuItem value="Type A">Type A</MenuItem>
+                <MenuItem value="Type B">Type B</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              sx={{ mt: 1 }}
+              onClick={async () => {
+                try {
+                  const clientRef = doc(db, "clients", clientId);
+                  await updateDoc(clientRef, { bankType: clientData.bankType });
+                  alert("Bank type updated!");
+                } catch (err) {
+                  console.error("Failed to update bankType:", err);
+                  alert("Error updating bank type.");
+                }
+              }}
+            >
+              Save Bank Type
+            </Button>
+          </Box>
+        )} */}
 
 
 
